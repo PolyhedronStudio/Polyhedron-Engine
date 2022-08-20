@@ -19,11 +19,11 @@ public:
 
 private:
     //! Private constructor. Players are created using the Create function.
-    SVGBasePlayer(PODEntity *svEntity);
+    SVGBasePlayer( PODEntity *svEntity );
     virtual ~SVGBasePlayer() = default;
 
 public:
-    DefineClass(SVGBasePlayer, SVGBaseEntity);
+    DefineClass( SVGBasePlayer, SVGBaseEntity );
 
     /***
     * 

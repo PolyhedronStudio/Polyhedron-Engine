@@ -25,6 +25,7 @@
 #include "Shared/Shared.h"
 #include "Shared/List.h"
 #include "Shared/SVGame.h"
+#include "Shared/EntitySkeleton.h"
 
 
 /**

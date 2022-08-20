@@ -89,7 +89,8 @@ void MonsterTestDummy::Precache() {
 	//			would now suffer from those relocated bones, while unwished for.
 	//
 	skm = gi.GetSkeletalModelDataByHandle(serverModelHandle);
-
+	model_t *modelt = gi.GetModelByHandle( serverModelHandle );
+	gi.ES_CreateFromModel( modelt, &entitySkeleton );
 
 	//
 	//	TODO:	Eventually, we need some animation.cfg like file because it's just simpler to work

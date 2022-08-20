@@ -326,22 +326,27 @@ void _wrp_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
 
 // Entity Skeleton.
 #include "Common/EntitySkeleton.h"
-///**
-//*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
-//*			relative transform for all bones.
-//*
-//*			
-//**/
-//void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePose *outBonePose, int32_t currentFrame, int32_t oldFrame, float backLerp, const int32_t rootBoneAxisFlags );
-//
-///**
-//*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode, using the given fraction as "intensity".
-//*	@param	fraction		When set to 1.0, it blends in the animation at 100% intensity. Take 0.5 for example, 
-//*							and a tpose(frac 0.5)+walk would have its arms half bend.
-//*	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
-//*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
-//**/
-//void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction = 1.0f );
+/**
+*	@brief	Utility function to test whether an animation is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+**/
+SkeletalAnimation *_wrp_ES_GetAnimationByName(EntitySkeleton *entitySkeleton, const std::string &name) {
+	return ES_GetAnimation( entitySkeleton, name );
+}
+SkeletalAnimation *_wrp_ES_GetAnimationByIndex(EntitySkeleton *entitySkeleton, const int32_t index) {
+	return ES_GetAnimation( entitySkeleton, index );
+}
+
+/**
+*	@brief	Utility function to easily get a pointer to an Action by name or index.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+**/
+SkeletalAnimationAction *_wrp_ES_GetActionByName ( EntitySkeleton *entitySkeleton, const std::string &name ) {
+	return ES_GetAction( entitySkeleton, name );
+}
+SkeletalAnimationAction *_wrp_ES_GetActionByIndex ( EntitySkeleton *entitySkeleton, const int32_t index ) {
+	return ES_GetAction( entitySkeleton, index );
+}
 
 // TEMPORARY BONE CACHE.
 static EntitySkeletonBonePose *wrp_TBC_AcquireCachedMemoryBlock(const uint32_t size) {
@@ -575,11 +580,19 @@ void CL_InitGameProgs(void)
     importAPI.Cvar_Variable_g = Cvar_Variable_g;
     importAPI.Cvar_Default_g = Cvar_Default_g;
 
-	importAPI.ES_ComputeLocalPoseTransforms = ES_ComputeLocalPoseTransforms;
-	importAPI.ES_ComputeWorldPoseTransforms = ES_ComputeWorldPoseTransforms;
 	importAPI.ES_LerpSkeletonPoses = ES_LerpSkeletonPoses;
 	importAPI.ES_RecursiveBlendFromBone = ES_RecursiveBlendFromBone;
 	importAPI.ES_CreateFromModel = ES_CreateFromModel;
+
+	importAPI.ES_ComputeLocalPoseTransforms = ES_ComputeLocalPoseTransforms;
+	importAPI.ES_ComputeWorldPoseTransforms = ES_ComputeWorldPoseTransforms;
+
+	importAPI.ES_GetAnimationByName = _wrp_ES_GetAnimationByName;
+	importAPI.ES_GetAnimationByIndex = _wrp_ES_GetAnimationByIndex;
+	importAPI.ES_GetActionByName = _wrp_ES_GetActionByName;
+	importAPI.ES_GetActionByIndex = _wrp_ES_GetActionByIndex;
+	importAPI.ES_GetBlendAction = ES_GetBlendAction;
+	importAPI.ES_GetBlendActionState = ES_GetBlendActionState;
 
     // Files.
     importAPI.FS_RenameFile = FS_RenameFile;

@@ -20,6 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Server.h"
 #include "Models.h"
 #include "Shared/SkeletalModelData.h"
+#include "Common/SkeletalModelData.h"
+#include "Common/EntitySkeleton.h"
+
 #include "../Client/Client.h"
 
 ServerGameExports    *ge;
@@ -353,6 +356,28 @@ static SkeletalModelData *PF_GetSkeletalModelDataByHandle(qhandle_t handle) {
 	}
 
 	return nullptr;
+}
+
+/**
+*	@brief	Utility function to test whether an animation is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+**/
+SkeletalAnimation *PF_ES_GetAnimationByName(EntitySkeleton *entitySkeleton, const std::string &name) {
+	return ES_GetAnimation( entitySkeleton, name );
+}
+SkeletalAnimation *PF_ES_GetAnimationByIndex(EntitySkeleton *entitySkeleton, const int32_t index) {
+	return ES_GetAnimation( entitySkeleton, index );
+}
+
+/**
+*	@brief	Utility function to easily get a pointer to an Action by name or index.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+**/
+SkeletalAnimationAction *PF_ES_GetActionByName ( EntitySkeleton *entitySkeleton, const std::string &name ) {
+	return ES_GetAction( entitySkeleton, name );
+}
+SkeletalAnimationAction *PF_ES_GetActionByIndex ( EntitySkeleton *entitySkeleton, const int32_t index ) {
+	return ES_GetAction( entitySkeleton, index );
 }
 
 /*
@@ -940,6 +965,13 @@ void SV_InitGameProgs(void)
 	importAPI.RegisterModel = PF_RegisterModel;
 	importAPI.GetModelByHandle = PF_GetModelByHandle;
 	importAPI.GetSkeletalModelDataByHandle = PF_GetSkeletalModelDataByHandle;
+	importAPI.ES_CreateFromModel = ES_CreateFromModel;
+	importAPI.ES_GetAnimationByName = PF_ES_GetAnimationByName;
+	importAPI.ES_GetAnimationByIndex = PF_ES_GetAnimationByIndex;
+	importAPI.ES_GetActionByName = PF_ES_GetActionByName;
+	importAPI.ES_GetActionByIndex = PF_ES_GetActionByIndex;
+	importAPI.ES_GetBlendAction = ES_GetBlendAction;
+	importAPI.ES_GetBlendActionState = ES_GetBlendActionState;
 	importAPI.SetModel = PF_setmodel;
 
     importAPI.configstring = PF_configstring;

@@ -134,11 +134,41 @@ typedef struct {
     int (*PrecacheSound)(const char *name);
     int (*PrecacheImage)(const char *name);
 
+	// Model Data Loading.
 	qhandle_t (*RegisterModel)(const char *name);
 	model_t* (*GetModelByHandle) (qhandle_t handle);
 	SkeletalModelData *(*GetSkeletalModelDataByHandle) (qhandle_t handle);
-
     void (*SetModel)(Entity *ent, const char *name);
+	
+	// Entity Skeleton.
+	/**
+	*	@brief	Sets up an entity skeleton using the specified skeletal model data.
+	*	@return	False on failure. True if successful.
+	**/
+	const bool (*ES_CreateFromModel) ( model_t *model, EntitySkeleton* es );
+	/**
+	*	@brief	Utility function to test whether an animation is existent and within range.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+	**/
+	SkeletalAnimation *(*ES_GetAnimationByName) ( EntitySkeleton *entitySkeleton, const std::string &name );
+	SkeletalAnimation *(*ES_GetAnimationByIndex) ( EntitySkeleton *entitySkeleton, const int32_t index );
+	/**
+	*	@brief	Utility function to easily get a pointer to an Action by name or index.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+	**/
+	SkeletalAnimationAction *(*ES_GetActionByName) ( EntitySkeleton *entitySkeleton, const std::string &name );
+	SkeletalAnimationAction *(*ES_GetActionByIndex) ( EntitySkeleton *entitySkeleton, const int32_t index );
+	/**
+	*	@brief	Utility function to test whether a BlendAction is existent and within range.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+	**/
+	SkeletalAnimationBlendAction *(*ES_GetBlendAction) ( EntitySkeleton *entitySkeleton, SkeletalAnimation *animation, const int32_t index );
+	/**
+	*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+	**/
+	EntitySkeletonBlendActionState *(*ES_GetBlendActionState) ( EntitySkeleton *entitySkeleton, const int32_t animationIndex, const int32_t blendActionIndex );
+
 
     // collision detection
     const TraceResult (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, int contentmask);

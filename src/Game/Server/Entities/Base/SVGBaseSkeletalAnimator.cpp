@@ -232,6 +232,7 @@ const bool SVGBaseSkeletalAnimator::CanSwitchAnimation( const EntityAnimationSta
 *
 *
 *	Utility Functions, for easy bounds checking and sorts of tasks alike.
+*	(Wraps around clgi).
 *
 *
 ***/
@@ -240,32 +241,10 @@ const bool SVGBaseSkeletalAnimator::CanSwitchAnimation( const EntityAnimationSta
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
 **/
 SkeletalAnimation *SVGBaseSkeletalAnimator::GetAnimation( const std::string &name ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the name is nonexistent in our Animation map.
-	if ( !skm->animationMap.contains(name) ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimation.
-	return &skm->animationMap[ name ];
+	return gi.ES_GetAnimationByName( &entitySkeleton, name );
 }
 SkeletalAnimation *SVGBaseSkeletalAnimator::GetAnimation( const int32_t index ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the index is out of bounds.
-	if ( index < 0 || index >= skm->animations.size() ) {
-		return nullptr;
-	}
-
-	// Return the pointer stored by index within the Animations vector.
-	return skm->animations[ index ];
+	return gi.ES_GetAnimationByIndex( &entitySkeleton, index );
 }
 
 /**
@@ -273,32 +252,10 @@ SkeletalAnimation *SVGBaseSkeletalAnimator::GetAnimation( const int32_t index ) 
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
 **/
 SkeletalAnimationAction *SVGBaseSkeletalAnimator::GetAction( const std::string &name ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the name is nonexistent in our Action map.
-	if ( !skm->actionMap.contains(name) ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimationAction.
-	return &skm->actionMap[ name ];
+	return gi.ES_GetActionByName( &entitySkeleton, name );
 }
 SkeletalAnimationAction *SVGBaseSkeletalAnimator::GetAction( const int32_t index ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the index is out of bounds.
-	if ( index < 0 || index >= skm->actions.size() ) {
-		return nullptr;
-	}
-
-	// Return the pointer stored by index within the Actions vector.
-	return skm->actions[ index ];
+	return gi.ES_GetActionByIndex( &entitySkeleton, index );
 }
 
 /**
@@ -306,21 +263,13 @@ SkeletalAnimationAction *SVGBaseSkeletalAnimator::GetAction( const int32_t index
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
 **/
 SkeletalAnimationBlendAction *SVGBaseSkeletalAnimator::GetBlendAction( SkeletalAnimation *animation, const int32_t index ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
+	return gi.ES_GetBlendAction( &entitySkeleton, animation, index );
+}
 
-	// Return (nullptr) since we had no SkeletalAnimation to check on.
-	if ( !animation ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the index is out of bounds.
-	if ( index < 0 || index >= animation->blendActions.size() ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimationAction.
-	return &animation->blendActions[ index ];
+/**
+*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+**/
+EntitySkeletonBlendActionState *SVGBaseSkeletalAnimator::GetBlendActionState( const int32_t animationIndex, const int32_t blendActionIndex ) {
+	return gi.ES_GetBlendActionState( &entitySkeleton, animationIndex, blendActionIndex );
 }

@@ -451,8 +451,8 @@ struct ClientState {
     *   Locally Derived Information from Server State.
     *
     **/
-    bsp_t *bsp = nullptr;                  //! Pointer to the actual BSP.
-	cm_t cm;						// Collision Model for local entities.
+    bsp_t *bsp = nullptr;	//! BSP For rendering.
+	cm_t cm;				//! Collision Model for local entities.
 
     qhandle_t drawModels[MAX_MODELS] = {};   //! Handles for loaded draw models (MD2, MD3, ...).
     mmodel_t *clipModels[MAX_MODELS] = {};   //! mmodel_t ptr handles for loaded clip models (Brush models).

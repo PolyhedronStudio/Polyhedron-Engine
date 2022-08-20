@@ -60,17 +60,13 @@ void MonsterTestDummy::Spawn() {
 		
     // Set solid.
     SetSolid(Solid::OctagonBox);
-
     //// Set move type.
     SetMoveType(MoveType::RootMotionMove);
-
     // Since this is a "monster", after all...
     SetServerFlags(EntityServerFlags::Monster);
-
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
-
-    //// Set the barrel model, and model index.
+    // Set the dummy model, and model index.
     SetModel("models/monsters/testdummy/testdummy.iqm");
 
     // Set the bounding box.

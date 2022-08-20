@@ -959,14 +959,6 @@ public:
 protected:
 	//! Actual skeleton unique to this entity.
 	EntitySkeleton entitySkeleton;
-	
-	//! Collection of bonePose animation channels.
-	struct {
-		//! Stores the bone poses of the Main Animation Channel.
-		EntitySkeletonBonePose mainChannel;
-		//! Stores the bone poses of the Event Animation Channel.
-		EntitySkeletonBonePose eventChannel;
-	} animationBonePoses;
 
 	//! Skeletal Model Data pointer. Needs to be loaded on request. DIYS
 	SkeletalModelData *skm = nullptr;

@@ -506,7 +506,7 @@ static const uint32_t SKC_Command_BlendAction( model_t *model, GPPSkeletalModelC
 	SkeletalModelData *skm = model->skeletalModelData;
 
 	// Keeps score of the next commandidentifier token position we'll be returning.
-	uint32_t offsetNextToken =4;
+	uint32_t offsetNextToken = 4;
 
 	// Now inspect and acquire our token values.
 	// Required 'QuotedString' Token: actionName
@@ -685,42 +685,6 @@ static const bool SKM_ParseConfiguration( model_t *model, const std::string &cfg
 	*	Every time we reach around, 
 	**/	
 	return (tokenized ? SKC_ProcessTokens( model, gppSKC ) : false);
-	/**
-	*	#3: Debug Output of our tokenization process.
-	**/
-	//// Debug output for testing tokenizing.
-	//Com_DPrintf("===================================================\n");
-	//Com_DPrintf("Tokenizing into lines, and each line into tokens based on spaces and tabs:\n");
-	//// Iterate our tokenized line buffers.
-	//for (auto &parsedLine : parseState.parsedLines) {
-	//	//	// Tokenize this line for spaces and tabs.
-	//	//	auto lineTokens = SKM_StringTokenize( bufferLine, " \t" );
-
-	//	//	// Print line:
-	//	Com_DPrintf("#%i:%s: {\n", parsedLine.number, parsedLine.value.c_str());
-	//	for (auto &token : parsedLine.tokens) {
-
-	//		std::string flagStr = "";
-
-	//		// Finish generating our debug flag mask by testing and adding string counterparts for all remaining 
-	//		// flags other than the QuoteString flag.
-	//		if (token.flags & SKMParsedToken::Flags::CommandIdentifier) { flagStr += "CommandIdentifier "; }
-	//		if (token.flags & SKMParsedToken::Flags::FloatNumber) { flagStr += "FloatNumber "; }
-	//		if (token.flags & SKMParsedToken::Flags::IntegralNumber) { flagStr += "IntegralNumber "; }
-	//		if (token.flags & SKMParsedToken::Flags::QuotedString) { flagStr += "QuotedString "; }
-	//		if (token.flags & SKMParsedToken::Flags::Identifier) { flagStr += "Identifier "; }
-
-	//		// Do some debug output.
-	//		Com_DPrintf("   token: {%s}, flags: {%s} \n", token.value.c_str(), flagStr.c_str());
-	//	}
-	//	// Debug output.
-	//	Com_DPrintf("}\n");
-	//}
-
-	//// Debug output for testing tokenizing.
-	//Com_DPrintf("===================================================\n");
-
-	return true;
 }
 
 /**
@@ -754,62 +718,62 @@ bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) 
 	// Start parsing our buffer.
 	SKM_ParseConfiguration(model, fileBuffer);
 
-	//////////////////////////
-	// Debug Output.
-	SkeletalModelData *skm = model->skeletalModelData;
+	////////////////////////////
+	//// Debug Output.
+	//SkeletalModelData *skm = model->skeletalModelData;
 
-	Com_DPrintf("------------------------------------------------------\n");
-	Com_DPrintf("Configuration resulted in the following action data:\n");
-	Com_DPrintf("Actions:\n");
-	int32_t index = 0;
-	for (auto &iterator : skm->actionMap) {
-		const std::string name = iterator.first;
-		auto *action = &iterator.second;
+	//Com_DPrintf("------------------------------------------------------\n");
+	//Com_DPrintf("Configuration resulted in the following action data:\n");
+	//Com_DPrintf("Actions:\n");
+	//int32_t index = 0;
+	//for (auto &iterator : skm->actionMap) {
+	//	const std::string name = iterator.first;
+	//	auto *action = &iterator.second;
 
-		Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
-			action->index,
-			name.c_str(), //animation.name, Since, temp var and .c_str()
-			action->startFrame,
-			action->endFrame,
-			action->numFrames,
-			action->forceLoop == true ? "true" : "false",
-			action->loopingFrames,
-			action->animationDistance);
-	}
-	Com_DPrintf("---:\n");
-	Com_DPrintf("Animations:\n");
+	//	Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
+	//		action->index,
+	//		name.c_str(), //animation.name, Since, temp var and .c_str()
+	//		action->startFrame,
+	//		action->endFrame,
+	//		action->numFrames,
+	//		action->forceLoop == true ? "true" : "false",
+	//		action->loopingFrames,
+	//		action->animationDistance);
+	//}
+	//Com_DPrintf("---:\n");
+	//Com_DPrintf("Animations:\n");
 
-	int32_t i = 0;
-	for (auto &iterator : skm->animationMap) {
-		const std::string name = iterator.first;
-		auto *blendAction = &iterator.second;
+	//int32_t i = 0;
+	//for (auto &iterator : skm->animationMap) {
+	//	const std::string name = iterator.first;
+	//	auto *blendAction = &iterator.second;
 
-		Com_DPrintf("    Animation(#%i, %s):\n", i, name.c_str() );
-		int32_t j = 0;
-		for (auto &blendAction : blendAction->blendActions) {
-			const uint16_t actionIndex = blendAction.actionIndex;
-			const float fraction = blendAction.fraction;
+	//	Com_DPrintf("    Animation(#%i, %s):\n", i, name.c_str() );
+	//	int32_t j = 0;
+	//	for (auto &blendAction : blendAction->blendActions) {
+	//		const uint16_t actionIndex = blendAction.actionIndex;
+	//		const float fraction = blendAction.fraction;
 
-			SkeletalAnimationAction *action = skm->actions[ actionIndex ];
-			if (j == 0) {
-				// Get the actual action belonging to this
-				Com_DPrintf("        blendAction(#%i, %s, %f, [Animation Dominator]):\n", j, action->name.c_str(), fraction );
-			} else {
-				// Get bone index.
-				const int32_t boneIndex = blendAction.boneNumber;
+	//		SkeletalAnimationAction *action = skm->actions[ actionIndex ];
+	//		if (j == 0) {
+	//			// Get the actual action belonging to this
+	//			Com_DPrintf("        blendAction(#%i, %s, %f, [Animation Dominator]):\n", j, action->name.c_str(), fraction );
+	//		} else {
+	//			// Get bone index.
+	//			const int32_t boneIndex = blendAction.boneNumber;
 
-				// Get bone name.
-				const std::string boneName = skm->jointArray[boneIndex].name;
+	//			// Get bone name.
+	//			const std::string boneName = skm->jointArray[boneIndex].name;
 
-				Com_DPrintf("        blendAction(#%i, %s, %f, From Bone: %s):\n", j, action->name.c_str(), fraction, boneName.c_str() );
+	//			Com_DPrintf("        blendAction(#%i, %s, %f, From Bone: %s):\n", j, action->name.c_str(), fraction, boneName.c_str() );
 
-			}
-			j++;
-		}
-		i++;
-	}
-	Com_DPrintf("------------------------------------------------------\n");
-	//////////////////
+	//		}
+	//		j++;
+	//	}
+	//	i++;
+	//}
+	//Com_DPrintf("------------------------------------------------------\n");
+	////////////////////
 
 	// We're done working with this file, free it from memory.
 	FS_FreeFile( fileBuffer );

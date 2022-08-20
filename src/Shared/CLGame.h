@@ -406,6 +406,12 @@ extern "C" {
 		// EntitySkeleton.
 		//---------------------------------------------------------------------
 		/**
+		*	@brief	Sets up an entity skeleton using the specified skeletal model data.
+		*	@return	False on failure. True if successful.
+		**/
+		const bool (*ES_CreateFromModel) ( model_t *model, EntitySkeleton* es );
+
+		/**
 		*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
 		*			relative transform for all bones.
 		*
@@ -420,16 +426,43 @@ extern "C" {
 		*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
 		**/
 		void		(*ES_RecursiveBlendFromBone) ( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction );
-
-
+		/**
+		*	@brief	Compute local space matrices for the given pose transformations.
+		*			This is enough to work with the pose itself. For rendering it needs
+		*			an extra computing of its additional World Pose Transforms.
+		**/
 		void (*ES_ComputeLocalPoseTransforms)( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+		/**
+		*	@brief	Compute world space matrices for the given pose transformations.
+		**/
 		void (*ES_ComputeWorldPoseTransforms)( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+		/**
+		*	@brief	Utility function to test whether an animation is existent and within range.
+		*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+		**/
+		SkeletalAnimation *(*ES_GetAnimationByName) ( EntitySkeleton *entitySkeleton, const std::string &name );
+		SkeletalAnimation *(*ES_GetAnimationByIndex) ( EntitySkeleton *entitySkeleton, const int32_t index );
 
 		/**
-		*	@brief	Sets up an entity skeleton using the specified skeletal model data.
-		*	@return	False on failure. True if successful.
+		*	@brief	Utility function to easily get a pointer to an Action by name or index.
+		*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
 		**/
-		const bool (*ES_CreateFromModel) ( model_t *model, EntitySkeleton* es );
+		SkeletalAnimationAction *(*ES_GetActionByName) ( EntitySkeleton *entitySkeleton, const std::string &name );
+		SkeletalAnimationAction *(*ES_GetActionByIndex) ( EntitySkeleton *entitySkeleton, const int32_t index );
+
+		/**
+		*	@brief	Utility function to test whether a BlendAction is existent and within range.
+		*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+		**/
+		SkeletalAnimationBlendAction *(*ES_GetBlendAction) ( EntitySkeleton *entitySkeleton, SkeletalAnimation *animation, const int32_t index );
+
+		/**
+		*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+		*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+		**/
+		EntitySkeletonBlendActionState *(*ES_GetBlendActionState) ( EntitySkeleton *entitySkeleton, const int32_t animationIndex, const int32_t blendActionIndex );
+
+
 
         //---------------------------------------------------------------------
         // Filesystem.

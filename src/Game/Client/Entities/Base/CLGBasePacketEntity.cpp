@@ -1327,6 +1327,7 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 *
 *
 *	Utility Functions, for easy bounds checking and sorts of tasks alike.
+*	(Wraps around clgi).
 *
 *
 ***/
@@ -1335,32 +1336,10 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
 **/
 SkeletalAnimation *CLGBasePacketEntity::GetAnimation( const std::string &name ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the name is nonexistent in our Animation map.
-	if ( !skm->animationMap.contains(name) ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimation.
-	return &skm->animationMap[ name ];
+	return clgi.ES_GetAnimationByName( &entitySkeleton, name );
 }
 SkeletalAnimation *CLGBasePacketEntity::GetAnimation( const int32_t index ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the index is out of bounds.
-	if ( index < 0 || index >= skm->animations.size() ) {
-		return nullptr;
-	}
-
-	// Return the pointer stored by index within the Animations vector.
-	return skm->animations[ index ];
+	return clgi.ES_GetAnimationByIndex( &entitySkeleton, index );
 }
 
 /**
@@ -1368,32 +1347,10 @@ SkeletalAnimation *CLGBasePacketEntity::GetAnimation( const int32_t index ) {
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
 **/
 SkeletalAnimationAction *CLGBasePacketEntity::GetAction( const std::string &name ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the name is nonexistent in our Action map.
-	if ( !skm->actionMap.contains(name) ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimationAction.
-	return &skm->actionMap[ name ];
+	return clgi.ES_GetActionByName( &entitySkeleton, name );
 }
 SkeletalAnimationAction *CLGBasePacketEntity::GetAction( const int32_t index ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the index is out of bounds.
-	if ( index < 0 || index >= skm->actions.size() ) {
-		return nullptr;
-	}
-
-	// Return the pointer stored by index within the Actions vector.
-	return skm->actions[ index ];
+	return clgi.ES_GetActionByIndex( &entitySkeleton, index );
 }
 
 /**
@@ -1401,23 +1358,7 @@ SkeletalAnimationAction *CLGBasePacketEntity::GetAction( const int32_t index ) {
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
 **/
 SkeletalAnimationBlendAction *CLGBasePacketEntity::GetBlendAction( SkeletalAnimation *animation, const int32_t index ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) since we had no SkeletalAnimation to check on.
-	if ( !animation ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the index is out of bounds.
-	if ( index < 0 || index >= animation->blendActions.size() ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimationAction.
-	return &animation->blendActions[ index ];
+	return clgi.ES_GetBlendAction( &entitySkeleton, animation, index );
 }
 
 /**
@@ -1425,22 +1366,7 @@ SkeletalAnimationBlendAction *CLGBasePacketEntity::GetBlendAction( SkeletalAnima
 *	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
 **/
 EntitySkeletonBlendActionState *CLGBasePacketEntity::GetBlendActionState( const int32_t animationIndex, const int32_t blendActionIndex ) {
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
-	if ( !skm ) {
-		return nullptr;
-	}
-
-	// Return (nullptr) in case the animationIndex is out of bounds.
-	if ( animationIndex < 0 || animationIndex >= entitySkeleton.blendActionAnimationStates.size() ) {
-		return nullptr;
-	}
-	// Return (nullptr) in case the blendActionIndex is out of bounds.
-	if ( blendActionIndex < 0 || blendActionIndex >= entitySkeleton.blendActionAnimationStates[ animationIndex ].size() ) {
-		return nullptr;
-	}
-
-	// We're good, return a pointer to the SkeletalAnimationAction.
-	return &entitySkeleton.blendActionAnimationStates[ animationIndex ][ blendActionIndex ];
+	return clgi.ES_GetBlendActionState( &entitySkeleton, animationIndex, blendActionIndex );
 }
 
 
