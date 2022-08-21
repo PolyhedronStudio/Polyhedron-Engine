@@ -573,11 +573,8 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
-//	CLG_Print( PrintType::Developer, fmt::format( "PacketEntity: level.time=({}), level.serverTime({})\n", level.time.count ) );
-	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
-
-	//// Setup same think for the next frame.
-	SetNextThinkTime(GameTime( cl->serverTime ) + 16ms);
+	// Setup same think for the next frame.
+	SetNextThinkTime( level.time + FRAMERATE_MS );
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
@@ -1191,14 +1188,12 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses ) {
 	// Get pointer.
 	const model_t *model = entitySkeleton.modelPtr;
-
-	// Get skeletal model data pointer.
-	const SkeletalModelData *skm = model->skeletalModelData;
-
-	// Ensure we got both:
-	if (!skm) {
+	if ( !model || !model->skeletalModelData ) {
+		refreshEntity.currentBonePoses = nullptr;
 		return;
 	}
+	// Get skeletal model data pointer.
+	const SkeletalModelData *skm = model->skeletalModelData;
 
 	// We got SKM, let's see what we are up against.
 	// Get state references.
@@ -1271,8 +1266,8 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 				if ( subdominatingAction ) {
 					// We've got the action data, time to process its frame for time and store it into
 					// our distinct entity skeleton.
-					//EntitySkeletonBlendActionState *baState = GetBlendActionState( currentAnimation->animationIndex, blendActionIndex );
-										EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+					EntitySkeletonBlendActionState *baState = GetBlendActionState( currentAnimation->animationIndex, blendActionIndex );
+					//EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
 					// Allocate our blend action bone pose channel.
 					EntitySkeletonBonePose *blendActionBonePose	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
 					if ( !baState || !blendActionBonePose) {
@@ -1281,13 +1276,7 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 					}
 
 					// Lerp the blend action skeleton pose.
-					clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-												blendActionBonePose,
-												baState->currentFrame, 
-												baState->oldFrame, 
-												baState->backLerp, 
-												refreshEntity.rootBoneAxisFlags
-					);
+					clgi.ES_LerpSkeletonPoses( &entitySkeleton, blendActionBonePose, baState->currentFrame, baState->oldFrame, baState->backLerp, refreshEntity.rootBoneAxisFlags );
 
 					// Now, see if the node exists and blend right on top of it.
 					const int32_t boneNumber = subdominatingBlendAction->boneNumber;
@@ -1295,16 +1284,11 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 
 					// Bone exists.
 					if ( boneNumber < entitySkeleton.bones.size() ) {
-						auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
-						//auto &boneNode = entitySkeleton.bones[boneNumber].boneTreeNode;
+						auto *hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
+						auto *boneNode = entitySkeleton.bones[ boneNumber ].boneTreeNode;
 
 						// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
-						clgi.ES_RecursiveBlendFromBone( blendActionBonePose, 
-														dominatingBlendPose, 
-														hipNode, 
-														baState->backLerp, 
-														fraction
-						);
+						clgi.ES_RecursiveBlendFromBone( blendActionBonePose, dominatingBlendPose, hipNode, baState->backLerp, fraction );
 
 						// Assign our currentbonePose pointer. It gets unset in case of any issues. (Better not render than glitch render.)
 						refreshEntity.currentBonePoses = dominatingBlendPose;
@@ -1391,388 +1375,353 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 	}
 
     // Client Info.
-    ClientInfo*  clientInfo = nullptr;
-    // Entity specific rentEntityEffects. (Such as whether to rotate or not.)
-    uint32_t rentEntityEffects = 0;
-    // Entity render rentEntityEffects. (Shells and the like.)
-    uint32_t rentRenderEffects= 0;
-    // Bonus items rotate at a fixed rate
-    float autoRotate = AngleMod(cl->time * BASE_1_FRAMETIME);
-    // Brush models can auto animate their frames
-    int32_t autoAnimation = BASE_FRAMERATE * cl->time / BASE_FRAMETIME_1000;
+    ClientInfo* clientInfo = nullptr;
+	// Base entity flags.
+    int32_t baseEntityFlags = 0;
+	// Entity specific entityEffects. (Such as whether to rotate or not.)
+    uint32_t entityEffects = 0;
+    // Entity render entityEffects. (Shells and the like.)
+    uint32_t renderEffects= 0;
 
+	// Are we dealing with a skeletal model here?
+	const bool isSkeletalModel = ( skm && entitySkeleton.modelPtr );
 
+    /**
+    *	Setup the refreshEntity its ID:
+    **/
+    // Fetch the entity index.
+    const int32_t entityIndex = podEntity->clientEntityNumber;
+    // Setup the render entity ID for the renderer.
+    refreshEntity.id = refreshEntityID;// + RESERVED_ENTITIY_COUNT;
 
+	/**
+    *	Render-)effects:
+	**/
+    // Fetch the entityEffects of current entity.
+    entityEffects = currentState->effects;
+    // Fetch the render entityEffects of current entity.
+    renderEffects = currentState->renderEffects;
 
-        // C++20: Had to be placed here because of label skip.
-        int32_t baseEntityFlags = 0;
+	/**
+	*	Model Light Styles:
+	**/
+	refreshEntity.modelLightStyle = GetStyle();
 
-        //
-        // Get needed general entity data.
-        // 
-        // Fetch the entity index.
-        const int32_t entityIndex = podEntity->clientEntityNumber;
-        // Setup the render entity ID for the renderer.
-        refreshEntity.id = refreshEntityID;// + RESERVED_ENTITIY_COUNT;
+    /**
+    *	Frame Based Animation Effects:
+    **/
+    // For brush model texture frame animation.
+    const int32_t autoAnimation = BASE_FRAMERATE * cl->time / BASE_FRAMETIME_1000;
 
-        //
-        // Effects.
-        // 
-        // Fetch the rentEntityEffects of current entity.
-        rentEntityEffects = currentState->effects;
-        // Fetch the render rentEntityEffects of current entity.
-        rentRenderEffects = currentState->renderEffects;
-
-		//
-		//	Model Light Styles.
-		//
-		refreshEntity.modelLightStyle = GetStyle();
-
-        //
-        // Frame Animation Effects.
-        //
-        if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2) {
-            refreshEntity.frame = autoAnimation & 1;
-		} else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2) {
-            refreshEntity.frame = 2 + (autoAnimation & 1);
-		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz) {
-            refreshEntity.frame = autoAnimation;
-		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
-            refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
+    if (entityEffects & EntityEffectType::AnimCycleFrames01hz2) {
+        refreshEntity.frame = autoAnimation & 1;
+	} else if (entityEffects & EntityEffectType::AnimCycleFrames23hz2) {
+        refreshEntity.frame = 2 + (autoAnimation & 1);
+	} else if (entityEffects & EntityEffectType::AnimCycleAll2hz) {
+        refreshEntity.frame = autoAnimation;
+	} else if (entityEffects & EntityEffectType::AnimCycleAll30hz) {
+        refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
+	/**
+	*	Skeletal Animation:
+	**/
+	} else {
+		// With skeletal model data we calculate all required data her so we can intercept it on time
+		// to apply custom needs. (Attaching objects to a bone, etc.)
+		if ( isSkeletalModel ) {
+			// Process the skeletal animation blend action frames for the current client time. (Based on animation start time.)
+			ProcessSkeletalAnimationForTime( GameTime( cl->time ) ); 
+			// Compute the Entity Skeleton Trasforms for Refresh Frame.
+			ComputeEntitySkeletonTransforms( nullptr );
+		// Otherwise make sure to set the bonePoses to nullptr since it might've been set to something in the
+		// previous frame.
 		} else {
-			// If we got Skeletal Model Data, take a special path for processing its animation states
-			// and computing the appropriate poses for it.
-			if ( skm ) {
-				/**
-				*	Skeletal Animation Processing.
-				**/
-				// Make sure we got model data to work our transformations on.
-				if (entitySkeleton.modelPtr != nullptr ) {
-					// Process the skeletal animation blend action frames for the current client time. (Based on animation start time.)
-					ProcessSkeletalAnimationForTime( GameTime( cl->time ) ); 
-					// Compute the Entity Skeleton Trasforms for Refresh Frame.
-					ComputeEntitySkeletonTransforms( nullptr );
-				} else {
-					// Otherwise, unset the bone pose pointer and let the refresh module take its own course.
-					refreshEntity.currentBonePoses = nullptr;
-				}
-			// Otherwise, unset the bone pose pointer and let the refresh module take its own course.
-			} else {
-				// Unset boneposes pointer.
-				refreshEntity.currentBonePoses = nullptr;
-			}
-        }
+			refreshEntity.currentBonePoses = nullptr;
+		}
+    }
         
 
-		//
-        // Optionally remove the glowing effect.
-		//
-        if (cl_noglow->integer) {
-            rentRenderEffects&= ~RenderEffects::Glow;
-		}
+	/**
+    *	Optionally remove the glowing effect:
+	**/
+    if (cl_noglow->integer) {
+        renderEffects&= ~RenderEffects::Glow;
+	}
 
 
-        //
-        // Setup refreshEntity origin.
-        //
-        if (rentRenderEffects& RenderEffects::FrameLerp) {
-            // Step origin discretely, because the model frames do the animation properly.
-            refreshEntity.origin = podEntity->currentState.origin;
-            refreshEntity.oldorigin = podEntity->currentState.oldOrigin;
-        } else if (rentRenderEffects& RenderEffects::Beam) {
-            // Interpolate start and end points for beams
+    /**
+    *	Origin:
+    **/
+    if (renderEffects& RenderEffects::FrameLerp) {
+        // Step origin discretely, because the model frames do the animation properly.
+        refreshEntity.origin = podEntity->currentState.origin;
+        refreshEntity.oldorigin = podEntity->currentState.oldOrigin;
+    } else if (renderEffects& RenderEffects::Beam) {
+        // Interpolate start and end points for beams
+        refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+        refreshEntity.oldorigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
+    } else {
+        if (currentState->number == cl->frame.clientNumber + 1) {
+            // In case of this being our actual client entity, we use the predicted origin.
+            refreshEntity.origin = cl->playerEntityOrigin;
+            refreshEntity.oldorigin = cl->playerEntityOrigin;
+        } else {
+            // Ohterwise, just neatly interpolate the origin.
             refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
-            refreshEntity.oldorigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
-        } else {
-            if (currentState->number == cl->frame.clientNumber + 1) {
-                // In case of this being our actual client entity, we use the predicted origin.
-                refreshEntity.origin = cl->playerEntityOrigin;
-                refreshEntity.oldorigin = cl->playerEntityOrigin;
-            } else {
-                // Ohterwise, just neatly interpolate the origin.
-                refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
-                // Neatly copy it as the refreshEntity's oldorigin.
-                refreshEntity.oldorigin = refreshEntity.origin;
+            // Neatly copy it as the refreshEntity's oldorigin.
+            refreshEntity.oldorigin = refreshEntity.origin;
+        }
+    }
+
+
+	/**
+	*	Particle Debug BoundingBox:
+	**/
+	if (renderEffects& RenderEffects::DebugBoundingBox) {
+	    CLG_DrawDebugBoundingBox(podEntity->lerpOrigin, podEntity->mins, podEntity->maxs);
+	}
+
+
+	/**
+    *	Beam Color Tweaking:
+	**/
+    if (renderEffects & RenderEffects::Beam) {
+        // The four beam colors are encoded in 32 bits of skinNumber (hack)
+        refreshEntity.alpha = 0.30;
+        refreshEntity.skinNumber = (currentState->skinNumber >> ((rand() % 4) * 8)) & 0xff;
+        refreshEntity.model = 0;
+    } else {
+		// Set the entity model skin
+        if (currentState->modelIndex == 255) {
+            // Use a custom player skin
+            clientInfo = &cl->clientInfo[currentState->skinNumber & 255];
+            refreshEntity.skinNumber = 0;
+            refreshEntity.skin = clientInfo->skin;
+            refreshEntity.model = clientInfo->model;
+
+            // Setup default base client info in case of 0.
+            if (!refreshEntity.skin || !refreshEntity.model) {
+                refreshEntity.skin = cl->baseClientInfo.skin;
+                refreshEntity.model = cl->baseClientInfo.model;
+                clientInfo = &cl->baseClientInfo;
             }
-        }
 
+            // Special Disguise render effect handling.
+            if (renderEffects& RenderEffects::UseDisguise) {
+                char buffer[MAX_QPATH];
 
-		//
-	    // Draw debug bounding box for client entity.
-		//
-	    if (rentRenderEffects& RenderEffects::DebugBoundingBox) {
-	        CLG_DrawDebugBoundingBox(podEntity->lerpOrigin, podEntity->mins, podEntity->maxs);
-	    }
-
-
-		//
-        // tweak the color of beams
-		//
-        if (rentRenderEffects& RenderEffects::Beam) {
-            // The four beam colors are encoded in 32 bits of skinNumber (hack)
-            refreshEntity.alpha = 0.30;
-            refreshEntity.skinNumber = (currentState->skinNumber >> ((rand() % 4) * 8)) & 0xff;
-            refreshEntity.model = 0;
-        } else {
-            //
-            // Set the entity model skin
-            //
-            if (currentState->modelIndex == 255) {
-                // Use a custom player skin
-                clientInfo = &cl->clientInfo[currentState->skinNumber & 255];
-                refreshEntity.skinNumber = 0;
-                refreshEntity.skin = clientInfo->skin;
-                refreshEntity.model = clientInfo->model;
-
-                // Setup default base client info in case of 0.
-                if (!refreshEntity.skin || !refreshEntity.model) {
-                    refreshEntity.skin = cl->baseClientInfo.skin;
-                    refreshEntity.model = cl->baseClientInfo.model;
-                    clientInfo = &cl->baseClientInfo;
-                }
-
-                // Special Disguise render effect handling.
-                if (rentRenderEffects& RenderEffects::UseDisguise) {
-                    char buffer[MAX_QPATH];
-
-                    Q_concat(buffer, sizeof(buffer), "players/", clientInfo->model_name, "/disguise.pcx", NULL);
-                    refreshEntity.skin = clgi.R_RegisterSkin(buffer);
-                }
-            } else {
-                // Default entity skin number handling behavior.
-                refreshEntity.skinNumber = currentState->skinNumber;
-                refreshEntity.skin = 0;
-                refreshEntity.model = cl->drawModels[currentState->modelIndex];
-
-                // Disable shadows on lasers and dm spots.
-                if (refreshEntity.model == cl_mod_laser || refreshEntity.model == cl_mod_dmspot)
-                    rentRenderEffects|= RF_NOSHADOW;
+                Q_concat(buffer, sizeof(buffer), "players/", clientInfo->model_name, "/disguise.pcx", NULL);
+                refreshEntity.skin = clgi.R_RegisterSkin(buffer);
             }
-        }
-
-
-		//
-        // Only used for black hole model right now, FIXME: do better
-		//
-        if ((rentRenderEffects& RenderEffects::Translucent) && !(rentRenderEffects& RenderEffects::Beam)) {
-            refreshEntity.alpha = 0.70;
-        }
-
-
-		//
-        // Render rentEntityEffects (fullbright, translucent, etc)
-		//
-        if ((rentEntityEffects & EntityEffectType::ColorShell)) {
-            refreshEntity.flags = 0;  // Render rentEntityEffects go on color shell entity
         } else {
-            refreshEntity.flags = rentRenderEffects;
+            // Default entity skin number handling behavior.
+            refreshEntity.skinNumber = currentState->skinNumber;
+            refreshEntity.skin = 0;
+            refreshEntity.model = cl->drawModels[currentState->modelIndex];
+
+            // Disable shadows on lasers and dm spots.
+            if (refreshEntity.model == cl_mod_laser || refreshEntity.model == cl_mod_dmspot)
+                renderEffects|= RF_NOSHADOW;
         }
+    }
 
 
-        //
-        // Angles.
-        //
-        if (rentEntityEffects & EntityEffectType::Rotate) {
-            // Autorotate for bonus item entities.
-            refreshEntity.angles[0] = 0;
-            refreshEntity.angles[1] = autoRotate;
-            refreshEntity.angles[2] = 0;
-        } else if (currentState->number == cl->frame.clientNumber + 1) {
-            // Predicted angles for client entities.
-            refreshEntity.angles = cl->playerEntityAngles;
-        } else {
-            // Otherwise, lerp angles by default.
-            refreshEntity.angles = vec3_mix_euler(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+	/**
+    *	Only used for black hole model right now, FIXME: do better
+	**/
+    if ((renderEffects& RenderEffects::Translucent) && !(renderEffects& RenderEffects::Beam)) {
+        refreshEntity.alpha = 0.70;
+    }
 
-            // Mimic original ref_gl "leaning" bug (uuugly!)
-            if (currentState->modelIndex == 255 && cl_rollhack->integer) {
-                refreshEntity.angles[vec3_t::Roll] = -refreshEntity.angles[vec3_t::Roll];
-            }
+
+	/**
+    *	Render entityEffects (fullbright, translucent, etc)
+	**/
+    if ((entityEffects & EntityEffectType::ColorShell)) {
+        refreshEntity.flags = 0;  // Render entityEffects go on color shell entity
+    } else {
+        refreshEntity.flags = renderEffects;
+    }
+
+
+    /**
+    *	Angles.
+    **/
+    if (entityEffects & EntityEffectType::Rotate) {
+		// Bonus items rotate at a fixed rate
+		const float autoRotate = AngleMod(cl->time * BASE_1_FRAMETIME);
+
+        // Autorotate for bonus item entities.
+        refreshEntity.angles[0] = 0;
+        refreshEntity.angles[1] = autoRotate;
+        refreshEntity.angles[2] = 0;
+    } else if (currentState->number == cl->frame.clientNumber + 1) {
+        // Predicted angles for client entities.
+        refreshEntity.angles = cl->playerEntityAngles;
+    } else {
+        // Otherwise, lerp angles by default.
+        refreshEntity.angles = vec3_mix_euler(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+
+        // Mimic original ref_gl "leaning" bug (uuugly!)
+        if (currentState->modelIndex == 255 && cl_rollhack->integer) {
+            refreshEntity.angles[vec3_t::Roll] = -refreshEntity.angles[vec3_t::Roll];
         }
+    }
 
 		
-		//
-		//	Give it a chance to act on post computed transforms.
-		//
-		// Make sure we got "skeletal model data", an "entity skeleton", and computed bone pose transforms to work with.
-		if ( skm && entitySkeleton.modelPtr && refreshEntity.currentBonePoses != nullptr ) {
-			// Pass it our current generated boen poses.
-			PostComputeSkeletonTransforms( refreshEntity.currentBonePoses );
-		}
+	/**
+	*	Entity Skeleton - PostCompute Transforms:
+	**/
+	// Make sure we got "skeletal model data", an "entity skeleton", and computed bone pose transforms to work with.
+	if ( isSkeletalModel && refreshEntity.currentBonePoses != nullptr ) {
+		// Pass it our current generated boen poses.
+		PostComputeSkeletonTransforms( refreshEntity.currentBonePoses );
+	}
 
-        //
-        // Entity Effects for in case the entity is the actual client.
-        //
-        if (currentState->number == cl->frame.clientNumber + 1) {
-            if (!cl->thirdPersonView)
-            {
-                // Special case handling for RTX rendering. Only draw third person model from mirroring surfaces.
-                if (vid_rtx->integer)
-                    baseEntityFlags |= RenderEffects::ViewerModel;
-                else
-                    goto skip;
+	/**
+	*	Client Entity (Thirdperson/Reflection-)model:
+	**/
+    if (currentState->number == cl->frame.clientNumber + 1) {
+        if (!cl->thirdPersonView)
+        {
+            // Special case handling for RTX rendering. Only draw third person model from mirroring surfaces.
+            if (vid_rtx->integer)
+                baseEntityFlags |= RenderEffects::ViewerModel;
+            else
+                goto skip;
+        }
+
+        // Don't tilt the model - looks weird
+        refreshEntity.angles[0] = 0.f;
+        // Temporary fix, not quite perfect though. Add some z offset so the shadow isn't too dark under the feet.
+        refreshEntity.origin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+        refreshEntity.oldorigin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+    }
+
+    // If set to invisible, skip
+    if (!currentState->modelIndex) {
+        goto skip;
+    }
+
+
+	/**
+	*	Color Shell:
+	**/
+    // Add the baseEntityFlags to the refreshEntity flags.
+    refreshEntity.flags |= baseEntityFlags;
+
+    // In rtx mode, the base entity has the renderEffectsfor shells
+    if ((entityEffects & EntityEffectType::ColorShell) && vid_rtx->integer) {
+        refreshEntity.flags |= renderEffects;
+    }
+
+    // Last but not least, add the entity to the refresh render list.
+    clge->view->AddRenderEntity(refreshEntity);
+
+    // For color shells we generate a separate entity for the main model.
+    // (Use the settings of the already rendered model, and apply translucency to it.
+    if ((entityEffects & EntityEffectType::ColorShell) && !vid_rtx->integer) {
+		// Apply flags.
+        refreshEntity.flags = renderEffects | baseEntityFlags | RenderEffects::Translucent;
+		// Set alpha.
+        refreshEntity.alpha = 0.30;
+		// Add the shell refresh entity.
+        clge->view->AddRenderEntity(refreshEntity);
+    }
+
+	// Reset skin, number, flags and alpha for further processing of other model indexes.
+    refreshEntity.skin = 0;       // never use a custom skin on others
+    refreshEntity.skinNumber = 0;
+    refreshEntity.flags = baseEntityFlags;
+    refreshEntity.alpha = 0;
+
+
+	/**
+	*	ModelIndex #2: 
+	**/
+    // Add an entity to the current rendering frame that has model index 2 attached to it.
+    // Duplicate for linked models
+    if (currentState->modelIndex2) {
+        if (currentState->modelIndex2 == 255) {
+            // Custom weapon
+            clientInfo = &cl->clientInfo[currentState->skinNumber & 0xff];
+                
+            // Determine skinIndex.
+            int32_t skinIndex = (currentState->skinNumber >> 8); // 0 is default weapon model
+            if (skinIndex < 0 || skinIndex > cl->numWeaponModels - 1) {
+                skinIndex = 0;
             }
 
-            // Don't tilt the model - looks weird
-            refreshEntity.angles[0] = 0.f;
+            // Fetch weapon model.
+            refreshEntity.model = clientInfo->weaponmodel[skinIndex];
 
-            //
-            // TODO: This needs to be fixed properly for the shadow to render.
-            // 
-            // Offset the model back a bit to make the view point located in front of the head
-            //constexpr float offset = -15.f;
-            //constexpr float offset = 8.f;// 0.0f;
-            //vec3_t angles = { 0.f, refreshEntity.angles[1], 0.f };
-            //vec3_t forward;
-            //AngleVectors(angles, &forward, NULL, NULL);
-            //refreshEntity.origin = vec3_fmaf(refreshEntity.origin, offset, forward);
-            //refreshEntity.oldorigin = vec3_fmaf(refreshEntity.oldorigin, offset, forward);
-
-            // Temporary fix, not quite perfect though. Add some z offset so the shadow isn't too dark under the feet.
-            refreshEntity.origin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
-            refreshEntity.oldorigin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+            // If invalid, use defaults.
+            if (!refreshEntity.model) {
+                if (skinIndex != 0) {
+                    refreshEntity.model = clientInfo->weaponmodel[0];
+                }
+                if (!refreshEntity.model) {
+                    refreshEntity.model = cl->baseClientInfo.weaponmodel[0];
+                }
+            }
+        } else {
+            refreshEntity.model = cl->drawModels[currentState->modelIndex2];
         }
 
-        // If set to invisible, skip
-        if (!currentState->modelIndex) {
-            goto skip;
+
+        if ((entityEffects & EntityEffectType::ColorShell) && vid_rtx->integer) {
+            refreshEntity.flags |= renderEffects;
         }
 
-        // Add the baseEntityFlags to the refreshEntity flags.
-        refreshEntity.flags |= baseEntityFlags;
-
-        // In rtx mode, the base entity has the rentRenderEffectsfor shells
-        if ((rentEntityEffects & EntityEffectType::ColorShell) && vid_rtx->integer) {
-//            rentRenderEffects= ApplyRenderEffects(rentRenderEffects);
-            refreshEntity.flags |= rentRenderEffects;
-        }
-
-        // Last but not least, add the entity to the refresh render list.
         clge->view->AddRenderEntity(refreshEntity);
 
-        // Keeping it here commented to serve as an example case.
-        // Add dlights for flares
-        //model_t* model;
-        //if (refreshEntity.model && !(refreshEntity.model & 0x80000000) &&
-        //    (model = clgi.CL_Model_GetModelByHandle(refreshEntity.model)))
-        //{
-        //    if (model->model_class == MCLASS_FLARE)
-        //    {
-        //        float phase = (float)cl->time * 0.03f + (float)refreshEntity.id;
-        //        float anim = sinf(phase);
-
-        //        float offset = anim * 1.5f + 5.f;
-        //        float brightness = anim * 0.2f + 0.8f;
-
-        //        vec3_t origin;
-        //        VectorCopy(refreshEntity.origin, origin);
-        //        origin[2] += offset;
-
-        //        V_AddLightEx(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
-        //    }
-        //}
-
-        // For color shells we generate a separate entity for the main model.
-        // (Use the settings of the already rendered model, and apply translucency to it.
-        if ((rentEntityEffects & EntityEffectType::ColorShell) && !vid_rtx->integer) {
-//            rentRenderEffects= ApplyRenderEffects(rentRenderEffects);
-            refreshEntity.flags = rentRenderEffects| baseEntityFlags | RenderEffects::Translucent;
-            refreshEntity.alpha = 0.30;
-            clge->view->AddRenderEntity(refreshEntity);
-        }
-
-        refreshEntity.skin = 0;       // never use a custom skin on others
-        refreshEntity.skinNumber = 0;
+        //PGM - make sure these get reset.
         refreshEntity.flags = baseEntityFlags;
         refreshEntity.alpha = 0;
-
-        //
-        // ModelIndex2
-        // 
-        // Add an entity to the current rendering frame that has model index 2 attached to it.
-        // Duplicate for linked models
-        if (currentState->modelIndex2) {
-            if (currentState->modelIndex2 == 255) {
-                // Custom weapon
-                clientInfo = &cl->clientInfo[currentState->skinNumber & 0xff];
-                
-                // Determine skinIndex.
-                int32_t skinIndex = (currentState->skinNumber >> 8); // 0 is default weapon model
-                if (skinIndex < 0 || skinIndex > cl->numWeaponModels - 1) {
-                    skinIndex = 0;
-                }
-
-                // Fetch weapon model.
-                refreshEntity.model = clientInfo->weaponmodel[skinIndex];
-
-                // If invalid, use defaults.
-                if (!refreshEntity.model) {
-                    if (skinIndex != 0) {
-                        refreshEntity.model = clientInfo->weaponmodel[0];
-                    }
-                    if (!refreshEntity.model) {
-                        refreshEntity.model = cl->baseClientInfo.weaponmodel[0];
-                    }
-                }
-            } else {
-                refreshEntity.model = cl->drawModels[currentState->modelIndex2];
-            }
+    }
 
 
-            if ((rentEntityEffects & EntityEffectType::ColorShell) && vid_rtx->integer) {
-                refreshEntity.flags |= rentRenderEffects;
-            }
+	/**
+	*	ModelIndex #3: 
+	**/
+    // Add an entity to the current rendering frame that has model index 3 attached to it.
+    //if (currentState->modelIndex3) {
+    //    refreshEntity.model = cl->drawModels[currentState->modelIndex3];
+    //    clge->view->AddRenderEntity(refreshEntity);
+    //}
 
-            clge->view->AddRenderEntity(refreshEntity);
 
-            //PGM - make sure these get reset.
-            refreshEntity.flags = baseEntityFlags;
-            refreshEntity.alpha = 0;
+	/**
+	*	ModelIndex #4: 
+	**/
+    //// Add an entity to the current rendering frame that has model index 4 attached to it.
+    //if (currentState->modelIndex4) {
+    //    refreshEntity.model = cl->drawModels[currentState->modelIndex4];
+    //    clge->view->AddRenderEntity(refreshEntity);
+    //}
+
+
+    /**
+    *	Particle Trail Effects:
+    **/
+    // Add automatic particle trail entityEffects where desired.
+    if (entityEffects & ~EntityEffectType::Rotate) {
+        if (entityEffects & EntityEffectType::Gib) {
+            ParticleEffects::DiminishingTrail(podEntity->lerpOrigin, refreshEntity.origin, podEntity, entityEffects);
+        } else if (entityEffects & EntityEffectType::Torch) {
+            const float anim = sinf((float)refreshEntity.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
+            const float offset = anim * 0.0f;
+            const float brightness = anim * 1.2f + 1.6f;
+            const vec3_t origin = { 
+                refreshEntity.origin.x,
+                refreshEntity.origin.y,
+                refreshEntity.origin.z + offset 
+            };
+
+            clge->view->AddLight(origin, vec3_t{ 1.0f * brightness, 0.425f * brightness, 0.1f * brightness }, 25.f, 3.6f);
         }
+    }
 
-
-        //
-        // ModelIndex3
-        // 
-        // Add an entity to the current rendering frame that has model index 3 attached to it.
-        //if (currentState->modelIndex3) {
-        //    refreshEntity.model = cl->drawModels[currentState->modelIndex3];
-        //    clge->view->AddRenderEntity(refreshEntity);
-        //}
-
-
-        ////
-        //// ModelIndex4
-        //// 
-        //// Add an entity to the current rendering frame that has model index 4 attached to it.
-        //if (currentState->modelIndex4) {
-        //    refreshEntity.model = cl->drawModels[currentState->modelIndex4];
-        //    clge->view->AddRenderEntity(refreshEntity);
-        //}
-
-
-        //
-        // Particle Trail Effects.
-        // 
-        // Add automatic particle trail rentEntityEffects where desired.
-        if (rentEntityEffects & ~EntityEffectType::Rotate) {
-            if (rentEntityEffects & EntityEffectType::Gib) {
-                ParticleEffects::DiminishingTrail(podEntity->lerpOrigin, refreshEntity.origin, podEntity, rentEntityEffects);
-            } else if (rentEntityEffects & EntityEffectType::Torch) {
-                const float anim = sinf((float)refreshEntity.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
-                const float offset = anim * 0.0f;
-                const float brightness = anim * 1.2f + 1.6f;
-                const vec3_t origin = { 
-                    refreshEntity.origin.x,
-                    refreshEntity.origin.y,
-                    refreshEntity.origin.z + offset 
-                };
-
-                clge->view->AddLight(origin, vec3_t{ 1.0f * brightness, 0.425f * brightness, 0.1f * brightness }, 25.f, 3.6f);
-            }
-        }
-
-    skip:
-        // Assign refreshEntity origin to podEntity lerp origin in the case of a skip.
-        podEntity->lerpOrigin = refreshEntity.origin;
+skip:
+    // Assign refreshEntity origin to podEntity lerp origin in the case of a skip.
+    podEntity->lerpOrigin = refreshEntity.origin;
 }

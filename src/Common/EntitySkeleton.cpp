@@ -787,15 +787,12 @@ void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBo
 **/
 SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const std::string &name ) {
 	// Make sure the skeleton and its model pointer are valid.
-	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+	if ( !entitySkeleton || !entitySkeleton->modelPtr || !entitySkeleton->modelPtr->skeletalModelData ) {
 		return nullptr;
 	}
 	
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	// Get a pointer to skm data.
 	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
-	if ( !skm ) {
-		return nullptr;
-	}
 
 	// Return (nullptr) in case the name is nonexistent in our Animation map.
 	if ( !skm->animationMap.contains(name) ) {
@@ -807,15 +804,12 @@ SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const std::s
 }
 SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const int32_t index ) {
 	// Make sure the skeleton and its model pointer are valid.
-	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+	if ( !entitySkeleton || !entitySkeleton->modelPtr || !entitySkeleton->modelPtr->skeletalModelData ) {
 		return nullptr;
 	}
 	
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	// Get a pointer to skm data.
 	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
-	if ( !skm ) {
-		return nullptr;
-	}
 
 	// Return (nullptr) in case the index is out of bounds.
 	if ( index < 0 || index >= skm->animations.size() ) {
@@ -832,15 +826,13 @@ SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const int32_
 **/
 SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const std::string &name ) {
 	// Make sure the skeleton and its model pointer are valid.
-	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+	if ( !entitySkeleton || !entitySkeleton->modelPtr || !entitySkeleton->modelPtr->skeletalModelData ) {
 		return nullptr;
 	}
 	
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	// Get a pointer to skm data.
 	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
-	if ( !skm ) {
-		return nullptr;
-	}
+
 
 	// Return (nullptr) in case the name is nonexistent in our Action map.
 	if ( !skm->actionMap.contains(name) ) {
@@ -852,15 +844,13 @@ SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const std
 }
 SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const int32_t index ) {
 	// Make sure the skeleton and its model pointer are valid.
-	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+	if ( !entitySkeleton || !entitySkeleton->modelPtr || !entitySkeleton->modelPtr->skeletalModelData ) {
 		return nullptr;
 	}
 	
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	// Get a pointer to skm data.
 	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
-	if ( !skm ) {
-		return nullptr;
-	}
+
 
 	// Return (nullptr) in case the index is out of bounds.
 	if ( index < 0 || index >= skm->actions.size() ) {
@@ -877,15 +867,12 @@ SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const int
 **/
 SkeletalAnimationBlendAction *ES_GetBlendAction( EntitySkeleton *entitySkeleton, SkeletalAnimation *animation, const int32_t index ) {
 	// Make sure the skeleton and its model pointer are valid.
-	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+	if ( !entitySkeleton || !entitySkeleton->modelPtr || !entitySkeleton->modelPtr->skeletalModelData ) {
 		return nullptr;
 	}
 	
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	// Get a pointer to skm data.
 	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
-	if ( !skm ) {
-		return nullptr;
-	}
 
 	// Return (nullptr) since we had no SkeletalAnimation to check on.
 	if ( !animation ) {
@@ -907,15 +894,12 @@ SkeletalAnimationBlendAction *ES_GetBlendAction( EntitySkeleton *entitySkeleton,
 **/
 EntitySkeletonBlendActionState *ES_GetBlendActionState( EntitySkeleton *entitySkeleton, const int32_t animationIndex, const int32_t blendActionIndex ) {
 	// Make sure the skeleton and its model pointer are valid.
-	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+	if ( !entitySkeleton || !entitySkeleton->modelPtr || !entitySkeleton->modelPtr->skeletalModelData ) {
 		return nullptr;
 	}
 	
-	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	// Get a pointer to skm data.
 	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
-	if ( !skm ) {
-		return nullptr;
-	}
 	
 	// Return (nullptr) in case the animationIndex is out of bounds.
 	if ( animationIndex < 0 || animationIndex >= entitySkeleton->blendActionAnimationStates.size() ) {
