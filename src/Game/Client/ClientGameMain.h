@@ -119,7 +119,6 @@ extern cvar_t* cl_explosion_sprites;
 extern cvar_t* cl_explosion_frametime;
 extern cvar_t* cl_disable_particles;
 extern cvar_t* cl_footsteps;
-extern cvar_t* cl_gunalpha;
 extern cvar_t* cl_kickangles;
 extern cvar_t* cl_monsterfootsteps;
 extern cvar_t* cl_noglow;

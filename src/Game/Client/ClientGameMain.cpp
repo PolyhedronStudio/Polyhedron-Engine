@@ -42,7 +42,6 @@ cvar_t *cl_disable_explosions   = nullptr;
 cvar_t *cl_explosion_sprites    = nullptr;
 cvar_t *cl_explosion_frametime  = nullptr;
 cvar_t *cl_footsteps            = nullptr;
-cvar_t *cl_gunalpha             = nullptr;
 cvar_t *cl_kickangles           = nullptr;
 cvar_t *cl_monsterfootsteps     = nullptr;
 cvar_t *cl_noglow               = nullptr;

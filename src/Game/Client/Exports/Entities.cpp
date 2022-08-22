@@ -277,7 +277,7 @@ void ClientGameEntities::AddViewEntities() {
 
     // Acquire access to View Camera, and tell it to calculate and add our weapon viewmodel.
     ViewCamera *viewCamera = clge->view->GetViewCamera();
-	viewCamera->AddWeaponViewmodel();	
+	viewCamera->AddWeaponViewModel();	
 }
 
 

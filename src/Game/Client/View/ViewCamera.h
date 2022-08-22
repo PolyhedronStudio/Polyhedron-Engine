@@ -47,17 +47,29 @@ public:
     * 
     ***/
 	/**
+	*	@brief	Calculates the weapon viewmodel's origin and angles and adds it for rendering.
+	**/
+	void AddWeaponViewModel();
+
+private:
+	/**
 	*	@brief	Calculate client view bobmove.
 	**/
 	void CalculateViewBob();
+
+		/**
+	*	@brief	Calculates the weapon viewmodel offset (tracing it against other objects and adjusting its position to that.)
+	**/
+	void CalculateViewWeaponOffset();
 	/**
 	*	@brief	Applies a certain view model drag effect to make it look more realistic in turns.
 	**/
-	void CalculateWeaponViewmodelDrag( vec3_t &origin, const vec3_t &angles, const vec3_t &v_forward, const vec3_t &v_right, const vec3_t &v_up );
+	void CalculateViewWeaponDrag( );
 	/**
-	*	@brief	Calculates the weapon viewmodel's origin and angles and adds it for rendering.
+	*	@brief	Changes the view weapon model if the gun index has changed, and applies current animation state.
 	**/
-	void AddWeaponViewmodel();
+	void UpdateViewWeaponModel( PlayerState *previousPlayerState, PlayerState *currentPlayerState );
+
 
 
     /***
@@ -67,6 +79,7 @@ public:
 	*
     * 
     ***/
+public:
     /**
     *   @brief  Calculates the new forward, up, and right vectors of
     *           the view camera.
@@ -136,7 +149,7 @@ private:
 
 private:
 	//! Refresh entity for our gun model.
-	r_entity_t gunRenderEntity;
+	r_entity_t rEntWeaponViewModel;
 
     //! True if in a third person game frame.
     bool isThirdperson = false;

@@ -154,7 +154,6 @@ void ClientGameCore::Initialize() {
 
     // Create the CG Module its own cvars here.
     cl_footsteps = clgi.Cvar_Get("cl_footsteps", "1", 0);
-    cl_gunalpha = clgi.Cvar_Get("cl_gunalpha", "1", 0);
     // TODO: This one was never implemented at all!!
     cl_monsterfootsteps = clgi.Cvar_Get("cl_monsterfootsteps", "1", 0);
     cl_player_model = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
