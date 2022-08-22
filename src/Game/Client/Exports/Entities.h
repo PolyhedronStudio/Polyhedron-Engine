@@ -31,6 +31,15 @@ public:
     //! Destructor.
     virtual ~ClientGameEntities()  = default;
 
+
+
+	/**
+	*
+	*
+	*	Client Local BSP Entities.
+    *
+	*
+	**/
     /**
     *   @brief  Parses and spawns the local class entities in the BSP Entity String.
     * 
@@ -40,8 +49,17 @@ public:
     * 
     *   @return True on success.
     **/
-    qboolean PrepareBSPEntities(const char *mapName, const char* entities) final;
+    qboolean PrepareBSPEntities( const char *mapName, const char* entities ) final;
 
+
+
+	/**
+	*
+	*
+	*	'Game' Entities.
+    *
+	*
+	**/
     /**
     *   @brief  When the client receives state updates it calls into this function so we can update
     *           the game entity belonging to the server side entity(defined by state.number).
@@ -51,56 +69,88 @@ public:
     * 
     *   @return True on success, false in case of trouble.
     **/
-    qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState *state) final;
-
-    /**
-    *   @brief  Executed whenever a server frame entity event is receieved.
-    **/
-    void PacketEntityEvent(int32_t number) final;
-
-    /**
-    *   @brief  Executed whenever a local client entity event is set.
-    **/
-    void LocalEntityEvent(int32_t number) final;
-
-    /**
-    *   @brief  Prepares all parsed server entities, as well as local entities for rendering
-	*			of the current frame.
-    **/
-    void PrepareRefreshEntities() final;
-
-    /**
-    *   @brief  Add the view weapon render entity to the screen. Can also be used for
-    *           other scenarios where a depth hack is required.
-    **/
-    void AddViewEntities() final;
-
-	/**
-	*	@brief	Returns a pointer to the actual client game POD Entities array residing in the ClientGame's world.
-	**/
-	PODEntity *GetClientPODEntities() final;
-
-	/**
-	*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
-	**/
-    void RunPacketEntitiesDeltaFrame();
-
-	/**
-	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
-	**/
-	void RunLocalEntitiesFrame();
+    qboolean UpdateGameEntityFromState( PODEntity *clEntity, const EntityState *state ) final;
 	/**
 	*   @brief  Gives local entities a chance to think. These are called "synchroniously" to the server frames.
 	*	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
 	**/
 	uint32_t GetHashedGameEntityClassname(PODEntity *podEntity); 
 
+
+	/**
+	*
+	*
+	*	Entity Events.
+    *
+	*
+	**/
+	/**
+    *   @brief  Executed whenever a server frame entity event is receieved.
+    **/
+    void PacketEntityEvent( int32_t number ) final;
+    /**
+    *   @brief  Executed whenever a local client entity event is set.
+    **/
+    void LocalEntityEvent( int32_t number ) final;
+
+
+
+	/**
+	*
+	*
+	*	Refresh & View entities.
+    *
+	*
+	**/
+    /**
+    *   @brief  Prepares all parsed server entities, as well as local entities for rendering
+	*			of the current frame.
+    **/
+    void PrepareRefreshEntities() final;
+	/**
+	*	@brief	Adds all 'view' entities to screen, the place to hook in entities that require a depth hack.
+	**/
+    void AddViewEntities() final;
+
+
+
+	/**
+	*
+	*
+	*	Run Frames for Packet Entities (Deltaframe), and Local Entities.
+    *	(Prediction is placeholder for now.)
+	*
+	**/
+	/**
+	*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+	**/
+    void RunPacketEntitiesDeltaFrame();
+	/**
+	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+	**/
+	void RunLocalEntitiesFrame();
 	/**
 	*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 	**/
 	void RunPackEntitiesPredictionFrame();
 
-    inline GameEntityVector &GetGameEntities() {
+
+
+	/**
+	*
+	*
+	*	Other.
+    *	
+	*
+	**/
+	/**
+	*	@brief	Returns a pointer to the actual client game POD Entities array residing in the ClientGame's world.
+	**/
+	PODEntity *GetClientPODEntities() final;
+	/**
+	*	@return	Pointer to the game entities, if the GameWorld is not yet created, we return a fake placeholder nullGameEntities.
+	**/
+	inline GameEntityVector &GetGameEntities() {
 		ClientGameWorld *gameWorld = GetGameWorld();
 		if (gameWorld) {
 			return gameWorld->GetGameEntities();
@@ -112,9 +162,13 @@ public:
 		}
     }
 
+
+
 //! Game Entity utilities.
 private:
 	GameEntityVector nullGameEntities;
+
+
 
 //! Entity Rendering utilities.
 private:

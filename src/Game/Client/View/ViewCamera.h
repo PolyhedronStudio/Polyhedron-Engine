@@ -18,11 +18,16 @@
 **/
 class ViewCamera {
 public:
-    /**
-    *   @brief  Calculates and sets the view bob for current frame.
-    **/
-    void UpdateViewBob();
 
+
+
+    /***
+    *
+	*
+    *   View Projections: First and Third -person are supported.
+	*
+    * 
+    ***/
     /**
     *   @brief  Sets up a firstperson view mode.
     **/
@@ -32,21 +37,66 @@ public:
     **/
     void SetupThirdpersonViewProjection();
 
+
+
+    /***
+    *
+	*
+    *   Viewbob & Weapon Viewmodel.
+	*
+    * 
+    ***/
+	/**
+	*	@brief	Calculate client view bobmove.
+	**/
+	void CalculateViewBob();
+	/**
+	*	@brief	Applies a certain view model drag effect to make it look more realistic in turns.
+	**/
+	void CalculateWeaponViewmodelDrag( vec3_t &origin, const vec3_t &angles, const vec3_t &v_forward, const vec3_t &v_right, const vec3_t &v_up );
+	/**
+	*	@brief	Calculates the weapon viewmodel's origin and angles and adds it for rendering.
+	**/
+	void AddWeaponViewmodel();
+
+
+    /***
+    *
+	*
+    *   View Vectors: Updated every time after we've set the view camera in a game's frame.
+	*
+    * 
+    ***/
     /**
     *   @brief  Calculates the new forward, up, and right vectors of
     *           the view camera.
     **/
     void UpdateViewVectors();
-
     /**
     *   @brief  Calculates the new forward, up, and right vectors of
     *           the view camera based on the vec3_t argument.
     **/
     void UpdateViewVectors(const vec3_t &fromAngles);
+    /**
+    *   @return The last calculated Forward vector for the View Camera's view. (Based on ViewAngles).
+    **/
+    inline const vec3_t &GetForwardViewVector() { return viewForward; }
+    /**
+    *   @return The last calculated Right vector for the View Camera's view. (Based on ViewAngles).
+    **/
+    inline const vec3_t &GetRightViewVector() { return viewRight; }
+    /**
+    *   @return The last calculated Up vector for the View Camera's view. (Based on ViewAngles).
+    **/
+    inline const vec3_t &GetUpViewVector() { return viewUp; }
+
+
 
     /***
     *
-    *   Get/Set
+	*
+    *   Get/Set View origin, angles, and delta angles.
+	*
     * 
     ***/
     /**
@@ -80,28 +130,17 @@ public:
         this->viewDeltaAngles = viewAngles;
     }
 
-    /**
-    *   @return The last calculated Forward vector for the View Camera's view. (Based on ViewAngles).
-    **/
-    inline const vec3_t &GetForwardViewVector() { return viewForward; }
-    /**
-    *   @return The last calculated Right vector for the View Camera's view. (Based on ViewAngles).
-    **/
-    inline const vec3_t &GetRightViewVector() { return viewRight; }
-    /**
-    *   @return The last calculated Up vector for the View Camera's view. (Based on ViewAngles).
-    **/
-    inline const vec3_t &GetUpViewVector() { return viewUp; }
-
 private:
 	//! For maintaining view bob client side.
 
 
 private:
+	//! Refresh entity for our gun model.
+	r_entity_t gunRenderEntity;
+
     //! True if in a third person game frame.
     bool isThirdperson = false;
-
-    //! Forward View Vector, based on viewAngles.
+	//! Forward View Vector, based on viewAngles.
     vec3_t viewForward = vec3_zero();
     //! Forward View Vector, based on viewAngles.
     vec3_t viewRight = vec3_zero();

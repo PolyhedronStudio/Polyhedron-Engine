@@ -100,7 +100,7 @@ static inline void SinCosRadians(const float radians, float  &s, float &c) {
 /**
 *   @brief  Initializes the Random Number generator for use with generating random vector coordinates.
 **/
-static inline void InitRandomNumberGenerator() {
+inline void InitRandomNumberGenerator() {
     static qboolean isInitialized = false;
     if (!isInitialized) {
         std::srand(std::time(NULL));
@@ -111,7 +111,7 @@ static inline void InitRandomNumberGenerator() {
 /**
 *   @brief  Returns a psuedo random unsigned integral value between `-UINT_MAX` and `UINT_MAX`.
 **/
-static inline int32_t Randomi(void) {
+inline const int32_t Randomi(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
@@ -121,7 +121,7 @@ static inline int32_t Randomi(void) {
 /**
 *   @brief  Returns a psuedo random unsigned integral value between `0` and `UINT_MAX`.
 **/
-static inline uint32_t Randomui(void) {
+inline const uint32_t Randomui(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
@@ -131,7 +131,7 @@ static inline uint32_t Randomui(void) {
 /**
 *   @brief  Returns a psuedo random float value between `0` and '1'
 **/
-static inline uint32_t Randomf(void) {
+inline const float Randomf(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
@@ -142,7 +142,7 @@ static inline uint32_t Randomf(void) {
 /**
 *   @brief  Returns a psuedo random float value between 'begin' and 'end'.
 **/
-static inline float RandomRangef(float begin, float end) {
+inline const float RandomRangef(float begin, float end) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 
@@ -152,7 +152,7 @@ static inline float RandomRangef(float begin, float end) {
 /**
 *   @brief  Returns a psuedo random unsigned integral value between 'begin' and 'end'.
 **/
-static inline uint32_t RandomRangeui(uint32_t begin, uint32_t end) {
+inline const uint32_t RandomRangeui(uint32_t begin, uint32_t end) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
 

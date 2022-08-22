@@ -30,12 +30,12 @@
 
 static int32_t sm_meat_index = 0;
 
-static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
+static inline const vec3_t CalculateDamageVelocity(int32_t damage, const vec3_t &baseDamageVelocity) {
     // Pick random velocities.
     vec3_t velocity = {
-        100.0f * crandom(),
-        100.0f * crandom(),
-        200.0f + 100.0f * random()
+        baseDamageVelocity.x * crandom(),
+        baseDamageVelocity.y * crandom(),
+        baseDamageVelocity.z + (baseDamageVelocity.z / 2.f) * random()
     };
 
     // Scale velocities.
@@ -65,7 +65,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
 
 	// Set size. // TODO: Use size and getabsmin from somewhere I guess.
     //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
-	const vec3_t gibSize = vec3_scale( vec3_t{16.f, 16.f, 56.f}, 0.5f );
+	const vec3_t gibSize = vec3_scale( vec3_t{16.f, 16.f, 56.f}, 0.875f );
     gibEntity->SetSize(gibSize);
 
     // Generate the origin to start from.
@@ -115,7 +115,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     }
 
     // Comment later...
-    const vec3_t velocityDamage = CalculateDamageVelocity(damage);
+    const vec3_t velocityDamage = CalculateDamageVelocity(damage, vec3_t{ 150.f, 150.f, 300.f });
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
     // adding it on to 'velocityDamage' its old value.
@@ -128,10 +128,11 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     gibEntity->SetVelocity(gibVelocity);
     
     // Generate angular velocity.
-    vec3_t angularVelocity = { Randomui() * 600.f, Randomui() * 600.f, Randomui() * 600.f };
-
-    // Set angular velocity.
-    gibEntity->SetAngularVelocity(angularVelocity);
+    gibEntity->SetAngularVelocity({
+		100.f + (Randomf() * 500.f), 
+		100.f + (Randomf() * 500.f), 
+		100.f + (Randomf() * 500.f)
+	});
 
     // Setup the Gib think function so it'll check for ground and add gravity.
     gibEntity->SetThinkCallback( &GibEntity::GibEntityThink );
@@ -230,8 +231,8 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
     // Z Axis.
     if (velocity.z < 200)
         velocity.z = 200;
-    else if (velocity.z > 500)
-        velocity.y = 500;
+    else if (velocity.z > 750)
+        velocity.y = 750;
 }
 
 //===============
@@ -309,12 +310,17 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
     SetTouchCallback(nullptr);
 
     // Did we get a plane passed?
-    if (plane) {
+    if ( plane ) {
         //CLG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("misc/fhit3.wav"), 1, Attenuation::Normal, 0);
 
-        vec3_t normalAngles = vec3_euler(plane->normal);
-        vec3_vectors(normalAngles, NULL, &right, NULL);
-        vec3_t right = vec3_euler(GetState().angles);
+		// Calculate new angles to 'stop' at when hitting the plane.
+        vec3_t normalAngles = vec3_euler( plane->normal );
+        vec3_vectors( normalAngles, NULL, &right, NULL );
+		
+		SetAngles( vec3_euler( right ) );
+
+		// New direction.
+        //vec3_t newDirection = vec3_dot(vec3_normalize( GetState().angles ), right);
 
         //if (GetModelIndex() == sm_meat_index) {
             //SetAnimationFrame(GetAnimationFrame() + Frametime(2.5).count());

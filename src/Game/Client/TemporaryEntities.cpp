@@ -67,9 +67,7 @@ qhandle_t   cl_mod_flash;
 qhandle_t   cl_mod_parasite_segment;
 qhandle_t   cl_mod_grapple_cable;
 qhandle_t   cl_mod_explo4;
-qhandle_t   cl_mod_powerscreen;
 qhandle_t   cl_mod_laser;
-qhandle_t   cl_mod_dmspot;
 qhandle_t   cl_mod_explosions[4];
 
 qhandle_t   cl_mod_lightning;
@@ -1040,6 +1038,8 @@ static void TE_SpawnGibs(const vec3_t &origin, const vec3_t &size, const vec3_t 
     // Throw some gibs around, true horror oh boy.
     ClientGameWorld* gameWorld = GetGameWorld();
 
+	CLG_Print(PrintType::DeveloperWarning, fmt::format( "Throwing Gib: origin({}, {}, {}), size({}, {}, {}), velocity({}, {}, {})\n",
+			  origin.x, origin.y, origin.z, size.x, size.y, size.z, velocity.x, velocity.y, velocity.z) );
 	// Let's go bonkers!
 	int32_t damage = 50;
 	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibhead.iqm", damage, GibType::Organic);
@@ -1351,9 +1351,7 @@ void CLG_RegisterTempEntityModels(void)
 	cl_mod_explosions[1] = clgi.R_RegisterModel("sprites/rocket_1.sp2");
 	cl_mod_explosions[2] = clgi.R_RegisterModel("sprites/rocket_5.sp2");
 	cl_mod_explosions[3] = clgi.R_RegisterModel("sprites/rocket_6.sp2");
-	cl_mod_powerscreen = clgi.R_RegisterModel("models/items/armor/effect/tris.md2");
 	cl_mod_laser = clgi.R_RegisterModel("models/objects/laser/tris.md2");
-	cl_mod_dmspot = clgi.R_RegisterModel("models/objects/dmspot/tris.md2");
 
 	cl_mod_lightning = clgi.R_RegisterModel("models/proj/lightning/tris.md2");
 	cl_mod_heatbeam = clgi.R_RegisterModel("models/proj/beam/tris.md2");
@@ -1386,15 +1384,7 @@ void CLG_RegisterTempEntityModels(void)
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.CL_Model_GetModelByHandle(cl_mod_powerscreen);
-	if (model)
-		model->sprite_vertical = true;
-
 	model = clgi.CL_Model_GetModelByHandle(cl_mod_laser);
-	if (model)
-		model->sprite_vertical = true;
-
-	model = clgi.CL_Model_GetModelByHandle(cl_mod_dmspot);
 	if (model)
 		model->sprite_vertical = true;
 

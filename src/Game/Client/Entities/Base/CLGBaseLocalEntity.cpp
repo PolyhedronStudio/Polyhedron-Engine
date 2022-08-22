@@ -461,7 +461,6 @@ void CLGBaseLocalEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
 **/
 void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) {
 	extern qhandle_t cl_mod_laser;
-	extern qhandle_t cl_mod_dmspot;
 
 	// If we don't have a PODEntity then we can't do anything.
 	if (!podEntity) {
@@ -634,7 +633,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
                 refreshEntity.model = currentState->modelIndex;//cl->drawModels[currentState->modelIndex];
 
                 // Disable shadows on lasers and dm spots.
-                if (refreshEntity.model == cl_mod_laser || refreshEntity.model == cl_mod_dmspot)
+                if ( refreshEntity.model == cl_mod_laser )
                     rentRenderEffects|= RF_NOSHADOW;
             }
         }

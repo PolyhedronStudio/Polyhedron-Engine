@@ -166,7 +166,7 @@ static void CL_SetActiveState(void) {
     CL_OpenBSPMenu();
 
     // Close the console to get rid of connection screen.
-    Con_Close(false);
+    Con_Close( false );
 
     // Check for pauses.
     CL_CheckForPause();
