@@ -16,7 +16,7 @@ public:
     /**
     *   @brief  Used by game modes to spawn server side gibs.
     **/
-    static GibEntity* Create(const vec3_t &origin, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType);
+    static GibEntity* Create(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType);
 
 private:
     //! Private constructor. Gibs are created using the Create function.
@@ -54,6 +54,7 @@ public:
     //
     //
     void GibEntityThink();
+	void GibEntityStopBleeding();
     void GibEntityDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     void GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 

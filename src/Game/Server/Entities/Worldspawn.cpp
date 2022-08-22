@@ -258,7 +258,15 @@ void Worldspawn::Precache() {
 
     SVG_PrecacheSound("infantry/inflies1.wav");
 
-    sm_meat_index = SVG_PrecacheModel("models/objects/gibs/sm_meat/tris.md2");
+    sm_meat_index = SVG_PrecacheModel("models/gibs/gibhead.iqm");
+	SVG_PrecacheModel("models/gibs/gibtorso.iqm");
+	SVG_PrecacheModel("models/gibs/gibarmleft.iqm");
+	SVG_PrecacheModel("models/gibs/gibarmright.iqm");
+	SVG_PrecacheModel("models/gibs/giblegupleft.iqm");
+	SVG_PrecacheModel("models/gibs/giblegupright.iqm");
+	SVG_PrecacheModel("models/gibs/gibleglowleft.iqm");
+	SVG_PrecacheModel("models/gibs/gibleglowright.iqm");
+
     SVG_PrecacheModel("models/objects/gibs/arm/tris.md2");
     SVG_PrecacheModel("models/objects/gibs/bone/tris.md2");
     SVG_PrecacheModel("models/objects/gibs/bone2/tris.md2");

@@ -1036,15 +1036,32 @@ static void dirtoangles(vec3_t angles)
 /**
 *	@brief	Parses a temporary entity message and acts accordingly.
 **/
-static void TE_SpawnGibs(const vec3_t &origin, const vec3_t &velocity, int32_t count) {
+static void TE_SpawnGibs(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, int32_t count) {
     // Throw some gibs around, true horror oh boy.
     ClientGameWorld* gameWorld = GetGameWorld();
 
 	// Let's go bonkers!
-	for (int32_t i = 0; i < count; i++) {
-		int32_t damage = 50;
-	    gameWorld->ThrowGib(origin, velocity, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-	}
+	int32_t damage = 50;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibhead.iqm", damage, GibType::Organic);
+	damage = 80;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibtorso.iqm", damage, GibType::Organic);
+	damage = 120;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibarmleft.iqm", damage, GibType::Organic);
+	damage = 100;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibarmright.iqm", damage, GibType::Organic);
+	damage = 140;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/giblegupleft.iqm", damage, GibType::Organic);
+	damage = 130;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/giblegupright.iqm", damage, GibType::Organic);
+	damage = 70;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibleglowleft.iqm", damage, GibType::Organic);
+	damage = 60;
+	gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibleglowright.iqm", damage, GibType::Organic);
+
+	//for (int32_t i = 0; i < count; i++) {
+	//	int32_t damage = 50;
+	//    gameWorld->ThrowGib(origin, size, velocity, "models/gibs/gibhead.iqm", damage, GibType::Organic);
+	//}
 }
 
 /**
@@ -1088,7 +1105,7 @@ void CLG_ParseTempEntity(void)
 			GameEntity *gibber = gameWorld->GetGameEntityByIndex(teParameters.entity1);
 
 			if (gibber) {
-				TE_SpawnGibs(gibber->GetOrigin(), gibber->GetVelocity(), teParameters.count);
+				TE_SpawnGibs(gibber->GetOrigin(), gibber->GetSize(), gibber->GetVelocity(), teParameters.count);
 			}
 		break;
 	}

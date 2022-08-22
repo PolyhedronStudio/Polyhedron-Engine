@@ -68,7 +68,6 @@ void SVGBaseSkeletalAnimator::Think() {
 	if (CanSwitchAnimation(currentAnimationState, animationToSwitchTo)) {
 		const std::string animName = skm->animations[animationToSwitchTo]->name;
 		SwitchAnimation(animName);
-		//ProcessSkeletalAnimationForTime(level.time);
 		//.Otherwise keep processing the current animation frame for time.
 	} else {
 		ProcessSkeletalAnimationForTime(level.time);

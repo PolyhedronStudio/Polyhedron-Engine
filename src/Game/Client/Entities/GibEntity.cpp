@@ -51,7 +51,7 @@ static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
 /**
 *   @brief  Used by game modes to spawn server side gibs.
 **/
-GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType) {
+GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType) {
     
 	PODEntity *localGibEntity = GetGameWorld()->GetUnusedPODEntity(false);
 
@@ -59,13 +59,14 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>(localGibEntity , false, false);
 
 	if (!sm_meat_index) {
-		sm_meat_index = CLG_PrecacheModel("models/objects/gibs/sm_meat/tris.md2");
+		//sm_meat_index = CLG_PrecacheModel("models/objects/gibs/sm_meat/tris.md2");
+		sm_meat_index = CLG_PrecacheModel(gibModel);
 	}
 
-	// Set size.
+	// Set size. // TODO: Use size and getabsmin from somewhere I guess.
     //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
-	const vec3_t size = vec3_scale(vec3_t{16.f, 16.f, 56.f}, 0.5f);
-    gibEntity->SetSize(size);
+	const vec3_t gibSize = vec3_scale( vec3_t{16.f, 16.f, 56.f}, 0.5f );
+    gibEntity->SetSize(gibSize);
 
     // Generate the origin to start from.
     //vec3_t origin = gibber->GetAbsoluteMin() + gibber->GetSize();
@@ -83,14 +84,14 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
 	});
 
     // Set the model.
-    gibEntity->SetModel(gibModel);
+    gibEntity->SetModel( gibModel );
 
     // Set solid and other properties.
-    gibEntity->SetSolid(Solid::OctagonBox);
-    gibEntity->SetEffects(gibEntity->GetEffects() | EntityEffectType::Gib);
-    gibEntity->SetFlags(gibEntity->GetFlags() | EntityFlags::NoKnockBack);
-    gibEntity->SetTakeDamage(1);
-    gibEntity->SetDieCallback(&GibEntity::GibEntityDie);
+    gibEntity->SetSolid( Solid::OctagonBox );
+    gibEntity->SetEffects( gibEntity->GetEffects() | EntityEffectType::Gib );
+    gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
+    //gibEntity->SetTakeDamage( 1 );
+    //gibEntity->SetDieCallback( &GibEntity::GibEntityDie );
 
     // Default velocity scale for non organic materials.
     float velocityScale = 1.f;
@@ -101,12 +102,15 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
 	    gibEntity->SetMoveType(MoveType::TossSlide);
 
 	    // Most of all, we setup a touch callback too ofc.
-	    //gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
+		gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
 
 	    // Adjust the velocity scale.
 	    velocityScale = 0.5f;
     } else {
-	    // Pick a different movetype, bouncing. No touch callback :)
+	    // Most of all, we setup a touch callback too ofc.
+		gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
+
+		// Pick a different movetype, bouncing. No touch callback :)
 	    gibEntity->SetMoveType(MoveType::Bounce);
     }
 
@@ -129,9 +133,9 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     // Set angular velocity.
     gibEntity->SetAngularVelocity(angularVelocity);
 
-    // Setup the Gib think function and its think time.
-    //gibEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-    //gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
+    // Setup the Gib think function so it'll check for ground and add gravity.
+    gibEntity->SetThinkCallback( &GibEntity::GibEntityThink );
+	gibEntity->SetNextThinkTime( level.time + FRAMETIME_S );
 
     // Link entity into the world.
     gibEntity->LinkEntity();
@@ -265,16 +269,16 @@ void GibEntity::GibEntityThink() {
     SetNextThinkTime(level.time + FRAMETIME_S);
     
 	// Increase frame and set a new think time.
-    SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
+    //SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
 
     // Play frames for these meshes, cut the crap at frame 10.
-    if (GetAnimationFrame() == 10) {
-		SetEffects(0);
+    //if (GetAnimationFrame() == 10) {
+		//SetEffects(0);
        // SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
         //SetNextThinkTime(level.time + 8s + Randomui() * 10s);
-    }
+    //}
 
-	//SG_CheckGround(this);
+	SG_CheckGround(this);
 	SG_AddGravity(this);
 }
 
@@ -282,9 +286,21 @@ void GibEntity::GibEntityThink() {
 // GibEntity::GibEntityTouch
 //
 //===============
+void GibEntity::GibEntityStopBleeding() {
+	// Set effects to nothing.
+	SetEffects(0);
+
+	// Old, would remove it after some time. May want to reverse this later on.
+	//gibEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
+    //gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
+
+	// Now just call its regular thinking method for this frame, it'll perform addgravity checkground and reassign think
+	GibEntityThink();
+}
 void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     vec3_t  right;
 
+	// If we don't have ground we keep bleeding.
     if (!ClientGameWorld::ValidateEntity(GetGroundEntityHandle()))
         return;
 
@@ -300,11 +316,11 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
         vec3_vectors(normalAngles, NULL, &right, NULL);
         vec3_t right = vec3_euler(GetState().angles);
 
-        if (GetModelIndex() == sm_meat_index) {
-            SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
-            SetThinkCallback(&GibEntity::GibEntityThink);
+        //if (GetModelIndex() == sm_meat_index) {
+            //SetAnimationFrame(GetAnimationFrame() + Frametime(2.5).count());
+            SetThinkCallback(&GibEntity::GibEntityStopBleeding);
             SetNextThinkTime(level.time + FRAMETIME_S);
-        }
+        //}
     }
 }
 

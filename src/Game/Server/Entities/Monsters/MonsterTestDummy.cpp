@@ -183,26 +183,6 @@ void MonsterTestDummy::PostSpawn() {
 *   @brief  General entity thinking routine.
 **/
 void MonsterTestDummy::Think() {
- 	// Get our current animation state.
-	const EntityAnimationState *animationState = GetCurrentAnimationState();
-
-		// Get state pointer.
-	EntityState *currentState	= &podEntity->currentState;
-	EntityState *previousState	= &podEntity->previousState;
-
-	// Get animation state.
-	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
-	EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
-	// If we got a new animation to switch to, ensure we are allowed to switch before doing so.
-	if (CanSwitchAnimation(currentAnimationState, animationToSwitchTo)) {
-		const std::string animName = skm->animations[animationToSwitchTo]->name;
-		SwitchAnimation(animName);
-		//ProcessSkeletalAnimationForTime(level.time);
-		//.Otherwise keep processing the current animation frame for time.
-	} else {
-		ProcessSkeletalAnimationForTime(level.time);
-	}
-
 	// Always call parent class method.
     Base::Think();
 
@@ -224,11 +204,6 @@ void MonsterTestDummy::Think() {
 
 		if (!geMoveGoal) {
 			// Y U HEF NO ENEMY?
-			
-			// TEMPORARY:
-			/*SetVelocity(vec3_zero());
-			RootMotionMove();
-			return;*/
 		}
 	}
 
