@@ -2947,8 +2947,6 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 	PODEntity *podEntities = CL_GM_GetClientPODEntities();
 
 	if ( podEntities ) {
-		// Give the client game module a chance to run its local entities for a frame.
-		CL_GM_ClientLocalEntitiesFrame();
 
 		// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
 		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
@@ -2969,6 +2967,9 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 			// Fire local entity events.
 			LocalEntity_FireEvent(&podEntity->currentState);
 		}
+
+		// Give the client game module a chance to run its local entities for a frame.
+		CL_GM_ClientLocalEntitiesFrame();
 	}
 
 	#if USE_CLIENT
@@ -3105,8 +3106,8 @@ uint64_t CL_Frame(uint64_t msec)
 			// Run the actual local game.
 		//}
 		if (clientgame_frame) {
-			CL_RunGameFrame( clientgame_msec );
-			clientgame_extra -= clientgame_msec;
+			clientgame_extra -= CL_RunGameFrame( clientgame_msec );
+			//clientgame_extra -= clientgame_msec;
 		}
 	}
 

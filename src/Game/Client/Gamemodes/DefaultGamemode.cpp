@@ -15,6 +15,16 @@
 //#include "../Entities/Base/BodyCorpse.h"
 #include "Game/Client/Entities/Base/CLGBasePlayer.h"
 
+// ClientGameExports implementations.
+#include "Game/Client/Exports/Core.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/Media.h"
+#include "Game/Client/Exports/Movement.h"
+#include "Game/Client/Exports/Prediction.h"
+#include "Game/Client/Exports/Screen.h"
+#include "Game/Client/Exports/ServerMessage.h"
+#include "Game/Client/Exports/View.h"
+
 // Game Mode.
 #include "Game/Client/Gamemodes/DefaultGamemode.h"
 
@@ -45,7 +55,8 @@ void DefaultGameMode::OnLevelExit() {
 *   @brief  
 **/
 void DefaultGameMode::ClientBeginLocalFrame(CLGBasePlayer* player, ServerClient *client) {
-	CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientBeginLocalFrame\n" );
+	ViewCamera *viewCamera = clge->view->GetViewCamera();
+	viewCamera->CalculateBobMoveCycle( &cl->oldframe.playerState, &cl->frame.playerState );
 }
 
 
@@ -53,7 +64,8 @@ void DefaultGameMode::ClientBeginLocalFrame(CLGBasePlayer* player, ServerClient 
 *   @brief  
 **/
 void DefaultGameMode::ClientEndLocalFrame(CLGBasePlayer* player, ServerClient* client) {
-	CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientEndLocalFrame\n" );
+	ViewCamera *viewCamera = clge->view->GetViewCamera();
+	//viewCamera->CalculateWeaponViewBob( &cl->oldframe.playerState, &cl->frame.playerState );
 }
 
 /**

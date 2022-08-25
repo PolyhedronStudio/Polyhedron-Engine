@@ -46,7 +46,7 @@ public:
 	**/
 	void AddWeaponViewModel();
 
-private:
+
 	/**
 	*	@brief	Calculate client view bobmove.
 	**/

@@ -143,16 +143,6 @@ uint32_t MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uin
     	to->gunAnimationForceLoop = MSG_ReadUint8();
     }
 
-    // Gun Offset.
-    if (extraFlags & EPS_GUNOFFSET) {
-        to->gunOffset = MSG_ReadVector3(true);
-    }
-
-    // Gun Angles.
-    if (extraFlags & EPS_GUNANGLES) {
-        to->gunAngles = MSG_ReadVector3(true);
-    }
-
     // Blend.
     if (flags & PS_BLEND) {
         //to->blend[0] = MSG_ReadHalfFloat();

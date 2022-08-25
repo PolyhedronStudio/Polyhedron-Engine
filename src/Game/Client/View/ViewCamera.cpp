@@ -162,7 +162,6 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
 		}
     }
 
-	bobMoveCycle.XYSpeed *= frameTime;
 
 	const float moveBase = bobMoveCycle.move;
 
@@ -174,8 +173,8 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
     if ( currentPlayerState->pmove.flags & PMF_DUCKED )
         bobTime *= 1.5;
 
-    bobMoveCycle.cycle = static_cast<int64_t>( bobTime * frameTime );
-    bobMoveCycle.fracSin = fabs( sin( bobTime * frameTime * M_PI ) );
+    bobMoveCycle.cycle = static_cast<int64_t>( bobTime );
+    bobMoveCycle.fracSin = fabs( sin( bobTime * M_PI ) );
 
 	//CLG_Print( PrintType::Developer, 
 	//		  fmt::format("[CLGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
@@ -336,11 +335,11 @@ void ViewCamera::CalculateWeaponViewBob( PlayerState *previousPlayerState, Playe
 
         // Special handling for gun angle Yaw.
         if (i == vec3_t::Yaw) {
-            viewGunAngles[vec3_t::Roll] += 0.1f * delta * frameTime;
+            viewGunAngles[vec3_t::Roll] += 0.1f * delta;
         }
 
         // Apply delta to gun angles.
-        viewGunAngles[i] += 0.2f * delta * frameTime;
+        viewGunAngles[i] += 0.2f * delta;
     }
 
 	// Apply the new view gun angles to our player state.
@@ -461,7 +460,7 @@ void ViewCamera::AddWeaponViewModel() {
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
 
 	// First calculate the actual bob move cycle for the current frame and state.
-	CalculateBobMoveCycle( oldPlayerState, currentPlayerState );
+	//CalculateBobMoveCycle( oldPlayerState, currentPlayerState );
 
 	// Calculate the weapon view bob.
 	CalculateWeaponViewBob( oldPlayerState, currentPlayerState );
@@ -477,7 +476,7 @@ void ViewCamera::AddWeaponViewModel() {
         rEntWeaponViewModel.origin = vec3_fmaf(rEntWeaponViewModel.origin, ofs, GetForwardViewVector());
     }
 	// Add interpolated(between player states) gunAngles..
-	rEntWeaponViewModel.angles = viewAngles + currentPlayerState->gunAngles;//vec3_mix_euler( oldPlayerState->gunAngles, currentPlayerState->gunAngles, cl->lerpFraction );
+	rEntWeaponViewModel.angles = viewAngles + vec3_mix_euler( oldPlayerState->gunAngles, currentPlayerState->gunAngles, cl->lerpFraction );
 
 	// Trace the weapon offset against other entities.
 	TraceViewWeaponOffset();

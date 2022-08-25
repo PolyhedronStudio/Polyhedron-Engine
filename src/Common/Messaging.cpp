@@ -56,8 +56,6 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(GUNANIMATION_FRAME_TIME, "gunAnimationFrameTime");
     SP(GUNANIMATION_LOOP_COUNT, "gunAnimationLoopCount");
     SP(GUNANIMATION_LOOP_FORCE, "gunAnimationForceLoop");
-    SE(GUNOFFSET, "gunOffset");
-    SE(GUNANGLES, "gunAngles");
     SP(BLEND, "blend");
     SP(FOV, "fov");
     SP(RDFLAGS, "rdflags");

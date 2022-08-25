@@ -154,8 +154,8 @@ struct ClientCommand {
 #define PS_MASK             ((1<<PS_BITS)-1)
 
 // r1q2 protocol specific extra flags
-#define EPS_GUNOFFSET       (1<<0)
-#define EPS_GUNANGLES       (1<<1)
+//#define EPS_GUNOFFSET       (1<<0)
+//#define EPS_GUNANGLES       (1<<1)
 #define EPS_M_VELOCITY2     (1<<2)
 #define EPS_M_ORIGIN2       (1<<3)
 #define EPS_VIEWANGLE2      (1<<4)

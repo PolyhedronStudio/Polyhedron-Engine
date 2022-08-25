@@ -163,19 +163,6 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
 	    playerStateFlags |= PS_GUNANIMATION_LOOP_FORCE;
     }
 
-
-    if (from->gunOffset[0] != to->gunOffset[0] ||
-        from->gunOffset[1] != to->gunOffset[1] ||
-        from->gunOffset[2] != to->gunOffset[2]) {
-        entityStateFlags |= EPS_GUNOFFSET;
-    }
-
-    if (from->gunAngles[0] != to->gunAngles[0] ||
-        from->gunAngles[1] != to->gunAngles[1] ||
-        from->gunAngles[2] != to->gunAngles[2]) {
-        entityStateFlags |= EPS_GUNANGLES;
-    }
-
     int32_t statbits = 0;
     for (int32_t i = 0; i < MAX_PLAYERSTATS; i++) {
 	    if (to->stats[i] != from->stats[i]) {
@@ -276,14 +263,6 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
     if (playerStateFlags & PS_GUNANIMATION_LOOP_FORCE) {
 	    MSG_WriteUint8(to->gunAnimationForceLoop);
-    }
-
-    if (entityStateFlags & EPS_GUNOFFSET) {
-        MSG_WriteVector3(to->gunOffset, true);
-    }
-
-    if (entityStateFlags & EPS_GUNANGLES) {
-        MSG_WriteVector3(to->gunAngles, true);
     }
 
     if (playerStateFlags & PS_BLEND) {

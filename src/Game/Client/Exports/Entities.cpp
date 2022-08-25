@@ -283,8 +283,6 @@ void ClientGameEntities::AddViewEntities() {
 	viewCamera->AddWeaponViewModel();	
 }
 
-
-
 /**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
@@ -343,76 +341,13 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 			}
 		}
 
-		// The client holds a list of all other client entities as well.
-		int32_t clientEntityNumber = podEntity->clientEntityNumber;
-        if (clientEntityNumber > 0 && clientEntityNumber <= game.GetMaxClients()) {
-            // Ensure the entity is in posession of a client that controls it.
-            ServerClient* client = gameEntity->GetClient();
-            if (!client) {
-                continue;
-            }
-
-            // If the entity is NOT a SVGBasePlayer (sub-)class, skip.
-            if (!gameEntity->GetTypeInfo()->IsSubclassOf(CLGBasePlayer::ClassInfo)) {
-                continue;
-            }
-
-            // Last but not least, begin its server frame.
-            GetGameMode()->ClientBeginLocalFrame( dynamic_cast< CLGBasePlayer* >( gameEntity ), client );
-
-            // Continue to next iteration.
-            continue;
-        }
-
         // Run it for a frame.
 		SGEntityHandle handle = podEntity;
 		SG_RunEntity(handle);
     }
 }
 
-//
-//=====================
-// SVG_ClientEndServerFrames
-//
-// Called when the game is at the end of its run for this frame, and decides to now
-// instantiate a process for updating each client by the current server frame.
-//=====================
-//
-void CLG_ClientEndLocalFrames(void)
-{
-    ClientGameWorld* gameworld = GetGameWorld();
 
-    // Acquire server entities array.
-    Entity* serverEntities = gameworld->GetPODEntities();
-
-    // Go through each client and calculate their final view for the state.
-    // (This happens here, so we can take into consideration objects that have
-    // pushed the player. And of course, because damage has been added.)
-    for (int32_t clientIndex = 0; clientIndex < game.GetMaxClients(); clientIndex++) {
-        // First, fetch entity state number.
-        int32_t stateNumber = serverEntities[1 + clientIndex].currentState.number;  // WID: 1 +, because 0 == Worldspawn.
-
-        // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
-        Entity *entity = &serverEntities[stateNumber];
-
-        // Acquire player entity pointer.
-        GameEntity *validGameEntity = ClientGameWorld::ValidateEntity(entity, true, true);
-
-        // Sanity check.
-        if (!validGameEntity|| !validGameEntity->IsSubclassOf< CLGBasePlayer >()) {
-            continue;
-        }
-
-        // Save to cast now.
-        CLGBasePlayer *player = static_cast<CLGBasePlayer*>(validGameEntity);
-
-        // Acquire server client.
-        ServerClient *client = player->GetClient();
-
-        // Notify game mode about this client ending its server frame.
-        gameworld->GetGameMode()->ClientEndLocalFrame(player, client);
-    }
-}
 /**
 *   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
 **/
@@ -424,8 +359,25 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 	if ( !gameWorld ) {
 		return;
 	}
+	
+	/**
+	*	#0: Call upon BeginLocalFrame for the client.
+	**/
+	GameEntity *geClient = gameWorld->GetClientGameEntity();
 
-	// Iterate through our local client side entities.
+	if ( geClient ) {
+        // Ensure the entity is in posession of a client that controls it.
+        ServerClient* client = geClient->GetClient();
+        if ( client && geClient->GetTypeInfo()->IsSubclassOf( CLGBasePlayer::ClassInfo ) ) {
+			// Last but not least, begin its server frame.
+			GetGameMode()->ClientBeginLocalFrame( dynamic_cast< CLGBasePlayer* >( geClient ), client );   
+        }
+    }
+
+
+	/**
+	*	#1: Iterate through our local client side entities, and run 'think' if demanded.
+	**/
     for ( int32_t localEntityNumber = MAX_WIRED_POD_ENTITIES; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++ ) {
 		const int32_t entityIndex = localEntityNumber;
 		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityIndex );
@@ -477,7 +429,18 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		SG_RunEntity( geHandle );
     }
 
-	CLG_ClientEndLocalFrames();
+
+	/**
+	*	#2: End client local frame.
+	**/
+	if ( geClient ) {
+        // Ensure the entity is in posession of a client that controls it.
+        ServerClient* client = geClient->GetClient();
+        if ( client && geClient->GetTypeInfo()->IsSubclassOf( CLGBasePlayer::ClassInfo ) ) {
+			// Last but not least, begin its server frame.
+			GetGameMode()->ClientEndLocalFrame( dynamic_cast< CLGBasePlayer* >( geClient ), client );   
+        }
+    }
 }
 /**
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
