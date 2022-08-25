@@ -18,7 +18,7 @@
 class SVGBaseEntity;
 class SGEntityHandle;
 class Worldspawn;
-class IGameMode;
+class IGamemode;
 class ISharedGameEntity;
 class IServerGameEntity;
 
@@ -71,7 +71,7 @@ public:
     /**
 	*	@return A pointer to the current active game mode.
 	**/
-    inline IGameMode* GetGameMode() { return currentGameMode; }
+    inline IGamemode* GetGameMode() { return currentGameMode; }
 
 
 
@@ -245,7 +245,7 @@ private:
     ServerClient *clients = nullptr;
 
 	//! Currently active game mode.
-    IGameMode* currentGameMode = nullptr;
+    IGamemode* currentGameMode = nullptr;
 
     
 private:

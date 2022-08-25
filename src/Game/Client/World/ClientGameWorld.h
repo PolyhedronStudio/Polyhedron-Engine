@@ -18,7 +18,7 @@
 /**
 *	Forward declare.
 **/
-class IGameMode;
+class IGamemode;
 class IGameWorld;
 class IClientGameEntity;
 class SGEntityHandle;
@@ -84,7 +84,7 @@ public:
     /**
 	*	@return A pointer to the current active game mode.
 	**/
-    inline IGameMode* GetGameMode() { return currentGameMode; }
+    inline IGamemode* GetGameMode() { return currentGameMode; }
 
 
 
@@ -296,7 +296,7 @@ private:
     gclient_s *clients = nullptr;
 
 	//! Currently active game mode.
-    IGameMode* currentGameMode = nullptr;
+    IGamemode* currentGameMode = nullptr;
 
 
     

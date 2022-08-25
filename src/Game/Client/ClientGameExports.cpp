@@ -21,6 +21,8 @@
 #include "Game/Client/Effects/LightStyles.h"
 #include "Game/Client/Effects/Particles.h"
 
+#include "Game/Client/Gamemodes/IGamemode.h"
+
 //! Static 
 ClientGameExports *clge = nullptr;
 
@@ -121,10 +123,10 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 /////
 
 
-	/**
-	*   @brief  Called right after connecting to a (loopback-)server and succesfully 
-	*			loaded up the BSP map data. This gives it a chance to initialize game objects.
-	**/
+/**
+*   @brief  Called right after connecting to a (loopback-)server and succesfully 
+*			loaded up the BSP map data. This gives it a chance to initialize game objects.
+**/
 void ClientGameExports::ClientConnect() {
 	// Setup a fresh game locals object.
 	game = ClientGameLocals{};
@@ -133,6 +135,11 @@ void ClientGameExports::ClientConnect() {
     // Reset level locals.
     level = LevelLocals{};
     level.time = GameTime::zero(); //GameTime(cl->serverTime);
+
+	// Notify Gamemode about ClientConnect:
+	IGamemode *gameMode = GetGameMode();
+	gameMode->ClientConnect( nullptr, nullptr );
+
 }
 
 /**
@@ -140,13 +147,14 @@ void ClientGameExports::ClientConnect() {
 *           Not used for demos.
 **/
 void ClientGameExports::ClientBegin() {
-	//// Setup a fresh game locals object.
-	//game = ClientGameLocals{};
-	//game.Initialize();
-
- //   // Reset level locals.
+	// Reset level locals.
     level = LevelLocals{};
     level.time = GameTime::zero(); //GameTime(cl->time);
+
+	// Notify Gamemode about ClientBegin:
+	IGamemode *gameMode = GetGameMode();
+	gameMode->ClientBegin( nullptr );
+
 }
 
 /**
@@ -154,6 +162,13 @@ void ClientGameExports::ClientBegin() {
 *           Could be him quiting, or pinging out etc. 
 **/
 void ClientGameExports::ClientClearState() {
+	// Notify Gamemode about ClientDisconnect:
+	IGamemode *gameMode = GetGameMode();
+	// There is a chance there is no game mode, however, clearstate is called, so make sure we got a gamemode.
+	if (gameMode) {
+		gameMode->ClientDisconnect( nullptr, nullptr );
+	}
+
     // Clear Particle.
     Particles::Clear();
     // Clear Dynamic Light Effects.

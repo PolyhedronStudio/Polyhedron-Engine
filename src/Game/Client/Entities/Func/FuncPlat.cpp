@@ -223,7 +223,7 @@ void FuncPlat::Callback_Blocked( IClientGameEntity* other ) {
 	//// Get GameWorld.
 	//ClientGameWorld *gameWorld = GetGameWorld();
 	//// Get GameMode.
-	//IGameMode *gameMode = gameWorld->GetGameMode();
+	//IGamemode *gameMode = gameWorld->GetGameMode();
 
  //   if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
  //       // Give it a chance to go away on its own terms (like gibs)

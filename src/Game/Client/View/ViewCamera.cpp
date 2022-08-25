@@ -177,17 +177,17 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
     bobMoveCycle.cycle = static_cast<int64_t>( bobTime * frameTime );
     bobMoveCycle.fracSin = fabs( sin( bobTime * frameTime * M_PI ) );
 
-	CLG_Print( PrintType::Developer, 
-			  fmt::format("[CLGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
-				velocity.x, velocity.y, velocity.z,		
-				moveBase,
-				move,
-				bobTime,
-				currentPlayerState->pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
-				bobMoveCycle.cycle,
-				bobMoveCycle.fracSin
-				)
-	);
+	//CLG_Print( PrintType::Developer, 
+	//		  fmt::format("[CLGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
+	//			velocity.x, velocity.y, velocity.z,		
+	//			moveBase,
+	//			move,
+	//			bobTime,
+	//			currentPlayerState->pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
+	//			bobMoveCycle.cycle,
+	//			bobMoveCycle.fracSin
+	//			)
+	//);
 }
 
 /**

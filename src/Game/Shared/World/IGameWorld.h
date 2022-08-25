@@ -15,7 +15,7 @@
 // Predefine.
 class SGEntityHandle;
 class ISharedGameEntity;
-class IGameMode;
+class IGamemode;
 class Worldspawn;
 
 
@@ -59,7 +59,7 @@ public:
     /**
 	*	@return A pointer to the current active game mode.
 	**/
-    virtual IGameMode* GetGameMode() = 0;
+    virtual IGamemode* GetGameMode() = 0;
 
 
 
@@ -250,7 +250,7 @@ public:
 
 private:
     //! Currently active game mode.
-    IGameMode* currentGameMode = nullptr;
+    IGamemode* currentGameMode = nullptr;
 
     //! Clients array, allocated to the size of maxclients cvar.
     ServerClient *clients = nullptr;

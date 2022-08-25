@@ -38,7 +38,7 @@
 //
 // Constructor/Deconstructor.
 //
-DefaultGameMode::DefaultGameMode() : IGameMode() {
+DefaultGameMode::DefaultGameMode() : IGamemode() {
 
 }
 
@@ -856,17 +856,17 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     bobMoveCycle.cycle = (int)bobTime;
     bobMoveCycle.fracSin = fabs(sin(bobTime * M_PI));
 	
-	SVG_DPrint( 
-			  fmt::format("[SVGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
-				playerVelocity.z,		playerVelocity.y,		playerVelocity.z,		
-				moveBase,
-				move,
-				bobTime,
-				client->playerState.pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
-				bobMoveCycle.cycle,
-				bobMoveCycle.fracSin
-				)
-	);
+	//SVG_DPrint( 
+	//		  fmt::format("[SVGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
+	//			playerVelocity.z,		playerVelocity.y,		playerVelocity.z,		
+	//			moveBase,
+	//			move,
+	//			bobTime,
+	//			client->playerState.pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
+	//			bobMoveCycle.cycle,
+	//			bobMoveCycle.fracSin
+	//			)
+	//);
 
 	// Detect hitting the floor, and apply damage appropriately.
     player->CheckFallingDamage();

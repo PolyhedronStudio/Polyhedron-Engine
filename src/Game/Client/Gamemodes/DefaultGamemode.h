@@ -14,7 +14,7 @@
 
 #include "IGamemode.h"
 
-class DefaultGameMode : public IGameMode {
+class DefaultGameMode : public IGamemode {
 public:
     //! Constructor/Deconstructor.
     DefaultGameMode();

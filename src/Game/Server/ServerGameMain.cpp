@@ -164,7 +164,7 @@ void SVG_ShutdownGame(void) {
 
 // TODO: Move elsewhere...
 qboolean SVG_CanSaveGame(qboolean isDedicatedServer) { 
-    IGameMode* gamemode = GetGameMode();
+    IGamemode* gamemode = GetGameMode();
 
     if (!gamemode)
         return false;

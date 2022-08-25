@@ -35,6 +35,24 @@ ClientGameLocals game;
 LevelLocals level;
 
 /**
+*   @return A pointer to the gameworld object. The big man in charge.
+**/
+ClientGameWorld *GetGameWorld() {
+    return game.world;
+}
+
+/**
+*   @return A pointer to the gamemode object. The man's little helper.
+**/
+IGamemode *GetGameMode() {
+    if (game.world) {
+        return game.world->GetGameMode();
+    } else {
+        return nullptr;
+    }
+}
+
+/**
 *	@return	An std::vector containing the found boxed entities.Will not exceed listCount.
 **/
 GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
@@ -82,26 +100,6 @@ GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t
 /**
 *   @return A pointer to the gameworld object. The big man in charge.
 **/
-ClientGameWorld *GetGameWorld() {
-    return game.world;
-}
-
-//**
-//*   @return A pointer to the gamemode object. The man's little helper.
-//**/
-//IGameMode *GetGameMode() {
-//    if (game.world) {
-//        return game.world->GetGameMode();
-//    } else {
-//        return nullptr;
-//    }
-//}
-
-
-
-/**
-*   @return A pointer to the gameworld object. The big man in charge.
-**/
 ClientGameWorld *ClientGameLocals::GetGameWorld() {
     return world;
 }
@@ -110,13 +108,13 @@ ClientGameWorld *ClientGameLocals::GetGameWorld() {
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-//IGameMode *GetGameMode() {
-//    if (game.world) {
-//        return game.world->GetGameMode();
-//    } else {
-//        return nullptr;
-//    }
-//}
+IGamemode *ClientGameLocals::GetGameMode() {
+    if (game.world) {
+        return game.world->GetGameMode();
+    } else {
+        return nullptr;
+    }
+}
 
 /**
 *	@brief Initializes the gameworld and its member objects.
@@ -169,7 +167,7 @@ void ClientGameLocals::DestroyWorld() {
 /**
 *   @return A pointer to the gameworld its current gamemode object.
 **/
-//IGameMode* ClientGameLocals::GetGameMode() { 
+//IGamemode* ClientGameLocals::GetGameMode() { 
 //    return world->GetGameMode(); 
 //}
 

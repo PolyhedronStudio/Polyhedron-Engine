@@ -13,8 +13,8 @@
 
 
 #include "IGamemode.h"
-
-class DefaultGameMode : public IGameMode {
+ 
+class DefaultGameMode : public IGamemode {
 public:
     //! Constructor/Deconstructor.
     DefaultGameMode();
@@ -25,10 +25,12 @@ public:
     ***/
     virtual qboolean CanSaveGame(qboolean isDedicatedServer) override;
 
+
     /***
     * Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     ***/
     virtual void OnLevelExit() override;
+
 
     /***
     * Combat GameRules checks.
@@ -39,6 +41,7 @@ public:
     virtual qboolean CanDamage(IServerGameEntity* targ, IServerGameEntity* inflictor) override;
     virtual GameEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
+
     /***
     * Combat GameMode Actions.
     ***/    
@@ -48,6 +51,7 @@ public:
     virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) override;
     virtual const int32_t& GetCurrentMeansOfDeath() override;
 
+
     /***
     * Random Gameplay Functions.
     ***/
@@ -55,6 +59,7 @@ public:
     virtual void SpawnTempDamageEntity(int32_t type, const vec3_t& origin, const vec3_t& normal, int32_t damage) override;
     virtual vec3_t CalculateDamageVelocity(int32_t damage) override;
     
+
     /***
     * Client Hooks.
     ***/
@@ -67,10 +72,10 @@ public:
     virtual void ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) override;
     virtual void ClientThink(SVGBasePlayer *player, ServerClient *client, ClientMoveCommand *moveCommand) override;
 
+
     /***
     * Client Related Functions.
     ***/ 
-
     virtual void InitializePlayerPersistentData(ServerClient* client) override;
     virtual void InitializePlayerRespawnData(ServerClient *client) override;
 

@@ -46,7 +46,8 @@ class CLGBasePlayer;
 class CLGBaseTrigger;
 //! Worldspawn.
 class WorldSpawn;
-
+//! Gamemodes.
+class IGamemode;
 //! GameWorld.
 class ClientGameWorld;
 //! ClientGame TraceResult.
@@ -176,7 +177,7 @@ public:
     /**
     *   @return A pointer to the gameworld its current gamemode object.
     **/
-    //IGameMode* GetGameMode();
+    IGamemode* GetGameMode();
 
     /**
     *   @brief  Code shortcut for accessing gameworld's client array.
@@ -290,7 +291,7 @@ ClientGameWorld* GetGameWorld();
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-//IGameMode* GetGameMode();
+IGamemode* GetGameMode();
 
 
 

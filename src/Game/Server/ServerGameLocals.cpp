@@ -29,12 +29,12 @@
 // GameWorld.
 #include "World/ServerGameWorld.h"
 
-//-----------------
-// Global Game Variables.
-//
-// These are used all throughout the code. To store game state related
-// information, and callbacks to the engine server game API.
-//-----------------
+/**
+*	Global Game Variables.
+*
+*	These are used all throughout the code. To store game state related
+*	information, and callbacks to the engine server game API.
+**/
 GameLocals game;
 LevelLocals level;
 
@@ -52,7 +52,7 @@ ServerGameWorld *GetGameWorld() {
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-IGameMode *GetGameMode() {
+IGamemode *GetGameMode() {
     if (game.world) {
         return game.world->GetGameMode();
     } else {
@@ -119,7 +119,7 @@ ServerGameWorld* GameLocals::GetGameWorld() {
 /**
 *   @return A pointer to the gameworld its current gamemode object.
 **/
-IGameMode* GameLocals::GetGameMode() { 
+IGamemode* GameLocals::GetGameMode() { 
     return world->GetGameMode(); 
 }
 

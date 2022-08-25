@@ -43,7 +43,7 @@ class SVGBasePlayer;
 class SVGBaseTrigger;
 class WorldSpawn;
 class IGameWorld;
-class IGameMode;
+class IGamemode;
 class ServerGameWorld;
 
 struct PODEntity;
@@ -164,7 +164,7 @@ public:
     /**
     *   @return A pointer to the gameworld its current gamemode object.
     **/
-    IGameMode* GetGameMode();
+    IGamemode* GetGameMode();
 
     /**
     *   @brief  Code shortcut for accessing gameworld's client array.
@@ -368,7 +368,7 @@ ServerGameWorld* GetGameWorld();
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-IGameMode* GetGameMode();
+IGamemode* GetGameMode();
 
 // These too need to be taken care of.
 extern  int32_t sm_meat_index;

@@ -29,6 +29,8 @@
 #include "Game/Client/Entities/Base/CLGBasePlayer.h"
 #include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 
+// Gamemode.
+#include "Game/Client/Gamemodes/IGamemode.h"
 // World.
 #include "Game/Client/World/ClientGameWorld.h"
 
@@ -356,7 +358,7 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
             }
 
             // Last but not least, begin its server frame.
-            //GetGameMode()->ClientBeginLocalFrame(dynamic_cast<CLGBasePlayer*>(gameEntity), client);
+            GetGameMode()->ClientBeginLocalFrame( dynamic_cast< CLGBasePlayer* >( gameEntity ), client );
 
             // Continue to next iteration.
             continue;
@@ -368,6 +370,49 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
     }
 }
 
+//
+//=====================
+// SVG_ClientEndServerFrames
+//
+// Called when the game is at the end of its run for this frame, and decides to now
+// instantiate a process for updating each client by the current server frame.
+//=====================
+//
+void CLG_ClientEndLocalFrames(void)
+{
+    ClientGameWorld* gameworld = GetGameWorld();
+
+    // Acquire server entities array.
+    Entity* serverEntities = gameworld->GetPODEntities();
+
+    // Go through each client and calculate their final view for the state.
+    // (This happens here, so we can take into consideration objects that have
+    // pushed the player. And of course, because damage has been added.)
+    for (int32_t clientIndex = 0; clientIndex < game.GetMaxClients(); clientIndex++) {
+        // First, fetch entity state number.
+        int32_t stateNumber = serverEntities[1 + clientIndex].currentState.number;  // WID: 1 +, because 0 == Worldspawn.
+
+        // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
+        Entity *entity = &serverEntities[stateNumber];
+
+        // Acquire player entity pointer.
+        GameEntity *validGameEntity = ClientGameWorld::ValidateEntity(entity, true, true);
+
+        // Sanity check.
+        if (!validGameEntity|| !validGameEntity->IsSubclassOf< CLGBasePlayer >()) {
+            continue;
+        }
+
+        // Save to cast now.
+        CLGBasePlayer *player = static_cast<CLGBasePlayer*>(validGameEntity);
+
+        // Acquire server client.
+        ServerClient *client = player->GetClient();
+
+        // Notify game mode about this client ending its server frame.
+        gameworld->GetGameMode()->ClientEndLocalFrame(player, client);
+    }
+}
 /**
 *   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
 **/
@@ -431,6 +476,8 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		SGEntityHandle geHandle = gameEntity;
 		SG_RunEntity( geHandle );
     }
+
+	CLG_ClientEndLocalFrames();
 }
 /**
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.

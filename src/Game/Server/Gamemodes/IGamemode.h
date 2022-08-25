@@ -20,11 +20,11 @@ class SVGBasePlayer;
 
 
 
-class IGameMode {
+class IGamemode {
 public:
 	//! Constructor/Destructor.
-    IGameMode() {};
-    virtual ~IGameMode() = default;
+    IGamemode() {};
+    virtual ~IGamemode() = default;
 
 
 	/***
@@ -39,7 +39,7 @@ public:
 	***/
     /**
     *   @brief  Checks if this gamemode class is exactly the given class.
-    *   @param  gamemodeClass A gamemode class which must inherint from IGameMode.
+    *   @param  gamemodeClass A gamemode class which must inherint from IGamemode.
     *   @return True if the game mode class is the same class type or a derivate of gamemodeClass.
     **/
     template<typename gamemodeClass>
@@ -49,7 +49,7 @@ public:
     
     /**
     *   @brief  Checks if this gamemode class is a subclass of another, or is the same class
-    *   @param  gamemodeClass A gamemode class which must inherint from IGameMode.
+    *   @param  gamemodeClass A gamemode class which must inherint from IGamemode.
     *   @return True if the game mode class is the same, or a derivate of gamemodeClass.
     **/
     template<typename gamemodeClass>
