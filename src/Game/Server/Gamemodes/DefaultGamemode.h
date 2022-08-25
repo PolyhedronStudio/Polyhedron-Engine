@@ -74,7 +74,9 @@ public:
 protected:
 	/**
 	*	@brief	Wrapper PM_Trace to interscept and adjust tracing needs if desired.
+	*			( PMove doesn't need to know about skipEntity and ContentMask. )
 	**/
+	static SVGBasePlayer* pmSkipEntity;
 	static TraceResult PM_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end );
 
 public:

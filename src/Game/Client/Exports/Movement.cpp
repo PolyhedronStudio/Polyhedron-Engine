@@ -76,7 +76,7 @@ int32_t ClientGameMovement::in_impulse;
 /**
 *   @brief 
 **/
-void ClientGameMovement::BuildFrameMovementCommand(uint64_t miliseconds) {
+void ClientGameMovement::BuildFrameMovementCommand(int64_t miliseconds) {
     // Assign view angles to move command user input.
     ViewCamera *viewCamera = clge->view->GetViewCamera();
 

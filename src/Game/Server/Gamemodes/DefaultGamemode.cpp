@@ -35,9 +35,12 @@
 // Shared Game API
 #include "Game/Shared/GameBindings/ServerBinding.h"
 
-//
-// Constructor/Deconstructor.
-//
+
+
+// Skip Entity for PM tracing.
+SVGBasePlayer* DefaultGameMode::pmSkipEntity = nullptr;
+
+//! Constructor/Destructor.
 DefaultGameMode::DefaultGameMode() : IGamemode() {
 
 }
@@ -906,17 +909,19 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     }
 }
 
-// TODO: Obvious to see what to do here lol.
-//
-// Create a static PM_Trace in GameWorld perhaps?
-static SVGBasePlayer* pm_passent;
-
-// pmove doesn't need to know about passent and contentmask
+/**
+*	@brief	Wrapper PM_Trace to interscept and adjust tracing needs if desired.
+*			( PMove doesn't need to know about skipEntity and ContentMask. )
+**/
 TraceResult DefaultGameMode::PM_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end ) {
-    if (pm_passent && pm_passent->GetHealth() > 0) {
-        return gi.Trace(start, mins, maxs, end, pm_passent->GetPODEntity(), BrushContentsMask::PlayerSolid);
+	if (!pmSkipEntity) {
+		Com_Error( ErrorType::Drop, "DefaultGameMode::PM_Trace called without a valid skipEntity\n" );
+	}
+
+	if ( pmSkipEntity->GetHealth() > 0 ) {
+        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::PlayerSolid);
     } else {
-        return gi.Trace(start, mins, maxs, end, pm_passent->GetPODEntity(), BrushContentsMask::DeadSolid);
+        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::DeadSolid);
     }
 }
 
@@ -963,7 +968,7 @@ void DefaultGameMode::ClientThink( SVGBasePlayer* player, ServerClient* client, 
         }
 
         // Store pass entity.
-        pm_passent = player;
+        pmSkipEntity = player;
 
         // Update player move's gravity state.
         client->playerState.pmove.gravity = sv_gravity->value;
@@ -1119,7 +1124,7 @@ void DefaultGameMode::ClientThink( SVGBasePlayer* player, ServerClient* client, 
 		const vec3_t useTraceEnd	= vec3_fmaf( useTraceStart, 64, forward );
 
 		// Trace Mask.
-		const int32_t	useTraceMask	= BrushContentsMask::PlayerSolid | BrushContentsMask::MonsterSolid;
+		const int32_t useTraceMask	= BrushContentsMask::PlayerSolid | BrushContentsMask::MonsterSolid;
 
 		// Perform trace.
 		const SGTraceResult useTraceResult = SG_Trace( useTraceStart, vec3_zero(), vec3_zero(), useTraceEnd, player, useTraceMask );
@@ -1128,21 +1133,21 @@ void DefaultGameMode::ClientThink( SVGBasePlayer* player, ServerClient* client, 
 		const int32_t useEntityNumber = SG_GetEntityNumber(useTraceResult.gameEntity);
 
 		// If we got an entity, get a pointer to it for dispatching.
-		if (useEntityNumber > 0) {
+		if ( useEntityNumber > 0 ) {
 			// Get GameWorld.
 			SGGameWorld *gameWorld = GetGameWorld();
 			// Get 'Use' entity.
 			GameEntity *geUse = gameWorld->GetGameEntityByIndex( useEntityNumber );
 
 			// The geUse pointer is valid, inspect whether it can truly be "Used".
-			if (geUse) {
+			if ( geUse ) {
 				// Figure out if this entity is active( in use ).
 				const bool isInUse = geUse->IsInUse();
 				// Get the entity use flags to determine how to operate from here on.
 				const int32_t useEntityFlags = geUse->GetUseEntityFlags();
 
 				// Use it once, requiring the '+use' action to be released again.
-				if (useEntityFlags & UseEntityFlags::Toggle) {
+				if ( useEntityFlags & UseEntityFlags::Toggle ) {
 					// Get 
 					geUse->DispatchUseCallback( player, player );
 
@@ -1150,17 +1155,16 @@ void DefaultGameMode::ClientThink( SVGBasePlayer* player, ServerClient* client, 
 					client->latchedButtons &= ~ButtonBits::Use;
 				}
 				// Hold usage simply means we don't release the '+use' action.
-				if (useEntityFlags & UseEntityFlags::Hold) {
+				if ( useEntityFlags & UseEntityFlags::Hold ) {
 					// Get 
 					geUse->DispatchUseCallback( player, player );
 
 					// Remove 'Use' button bit.
 					//client->latchedButtons &= ~ButtonBits::Use;
 				}
-
-			}
-		}
-	}
+			} // if ( geUse )
+		} // (useEntityNumber > 0)
+	} // if ( client->latchedButtons & ButtonBits::Use )
 
 	/**
 	*	Fire weapon from final position if needed

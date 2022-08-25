@@ -39,7 +39,9 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
         out->viewOrigin = in->origin;
         out->viewOffset = in->viewOffset;
         out->viewAngles = in->viewAngles;
-        out->stepOffset = 0.f;
+        out->stepOffset = in->stepOffset;
+		out->velocity   = in->velocity;
+		//out->groundEntityNumber = -1;
 
         out->error = vec3_zero();
         return;
@@ -57,11 +59,12 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
             out->viewOrigin = in->origin;
             out->viewOffset = in->viewOffset;
             out->viewAngles = in->viewAngles;
-            out->stepOffset = 0.f;
+            out->stepOffset = in->stepOffset;
+			out->velocity   = in->velocity;
+			//out->groundEntityNumber = -1;
 
             out->error = vec3_zero();
-        }
-        else {
+        } else {
             CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLG_PredictionError: {}\n", Vec3ToString(out->error) ) );
         }
     }
@@ -81,13 +84,14 @@ void ClientGamePrediction::PredictAngles() {
 /**
 *   @brief  Process the actual predict movement simulation.
 **/
-void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) {
+void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex) {
     // Player Move object.
     PlayerMove pm = {};
 
     // Only continue if there is an acknowledged command index, or a current command index.
-    if (!acknowledgedCommandIndex || !currentCommandIndex)
+    if ( !acknowledgedCommandIndex || !currentCommandIndex ) {
         return;
+	}
 
     // Setup base trace calls.
     pm.Trace = PM_Trace;
@@ -299,7 +303,20 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
     TraceResult cmTrace;
     
-    cmTrace = clgi.Trace(start, mins, maxs, end, 0, BrushContentsMask::PlayerSolid);
+	// Use GameWorld to get us our client entity.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	GameEntity *geClient = gameWorld->GetClientGameEntity();
+	PODEntity *podClient = (geClient ? geClient->GetPODEntity() : nullptr);
+
+	if ( podClient && cl->frame.playerState.stats[PlayerStats::Health] > 0 ) {
+	    cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::PlayerSolid );
+	} else if ( podClient ) {
+		cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::DeadSolid );
+	} else {
+		// TODO: Com_Error?
+		Com_Error( ErrorType::Drop, "ClientGamePrediction::PM_Trace called without a valid skipEntity\n" );
+		cmTrace = clgi.Trace( start, mins, maxs, end, 0, BrushContentsMask::DeadSolid );
+	}
 
     return cmTrace;
 }

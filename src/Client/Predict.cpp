@@ -89,8 +89,8 @@ void CL_PredictMovement(void)
     }
 
     // Fetch acknowledged command and frame.
-    uint32_t ack = cl.clientCommandHistory[cls.netChannel->incomingAcknowledged & CMD_MASK].commandNumber;
-    uint32_t currentFrameIndex = cl.currentClientCommandNumber;
+    uint64_t ack = cl.clientCommandHistory[cls.netChannel->incomingAcknowledged & CMD_MASK].commandNumber;
+    uint64_t currentFrameIndex = cl.currentClientCommandNumber;
 
     // If we are too far out of date, just freeze
     if (currentFrameIndex - ack > CMD_BACKUP - 1) {

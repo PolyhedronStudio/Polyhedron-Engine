@@ -463,7 +463,7 @@ void IN_Activate(void);
 qboolean CL_GetMouseMotion(int* deltaX, int* deltaY);
 
 void CL_RegisterInput(void);
-void CL_UpdateCmd(int msec);
+void CL_UpdateCmd( int64_t msec );
 void CL_FinalizeCmd(void);
 void CL_SendCmd(void);
 

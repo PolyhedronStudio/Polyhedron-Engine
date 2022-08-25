@@ -74,7 +74,7 @@ void        CL_GM_ShutdownMedia(void);
 //
 // Movement.
 // 
-void CL_GM_BuildFrameMoveCommand(int32_t msec);
+void CL_GM_BuildFrameMoveCommand(int64_t msec);
 void CL_GM_FinalizeFrameMoveCommand(void);
 
 //
@@ -82,7 +82,7 @@ void CL_GM_FinalizeFrameMoveCommand(void);
 //
 void		CL_GM_CheckPredictionError(ClientMoveCommand* moveCommand);
 void		CL_GM_PredictAngles(void);
-void		CL_GM_PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex);
+void		CL_GM_PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex);
 
 //
 // Parse

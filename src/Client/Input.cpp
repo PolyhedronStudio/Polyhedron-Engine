@@ -273,8 +273,7 @@ Updates msec, angles and builds interpolated movement vector for local predictio
 Doesn't touch command forward/side/upMove, these are filled by CL_FinalizeCmd.
 =================
 */
-void CL_UpdateCmd(int msec)
-{
+void CL_UpdateCmd(int64_t msec){
     CL_GM_BuildFrameMoveCommand(msec);
 }
 
@@ -347,9 +346,7 @@ void CL_FinalizeCmd(void)
     CL_GM_FinalizeFrameMoveCommand();
 }
 
-static inline qboolean CL_ReadyToSendInputPacket(void)
-{
-
+static inline qboolean CL_ReadyToSendInputPacket(void) {
 
     if (cl.sendPacketNow) {
         Com_DDPrintf("NET: if cl.sendPacketNow\n");
@@ -370,11 +367,11 @@ static inline qboolean CL_ReadyToSendInputPacket(void)
         Com_DDPrintf("NET: cl_maxpackets->integer[%i] < BASE_FRAMERATE[%i]\n", cl_maxpackets->integer, BASE_FRAMERATE);
     }
 
-    uint32_t milliseconds = 1000 / cl_maxpackets->integer;
+    uint64_t milliseconds = 1000 / cl_maxpackets->integer;
     if (milliseconds) {
-        int32_t oldMilliseconds = milliseconds;
+        int64_t oldMilliseconds = milliseconds;
         //milliseconds = 100 / (100 / milliseconds);
-		milliseconds = static_cast<int32_t>(32) / (static_cast<int32_t>(32)  / milliseconds);
+		milliseconds = static_cast<int64_t>(BASE_FRAMERATE) / (static_cast<int64_t>(BASE_FRAMERATE)  / milliseconds);
         Com_DDPrintf("NET: if msec { oldmsec[%i], msec[%i] }\n", oldMilliseconds, milliseconds);
     }
     if (cls.realtime - cl.lastTransmitTime < milliseconds) {

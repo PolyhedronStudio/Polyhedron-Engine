@@ -175,7 +175,7 @@ public:
     *   @brief  Called when the movement command needs to be build for the given
     *           client networking frame.
     **/
-    virtual void BuildFrameMovementCommand(uint64_t miliseconds) = 0;
+    virtual void BuildFrameMovementCommand(int64_t miliseconds) = 0;
     /**
     *   @brief  Finalize the movement user command before sending it to server.
     **/
@@ -206,7 +206,7 @@ public:
 	*	@brief	Called when the client wants to predict movement from the last acknowledged move
 	*			command up to the last, and thus current move command.
 	**/
-	virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
+	virtual void PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex) = 0;
 
 	/**
 	*	@brief	Called later on by the engine to update sound positioning and its special effects.

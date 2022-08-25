@@ -1072,7 +1072,7 @@ void CL_GM_EndServerMessage () {
 /**
 *   @brief  Called by the client to build up the movement command for the current frame.
 **/
-void CL_GM_BuildFrameMoveCommand(int32_t msec) {
+void CL_GM_BuildFrameMoveCommand(int64_t msec) {
     if (cge) {
         IClientGameExportMovement *movement = cge->GetMovementInterface();
 
@@ -1125,12 +1125,12 @@ void CL_GM_PredictAngles(void) {
 /**
 *   @brief  Called by the client to predict the actual movement.
 **/
-void CL_GM_PredictMovement(uint32_t ack, uint32_t current) {
+void CL_GM_PredictMovement( uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex ) {
     if (cge) {
         IClientGameExportPrediction *prediction = cge->GetPredictionInterface();
 
         if (prediction) {
-            prediction->PredictMovement(ack, current);
+            prediction->PredictMovement( acknowledgedCommandIndex, currentCommandIndex );
         }
     }
 }
