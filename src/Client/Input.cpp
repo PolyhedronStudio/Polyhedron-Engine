@@ -433,9 +433,9 @@ static void CL_SendUserCommand(void)
     // let the server know what the last frame we
     // got was, so the next message can be delta compressed
     if (cl_nodelta->integer || !cl.frame.valid /*|| cls.demowaiting*/) {
-        MSG_WriteInt32(-1);//MSG_WriteLong(-1);   // no compression
+        MSG_WriteIntBase128(-1);//MSG_WriteLong(-1);   // no compression
     } else {
-        MSG_WriteInt32(cl.frame.number);//MSG_WriteLong(cl.frame.number);
+        MSG_WriteIntBase128(cl.frame.number);//MSG_WriteLong(cl.frame.number);
     }
 
     // send this and the previous clientUserCommands in the message, so

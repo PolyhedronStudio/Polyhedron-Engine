@@ -1121,7 +1121,7 @@ static void SV_ExecuteMove(void)
 
     moveIssued = true;
 
-    lastFrame = MSG_ReadInt32();//MSG_ReadLong();
+    lastFrame = MSG_ReadIntBase128();//MSG_ReadLong();
 
     MSG_ReadDeltaClientMoveCommand(NULL, &oldest);
     MSG_ReadDeltaClientMoveCommand(&oldest, &oldcmd);

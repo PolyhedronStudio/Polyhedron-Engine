@@ -844,7 +844,7 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 
 	const float moveBase = bobMoveCycle.move;
 
-    // Generate bob time.
+    // Calculate bob time, cycle, and sin fraction.
     bobMoveCycle.move /= 3.5;
 	const float move = bobMoveCycle.move;
 
@@ -855,18 +855,6 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 
     bobMoveCycle.cycle = (int)bobTime;
     bobMoveCycle.fracSin = fabs(sin(bobTime * M_PI));
-	
-	//SVG_DPrint( 
-	//		  fmt::format("[SVGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
-	//			playerVelocity.z,		playerVelocity.y,		playerVelocity.z,		
-	//			moveBase,
-	//			move,
-	//			bobTime,
-	//			client->playerState.pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
-	//			bobMoveCycle.cycle,
-	//			bobMoveCycle.fracSin
-	//			)
-	//);
 
 	// Detect hitting the floor, and apply damage appropriately.
     player->CheckFallingDamage();
@@ -924,24 +912,25 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 static SVGBasePlayer* pm_passent;
 
 // pmove doesn't need to know about passent and contentmask
-TraceResult q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
-{
+TraceResult DefaultGameMode::PM_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end ) {
     if (pm_passent && pm_passent->GetHealth() > 0) {
         return gi.Trace(start, mins, maxs, end, pm_passent->GetPODEntity(), BrushContentsMask::PlayerSolid);
     } else {
         return gi.Trace(start, mins, maxs, end, pm_passent->GetPODEntity(), BrushContentsMask::DeadSolid);
     }
 }
-void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand) {
+
+
+void DefaultGameMode::ClientThink( SVGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand ) {
     // Store the current entity to be run from SVG_RunFrame.
     level.currentEntity = player;
 
     // Set move type to freeze in case intermission has a waiting time set on it.
-    if (level.intermission.time != GameTime::zero()) {
-        player->SetPlayerMoveType(EnginePlayerMoveType::Freeze);
+    if ( level.intermission.time != GameTime::zero() ) {
+        player->SetPlayerMoveType( EnginePlayerMoveType::Freeze );
         
         // Can exit intermission after five seconds
-        if (level.time > level.intermission.time + 5s && (moveCommand->input.buttons & ButtonBits::Any)) {
+        if ( level.time > level.intermission.time + 5s && ( moveCommand->input.buttons & ButtonBits::Any ) ) {
             level.intermission.exitIntermission = true;
         }
     }
@@ -1171,18 +1160,6 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 
 			}
 		}
-
-		//#if 1
-		//		const char *startStr = Vec3ToString(useTraceStart);
-		//		const char *endStr = Vec3ToString(useTraceEnd);
-		//		const char *endPositionStr = Vec3ToString(useTraceResult.endPosition);
-		//		gi.DPrintf("PlayerUse - Entity(#%i): traceStart(%s), traceEnd(%s), traceEndPoint(%s)\n",
-		//			useEntityNumber,
-		//			startStr,
-		//			endStr,
-		//			endPositionStr
-		//		);
-		//#endif
 	}
 
 	/**

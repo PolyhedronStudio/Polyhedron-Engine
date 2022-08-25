@@ -165,7 +165,7 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
 
 	const float moveBase = bobMoveCycle.move;
 
-    // Generate bob time.
+    // Calculate bob time, cycle, and sin fraction.
     bobMoveCycle.move /= 3.5;
 	const float move = bobMoveCycle.move;
     bobTime += bobMoveCycle.move;
@@ -175,18 +175,6 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
 
     bobMoveCycle.cycle = static_cast<int64_t>( bobTime );
     bobMoveCycle.fracSin = fabs( sin( bobTime * M_PI ) );
-
-	//CLG_Print( PrintType::Developer, 
-	//		  fmt::format("[CLGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
-	//			velocity.x, velocity.y, velocity.z,		
-	//			moveBase,
-	//			move,
-	//			bobTime,
-	//			currentPlayerState->pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
-	//			bobMoveCycle.cycle,
-	//			bobMoveCycle.fracSin
-	//			)
-	//);
 }
 
 /**
@@ -258,13 +246,14 @@ void ViewCamera::CalculateViewWeaponDrag( ) {
 	// Last facing direction.
 	static vec3_t lastFacingAngles = vec3_zero();
 	// Actual lag we allow to stay behind.
-	static constexpr float maxViewModelLag = 1.5f;
+	static constexpr float maxViewModelLag = 1.35f;
 	
 	//Calculate the difference between current and last facing forward angles.
 	vec3_t difference = viewForward - lastFacingAngles;
 
 	// Actual speed to move at.
-	float speed = 5.0f;
+	constexpr float constSpeed = 6.15;
+	float speed = constSpeed;
 
 	// When the yaw is rotating too fast, it'll get choppy and "lag" behind. Interpolate to neatly catch up,
 	// gives a more realism effect to go along with it.
@@ -277,10 +266,10 @@ void ViewCamera::CalculateViewWeaponDrag( ) {
 	VectorNormalize( lastFacingAngles );
 
 	difference = vec3_negate( difference );
-	rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, 5.0f, difference );
+	rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, constSpeed, difference );
 
 	// Calculate Pitch.
-	float pitch = rEntWeaponViewModel.angles[vec3_t::PYR::Pitch];
+	float pitch = AngleMod( rEntWeaponViewModel.angles[vec3_t::PYR::Pitch] );
 	if ( pitch > 180.0f ) {
 		pitch -= 360.0f;
 	}
@@ -477,6 +466,7 @@ void ViewCamera::AddWeaponViewModel() {
     }
 	// Add interpolated(between player states) gunAngles..
 	rEntWeaponViewModel.angles = viewAngles + vec3_mix_euler( oldPlayerState->gunAngles, currentPlayerState->gunAngles, cl->lerpFraction );
+	rEntWeaponViewModel.angles = viewAngles + currentPlayerState->gunAngles;
 
 	// Trace the weapon offset against other entities.
 	TraceViewWeaponOffset();
