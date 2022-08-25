@@ -241,55 +241,55 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
 	auto *gePlayer = gameWorld->GetClientGameEntity();
 	if (gePlayer && pm && cl->bsp) {//}&& cl->cm.cache) {
-	//const int32_t playerMoveType = player->GetMoveType();
-	//      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
-		// Setup origin, mins and maxs for UTIL_TouchTriggers as well as the ground entity.
-		//player->SetOrigin(pm->state.origin);
-		//player->SetMins(pm->mins);
-		//player->SetMaxs(pm->maxs);
-	// Update entity properties based on results of the player move simulation.
-		// What if we try and set it here?
-		PlayerMoveToClientEntity( pm );
+		const int32_t playerMoveType = gePlayer->GetMoveType();
+	    if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+			// Setup origin, mins and maxs for UTIL_TouchTriggers as well as the ground entity.
+			//player->SetOrigin(pm->state.origin);
+			//player->SetMins(pm->mins);
+			//player->SetMaxs(pm->maxs);
+		// Update entity properties based on results of the player move simulation.
+			// What if we try and set it here?
+			PlayerMoveToClientEntity( pm );
 
-		// Let the world know about the current entity we're running.
-		level.currentEntity = gePlayer;
+			// Let the world know about the current entity we're running.
+			level.currentEntity = gePlayer;
 
-		// Dispatch touch trigger callbacks on the player entity for each touched entity.
-		SG_TouchTriggers( gePlayer );
+			// Dispatch touch trigger callbacks on the player entity for each touched entity.
+			SG_TouchTriggers( gePlayer );
 
-		// Solid touch logic.
-		int32_t i = 0;
-		int32_t j = 0;
+			// Solid touch logic.
+			int32_t i = 0;
+			int32_t j = 0;
             
-		for ( i = 0 ; i < pm->numTouchedEntities; i++ ) {
-			// Skip touch events on the same entities.
-            for ( j = 0; j < i ; j++ ) {
-				const int32_t touchEntityNumberA = SG_GetEntityNumber( pm->touchedEntityTraces[j].podEntity );
-				const int32_t touchEntityNumberB = SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity );
-                if ( touchEntityNumberA == touchEntityNumberB ) {
-                    break;
-                }
-            }
-            if ( j != i ) {
-                continue; // Duplicated.
-            }
+			for ( i = 0 ; i < pm->numTouchedEntities; i++ ) {
+				// Skip touch events on the same entities.
+				for ( j = 0; j < i ; j++ ) {
+					const int32_t touchEntityNumberA = SG_GetEntityNumber( pm->touchedEntityTraces[j].podEntity );
+					const int32_t touchEntityNumberB = SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity );
+					if ( touchEntityNumberA == touchEntityNumberB ) {
+						break;
+					}
+				}
+				if ( j != i ) {
+					continue; // Duplicated.
+				}
 
 				
-			// Get Touched Entity.
-			const int32_t touchedEntityNumber = SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity );
+				// Get Touched Entity.
+				const int32_t touchedEntityNumber = SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity );
 
-			// Get and validate our touched entity.
-			GameEntity *geOther = ClientGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( touchedEntityNumber ) );
+				// Get and validate our touched entity.
+				GameEntity *geOther = ClientGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( touchedEntityNumber ) );
 
-			// Continue in case it's invalid.
-			if ( !geOther ) {
-				continue;
+				// Continue in case it's invalid.
+				if ( !geOther ) {
+					continue;
+				}
+
+				// Dispatch Touch.
+				geOther->DispatchTouchCallback( geOther, gePlayer, NULL, NULL );
 			}
-
-			// Dispatch Touch.
-			geOther->DispatchTouchCallback( geOther, gePlayer, NULL, NULL );
 		}
-	//} if playermovetype thing
 	}
 }
 

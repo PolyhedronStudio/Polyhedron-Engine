@@ -174,6 +174,7 @@ void ClientGameCore::Initialize() {
     cl_vwep = clgi.Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
     cl_vwep->changed = cl_vwep_changed;
 
+
     //
     // User Info.
     //
@@ -187,13 +188,16 @@ void ClientGameCore::Initialize() {
     info_password = clgi.Cvar_Get("password", "", CVAR_USERINFO);
     info_spectator = clgi.Cvar_Get("spectator", "0", CVAR_USERINFO);
 
-    //
     // Server Info.
-    //
     info_in_bspmenu = clgi.Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
     // Video.
     vid_rtx = clgi.Cvar_Get("vid_rtx", NULL, 0);
+
+	// Developer cvars.
+    cl_vwep_x = clgi.Cvar_Get("cl_vwep_x", "0", 0);
+    cl_vwep_y = clgi.Cvar_Get("cl_vwep_y", "0", 0);
+    cl_vwep_z = clgi.Cvar_Get("cl_vwep_z", "0", 0);
 
     // Register our commands.
     clgi.Cmd_Register(cmd_cgmodule);

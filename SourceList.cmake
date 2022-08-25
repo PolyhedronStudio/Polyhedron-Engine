@@ -613,6 +613,11 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Exports/ServerMessage.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Exports/View.cpp"
 
+		"${SRC_GAME_CLIENT_DIR}/Gamemodes/DefaultGamemode.cpp"
+		#"${SRC_GAME_CLIENT_DIR}/GameModes/CoopGamemode.cpp"
+		#"${SRC_GAME_CLIENT_DIR}/Gamemodes/DeathMatchGamemode.cpp"
+		#"${SRC_GAME_CLIENT_DIR}/Gamemodes/IGamemode.cpp"
+
 		"${SRC_GAME_CLIENT_DIR}/HUD/ChatHUD.cpp"
 		"${SRC_GAME_CLIENT_DIR}/HUD/NumberHUD.cpp"
 
@@ -667,6 +672,11 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Exports/Screen.h"
 		"${SRC_GAME_CLIENT_DIR}/Exports/ServerMessage.h"
 		"${SRC_GAME_CLIENT_DIR}/Exports/View.h"
+
+		"${SRC_GAME_CLIENT_DIR}/Gamemodes/DefaultGamemode.h"
+		#"${SRC_GAME_CLIENT_DIR}/GameModes/CoopGamemode.h"
+		#"${SRC_GAME_CLIENT_DIR}/Gamemodes/DeathMatchGamemode.h"
+		"${SRC_GAME_CLIENT_DIR}/Gamemodes/IGamemode.h"
 
 		"${SRC_GAME_CLIENT_DIR}/HUD/ChatHUD.h"
 		"${SRC_GAME_CLIENT_DIR}/HUD/NumberHUD.h"

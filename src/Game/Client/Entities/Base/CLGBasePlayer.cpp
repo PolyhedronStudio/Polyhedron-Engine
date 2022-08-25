@@ -111,7 +111,7 @@ void CLGBasePlayer::Spawn() {
 
 
 	SetNextThinkTime( level.time + FRAMETIME_S );
-	SetThinkCallback( &CLGBasePlayer::CLGBasePacketEntityThinkStandard );
+	SetThinkCallback( &CLGBasePlayer::CLGBasePlayerThink );
 }
 
 void CLGBasePlayer::CLGBasePlayerDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) {
@@ -133,6 +133,10 @@ void CLGBasePlayer::PostSpawn() {
 	Base::PostSpawn();
 }
 
+void CLGBasePlayer::CLGBasePlayerThink() {
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &CLGBasePlayer::CLGBasePlayerThink );
+}
 /**
 *   @brief  General entity thinking routine.
 **/

@@ -265,10 +265,6 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
 *   @brief  Sets up all server game cvars and/or fetches those belonging to the engine.
 **/
 static void SVG_SetupCVars() {
-    // Developer cvars.
-    gun_x = gi.cvar("gun_x", "0", 0);
-    gun_y = gi.cvar("gun_y", "0", 0);
-    gun_z = gi.cvar("gun_z", "0", 0);
     dev_show_physwarnings = gi.cvar("dev_show_physwarnings", "0", 0);
 
     //FIXME: sv_ prefix is wrong for these
@@ -358,10 +354,10 @@ void SVG_ClientEndServerFrames(void)
     // pushed the player. And of course, because damage has been added.)
     for (int32_t clientIndex = 0; clientIndex < game.GetMaxClients(); clientIndex++) {
         // First, fetch entity state number.
-        int32_t stateNumber = serverEntities[1 + clientIndex].currentState.number;
+        int32_t stateNumber = serverEntities[1 + clientIndex].currentState.number;  // WID: 1 +, because 0 == Worldspawn.
 
         // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
-        Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
+        Entity *entity = &serverEntities[stateNumber];
 
         // Acquire player entity pointer.
         GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(entity, true, true);

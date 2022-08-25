@@ -1368,57 +1368,59 @@ void SVGBasePlayer::CalculateGunOffset() {
         return;
     }
 
-    // Calculate gun angles based on view bob.
-    client->playerState.gunAngles[vec3_t::Roll] = bobMove.XYSpeed * bobMove.fracSin * 0.005f;
-    client->playerState.gunAngles[vec3_t::Yaw]  = bobMove.XYSpeed * bobMove.fracSin * 0.01f;
+	client->playerState.gunAngles = vec3_zero();
+	client->playerState.gunOffset = vec3_zero();
+    //// Calculate gun angles based on view bob.
+    //client->playerState.gunAngles[vec3_t::Roll] = bobMove.XYSpeed * bobMove.fracSin * 0.005f;
+    //client->playerState.gunAngles[vec3_t::Yaw]  = bobMove.XYSpeed * bobMove.fracSin * 0.01f;
 
-    // Negate roll and yaw based on which bob cycle step we're in.
-    if (bobMove.cycle & 1) {
-        client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
-        client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
-    }
+    //// Negate roll and yaw based on which bob cycle step we're in.
+    //if (bobMove.cycle & 1) {
+    //    client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
+    //    client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
+    //}
 
-    // Calculate pitch.
-    client->playerState.gunAngles[vec3_t::Pitch] = bobMove.XYSpeed * bobMove.fracSin * 0.005f;
+    //// Calculate pitch.
+    //client->playerState.gunAngles[vec3_t::Pitch] = bobMove.XYSpeed * bobMove.fracSin * 0.005f;
 
-    // Calculate gun angles from delta view movement.
-    for (int32_t i = 0 ; i < 3 ; i++) {
-        // Calculate delta value.
-        float delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
+    //// Calculate gun angles from delta view movement.
+    //for (int32_t i = 0 ; i < 3 ; i++) {
+    //    // Calculate delta value.
+    //    float delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
 
-        // Keep delta within sane bounds.
-        if (delta > 180) {
-            delta -= 360;
-        }
-        if (delta < -180) {
-            delta += 360;
-        }
-        if (delta > 45) {
-            delta = 45;
-        }
-        if (delta < -45) {
-            delta = -45;
-        }
+    //    // Keep delta within sane bounds.
+    //    if (delta > 180) {
+    //        delta -= 360;
+    //    }
+    //    if (delta < -180) {
+    //        delta += 360;
+    //    }
+    //    if (delta > 45) {
+    //        delta = 45;
+    //    }
+    //    if (delta < -45) {
+    //        delta = -45;
+    //    }
 
-        // Special handling for gun angle Yaw.
-        if (i == vec3_t::Yaw) {
-            client->playerState.gunAngles[vec3_t::Roll] += 0.1f * delta;
-        }
+    //    // Special handling for gun angle Yaw.
+    //    if (i == vec3_t::Yaw) {
+    //        client->playerState.gunAngles[vec3_t::Roll] += 0.1f * delta;
+    //    }
 
-        // Apply delta to gun angles.
-        client->playerState.gunAngles[i] += 0.2f * delta;
-    }
+    //    // Apply delta to gun angles.
+    //    client->playerState.gunAngles[i] += 0.2f * delta;
+    //}
 
-    // gun height
-    client->playerState.gunOffset = vec3_zero();
+    //// gun height
+    //client->playerState.gunOffset = vec3_zero();
 
 
-    // gun_x / gun_y / gun_z are development tools
-    for (int32_t i = 0 ; i < 3 ; i++) {
-        client->playerState.gunOffset[i] += bobMove.forward[i] * (gun_y->value);
-        client->playerState.gunOffset[i] += bobMove.right[i] * gun_x->value;
-        client->playerState.gunOffset[i] += bobMove.up[i] * (-gun_z->value);
-    }
+    //// gun_x / gun_y / gun_z are development tools
+    //for (int32_t i = 0 ; i < 3 ; i++) {
+    //    client->playerState.gunOffset[i] += bobMove.forward[i] * (gun_y->value);
+    //    client->playerState.gunOffset[i] += bobMove.right[i] * gun_x->value;
+    //    client->playerState.gunOffset[i] += bobMove.up[i] * (-gun_z->value);
+    //}
 }
 
 //

@@ -842,8 +842,12 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
             bobMoveCycle.move = 0.03125;
     }
 
+	const float moveBase = bobMoveCycle.move;
+
     // Generate bob time.
     bobMoveCycle.move /= 3.5;
+	const float move = bobMoveCycle.move;
+
     float bobTime = (client->bobTime += bobMoveCycle.move);
 
     if (client->playerState.pmove.flags & PMF_DUCKED)
@@ -851,8 +855,20 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 
     bobMoveCycle.cycle = (int)bobTime;
     bobMoveCycle.fracSin = fabs(sin(bobTime * M_PI));
+	
+	SVG_DPrint( 
+			  fmt::format("[SVGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
+				playerVelocity.z,		playerVelocity.y,		playerVelocity.z,		
+				moveBase,
+				move,
+				bobTime,
+				client->playerState.pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
+				bobMoveCycle.cycle,
+				bobMoveCycle.fracSin
+				)
+	);
 
-    // Detect hitting the floor, and apply damage appropriately.
+	// Detect hitting the floor, and apply damage appropriately.
     player->CheckFallingDamage();
 
     // Apply all other the damage taken this frame

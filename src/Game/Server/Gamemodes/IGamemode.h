@@ -1,34 +1,42 @@
-/*
-// LICENSE HERE.
-
-//
-// IGamemode.h
-//
-// GameMode interface class. Need a custom new gamemode? Implement this interface,
-// and you did yourself a pleasure. :)
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Gamemode Interface: Do not inherit, use DefaultGamemode instead to have most
+*	functions implemented with a base code.
+* 
+***/
 #pragma once
 
 
+
+/**
+*	Predeclarations.
+**/
 class SVGBaseEntity;
 class SVGBasePlayer;
 
-//using GameEntityVector = std::vector<IServerGameEntity*>;
+
 
 class IGameMode {
 public:
-    //
-    // Constructor/Deconstructor.
-    //
+	//! Constructor/Destructor.
     IGameMode() {};
     virtual ~IGameMode() = default;
 
 
-    // GameMode specific class checking. Best practice is to try and write code
-    // that does not depend on checking a game mode class type too much.
-    //
-    // Instead try to facilitate the game mode itself instead where possible.
+	/***
+	*
+	*
+	*	GameMode specific class checking. Best practice is to try and write code
+    *	that does not depend on checking a game mode class type too much.
+    *
+    *	Instead try to facilitate the game mode itself instead where possible.
+	*
+	*
+	***/
     /**
     *   @brief  Checks if this gamemode class is exactly the given class.
     *   @param  gamemodeClass A gamemode class which must inherint from IGameMode.

@@ -135,7 +135,6 @@ void ClientGameView::SetupViewCamera() {
 
 firstpersonview:
     // Setup the firstperson view.
-    //SetupFirstpersonView();
     viewCamera.SetupFirstpersonViewProjection();
 }
 

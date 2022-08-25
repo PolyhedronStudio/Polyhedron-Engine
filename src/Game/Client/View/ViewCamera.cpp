@@ -34,13 +34,12 @@
 *   @brief  Sets up a firstperson view mode.
 **/
 void ViewCamera::SetupFirstpersonViewProjection() {
-    // If kickangles are enabled, lerp them and add to view angles.
+	// If kickangles are enabled, lerp them and add to view angles.
     if (cl_kickangles->integer) {
         const PlayerState *playerState = &cl->frame.playerState;
         const PlayerState *oldPlayerState = &cl->oldframe.playerState;
 
         // Lerp first.
-        const double lerp = cl->lerpFraction;
         const vec3_t kickAngles = vec3_mix_euler(oldPlayerState->kickAngles, playerState->kickAngles, cl->lerpFraction);
 
         // Add afterwards.
@@ -124,7 +123,88 @@ void ViewCamera::SetupThirdpersonViewProjection() {
 /**
 *	@brief	Calculate client view bobmove.
 **/
-void ViewCamera::CalculateViewBob() {
+void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, PlayerState *currentPlayerState ) {
+    // Get our client game entity.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	GameEntity *geClient = gameWorld->GetClientGameEntity();
+
+	// Get frametime.
+	const double frameTime = clgi.GetFrameTime();
+
+	// Get velocity and calculate XYSpeed with that..
+	const vec3_t velocity = currentPlayerState->pmove.velocity;//geClient->GetVelocity();
+	// Without * FRAMETIME_S = XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    bobMoveCycle.XYSpeed = sqrtf( velocity.x * velocity.x + velocity.y * velocity.y );
+
+	// Determine if the ground entity is actually valid.
+	bool isValidGroundEntity = ClientGameWorld::ValidateEntity( geClient->GetGroundEntityHandle() );
+
+    if ( bobMoveCycle.XYSpeed < 5 || !( currentPlayerState->pmove.flags & PMF_ON_GROUND ) ) {
+        // Special handling for when not on ground.
+        bobMoveCycle.move = 0;
+
+        // Start at beginning of cycle again (See the else if statement.)
+        bobTime = 0;
+    } else if ( isValidGroundEntity || geClient->GetWaterLevel() == 2 ) {
+        // So bobbing only cycles when on ground.
+        if ( bobMoveCycle.XYSpeed > 450 ) {
+            bobMoveCycle.move = 0.25;
+		} else if ( bobMoveCycle.XYSpeed > 210 ) {
+            bobMoveCycle.move = 0.125;
+		} else if ( !isValidGroundEntity&& geClient->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100 ) {
+            bobMoveCycle.move = 0.225;
+		} else if ( bobMoveCycle.XYSpeed > 100 ) {
+            bobMoveCycle.move = 0.0825;
+		} else if ( !isValidGroundEntity && geClient->GetWaterLevel() == 2 ) {
+            bobMoveCycle.move = 0.1625;
+		} else {
+            bobMoveCycle.move = 0.03125;
+		}
+    }
+
+	bobMoveCycle.XYSpeed *= frameTime;
+
+	const float moveBase = bobMoveCycle.move;
+
+    // Generate bob time.
+    bobMoveCycle.move /= 3.5;
+	const float move = bobMoveCycle.move;
+    bobTime += bobMoveCycle.move;
+
+    if ( currentPlayerState->pmove.flags & PMF_DUCKED )
+        bobTime *= 1.5;
+
+    bobMoveCycle.cycle = static_cast<int64_t>( bobTime * frameTime );
+    bobMoveCycle.fracSin = fabs( sin( bobTime * frameTime * M_PI ) );
+
+	CLG_Print( PrintType::Developer, 
+			  fmt::format("[CLGBobMoveCycle]: velocity=({},{},{}), moveBase={}, move={}, bobTime={}, ducked={}, cycle={}, fracSin={}\n",
+				velocity.x, velocity.y, velocity.z,		
+				moveBase,
+				move,
+				bobTime,
+				currentPlayerState->pmove.flags & PMF_DUCKED ? "PMF_DUCKED" : "0",
+				bobMoveCycle.cycle,
+				bobMoveCycle.fracSin
+				)
+	);
+}
+
+/**
+*	@brief	Calculate's view offset based on bobmove.
+**/
+void ViewCamera::CalculateViewOffset( PlayerState *previousPlayerState, PlayerState *currentPlayerState ) {
+	//
+	// I really wanted to get this right, but last time I ended up puking all my guts out so... not today.
+	//
+	//static constexpr float run_pitch = 0.002f;
+	//static constexpr float run_roll = 0.005f;
+
+	//static constexpr float bob_up = 0.005f;
+	//static constexpr float bob_pitch = 0.002f;
+	//static constexpr float bob_roll = 0.002f;
+	//	// Get frametime.
+	//const double frameTime = clgi.GetFrameTime();
 	//// The view bob value itself.
  //   float viewBob = 0.f;
 	//// Ratio of view bob.
@@ -132,31 +212,46 @@ void ViewCamera::CalculateViewBob() {
 	//// Delta between view bobs.
  //   float bobDelta = 0.f;
 
-	//// Add angles based on velocity
-	//bobDelta = vec3_dot( GetVelocity(), bobMove.forward );
-	//newKickAngles[ vec3_t::Pitch ] += delta * run_pitch->value;
+ //   // Get our client game entity.
+	//ClientGameWorld *gameWorld = GetGameWorld();
+	//GameEntity *geClient = gameWorld->GetClientGameEntity();
+	//
+	//// Get velocity and calculate XYSpeed with that..
+	//const vec3_t velocity = currentPlayerState->pmove.velocity; //geClient->GetVelocity();
 
-	//delta = vec3_dot( GetVelocity(), bobMove.right );
-	//newKickAngles[ vec3_t::Roll ] += delta * run_roll->value;
+	//// Bob time? C
+	////cl->moveCommand.timeSent
+	//
+	//vec3_t newKickAngles = vec3_zero(); //currentPlayerState->kickAngles;
+	//// Add angles based on velocity
+	//bobDelta = vec3_dot( velocity, viewForward );
+	//newKickAngles[ vec3_t::Pitch ] += bobDelta * run_pitch;
+
+	//// Right roll.
+	//bobDelta = vec3_dot( velocity, viewRight );
+	//newKickAngles[ vec3_t::Roll ] += bobDelta * run_roll;
 
 	//// Add angles based on bob
-	//delta = bobMove.fracSin * bob_pitch->value * bobMove.XYSpeed;
+	//bobDelta = bobMoveCycle.fracSin * bob_pitch * bobMoveCycle.XYSpeed;
 	//// Adjust for crouching.
-	//if ( client->playerState.pmove.flags & PMF_DUCKED ) {
-	//	delta *= 6; 
+	//if ( currentPlayerState->pmove.flags & PMF_DUCKED ) {
+	//	bobDelta *= 6; 
 	//}
-	//newKickAngles[ vec3_t::Pitch ] += delta;
-	//delta = bobMove.fracSin * bob_roll->value * bobMove.XYSpeed;
+	//newKickAngles[ vec3_t::Pitch ] += bobDelta;
+	//bobDelta = bobMoveCycle.fracSin * bob_roll * bobMoveCycle.XYSpeed;
 
 	//// Adjust for crouching.
-	//if ( client->playerState.pmove.flags & PMF_DUCKED ) {
-	//	delta *= 6;
+	//if ( currentPlayerState->pmove.flags & PMF_DUCKED ) {
+	//	bobDelta *= 6;
 	//}
-	//if ( bobMove.cycle & 1 ) {
-	//	delta = -delta;
+	//if ( bobMoveCycle.cycle & 1 ) {
+	//	bobDelta = -bobDelta;
 	//}
-	//newKickAngles[ vec3_t::Roll ] += delta;
+	//newKickAngles[ vec3_t::Roll ] += bobDelta;
+
+	//currentPlayerState->kickAngles += newKickAngles;
 }
+
 /**
 *	@brief	Applies a certain view model drag effect to make it look more realistic in turns.
 **/
@@ -201,9 +296,71 @@ void ViewCamera::CalculateViewWeaponDrag( ) {
 }
 
 /**
+*	Applies the Viewbob to weapon.
+**/
+void ViewCamera::CalculateWeaponViewBob( PlayerState *previousPlayerState, PlayerState *currentPlayerState ) {
+    // Calculate gun angles based on view bob.
+    vec3_t viewGunAngles = vec3_zero();
+	const double frameTime = clgi.GetFrameTime();
+
+	viewGunAngles[vec3_t::Roll] = bobMoveCycle.XYSpeed * bobMoveCycle.fracSin * 0.005f;
+    viewGunAngles[vec3_t::Yaw]  = bobMoveCycle.XYSpeed * bobMoveCycle.fracSin * 0.01f;
+
+    // Negate roll and yaw based on which bob cycle step we're in.
+    if (bobMoveCycle.cycle & 1) {
+        viewGunAngles[vec3_t::Roll] = -viewGunAngles[vec3_t::Roll];
+        viewGunAngles[vec3_t::Yaw]  = -viewGunAngles[vec3_t::Yaw];
+    }
+
+    // Calculate pitch.
+    viewGunAngles[vec3_t::Pitch] = bobMoveCycle.XYSpeed * bobMoveCycle.fracSin * 0.005f;
+
+    // Calculate gun angles from delta view movement.
+    for (int32_t i = 0 ; i < 3 ; i++) {
+        // Calculate delta value.
+        float delta = previousPlayerState->pmove.viewAngles[i] - currentPlayerState->pmove.viewAngles[i];
+
+        // Keep delta within sane bounds.
+        if (delta > 180) {
+            delta -= 360;
+        }
+        if (delta < -180) {
+            delta += 360;
+        }
+        if (delta > 45) {
+            delta = 45;
+        }
+        if (delta < -45) {
+            delta = -45;
+        }
+
+        // Special handling for gun angle Yaw.
+        if (i == vec3_t::Yaw) {
+            viewGunAngles[vec3_t::Roll] += 0.1f * delta * frameTime;
+        }
+
+        // Apply delta to gun angles.
+        viewGunAngles[i] += 0.2f * delta * frameTime;
+    }
+
+	// Apply the new view gun angles to our player state.
+	currentPlayerState->gunAngles = viewGunAngles;
+
+    // Gun height
+    currentPlayerState->gunOffset = vec3_zero();
+
+	// Apply developer vweapon offsets (Easy for debugging.)
+    for (int32_t i = 0 ; i < 3 ; i++) {
+        currentPlayerState->gunOffset[i] += bobMoveCycle.forward[i] * (cl_vwep_y->value);
+        currentPlayerState->gunOffset[i] += bobMoveCycle.right[i] * cl_vwep_x->value;
+        currentPlayerState->gunOffset[i] += bobMoveCycle.up[i] * (-cl_vwep_z->value);
+    }
+}
+
+/**
 *	@brief	Calculates the weapon viewmodel offset (tracing it against other objects and adjusting its position to that.)
 **/
-void ViewCamera::CalculateViewWeaponOffset() {
+void ViewCamera::TraceViewWeaponOffset() {
 	// Actual offsets from origin.
     constexpr float gunLengthOffset = 56.f;
     constexpr float gunRightOffset = 10.f;
@@ -303,26 +460,33 @@ void ViewCamera::AddWeaponViewModel() {
     PlayerState *currentPlayerState = &cl->frame.playerState;
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
 
-    for (int32_t i = 0; i < 3; i++) {
-        rEntWeaponViewModel.origin[i] = viewOrigin[i] + oldPlayerState->gunOffset[i] + cl->lerpFraction * (currentPlayerState->gunOffset[i] - oldPlayerState->gunOffset[i]);
-    }
+	// First calculate the actual bob move cycle for the current frame and state.
+	CalculateBobMoveCycle( oldPlayerState, currentPlayerState );
 
-	// Initial view angles.
-	rEntWeaponViewModel.angles = viewAngles;// + vec3_mix_euler(oldPlayerState->gunAngles, currentPlayerState->gunAngles, clgi.GetFrameTime());
+	// Calculate the weapon view bob.
+	CalculateWeaponViewBob( oldPlayerState, currentPlayerState );
 
+	// Calculate the player's view offset.
+	//CalculateViewOffset( oldPlayerState, currentPlayerState );
+
+	// Add interpolated(between player states) gunoffset.
+	rEntWeaponViewModel.origin = viewOrigin + vec3_mix( oldPlayerState->gunOffset, currentPlayerState->gunOffset, cl->lerpFraction );
     // Adjust for high fov.
     if (currentPlayerState->fov > 90) {
         vec_t ofs = (90 - currentPlayerState->fov) * 0.2f;
         rEntWeaponViewModel.origin = vec3_fmaf(rEntWeaponViewModel.origin, ofs, GetForwardViewVector());
     }
+	// Add interpolated(between player states) gunAngles..
+	rEntWeaponViewModel.angles = viewAngles + currentPlayerState->gunAngles;//vec3_mix_euler( oldPlayerState->gunAngles, currentPlayerState->gunAngles, cl->lerpFraction );
 
-	/**
-	*	- Calculate additional client side weapon offset.
-	*	- Calculate and add a rotational 'weapon drag' to prevent it from jumping origin, and giving some more 'realism'.
-	*	- Calculate current weapon animation frame.
-	**/
-	CalculateViewWeaponOffset();
+	// Trace the weapon offset against other entities.
+	TraceViewWeaponOffset();
+
+	// Calculate the weapon view drag in case of too fast yaw changing, preventing jumping origins and
+	// making it more realistic like in general.
 	CalculateViewWeaponDrag();
+	
+	// Update the actual view model(did we change weapons? did we start another animation event?)
 	UpdateViewWeaponModel( oldPlayerState, currentPlayerState );
 	
     // If there is no model to render, there is no need to continue.

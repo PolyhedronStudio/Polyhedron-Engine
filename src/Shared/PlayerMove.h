@@ -35,36 +35,49 @@ static constexpr int32_t PMF_GAME = (PMF_ENGINE << 3);             // Game flags
 *   prediction error of some degree.
 **/
 struct PlayerMoveState {
-    uint32_t    type;
+	//! Movement type for this movestate, walk, noclip, or...
+    uint32_t type = 0;
 
-    vec3_t      origin;
-    vec3_t      velocity;
+	//! Player origin for this move state.
+    vec3_t origin = vec3_zero();
+	//! Player velocity for this move state.
+    vec3_t velocity = vec3_zero();
 
-    uint16_t    flags;       // Ducked, jump_held, etc
-    uint16_t    time;        // Each unit = 8 ms
-    uint16_t    gravity;
+	//! Flags indicating the state, ducked, jump held, etc.
+    uint16_t flags = 0;
+	//! Time (Each unit = 8ms).
+    uint16_t time= 0;
+	//! Player gravity.
+    uint16_t gravity = 0;
 
     // Changed by spawns, rotating objects, and teleporters
-    vec3_t deltaAngles; // Add to command angles to get view direction
+    vec3_t deltaAngles = vec3_zero(); // Add to command angles to get view direction
 
-    // View offsets. (Only Z is used atm, beware.)
-    vec3_t viewOffset;
-    vec3_t viewAngles;
+    //! View offsets. (Only Z is used atm, beware.)
+    vec3_t viewOffset = vec3_zero();
+	//! View angles.
+    vec3_t viewAngles = vec3_zero();
 
-    // Step offset, used for stair interpolations.
-    float stepOffset;
+    //! Step offset, used for stair interpolations.
+    float stepOffset = 0.f;
 };
 
 /**
 *   PlayerMoveInput is part of each client user cmd.
 **/
 struct PlayerMoveInput {
-    uint8_t msec;       // Duration of the command, in milliseconds
-    vec3_t viewAngles;  // The final view angles for this command
-    int16_t forwardMove, rightMove, upMove; // Directional intentions
-    uint8_t buttons;    // Bit mask of buttons down
-    uint8_t impulse;    // Impulse cmd.
-    uint8_t lightLevel; // Lightlevel.
+	//! Duration of the command, in milliseconds
+    uint8_t msec = 0;
+	//! The final view angles for this command
+    vec3_t viewAngles = vec3_zero();
+	//! Directional intentions.
+    int16_t forwardMove = 0, rightMove = 0, upMove = 0; 
+	//! Button Bits bitmask.
+    uint8_t buttons = 0;
+	//! Impulse command #.
+    uint8_t impulse = 0;    // Impulse cmd.
+	//! The lightlevel we're standing on, currently unusable since we got no method of identifying it in RTX.
+    uint8_t lightLevel = 0; // Lightlevel.
 };
 
 /**
@@ -73,14 +86,14 @@ struct PlayerMoveInput {
 struct ClientMoveCommand {
     PlayerMoveInput input;  // the movement command
 
-    uint64_t timeSent;      // Time sent, for calculating pings
-    uint64_t timeReceived;  // Time rcvd, for calculating pings
-    uint64_t commandNumber; // Current commandNumber for this move command frame
+    uint64_t timeSent = 0;      // Time sent, for calculating pings
+    uint64_t timeReceived = 0;  // Time rcvd, for calculating pings
+    uint64_t commandNumber = 0; // Current commandNumber for this move command frame
 
     struct {
-        uint64_t simulationTime;    // The simulation time when prediction was run
-        vec3_t origin;              // The predicted origin for this command.
-		vec3_t velocity;              // The predicted velocity for this command.
-        vec3_t error;               // The prediction error for this command.
+        uint64_t simulationTime = 0;	// The simulation time when prediction was run
+        vec3_t origin = vec3_zero();    // The predicted origin for this command.
+		vec3_t velocity = vec3_zero();  // The predicted velocity for this command.
+        vec3_t error = vec3_zero();     // The prediction error for this command.
     } prediction;
 };

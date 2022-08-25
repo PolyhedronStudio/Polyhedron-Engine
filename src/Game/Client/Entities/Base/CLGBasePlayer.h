@@ -44,7 +44,7 @@ public:
     **/
     void CLGBasePlayerDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
 
-
+	void CLGBasePlayerThink();
 
     /**
     *

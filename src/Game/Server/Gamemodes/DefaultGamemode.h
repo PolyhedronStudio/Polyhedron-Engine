@@ -1,13 +1,16 @@
-/*
-// LICENSE HERE.
-
-//
-// DefaultGamemode.h
-//
-// Default game mode to run, allows for all sorts of stuff.
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Gamemode Interface: Do not inherit, use DefaultGamemode instead to have most
+*	functions implemented with a base code.
+* 
+***/
 #pragma once
+
+
 
 #include "IGamemode.h"
 

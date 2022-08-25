@@ -248,13 +248,13 @@ void ClientGameExports::ClientUpdateOrigin() {
     /*
     *	View Origin.
     **/
-    if (!clgi.IsDemoPlayback() && cl_predict->integer && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
+    if ( !clgi.IsDemoPlayback() && cl_predict->integer && !( currentPlayerState->pmove.flags & PMF_NO_PREDICTION ) ) {
         // Set the view camera's origin to that of the predicted state's view origin + view offset.
         ClientPredictedState* predictedState = &cl->predictedState;
         newViewOrigin = predictedState->viewOrigin + predictedState->viewOffset;
 
         // Scale prediction error to frame lerp fraction and add it to the camera view origin.
-        const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);
+        const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
         newViewOrigin += error;
 
         // Last but not least, subtract the stepOffset from the Z axis.
@@ -267,7 +267,7 @@ void ClientGameExports::ClientUpdateOrigin() {
         newViewOrigin.z -= cl->predictedState.stepOffset;
 
         // Interpolate new view origin based on the frame's lerpfraction.
-        newViewOrigin = vec3_mix(oldViewOrigin, newViewOrigin, lerpFraction);
+        newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, lerpFraction );
     }
 
     /*
@@ -276,7 +276,7 @@ void ClientGameExports::ClientUpdateOrigin() {
     // Interpolate between previous and current player state.
     if ( clgi.IsDemoPlayback() ) {
         // Interpolate view angles.
-        newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
+        newViewAngles = vec3_mix_euler( previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction );
 	// Use predicted state view angles.
 	} else if ( currentPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {
         newViewAngles = cl->predictedState.viewAngles;
@@ -285,7 +285,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 		newViewAngles = vec3_mix_euler( cl->predictedState.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction );
 	// Interpolate between previous and current player state.
 	} else {
-		newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
+		newViewAngles = vec3_mix_euler( previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction );
 	}
     
     //// if not running a demo or on a locked frame, add the local angle movement

@@ -167,3 +167,11 @@ extern cvar_t* sv_paused;
 *	Video.
 **/
 extern cvar_t* vid_rtx;				// 1 if we're in RTX mode, 0 if not.
+
+/**
+*	Developer cvars.
+**/
+//! Developer view weapon offset cvars.
+extern cvar_t *cl_vwep_x;
+extern cvar_t *cl_vwep_y;
+extern cvar_t *cl_vwep_z;

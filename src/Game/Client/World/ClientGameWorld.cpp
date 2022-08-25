@@ -19,8 +19,8 @@
 #include "Game/Client/Entities/GibEntity.h"
 
 // GameModes.
-//#include "../Gamemodes/IGamemode.h"
-//#include "../Gamemodes/DefaultGamemode.h"
+#include "../Gamemodes/IGamemode.h"
+#include "../Gamemodes/DefaultGamemode.h"
 //#include "../Gamemodes/CoopGamemode.h"
 //#include "../Gamemodes/DeathMatchGamemode.h"
 
@@ -73,7 +73,7 @@ void ClientGameWorld::SetupGameMode() {
 	//    currentGameMode = new CoopGameMode();
 	//} else {
 	//	// Acts as a singleplayer game mode.
-	//    currentGameMode = new DefaultGameMode();
+	    currentGameMode = new DefaultGameMode();
 	//}
 }
 
@@ -81,11 +81,11 @@ void ClientGameWorld::SetupGameMode() {
 *	@brief	Destroys the current gamemode object.
 **/
 void ClientGameWorld::DestroyGameMode() {
-	//// Always make sure it is valid to begin with.
- //   if (currentGameMode != nullptr) {
-	//	delete currentGameMode;
-	//	currentGameMode = nullptr;
-	//}
+	// Always make sure it is valid to begin with.
+    if (currentGameMode != nullptr) {
+		delete currentGameMode;
+		currentGameMode = nullptr;
+	}
 }
 
 

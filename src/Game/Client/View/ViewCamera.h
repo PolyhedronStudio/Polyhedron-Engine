@@ -18,9 +18,6 @@
 **/
 class ViewCamera {
 public:
-
-
-
     /***
     *
 	*
@@ -36,8 +33,6 @@ public:
     *   @brief  Sets up a thirdperson view mode.
     **/
     void SetupThirdpersonViewProjection();
-
-
 
     /***
     *
@@ -55,12 +50,20 @@ private:
 	/**
 	*	@brief	Calculate client view bobmove.
 	**/
-	void CalculateViewBob();
-
-		/**
-	*	@brief	Calculates the weapon viewmodel offset (tracing it against other objects and adjusting its position to that.)
+	void CalculateBobMoveCycle( PlayerState *previousPlayerState, PlayerState *currentPlayerState );
+	/**
+	*	@brief	Calculate's view offset based on bobmove.
 	**/
-	void CalculateViewWeaponOffset();
+	void CalculateViewOffset( PlayerState *previousPlayerState, PlayerState *currentPlayerState );
+
+	/**
+	*	Applies the Viewbob to weapon.
+	**/
+	void CalculateWeaponViewBob( PlayerState *previousPlayerState, PlayerState *currentPlayerState );
+	/**
+	*	@brief	Traces the weapon tip against the world to calculate and apply a viewmodel offset with.
+	**/
+	void TraceViewWeaponOffset();
 	/**
 	*	@brief	Applies a certain view model drag effect to make it look more realistic in turns.
 	**/
@@ -175,7 +178,23 @@ private:
     vec3_t viewKickAngles   = vec3_zero();
 
     //! View Bob.
-    GameTime bobTime = GameTime::zero();
+	public:
+    //GameTime bobTime = GameTime::zero();
+	double bobTime = 0;
     //! Bob value of the client's view camera.
-    float bobValue = 0;
+    double bobValue = 0;
+    // BobMoveCycle is used for view bobbing, where the player FPS view looks like he is
+    // walking instead of floating around.
+    struct BobMoveCycle {
+        // Forward, right, and up vectors.
+        vec3_t  forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
+        // Speed squared over the X/Y axis.
+        double XYSpeed = 0.f;
+        // bobMove counter.
+        double move = 0.f;
+        // Cycles are caculated over bobMove, uneven cycles = right foot.
+        int64_t cycle = 0;
+        // Calculated as: // sin(bobfrac*M_PI)
+        double fracSin = 0.f;
+    } bobMoveCycle;
 };

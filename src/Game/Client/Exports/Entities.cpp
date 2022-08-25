@@ -26,6 +26,7 @@
 
 // Entitiess.
 #include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBasePlayer.h"
 #include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 
 // World.
@@ -339,6 +340,27 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 				//}
 			}
 		}
+
+		// The client holds a list of all other client entities as well.
+		int32_t clientEntityNumber = podEntity->clientEntityNumber;
+        if (clientEntityNumber > 0 && clientEntityNumber <= game.GetMaxClients()) {
+            // Ensure the entity is in posession of a client that controls it.
+            ServerClient* client = gameEntity->GetClient();
+            if (!client) {
+                continue;
+            }
+
+            // If the entity is NOT a SVGBasePlayer (sub-)class, skip.
+            if (!gameEntity->GetTypeInfo()->IsSubclassOf(CLGBasePlayer::ClassInfo)) {
+                continue;
+            }
+
+            // Last but not least, begin its server frame.
+            //GetGameMode()->ClientBeginLocalFrame(dynamic_cast<CLGBasePlayer*>(gameEntity), client);
+
+            // Continue to next iteration.
+            continue;
+        }
 
         // Run it for a frame.
 		SGEntityHandle handle = podEntity;

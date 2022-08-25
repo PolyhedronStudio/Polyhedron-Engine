@@ -90,6 +90,14 @@ cvar_t *sv_paused   = nullptr;
 **/
 cvar_t* vid_rtx = nullptr;
 
+/**
+*	Developer cvars.
+**/
+//! Developer view weapon offset cvars.
+cvar_t *cl_vwep_x				= nullptr;
+cvar_t *cl_vwep_y				= nullptr;
+cvar_t *cl_vwep_z				= nullptr;
+
 
 
 
