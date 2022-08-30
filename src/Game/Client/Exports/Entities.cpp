@@ -301,6 +301,7 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 
 	if (clTime > svTime) {
 		level.time = svTime;
+		//level.extrapolatedTime = svTime;
 	} else {
 		level.time = clTime;
 	}
@@ -445,7 +446,7 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 /**
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 **/
-void ClientGameEntities::RunPackEntitiesPredictionFrame() {
+void ClientGameEntities::RunPackEntitiesPredictionFrame( int64_t msec ) {
 
 }
 

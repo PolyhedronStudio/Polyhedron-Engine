@@ -912,6 +912,15 @@ void CL_GM_ClientLocalEntitiesFrame(void) {
 }
 
 /**
+*   @brief  Called each time the client wants to predict movement for other entities.
+**/
+void CL_GM_ClientPredictEntitiesFrame(int64_t msec) {
+    if (cge) {
+        cge->ClientPredictEntitiesFrame(msec);
+    }
+}
+
+/**
 *	@brief	Returns a pointer to the actual client game entities array residing in the ClientGame's world.
 **/
 PODEntity *CL_GM_GetClientPODEntities() {

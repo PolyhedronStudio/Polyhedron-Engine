@@ -95,5 +95,8 @@ struct ClientMoveCommand {
         vec3_t origin = vec3_zero();    // The predicted origin for this command.
 		vec3_t velocity = vec3_zero();  // The predicted velocity for this command.
         vec3_t error = vec3_zero();     // The prediction error for this command.
+		int32_t groundEntityNumber = -1; // The predicted ground entity for this command.
+		uint64_t moverTime = 0;
+		uint64_t moverTimeExtrapolated = 0;
     } prediction;
 };

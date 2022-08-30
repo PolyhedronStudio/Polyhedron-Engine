@@ -99,6 +99,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 		platformEntity->Callback_EngageRaiseMove();
 	} else if (moveInfo->state == MoverState::Top) {
 		platformEntity->SetNextThinkTime(level.time + 1 * FRAMETIME_S);
+		platformEntity->SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
 	}
 
 	//if ( other->GetHealth() <= 0 ) {

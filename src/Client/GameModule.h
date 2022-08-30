@@ -37,6 +37,12 @@ void		CL_GM_ClientConnect();
 void		CL_GM_ClientBegin(void);
 void		CL_GM_ClientPacketEntityDeltaFrame(void);
 /**
+*   @brief  Called each time the client wants to predict movement for other entities.
+**/
+void		CL_GM_ClientPredictEntitiesFrame(int64_t msec);
+
+
+/**
 *   @brief  Runs the local entity logic for a single client game frame.
 *	@return	The current actual hashed classname of the PODEntity's game object. 
 *			If it has no object, 0 will be returned instead.

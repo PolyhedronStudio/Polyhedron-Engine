@@ -330,12 +330,4 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
     if (byteMask & EntityMessageBits::AnimationIndex) {
 	    MSG_WriteUint8(to->currentAnimation.animationIndex);
     }
-    //// Write out the Animation End Frame.
-    //if (byteMask & EntityMessageBits::AnimationFrameEnd) {
-	   // MSG_WriteUint16(to->animationEndFrame);
-    //}
-    //// Write out the Animation Frame Time.
-    //if (byteMask & EntityMessageBits::AnimationFrameTime) {
-    //	MSG_WriteHalfFloat(to->animationFramerate);
-    //}
 }

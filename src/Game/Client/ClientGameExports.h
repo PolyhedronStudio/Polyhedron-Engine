@@ -92,10 +92,10 @@ public:
 	*	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
 	**/
 	uint32_t GetHashedGameEntityClassname(PODEntity *podEntity) final;
-    /**
-    *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
-    **/
-    void ClientPredictEntitiesFrame();
+	/**
+	*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
+	**/
+    void ClientPredictEntitiesFrame( int64_t msec );
     /**
     *   @brief  Called when a disconnect even occures. Including those for Com_Error
     **/

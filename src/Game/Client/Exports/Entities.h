@@ -132,7 +132,7 @@ public:
 	/**
 	*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 	**/
-	void RunPackEntitiesPredictionFrame();
+	void RunPackEntitiesPredictionFrame(int64_t msec);
 
 
 

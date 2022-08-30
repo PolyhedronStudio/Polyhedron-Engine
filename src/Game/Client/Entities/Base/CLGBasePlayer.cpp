@@ -74,7 +74,7 @@ void CLGBasePlayer::Spawn() {
     // Clip mask this client belongs to.
     SetClipMask(BrushContentsMask::PlayerSolid);
     // Fresh default model.
-    SetModel("players/male/tris.md2");
+	//SetModel("players/alphadummy/alphadummy.iqm");
 	//SetModel( "models/monsters/stepdummy/stepdummy.iqm" );
     /*ent->pain = player_pain;*/
     // Fresh water level and type.
@@ -95,14 +95,14 @@ void CLGBasePlayer::Spawn() {
     Base::SetEffects(0);
 
     // Reset model indexes.
-    SetModelIndex(255); // Use the skin specified by its model.
-    SetModelIndex2(255);// Custom gun model.
-    SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->currentState.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
+    //SetModelIndex(255); // Use the skin specified by its model.
+    //SetModelIndex2(255);// Custom gun model.
+    //SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->currentState.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
     
     // Fresh frame for animations.
-    SetAnimationFrame(0);
+    SetAnimationFrame(64);
 	//SwitchAnimation(2, level.time);
-
+	SwitchAnimation( 5, level.time );
     // Set the die function.
     //SetDieCallback(&CLGBasePlayer::CLGBasePlayerDie);
 

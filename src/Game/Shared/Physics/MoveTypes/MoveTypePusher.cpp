@@ -21,6 +21,7 @@
 extern cvar_t *sv_maxvelocity;
 extern cvar_t *sv_gravity;
 extern void CheckSVCvars();
+
 #endif
 
 #ifdef SHAREDGAME_CLIENTGAME
@@ -158,7 +159,7 @@ retry:
 *	@brief	Objects need to be moved back on a failed push, otherwise 
 *			riders would continue to slide.
 **/
-static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
+static const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
     GameEntity* geCheck = nullptr;
     GameEntity* geBlock = nullptr;
     PushedEntityState *p = nullptr;

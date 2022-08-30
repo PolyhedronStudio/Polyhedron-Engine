@@ -38,6 +38,7 @@ static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
 class SVGBaseEntity;
 class SVGBaseItem;
 class SVGBaseItemWeapon;
+class SVGBaseLinearMover;
 class SVGBaseMover;
 class SVGBasePlayer;
 class SVGBaseTrigger;

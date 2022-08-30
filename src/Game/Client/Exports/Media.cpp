@@ -213,39 +213,41 @@ void ClientGameMedia::LoadClientInfo(ClientInfo* ci, const char* str)
     // model file
     Q_concat(model_filename, sizeof(model_filename),
         "players/", model_name, "/tris.md2", NULL);
-    ci->model = clgi.R_RegisterModel(model_filename);
-    if (!ci->model && PH_StringCompare(model_name, "male")) {
-        strcpy(model_name, "male");
-        strcpy(model_filename, "players/male/tris.md2");
-        ci->model = clgi.R_RegisterModel(model_filename);
-    }
+
+	// TODO: Redo this whole parsing thing.
+	ci->model = clgi.R_RegisterModel("players/alphadummy/alphadummy.iqm");
+    //if (!ci->model && PH_StringCompare(model_name, "male")) {
+    //    strcpy(model_name, "male");
+    //    strcpy(model_filename, "players/male/tris.md2");
+    //    ci->model = clgi.R_RegisterModel(model_filename);
+    //}
 
     // skin file
     Q_concat(skin_filename, sizeof(skin_filename),
         "players/", model_name, "/", skin_name, ".pcx", NULL);
     ci->skin = clgi.R_RegisterSkin(skin_filename);
 
-    // if we don't have the skin and the model was female,
-    // see if athena skin exists
-    if (!ci->skin && !PH_StringCompare(model_name, "female")) {
-        strcpy(skin_name, "athena");
-        strcpy(skin_filename, "players/female/athena.pcx");
-        ci->skin = clgi.R_RegisterSkin(skin_filename);
-    }
+    //// if we don't have the skin and the model was female,
+    //// see if athena skin exists
+    //if (!ci->skin && !PH_StringCompare(model_name, "female")) {
+    //    strcpy(skin_name, "athena");
+    //    strcpy(skin_filename, "players/female/athena.pcx");
+    //    ci->skin = clgi.R_RegisterSkin(skin_filename);
+    //}
 
-    // if we don't have the skin and the model wasn't male,
-    // see if the male has it (this is for CTF's skins)
-    if (!ci->skin && PH_StringCompare(model_name, "male")) {
-        // change model to male
-        strcpy(model_name, "male");
-        strcpy(model_filename, "players/male/tris.md2");
-        ci->model = clgi.R_RegisterModel(model_filename);
+    //// if we don't have the skin and the model wasn't male,
+    //// see if the male has it (this is for CTF's skins)
+    //if (!ci->skin && PH_StringCompare(model_name, "male")) {
+    //    // change model to male
+    //    strcpy(model_name, "male");
+    //    strcpy(model_filename, "players/male/tris.md2");
+    //    ci->model = clgi.R_RegisterModel(model_filename);
 
-        // see if the skin exists for the male model
-        Q_concat(skin_filename, sizeof(skin_filename),
-            "players/male/", skin_name, ".pcx", NULL);
-        ci->skin = clgi.R_RegisterSkin(skin_filename);
-    }
+    //    // see if the skin exists for the male model
+    //    Q_concat(skin_filename, sizeof(skin_filename),
+    //        "players/male/", skin_name, ".pcx", NULL);
+    //    ci->skin = clgi.R_RegisterSkin(skin_filename);
+    //}
 
     // if we still don't have a skin, it means that the male model
     // didn't have it, so default to grunt

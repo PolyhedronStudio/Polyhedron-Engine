@@ -223,9 +223,9 @@ uint32_t ClientGameExports::GetHashedGameEntityClassname(PODEntity *podEntity) {
 /**
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 **/
-void ClientGameExports::ClientPredictEntitiesFrame() {
+void ClientGameExports::ClientPredictEntitiesFrame(int64_t msec) {
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
-    entities->RunPackEntitiesPredictionFrame();
+    entities->RunPackEntitiesPredictionFrame(msec);
 }
 
 /**

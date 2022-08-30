@@ -366,6 +366,10 @@ struct ClientState {
     //! This is the 'current moment in time' value of the client's game state at.  
     //! Always <= cl.serverTime
     int64_t	time = 0;
+	//! This is the 'extrapolated moment in time' value of the client's game state.
+	//! Always >= cl.serverTime
+	int64_t extrapolatedTime = 0;
+
     //! between oldframe and frame
     double		lerpFraction = 0.f;
 

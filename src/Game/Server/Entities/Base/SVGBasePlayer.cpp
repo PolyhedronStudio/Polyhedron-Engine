@@ -97,7 +97,7 @@ void SVGBasePlayer::Spawn() {
     // Clip mask this client belongs to.
     SetClipMask(BrushContentsMask::PlayerSolid);
     // Fresh default model.
-    SetModel("players/male/tris.md2");
+    SetModel("players/alphadummy/alphadummy.iqm");
     /*ent->pain = player_pain;*/
     // Fresh water level and type.
     SetWaterLevel(0);

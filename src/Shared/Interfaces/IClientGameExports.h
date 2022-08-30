@@ -467,6 +467,10 @@ public:
 	**/
 	virtual void ClientLocalEntitiesFrame() = 0;
 	/**
+    *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
+    **/
+    virtual void ClientPredictEntitiesFrame(int64_t msec) = 0;
+	/**
 	*   @brief  Gives local entities a chance to think. These are called "synchroniously" to the server frames.
 	*	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
 	**/

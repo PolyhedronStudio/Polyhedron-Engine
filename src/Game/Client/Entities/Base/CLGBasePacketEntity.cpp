@@ -591,7 +591,7 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 *	@brief	Switches the animation by blending from the current animation into the next.
 *	@return	True if succesfull, false otherwise.
 **/
-bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
+const bool CLGBasePacketEntity::SwitchAnimation(const int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
 	//Com_DPrint("SwitchAnimation CALLED !! Index(#%i) startTime(#%i)\n", animationIndex, startTime.count());
 	if (!skm) {
 		CLG_Print( PrintType::Developer, "SwitchAnimation: No SKM Data present.\n");

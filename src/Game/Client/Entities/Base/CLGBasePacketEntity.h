@@ -944,7 +944,7 @@ public:
 	*	@brief	Switches the animation by blending from the current animation into the next.
 	*	@return	True if succesfull, false otherwise.
 	**/
-	bool SwitchAnimation(int32_t animationIndex, const GameTime &startTime);
+	const bool SwitchAnimation(const int32_t animationIndex, const GameTime &startTime);
 
 	/**
 	*	@brief	This class implements a basic templated functionality that will assign
@@ -960,7 +960,7 @@ protected:
 	//! Actual skeleton unique to this entity.
 	EntitySkeleton entitySkeleton;
 
-	//! Skeletal Model Data pointer. Needs to be loaded on request. DIYS
+	//! Skeletal Model Data pointer.
 	SkeletalModelData *skm = nullptr;
 
 private:

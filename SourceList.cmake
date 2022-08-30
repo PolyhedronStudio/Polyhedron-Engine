@@ -579,6 +579,7 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLocalEntity.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePacketEntity.cpp"
 
+		#"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLinearMover.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseMover.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePlayer.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseTrigger.cpp"
@@ -644,6 +645,7 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLocalEntity.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePacketEntity.h"
 
+		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLinearMover.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseMover.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePlayer.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseTrigger.h"
@@ -724,6 +726,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseLinearMover.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseSkeletalAnimator.cpp"
@@ -849,6 +852,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.h"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseLinearMover.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/BodyCorpse.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/DebrisEntity.h"

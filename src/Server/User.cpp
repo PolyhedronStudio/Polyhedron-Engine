@@ -1050,7 +1050,7 @@ static int         userinfoUpdateCount;
 SV_ClientThink
 ==================
 */
-static inline void SV_ClientThink(ClientMoveCommand *cmd)
+static inline void SV_ClientThink( ClientMoveCommand *cmd )
 {
     ClientMoveCommand *old = &sv_client->lastClientUserCommand;
 
@@ -1075,24 +1075,29 @@ static inline void SV_ClientThink(ClientMoveCommand *cmd)
     ge->ClientThink(sv_player, cmd);
 }
 
-static void SV_SetLastFrame(int lastFrame)
+static void SV_SetLastFrame( int64_t lastFrame )
 {
     ClientFrame *frame;
 
-    if (lastFrame > 0) {
-        if (lastFrame >= sv_client->frameNumber)
-            return; // ignore invalid acks
+    if ( lastFrame > 0 ) {
+		// Ignore invalid acks.
+        if (lastFrame >= sv_client->frameNumber ) {
+            return; 
+		}
 
-        if (lastFrame <= sv_client->lastFrame)
-            return; // ignore duplicate acks
+		// Ignore duplicate acks.
+        if ( lastFrame <= sv_client->lastFrame ) {
+            return;
+		}
 
-        if (sv_client->frameNumber - lastFrame <= UPDATE_BACKUP) {
-            frame = &sv_client->frames[lastFrame & UPDATE_MASK];
+        if ( sv_client->frameNumber - lastFrame <= UPDATE_BACKUP ) {
+            frame = &sv_client->frames[ lastFrame & UPDATE_MASK ];
 
-            if (frame->number == lastFrame) {
+            if ( frame->number == lastFrame ) {
                 // save time for ping calc
-                if (frame->sentTime <= com_eventTime)
+                if (frame->sentTime <= com_eventTime) {
                     frame->latency = com_eventTime - frame->sentTime;
+				}
             }
         }
 

@@ -106,6 +106,10 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
     pm.state.deltaAngles = clge->view->GetViewCamera()->GetViewDeltaAngles(); //cl->deltaAngles;
 #endif
 	
+	// Get our player game entity.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	GameEntity *gePlayer = gameWorld->GetClientGameEntity();
+
     // Run frames in order.
 	// First run the player move prediction process in order on all previously backed up acknowledged
 	// user input command frames.
@@ -129,12 +133,11 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
             UpdateClientSoundSpecialEffects( &pm );
 			
 			// Execute touch callbacks and "predict" against other entities.
-			DispatchPredictedTouchCallbacks( &pm );
-        }
-
+			DispatchPredictedTouchCallbacks( &pm, gePlayer );
+		}
         // Save for error detection
-        cmd->prediction.origin = pm.state.origin;
-    }
+        cmd->prediction.origin = pm.state.origin;		
+	}
 
 	// Run the player move prediction process using the current pending frame user input.
     if (cl->moveCommand.input.msec) {
@@ -146,17 +149,20 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
         pm.moveCommand.input.forwardMove = cl->localMove[0];
         pm.moveCommand.input.rightMove = cl->localMove[1];
         pm.moveCommand.input.upMove = cl->localMove[2];
+
+		// Simulate the move command.
         PMove(&pm);
 		
         // Update player move client side audio effects.
-        UpdateClientSoundSpecialEffects(&pm);
+        UpdateClientSoundSpecialEffects( &pm );
 
 		// Execute touch callbacks and "predict" against other entities.		
-		DispatchPredictedTouchCallbacks(&pm);
-
-        // Save for error detection
+		DispatchPredictedTouchCallbacks( &pm, gePlayer );
+		
+		// Save for error detection
+		//cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
         cl->moveCommand.prediction.origin = pm.state.origin;
-    }
+	}
 
     // Copy results out for rendering
     // TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
@@ -175,8 +181,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 /**
 *   @brief  Update the client side audio state.
 **/
-void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
-{
+void ClientGamePrediction::UpdateClientSoundSpecialEffects( PlayerMove* pm ) {
     static int underwater;
 
     // Ensure that cl != NULL, it'd be odd but hey..
@@ -206,19 +211,20 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
 *	@brief	Called by DispatchPredictTouchCallbacks to apply the current player move results
 *			to the actual player entity itself.
 **/
-void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm ) {
-	// Get Game World.
+void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm, GameEntity *gePlayer ) {
+	// Get gameworld.
 	ClientGameWorld *gameWorld = GetGameWorld();
-	auto *gePlayer = gameWorld->GetClientGameEntity();
-    gePlayer->SetOrigin( pm->state.origin );
+
+    // Update player entity.
+	gePlayer->SetOrigin( pm->state.origin );
     gePlayer->SetVelocity( pm->state.velocity );
     gePlayer->SetMins( pm->mins );
     gePlayer->SetMaxs( pm->maxs );
     gePlayer->SetViewHeight( pm->state.viewOffset[2] );
     gePlayer->SetWaterLevel( pm->waterLevel );
     gePlayer->SetWaterType( pm->waterType );
-	// Resolve the perhaps new Ground Entity.
 
+	// Resolve the perhaps new Ground Entity.
 	if ( gameWorld ) {
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
 
@@ -238,22 +244,20 @@ void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm ) {
 /**
 *	@brief	Dispatch touch callbacks for all predicted touched entities.
 **/
-void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
+void ClientGamePrediction::DispatchPredictedTouchCallbacks( PlayerMove *pm, GameEntity *gePlayer ) {
 	// Get gameworld.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
-	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
-	auto *gePlayer = gameWorld->GetClientGameEntity();
-	if (gePlayer && pm && cl->bsp) {//}&& cl->cm.cache) {
+	if (gePlayer && pm && cl->bsp /* && cl->cm.cache*/) {
+		// Get movetype.
 		const int32_t playerMoveType = gePlayer->GetMoveType();
-	    if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+
+		// NoClipped and Spectating clients do NOT touch triggers for obvious reasons.
+	    if (playerMoveType != MoveType::NoClip
+			&& playerMoveType != MoveType::Spectator) {
 			// Setup origin, mins and maxs for UTIL_TouchTriggers as well as the ground entity.
-			//player->SetOrigin(pm->state.origin);
-			//player->SetMins(pm->mins);
-			//player->SetMaxs(pm->maxs);
-		// Update entity properties based on results of the player move simulation.
-			// What if we try and set it here?
-			PlayerMoveToClientEntity( pm );
+
+			PlayerMoveToClientEntity( pm, gePlayer );
 
 			// Let the world know about the current entity we're running.
 			level.currentEntity = gePlayer;
@@ -300,7 +304,7 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 /**
 *   @brief  Player Move Simulation Trace Wrapper.
 **/
-TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
+TraceResult ClientGamePrediction::PM_Trace( const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end ) {
     TraceResult cmTrace;
     
 	// Use GameWorld to get us our client entity.
@@ -313,8 +317,8 @@ TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mi
 	} else if ( podClient ) {
 		cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::DeadSolid );
 	} else {
-		// TODO: Com_Error?
-		Com_Error( ErrorType::Drop, "ClientGamePrediction::PM_Trace called without a valid skipEntity\n" );
+		// TODO: Com_Error, or just perform a trace without skip entity...? Hmmm..
+		//Com_Error( ErrorType::Drop, "ClientGamePrediction::PM_Trace called without a valid skipEntity\n" );
 		cmTrace = clgi.Trace( start, mins, maxs, end, 0, BrushContentsMask::DeadSolid );
 	}
 
@@ -324,7 +328,7 @@ TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mi
 /**
 *   @brief  Player Move Simulation PointContents Wrapper.
 **/
-int32_t ClientGamePrediction::PM_PointContents(const vec3_t &point) {
+int32_t ClientGamePrediction::PM_PointContents( const vec3_t &point ) {
 	// Get world brush contents at 'point' coordinate.
     PODEntity* ent = nullptr;
     mmodel_t* cmodel = nullptr;

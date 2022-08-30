@@ -232,10 +232,10 @@ typedef struct MessagePacket_t {
 static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;
 
 //! Used to divide for rate calculating.
-static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 50 / 10 = 5.
+static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 60 / 10 = 6.
 
 //! Used to multiply for rate user input drop calculating.
-static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 10 = 5.
+static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 60 / 10 = 6.
 
 
 /**

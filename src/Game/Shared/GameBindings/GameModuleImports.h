@@ -27,9 +27,13 @@
 //! Base Entities.
 #include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 #include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseLinearMover.h"
 #include "Game/Client/Entities/Base/CLGBaseMover.h"
 #include "Game/Client/Entities/Base/CLGBaseTrigger.h"
 #include "Game/Client/Entities/Base/CLGBasePlayer.h"
+
+//! Func Entities for Physics.
+#include "Game/Client/Entities/Func/FuncPlat.h"
 
 //! SharedGame Client Bindings.
 #include "Game/Shared/GameBindings/ClientBinding.h"
@@ -50,6 +54,7 @@
 
 //! Base Entities.
 #include "Game/Server/Entities/Base/SVGBaseEntity.h"
+#include "Game/Server/Entities/Base/SVGBaseLinearMover.h"
 #include "Game/Server/Entities/Base/SVGBaseMover.h"
 #include "Game/Server/Entities/Base/SVGBaseTrigger.h"
 #include "Game/Server/Entities/Base/SVGBaseItem.h"
@@ -59,6 +64,9 @@
 #include "Game/Server/Entities/Base/SVGBaseRootMotionMonster.h"
 //#include "Game/Server/Entities/Base/SVGBaseStepMonster.h"
 #include "Game/Server/Entities/Base/SVGBasePlayer.h"
+
+//! Func Entities for Physics.
+#include "Game/Server/Entities/Func/FuncPlat.h"
 
 //! SharedGame Client Bindings.
 #include "Game/Shared/GameBindings/ServerBinding.h"

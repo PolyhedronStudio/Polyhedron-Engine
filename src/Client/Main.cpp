@@ -2674,8 +2674,12 @@ void CL_Activate(active_t active)
     }
 }
 
-static void CL_SetClientTime(void)
-{
+/**
+*	@brief	Calculates the current client time, always <= serverTime as well as the 
+*	extraPolated 'next frame' time, always <= serverTime + CL_FRAMETIME_U64
+*
+**/
+static void CL_SetClientTime( int64_t msec ) {
     if (com_timedemo->integer) {
         cl.time = cl.serverTime;
         cl.lerpFraction = 1.0f;
@@ -2695,7 +2699,17 @@ static void CL_SetClientTime(void)
         cl.lerpFraction = (cl.time - prevtime) * CL_1_FRAMETIME;
     }
 
-    SHOWCLAMP(2, "time %d %d, lerpFraction %.3f\n",
+	// We extrapolate starting at each newly received serverTime. Ensuring that the extrapolated steps
+	// are as minimal as can be.
+	const int64_t nextFrameTime = cl.serverTime + CL_FRAMETIME_UI64;
+	if (cl.extrapolatedTime < cl.serverTime) {
+		cl.extrapolatedTime = cl.serverTime;
+	} else if ( cl.extrapolatedTime > nextFrameTime ) {
+		cl.extrapolatedTime = nextFrameTime;
+	}
+
+	Com_DPrintf( "time=%i, servertime=%i, xtratime=%i, msec=%i\n", cl.time, cl.serverTime, cl.extrapolatedTime, msec );
+	SHOWCLAMP(2, "time %d %d, lerpFraction %.3f\n",
               cl.time, cl.serverTime, cl.lerpFraction);
 }
 
@@ -3090,6 +3104,7 @@ uint64_t CL_Frame(uint64_t msec)
 
 	if (!sv_paused->integer) {
         cl.time += main_extra;
+		cl.extrapolatedTime += main_extra;
     }
 
     // Read next demo frame
@@ -3099,15 +3114,11 @@ uint64_t CL_Frame(uint64_t msec)
 
 	// Calculate local time
 	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer) {
-        CL_SetClientTime();
+        CL_SetClientTime(main_extra);
 
 		// Let client side entities do their thing.
-		//if (phys_frame) {
-			// Run the actual local game.
-		//}
 		if (clientgame_frame) {
 			clientgame_extra -= CL_RunGameFrame( clientgame_msec );
-			//clientgame_extra -= clientgame_msec;
 		}
 	}
 
@@ -3121,12 +3132,13 @@ uint64_t CL_Frame(uint64_t msec)
 
     // Read user intentions
     CL_UpdateCmd(main_extra);
-			
+
     // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
 
     if (phys_frame) {
-        CL_FinalizeCmd();
+		CL_FinalizeCmd();
+
         phys_extra -= phys_msec;
 
         M_FRAMES++;

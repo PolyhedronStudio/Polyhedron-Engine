@@ -41,6 +41,7 @@ class IClientGameEntity;
 //! Base entities.
 class CLGBasePacketEntity;
 class CLGBaseLocalEntity;
+class CLGBaseLinearMover;
 class CLGBaseMover;
 class CLGBasePlayer;
 class CLGBaseTrigger;
@@ -249,6 +250,9 @@ struct LevelLocals  {
 	uint64_t frameNumber = 0;
 	//! Current sum of total frame time taken.
     GameTime time = GameTime::zero();
+	//! Extrapolated time for predicting linear move entities.
+	GameTime oldExtrapolatedTime = GameTime::zero();
+    GameTime extrapolatedTime = GameTime::zero();
 	
 	////! The current serverTime.
  //   GameTime curServerTime = GameTime::zero();
