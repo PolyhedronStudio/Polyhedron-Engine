@@ -179,6 +179,7 @@ const bool ES_GenerateBoneTreeHierachy( const SkeletalModelData *skm, EntitySkel
 
 			// Add a pointer in our bone map to the node.
 			es->boneMap[esBone->name] = &childNode;
+			esBone->boneTreeNode = &childNode;
 
 			// Generate a tree hierachy for this bone as well.
 			ES_GenerateBoneTreeHierachy( skm, es, childNode );
@@ -248,7 +249,7 @@ const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es ) {
 
 
 	// Resize the skeleton's bones array to proper size.
-	es->bones.resize( (skm->numberOfJoints + 1) );
+	es->bones.resize( (size_t)(skm->numberOfJoints + 1) );
 
 	// Copy over specific joint data.
 	for ( auto &joint : skm->jointArray ) {

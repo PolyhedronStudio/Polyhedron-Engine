@@ -90,11 +90,15 @@ void SKM_GenerateModelData(model_t* model) {
 			// TODO: Warn.
 		}
 
-		// If we are dealing with the "root" bone, store it.
-		if (jointData.name == "mixamorig8:Hips") {
-			skm->rootJointIndex = jointIndex;
-		}
+		//// If we are dealing with the "root" bone, store it.
+		//if (jointData.name == "mixamorig8:Hips") {
+		//	skm->rootJointIndex = jointIndex;
+		//}
 	}
+
+	// Default to -1, as in, unset.
+	//skm->rootJointIndex = -1;
+
 // Debug Info:
 #if DEBUG_MODEL_DATA == 1
 	for (int32_t i = 0; i < skm->numberOfJoints; i++) {
@@ -301,7 +305,51 @@ static GPPSourceToken *SKC_GetToken( GPPSkeletalModelConfiguration &gppState, ui
 *	@brief	Processes the tokens for the CommandIdentifier: 'rootbone'.
 **/
 static const uint32_t SKC_Command_RootBone( model_t *model, GPPSkeletalModelConfiguration &gppState, uint32_t tokenIndex ) {
-	
+	//.SKM Pointer.
+	SkeletalModelData *skm = model->skeletalModelData;
+
+	// Keeps score of the next commandidentifier token position we'll be returning.
+	uint32_t offsetNextToken = 2;
+
+	// Now inspect and acquire our token values.
+	// Required 'QuotedString'/'IntegralNumber' Token: rootBoneIdentifier
+	const GPPSourceToken *rootBoneIdentifier = SKC_GetToken( gppState, tokenIndex + 1 );
+	// See which type it is.
+	if ( rootBoneIdentifier ) {
+		// String Identifier.
+		if ( rootBoneIdentifier->type == GPPSourceToken::Type::QuotedString ) {
+			// String Identifier.
+			const std::string strBoneIdentifier = rootBoneIdentifier->value.str;
+
+			// See if the joint exists in our name mape.
+			if ( skm->jointMap.contains( strBoneIdentifier ) ) {
+				// Set our root joint index.
+				skm->rootJointIndex = skm->jointMap[ strBoneIdentifier ].index;
+			} else {
+				// TODO: Error.
+				skm->rootJointIndex = -1;
+				return 0;
+			}
+		// Integral Identifier.
+		} else if ( rootBoneIdentifier->type == GPPSourceToken::Type::IntegralNumber ) {
+			// Integral identifier.
+			const int32_t intBoneIdentifier = rootBoneIdentifier->value.integralNumber;
+
+			// See if it's within bounds.
+			if ( intBoneIdentifier >= 0 && intBoneIdentifier < skm->numberOfJoints ) {
+				skm->rootJointIndex = skm->jointArray[ intBoneIdentifier ].index;
+			} else {
+				skm->rootJointIndex = -1;
+				// TODO: Error.
+				return 0;
+			}
+		}
+	} else {
+		skm->rootJointIndex = -1;
+		// TODO: Error.
+		return 0;
+	}
+
 	return 2;
 }
 

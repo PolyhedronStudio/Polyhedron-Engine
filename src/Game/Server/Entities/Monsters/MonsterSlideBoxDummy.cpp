@@ -79,6 +79,9 @@ void MonsterSlideBoxDummy::Precache() {
 	skm = gi.GetSkeletalModelDataByHandle( serverModelHandle );
 	model_t *modelt = gi.GetModelByHandle( serverModelHandle );
 	gi.ES_CreateFromModel( modelt, &entitySkeleton );
+	//if ( entitySkeleton.modelPtr && entitySkeleton.modelPtr->skeletalModelData ) {
+	//	skm = entitySkeleton.modelPtr->skeletalModelData;
+	//}
 
 	//
 	//	TODO:	Eventually, we need some animation.cfg like file because it's just simpler to work
