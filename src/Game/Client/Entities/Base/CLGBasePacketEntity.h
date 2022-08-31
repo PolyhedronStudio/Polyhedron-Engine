@@ -37,7 +37,7 @@ public:
     virtual ~CLGBasePacketEntity() = default;
 
     // Runtime type information
-	DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
+	DefineGameClass( CLGBasePacketEntity, IClientGameEntity );
 
 	//! Used for returning vectors from a const vec3_t & reference.
     static vec3_t ZeroVec3;
@@ -77,7 +77,7 @@ public:
     /**
     *   @brief  Act upon the parsed key and value.
     **/
-    virtual void SpawnKey(const std::string& key, const std::string& value) override; // Called for each key:value when parsing the entity dictionary.
+    virtual void SpawnKey( const std::string& key, const std::string& value ) override; // Called for each key:value when parsing the entity dictionary.
 
 
 
@@ -91,12 +91,12 @@ public:
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
-    virtual void UpdateFromState(const EntityState *state) override;
+    virtual void UpdateFromState( const EntityState *state ) override;
 
 	/**
 	*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 	**/
-	virtual void SpawnFromState(const EntityState *state) override;
+	virtual void SpawnFromState( const EntityState *state ) override;
 
     /**
     *   @returen True if the entity is still in the current frame.
@@ -122,7 +122,7 @@ public:
     *   @brief  Sets the pointer ot the client/server side POD Entity.
     *           Used only in SVG_FreeEntity and SVG_CreateGameEntity.
     **/
-    inline void SetPODEntity(PODEntity* podEntity) override {
+    inline void SetPODEntity( PODEntity* podEntity ) override {
         this->podEntity = podEntity;
     }
 

@@ -2708,7 +2708,8 @@ static void CL_SetClientTime( int64_t msec ) {
 		cl.extrapolatedTime = nextFrameTime;
 	}
 
-	Com_DPrintf( "time=%i, servertime=%i, xtratime=%i, msec=%i\n", cl.time, cl.serverTime, cl.extrapolatedTime, msec );
+//	Com_DPrintf( "time=%i, servertime=%i, xtratime=%i, msec=%i\n", cl.time, cl.serverTime, cl.extrapolatedTime, msec );
+
 	SHOWCLAMP(2, "time %d %d, lerpFraction %.3f\n",
               cl.time, cl.serverTime, cl.lerpFraction);
 }

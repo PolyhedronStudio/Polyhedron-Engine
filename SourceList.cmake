@@ -502,6 +502,7 @@ list( APPEND SRC_GAME_SHARED
 	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypeToss.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/Physics.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/RootMotionMove.cpp"
+	"${SRC_GAME_SHARED_DIR}/Physics/SlideBox.cpp"
 
 	"${SRC_GAME_SHARED_DIR}/World/IGameWorld.cpp"
 
@@ -519,6 +520,7 @@ list( APPEND HEADERS_GAME_SHARED
 
 	"${SRC_GAME_SHARED_DIR}/Physics/Physics.h"
 	"${SRC_GAME_SHARED_DIR}/Physics/RootMotionMove.h"
+	"${SRC_GAME_SHARED_DIR}/Physics/SlideBox.h"
 
 	"${SRC_GAME_SHARED_DIR}/World/IGameWorld.h"
 	
@@ -724,6 +726,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemAmmo.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemWeapon.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionAnimator.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseLinearMover.cpp"
@@ -774,6 +777,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 
 		#"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterSlideBoxDummy.cpp"
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathCorner.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathMonsterGoal.cpp"
@@ -849,6 +853,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemAmmo.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemWeapon.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionAnimator.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.h"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.h"
@@ -888,6 +893,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 
 		#"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterSlideBoxDummy.h"
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathCorner.h"
 
