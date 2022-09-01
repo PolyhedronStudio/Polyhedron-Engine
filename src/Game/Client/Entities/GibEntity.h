@@ -25,12 +25,9 @@ private:
 
 public:
 	DefineGameClass( GibEntity, CLGBaseLocalEntity);
-	//DefineClass( GibEntity, IClientGameEntity);
-	//DefineMapClass( "GibEntity", CLGBaseLocalEntity, IClientGameEntity);
-	//DefineGameClass( GibEntity, IClientGameEntity);
-    //DefineGameClass("GibEntity", GibEntity, CLGBaseLocalEntity);
 
-    //
+
+	//
     // Interface functions. 
     //
     void Precache() override;    // Precaches data.

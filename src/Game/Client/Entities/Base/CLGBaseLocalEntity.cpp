@@ -887,8 +887,8 @@ void CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBaseLocalEntity::CLGBaseLocalEntityThinkStandard(void) {
-	CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
-	//// Setup same think for the next frame.
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
+	// Setup same think for the next frame.
 	SetNextThinkTime( level.time + FRAMERATE_MS);
 	SetThinkCallback( &CLGBaseLocalEntity::CLGBaseLocalEntityThinkStandard );
 }

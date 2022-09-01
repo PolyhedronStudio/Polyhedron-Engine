@@ -108,7 +108,7 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 			.skipEntityNumber = geSlider->GetNumber(),
 			
 			// Entity Flags and Content Mask.
-			.contentMask = contentMask,
+			.contentMask = SG_SolidMaskForGameEntity( geSlider ),
 
 			// Zero clip planes and/or entities are touched at a clean move state.
 			.numClipPlanes = 0,

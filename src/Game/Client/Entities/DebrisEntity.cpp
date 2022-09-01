@@ -20,6 +20,9 @@
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
 #define crandom()   (2.0f * (random() - 0.5f))
 
+
+#include "Game/Shared/Physics/Physics.h"
+
 // Class Entities.
 #include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 #include "Game/Client/Entities/DebrisEntity.h"
@@ -28,15 +31,7 @@
 //! Constructor/Deconstructor.
 DebrisEntity::DebrisEntity(PODEntity *podEntity)
     : CLGBaseLocalEntity(podEntity) {
-	
-}
-
-/**
-*	@brief	Die callback.
-**/
-void DebrisEntity::DebrisEntityDie(GameEntity* inflictor, GameEntity* attacker, int32_t damage, const vec3_t& point) {
-    // Save to queue for removal.
-    Remove();
+	deathTime = duration_cast<GameTime>( level.time + 5s + random() * 5s );
 }
 
 static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
@@ -108,8 +103,11 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
 	debrisEntity->SetAngularVelocity(angularVelocity);
 
     // Set up the thinking machine.
-    debrisEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-    debrisEntity->SetNextThinkTime(level.time + 5s + random() * 5s);
+    //debrisEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
+    //debrisEntity->SetNextThinkTime(level.time + 5s + random() * 5s);
+    // Setup the Gib think function so it'll check for ground and add gravity.
+    debrisEntity->SetThinkCallback( &DebrisEntity::DebrisEntityThink );
+	debrisEntity->SetNextThinkTime( level.time + FRAMERATE_MS );
 
     // Setup the other properties.
     debrisEntity->SetAnimationFrame(0);
@@ -122,4 +120,31 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
 
     // Return the debris entity.
     return debrisEntity;
+}
+
+/**
+*	@brief	Think callback, checks for ground, applies gravity, and sets a free callback after deathTime passed.
+**/
+void DebrisEntity::DebrisEntityThink() {   
+	// Check for ground.
+	SG_CheckGround(this);
+	// Apply gravity.
+	SG_AddGravity(this);
+
+	// Set free think, IF, deathtime has passed.
+	if (level.time >= deathTime) {
+		SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
+	// Default callback otherwise.
+	} else {
+		SetThinkCallback(&DebrisEntity::DebrisEntityThink);
+	}
+	SetNextThinkTime(level.time + FRAMERATE_MS);
+}
+
+/**
+*	@brief	Die callback.
+**/
+void DebrisEntity::DebrisEntityDie(GameEntity* inflictor, GameEntity* attacker, int32_t damage, const vec3_t& point) {
+    // Save to queue for removal.
+    Remove();
 }

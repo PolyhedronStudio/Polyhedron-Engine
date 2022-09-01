@@ -34,7 +34,22 @@ public:
 	*
 	**/
 	/**
+	*	@brief	Think callback, checks for ground, applies gravity, and sets a free callback after deathTime passed.
+	**/
+	void DebrisEntityThink();
+
+	/**
 	*	@brief	Die callback.
 	**/
 	void DebrisEntityDie(GameEntity* inflictor, GameEntity* attacker, int32_t damage, const vec3_t& point);
+    //void GibEntityThink();
+	//void GibEntityStopBleeding();
+    //void GibEntityDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
+    //void GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+
+
+private:
+	//! Time of spawning, used for checking when to 'die', since our think method is occupied
+	//! handling the debris itself.
+	GameTime deathTime = GameTime::zero();
 };

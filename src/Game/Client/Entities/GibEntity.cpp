@@ -88,7 +88,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     // Set solid and other properties.
     gibEntity->SetSolid( Solid::OctagonBox );
     gibEntity->SetEffects( gibEntity->GetEffects() | EntityEffectType::Gib );
-    gibEntity->SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
+    gibEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContents::MonsterClip );
 
 	//gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
     //gibEntity->SetTakeDamage( 1 );
