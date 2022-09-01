@@ -136,10 +136,11 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
 	// Without * FRAMETIME_S = XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
     bobMoveCycle.XYSpeed = sqrtf( velocity.x * velocity.x + velocity.y * velocity.y );
 
+	const bool isValidGroundEntity = ( cl->predictedState.groundEntityNumber >= 0 ? gameWorld->GetPODEntityByIndex( cl->predictedState.groundEntityNumber ) : false );
 	// Determine if the ground entity is actually valid.
-	bool isValidGroundEntity = ClientGameWorld::ValidateEntity( geClient->GetGroundEntityHandle() );
+	//const bool isValidGroundEntity = ClientGameWorld::ValidateEntity( geClient->GetGroundEntityHandle() );
 
-    if ( bobMoveCycle.XYSpeed < 5 || !( currentPlayerState->pmove.flags & PMF_ON_GROUND ) ) {
+	if ( bobMoveCycle.XYSpeed < 5 ) {
         // Special handling for when not on ground.
         bobMoveCycle.move = 0;
 
@@ -162,19 +163,20 @@ void ViewCamera::CalculateBobMoveCycle( PlayerState *previousPlayerState, Player
 		}
     }
 
-
-	const float moveBase = bobMoveCycle.move;
-
     // Calculate bob time, cycle, and sin fraction.
     bobMoveCycle.move /= 3.5;
-	const float move = bobMoveCycle.move;
-    bobTime += bobMoveCycle.move;
 
-    if ( currentPlayerState->pmove.flags & PMF_DUCKED )
-        bobTime *= 1.5;
+	// Local frame bobtime set to total bobtime after adding the move of our frame.
+    float _bobTime = ( bobTime += bobMoveCycle.move );
 
-    bobMoveCycle.cycle = static_cast<int64_t>( bobTime );
-    bobMoveCycle.fracSin = fabs( sin( bobTime * M_PI ) );
+	// Multipl by 1.5 in case of crouching.
+    if ( currentPlayerState->pmove.flags & PMF_DUCKED ) {
+        _bobTime *= 1.5;
+	}
+
+	// Calculate cycle and frac sin.
+    bobMoveCycle.cycle = static_cast<int64_t>( _bobTime );
+    bobMoveCycle.fracSin = fabs( sin( _bobTime * M_PI ) );
 }
 
 /**
@@ -466,7 +468,7 @@ void ViewCamera::AddWeaponViewModel() {
     }
 	// Add interpolated(between player states) gunAngles..
 	rEntWeaponViewModel.angles = viewAngles + vec3_mix_euler( oldPlayerState->gunAngles, currentPlayerState->gunAngles, cl->lerpFraction );
-	rEntWeaponViewModel.angles = viewAngles + currentPlayerState->gunAngles;
+//	rEntWeaponViewModel.angles = viewAngles + currentPlayerState->gunAngles;
 
 	// Trace the weapon offset against other entities.
 	TraceViewWeaponOffset();
@@ -479,7 +481,7 @@ void ViewCamera::AddWeaponViewModel() {
 	UpdateViewWeaponModel( oldPlayerState, currentPlayerState );
 	
     // If there is no model to render, there is no need to continue.
-    if (!rEntWeaponViewModel.model) {
+    if ( !rEntWeaponViewModel.model ) {
         return;
     }
 
@@ -492,13 +494,13 @@ void ViewCamera::AddWeaponViewModel() {
     }
 
     // Add the gun render entity to the current render frame.
-    clge->view->AddRenderEntity(rEntWeaponViewModel);
+    clge->view->AddRenderEntity( rEntWeaponViewModel );
 
     // OpenGL: Yeah... 
     if (shellFlags && !vid_rtx->integer) {
         rEntWeaponViewModel.alpha = 0.30f;
         rEntWeaponViewModel.flags |= shellFlags | RenderEffects::Translucent;
-        clge->view->AddRenderEntity(rEntWeaponViewModel);
+        clge->view->AddRenderEntity( rEntWeaponViewModel );
     }
 }
 

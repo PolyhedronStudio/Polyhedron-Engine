@@ -10,31 +10,79 @@
 #pragma once
 
 
+
 /**
 *
 *
-*	General Physics Functions:
+*	Physics:
 *
 *
 **/
-/*
-* GS_ClipVelocity
-*/
+/**
+*	@brief	Called when two entities have touched so we can safely call their touch callback functions.
+**/
+void SG_Impact( GameEntity *entityA, const SGTraceResult &trace );
+/**
+*	@brief	Processes active game and physics logic of this entity for the current time/frame.
+**/
+void SG_RunEntity( SGEntityHandle &entityHandle );
+/**
+*	@brief	Gives the entity a chance to process 'Think' callback logic if the
+*			time is there for it to do so.
+*	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
+**/
+const bool SG_RunThink( GameEntity *geThinker );
+
+
+
+/**
+*
+*
+*	Velocity:
+*
+*
+**/
+/**
+*	@brief	Clips velocity.
+**/
 vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, const float overbounce );
 /**
 *	@brief	Keep entity velocity within bounds.
 **/
 void SG_CheckVelocity( GameEntity *geCheck );
 
+
+
+/**
+*
+*
+*	Gravity/Friction:
+*
+*
+**/
 /**
 *	@brief	Applies 'downward' gravity forces to the entity.
 **/
 void SG_AddGravity( GameEntity *sharedGameEntity );
 /**
+*	@brief	The rotational friction is NOT SET to geRotateFriction!
+*	@return	The angular velocity of geRotateFriction after applying rotational friction.
+**/
+const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction );
+/**
 *	@brief	Apply ground friction forces to entity.
 **/
 void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction );
 
+
+
+/**
+*
+*
+*	Utilities:
+*
+*
+**/
 /**
 *	@brief	Pushes the entity. Does not change the entities velocity at all
 **/
@@ -53,25 +101,6 @@ void SG_CheckGround( GameEntity *geCheck );
 static inline bool IsWalkablePlane(const CollisionPlane& plane) {
 	return plane.normal.z >= 0.7f ? true : false;
 }
-/**
-*	@brief	Tests whether the entity position would be trapped in a Solid.
-*	@return	(nullptr) in case it is free from being trapped. Worldspawn entity otherwise.
-**/
-GameEntity *SG_TestEntityPosition(GameEntity *geTestSubject);
-/**
-*	@brief	Called when two entities have touched so we can safely call their touch callback functions.
-**/
-void SG_Impact( GameEntity *entityA, const SGTraceResult &trace );
-/**
-*	@brief	Processes active game and physics logic of this entity for the current time/frame.
-**/
-void SG_RunEntity( SGEntityHandle &entityHandle );
-/**
-*	@brief	Gives the entity a chance to process 'Think' callback logic if the
-*			time is there for it to do so.
-*	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
-**/
-const bool SG_RunThink( GameEntity *geThinker );
 
 
 

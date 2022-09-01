@@ -30,7 +30,7 @@ void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, P
     vec3_t vec = end - start;
     float len = VectorNormalize(vec);
 
-    float dec = 0.5f;
+    float dec = 0.3f;
     vec = vec3_scale(vec, dec);
 
     if (oldTrailEntity->trailCount > 900) {
@@ -63,6 +63,11 @@ void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, P
                 particle->alphavel = -1.0 / (1 + frand() * 0.4);
 
                 particle->color = 0xe8 + (rand() & 7);
+				//particle->color = -1;
+				//particle->rgba = MakeColor( 90, 0, 0 ); // Should add random number values to ranges of below.
+				//90 tot 136
+				//0 tot 8
+				//0 tot 8
                 particle->brightness = 1.0f;
 
                 for (int32_t j = 0; j < 3; j++) {
@@ -70,7 +75,7 @@ void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, P
                     particle->vel[j] = crand() * velocityScale;
                     particle->acceleration[j] = 0;
                 }
-                particle->vel[2] -= ParticleEffects::ParticleGravity;
+                particle->vel[2] -= ParticleEffects::ParticleGravity;// + 40;
             } else {
                 particle->alpha = 1.0;
                 particle->alphavel = -1.0 / (1 + frand() * 0.2);

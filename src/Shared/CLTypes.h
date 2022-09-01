@@ -91,8 +91,13 @@ struct tent_params_t {
 	/**
 	*	New Properties.
 	**/
-    vec3_t velocity = vec3_zero();
+	//! Possible received velocity.
+	vec3_t velocity = vec3_zero();
+	//! Received damage.
+	float damage = 0.f;
+	//! Received speed.
 	float speed = 0.f;
+	//! Received model index.
 	int32_t modelIndex1 = 0;
 
 	// Debris Specific.

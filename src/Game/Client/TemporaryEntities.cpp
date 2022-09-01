@@ -1102,10 +1102,21 @@ void CLG_ParseTempEntity(void)
 
 // ---------------------- START OF: Client Side Debris / Explosions / Gibs ---------------------- 
 	case TempEntityEvent::BodyGib: {
-			GameEntity *gibber = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+			GameEntity *geGibber = gameWorld->GetGameEntityByIndex(teParameters.entity1);
 
-			if (gibber) {
-				TE_SpawnGibs(gibber->GetOrigin(), gibber->GetSize(), gibber->GetVelocity(), teParameters.count);
+			if (geGibber) {
+				// We oughta get it from previous frame since by the time it is gibbing, the entity has already "disappeared" in that
+				// it has no model set and its state is already gone.
+				const vec3_t previousMins = geGibber->GetPODEntity()->previousState.mins;
+				const vec3_t previousAbsMins = geGibber->GetPODEntity()->previousState.origin + previousMins;
+				const vec3_t gibberSize = geGibber->GetSize();
+				const vec3_t gibberVelocity = geGibber->GetVelocity();
+
+				// Calculate the actual start origin for offset spawning the gibs at.
+				const vec3_t teOrigin = previousAbsMins + vec3_scale( gibberSize, 0.5f );
+
+				// Spawn the gibs.
+				TE_SpawnGibs( teOrigin, gibberSize, gibberVelocity, teParameters.count );
 			}
 		break;
 	}

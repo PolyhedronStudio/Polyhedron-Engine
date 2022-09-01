@@ -136,7 +136,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 			DispatchPredictedTouchCallbacks( &pm, gePlayer );
 		}
         // Save for error detection
-        cmd->prediction.origin = pm.state.origin;		
+        cmd->prediction.groundEntityNumber = pm.groundEntityNumber;
+		cmd->prediction.origin = pm.state.origin;		
 	}
 
 	// Run the player move prediction process using the current pending frame user input.
@@ -160,7 +161,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		DispatchPredictedTouchCallbacks( &pm, gePlayer );
 		
 		// Save for error detection
-		//cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
+		cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
         cl->moveCommand.prediction.origin = pm.state.origin;
 	}
 

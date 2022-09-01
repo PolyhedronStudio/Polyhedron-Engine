@@ -1548,7 +1548,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
     **/
     if (entityEffects & EntityEffectType::Rotate) {
 		// Bonus items rotate at a fixed rate
-		const float autoRotate = AngleMod(cl->time * BASE_1_FRAMETIME);
+		const float autoRotate = AngleMod( cl->time * BASE_1_FRAMETIME );
 
         // Autorotate for bonus item entities.
         refreshEntity.angles[0] = 0;
@@ -1559,7 +1559,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         refreshEntity.angles = cl->playerEntityAngles;
     } else {
         // Otherwise, lerp angles by default.
-        refreshEntity.angles = vec3_mix_euler(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+        refreshEntity.angles = vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
 
         // Mimic original ref_gl "leaning" bug (uuugly!)
         if (currentState->modelIndex == 255 && cl_rollhack->integer) {

@@ -96,7 +96,7 @@ void MiscClientExplosionBox::Spawn() {
         // Maxs.
         { 16.f, 16.f, 40.f }
     );
-    //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
+    SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
     // Set default values in case we have none.
     if (!GetMass()) {

@@ -823,40 +823,42 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 	// Do we have a valid ground entity?
 	bool isValidGroundEntity = ServerGameWorld::ValidateEntity(player->GetGroundEntityHandle());
 
-    if (bobMoveCycle.XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
+    if ( bobMoveCycle.XYSpeed < 5 ) {
         // Special handling for when not on ground.
         bobMoveCycle.move = 0;
 
         // Start at beginning of cycle again (See the else if statement.)
         client->bobTime = 0;
-    } else if (isValidGroundEntity || player->GetWaterLevel() == 2) {
+    } else if ( isValidGroundEntity || player->GetWaterLevel() == 2 ) {
         // So bobbing only cycles when on ground.
-        if (bobMoveCycle.XYSpeed > 450)
+        if ( bobMoveCycle.XYSpeed > 450) {
             bobMoveCycle.move = 0.25;
-        else if (bobMoveCycle.XYSpeed > 210)
+		} else if ( bobMoveCycle.XYSpeed > 210) {
             bobMoveCycle.move = 0.125;
-        else if (!isValidGroundEntity&& player->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100)
+		} else if ( !isValidGroundEntity && player->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100 ) {
             bobMoveCycle.move = 0.225;
-        else if (bobMoveCycle.XYSpeed > 100)
+		} else if ( bobMoveCycle.XYSpeed > 100 ) {
             bobMoveCycle.move = 0.0825;
-        else if (!isValidGroundEntity && player->GetWaterLevel() == 2)
+		} else if ( !isValidGroundEntity && player->GetWaterLevel() == 2 ) {
             bobMoveCycle.move = 0.1625;
-        else
+		} else {
             bobMoveCycle.move = 0.03125;
+		}
     }
-
-	const float moveBase = bobMoveCycle.move;
 
     // Calculate bob time, cycle, and sin fraction.
     bobMoveCycle.move /= 3.5;
-	const float move = bobMoveCycle.move;
 
-    float bobTime = (client->bobTime += bobMoveCycle.move);
+	// Local frame bobtime set to total bobtime after adding the move of our frame.
+    float bobTime = ( client->bobTime += bobMoveCycle.move );
 
-    if (client->playerState.pmove.flags & PMF_DUCKED)
+	// Multipl by 1.5 in case of crouching.
+    if ( client->playerState.pmove.flags & PMF_DUCKED ) {
         bobTime *= 1.5;
+	}
 
-    bobMoveCycle.cycle = (int)bobTime;
+	// Calculate cycle and frac sin.
+    bobMoveCycle.cycle = static_cast<int64_t>( bobTime );
     bobMoveCycle.fracSin = fabs(sin(bobTime * M_PI));
 
 	// Detect hitting the floor, and apply damage appropriately.

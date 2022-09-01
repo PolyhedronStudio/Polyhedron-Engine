@@ -81,3 +81,5 @@ GameEntity *SG_GetGameEntityByNumber( const int32_t entityNumber );
 ***/
 extern cvar_t *sv_maxvelocity;
 extern cvar_t *sv_gravity;
+extern cvar_t *sv_friction;
+extern cvar_t *sv_stopspeed;

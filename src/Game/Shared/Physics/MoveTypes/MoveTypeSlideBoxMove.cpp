@@ -38,128 +38,9 @@ void SG_Physics_SlideBoxMove( SGEntityHandle &entityHandle ) {
     SG_RunThink(gameEntity);
 }
 
-///**
-//*	@brief	Processes rotational friction calculations.
-//**/
-//static const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) { 
-//	// Assign handle to base entity.
-//    GameEntity *ent = *entityHandle;
-//
-//    // Ensure it is a valid entity.
-//    if ( !ent ) {
-//	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
-//        return vec3_zero();
-//    }
-//
-//    // Acquire the rotational velocity first.
-//    vec3_t angularVelocity = ent->GetAngularVelocity();
-//
-//    // Set angles in proper direction.
-//    ent->SetAngles( vec3_fmaf(ent->GetAngles(), FRAMETIME_S.count(), angularVelocity) );
-//
-//    // Calculate adjustment to apply.
-//    float adjustment = FRAMETIME_S.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
-//
-//    // Apply adjustments.
-//    angularVelocity = ent->GetAngularVelocity();
-//    for (int32_t n = 0; n < 3; n++) {
-//        if (angularVelocity[n] > 0) {
-//            angularVelocity[n] -= adjustment;
-//            if (angularVelocity[n] < 0)
-//                angularVelocity[n] = 0;
-//        } else {
-//            angularVelocity[n] += adjustment;
-//            if (angularVelocity[n] > 0)
-//                angularVelocity[n] = 0;
-//        }
-//    }
-//
-//	// Return the angular velocity.
-//	return angularVelocity;
-//}
-//
-///**
-//*	@brief	Checks if this entity should have a groundEntity set or not.
-//*	@return	The number of the ground entity this entity is covering ground on.
-//**/
-//int32_t SG_RootMotionMove_CheckForGround( GameEntity *geCheck ) {
-//	if (!geCheck) {
-//		// Warn, or just remove check its already tested elsewhere?
-//		return -1;
-//	}
-//
-//	// In case of a flying or swimming monster there's no need to check for ground.
-//	// If anything we clear out the ground pointer in case the entity did acquire
-//	// flying skills.
-//	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
-//		geCheck->SetGroundEntity( SGEntityHandle() );
-//		geCheck->SetGroundEntityLinkCount(0);
-//		return -1;
-//	}
-//
-//	//// In case the entity has a client and its velocity is high
-//	//if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
-//	//	geCheck->SetGroundEntity( SGEntityHandle() );
-//	//	geCheck->SetGroundEntityLinkCount(0);
-//	//	return;
-//	//}
-//
-//	// if the hull point one-quarter unit down is solid the entity is on ground
-//	const vec3_t geOrigin = geCheck->GetOrigin();
-//	vec3_t traceEndPoint = {
-//		geOrigin.x,
-//		geOrigin.y,
-//		geOrigin.z - 0.25f
-//	};
-//
-//	// Execute ground seek trace.
-//	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck));
-//
-//
-//	// Check steepness.
-//	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
-//		geCheck->SetGroundEntity( SGEntityHandle() );
-//		geCheck->SetGroundEntityLinkCount(0);
-//		return -1;
-//	}
-//
-//	// If velocity is up, and the actual trace result did not start inside of a solid, it means we have no ground.
-//	const vec3_t geCheckVelocity = geCheck->GetVelocity();
-//	if( geCheckVelocity.z > 1 && !traceResult.startSolid ) {
-//		geCheck->SetGroundEntity( SGEntityHandle() );
-//		geCheck->SetGroundEntityLinkCount(0);
-//		return -1;
-//	}
-//
-//	// The trace did not start, or end inside of a solid.
-//	if( !traceResult.startSolid && !traceResult.allSolid ) {
-//		//VectorCopy( trace.endpos, ent->s.origin );
-//		geCheck->SetGroundEntity(traceResult.gameEntity);
-//		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
-//
-//		// Since we've found ground, we make sure that any negative Z velocity is zero-ed out.
-//		if( geCheckVelocity .z < 0) {
-//			geCheck->SetVelocity({ 
-//				geCheckVelocity.x,
-//				geCheckVelocity.y,
-//				0
-//			});
-//		}
-//
-//		return traceResult.gameEntity->GetNumber();
-//	}
-//
-//	// Should never happen..?
-//	return -1;
-//}
 /**
 *	@brief	Starts performing the RootMotion move process.
 **/
-/**
-*	@brief	Processes rotational friction calculations.
-**/
-extern const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle );
-
 const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove ) {
 	/**
 	*	Ensure our SlideMove Game Entity is non (nullptr).
@@ -177,7 +58,8 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 
 	// If we got any angular velocity, apply friction.
     if ( angularVelocity.x || angularVelocity.y || angularVelocity.z ) {
-		SG_AddRotationalFriction( geSlider );
+
+		geSlider->SetAngularVelocity( SG_CalculateRotationalFriction( geSlider ) );
 	}
 
     // Run think method.
@@ -204,8 +86,6 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 	int32_t blockedMask = 0;
 
 	if ( oldVelocityLength > 0 ) {
-		
-
 		// Setup our SlideBoxMove structure. Keeps track of state for the current frame's move we're about to perform.
 		*slideBoxMove = {
 			// Working State & Final Move Attributes.
@@ -222,9 +102,11 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 			// Slide Bounce Value.
 			.slideBounce = slideBounce,
 
+			// Ground entity.
+			.groundEntity = groundEntityNumber,
 			// Entity we want to exclude(skip) from our move testing traces.
 			.skipEntityNumber = geSlider->GetNumber(),
-
+			
 			// Entity Flags and Content Mask.
 			.contentMask = contentMask,
 
@@ -248,8 +130,8 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 				geSlider->SetGroundEntityLinkCount( geGroundEntity->GetLinkCount() );
 			}
 		} else {
-				geSlider->SetGroundEntity( SGEntityHandle() );
-				geSlider->SetGroundEntityLinkCount( 0 );
+			geSlider->SetGroundEntity( SGEntityHandle() );
+			geSlider->SetGroundEntityLinkCount( 0 );
 		}
 
 		// Link it in.
@@ -260,7 +142,7 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 	*	Touch Callbacks.
 	**/
 	// Execute touch callbacks.
-	if( contentMask != 0 ) {
+	if( blockedMask != 0 ) {
 		GameEntity *otherEntity = nullptr;
 
 		// Call Touch Triggers on our slide box entity for its new position.
@@ -300,7 +182,12 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 		// Revalidate it
 		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( SG_GetGameEntityByNumber( groundEntityNumber ) );
 
-		// Set it to a halt in case velocity becomes too low, this way it won't look odd.
+		// Apply ground friction now since we're officially on-ground.
+		if (geNewGroundEntity) {
+			SG_AddGroundFriction( geSlider, friction );
+		}
+
+		// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.
 		if( geNewGroundEntity && vec3_length( geSlider->GetVelocity() ) <= 1.f && oldVelocityLength > 1.f ) {
 			// Zero out velocities.
 			geSlider->SetVelocity( vec3_zero() );

@@ -138,7 +138,6 @@ void ClientGameExports::ClientConnect() {
 
     // Reset level locals.
     level = LevelLocals{};
-    level.time = GameTime::zero(); //GameTime(cl->serverTime);
 
 	// Notify Gamemode about ClientConnect:
 	IGamemode *gameMode = GetGameMode();
@@ -151,14 +150,10 @@ void ClientGameExports::ClientConnect() {
 *           Not used for demos.
 **/
 void ClientGameExports::ClientBegin() {
-	// Reset level locals.
-    level = LevelLocals{};
-    level.time = GameTime::zero(); //GameTime(cl->time);
 
 	// Notify Gamemode about ClientBegin:
 	IGamemode *gameMode = GetGameMode();
 	gameMode->ClientBegin( nullptr );
-
 }
 
 /**

@@ -64,12 +64,11 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
 	}
 
 	// Set size. // TODO: Use size and getabsmin from somewhere I guess.
-    //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
-	const vec3_t gibSize = vec3_scale( vec3_t{16.f, 16.f, 56.f}, 0.875f );
+    const vec3_t gibSize = vec3_scale( size, 0.25f);
     gibEntity->SetSize(gibSize);
 
     // Generate the origin to start from.
-    //vec3_t origin = gibber->GetAbsoluteMin() + gibber->GetSize();
+    vec3_t newOrigin = origin + gibSize;
 
     //// Add some random values to it, so they all differ.
     //origin.x += crandom() * size.x;
@@ -78,9 +77,9 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
 
     // Set the origin.
 	gibEntity->SetOrigin(vec3_t{
-		origin.x + crandom() * size.x,
-		origin.y + crandom() * size.y,
-		origin.z + crandom() * size.z,
+		newOrigin.x + crandom() * gibSize.x,
+		newOrigin.y + crandom() * gibSize.y,
+		newOrigin.z + crandom() * gibSize.z,
 	});
 
     // Set the model.
@@ -89,7 +88,9 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     // Set solid and other properties.
     gibEntity->SetSolid( Solid::OctagonBox );
     gibEntity->SetEffects( gibEntity->GetEffects() | EntityEffectType::Gib );
-    //gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
+    gibEntity->SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
+
+	//gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
     //gibEntity->SetTakeDamage( 1 );
     //gibEntity->SetDieCallback( &GibEntity::GibEntityDie );
 
@@ -100,10 +101,10 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
 	    gibEntity->SetMoveType(MoveType::SlideBoxMove);
-
-	    // Most of all, we setup a touch callback too ofc.
+	    // Touch callback to stop the gib from bleeding as well as try and change into a halt.
 		gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
-
+		// Mass.
+		gibEntity->SetMass( 40 );
 	    // Adjust the velocity scale.
 	    velocityScale = 0.5f;
     } else {
@@ -129,9 +130,12 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     
     // Generate angular velocity.
     gibEntity->SetAngularVelocity({
-		100.f + (Randomf() * 500.f), 
-		100.f + (Randomf() * 500.f), 
-		100.f + (Randomf() * 500.f)
+		100.f + (Randomf() * 950.f), 
+		100.f + (Randomf() * 950.f), 
+		100.f + (Randomf() * 1100.f)
+		//50.f + (Randomf() * 150.f), 
+		//50.f + (Randomf() * 150.f), 
+		//50.f + (Randomf() * 150.f)
 	});
 
     // Setup the Gib think function so it'll check for ground and add gravity.
@@ -264,11 +268,7 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 // GibEntity::GibEntityThink
 //
 //===============
-void GibEntity::GibEntityThink() {
-	// Next Think.
-	SetThinkCallback(&GibEntity::GibEntityThink);
-    SetNextThinkTime(level.time + FRAMERATE_MS);
-    
+void GibEntity::GibEntityThink() {   
 	// Increase frame and set a new think time.
     //SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
 
@@ -279,18 +279,27 @@ void GibEntity::GibEntityThink() {
         //SetNextThinkTime(level.time + 8s + Randomui() * 10s);
     //}
 
-	if (GetEffects() != 0) {
-		SetAngles( GetAngles() +
-			vec3_euler(  
-				  vec3_scale( vec3_normalize( GetAngularVelocity() ), 0.125 )
-			)
-		);
-	}
+	//const vec3_t avel = GetAngularVelocity();
+	//if ( avel.x || avel.y || avel.z ) {
+	//	SetAngles( GetAngles() +
+	//		vec3_euler( vec3_normalize(GetAngularVelocity()) )
+	//	);
+	//} else {
+	//	SetAngularVelocity( vec3_zero() );
+	//}
 
 	SG_CheckGround(this);
-	if (GetGroundEntityLinkCount() <= 0) {
-		SG_AddGravity(this);
-	}
+	SG_AddGravity(this);
+	//const vec3_t avel = GetAngularVelocity();
+	//if (!GetGroundEntityHandle() && (avel.x || avel.y || avel.z) ) {
+	//	SetAngularVelocity( vec3_scale( GetAngularVelocity(), 0.98 ) );
+	//} else {
+
+	//}
+
+	// Next Think.
+	SetThinkCallback(&GibEntity::GibEntityThink);
+    SetNextThinkTime(level.time + FRAMERATE_MS);
 }
 
 //===============
@@ -300,7 +309,7 @@ void GibEntity::GibEntityThink() {
 void GibEntity::GibEntityStopBleeding() {
 	// Set effects to nothing.
 	SetEffects(0);
-	SetAngularVelocity(vec3_zero());
+	//SetAngularVelocity(vec3_zero());
 	// Old, would remove it after some time. May want to reverse this later on.
 	//gibEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
     //gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
@@ -311,9 +320,9 @@ void GibEntity::GibEntityStopBleeding() {
 void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     vec3_t  right;
 
-	// If we don't have ground we keep bleeding.
-    if (!ClientGameWorld::ValidateEntity(other))
-        return;
+	//// If we don't have ground we keep bleeding.
+ //   if (!ClientGameWorld::ValidateEntity(other))
+ //       return;
 
     // Did we get a plane passed?
     if ( plane ) {
@@ -332,12 +341,17 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
 		// New direction.
         vec3_t newDirection = vec3_cross( normalAngles, right );//vec3_dot( vec3_normalize( GetAngles() ), right );
 
-		SetAngles( vec3_euler( vec3_normalize( newDirection ) ) );
+		const vec3_t oldAngles = GetAngles();
+		SetAngles( vec3_euler( vec3_fmaf( oldAngles, FRAMETIME_S.count(), newDirection ) ) );
 
         //if (GetModelIndex() == sm_meat_index) {
             //SetAnimationFrame(GetAnimationFrame() + Frametime(2.5).count());
-            SetThinkCallback(&GibEntity::GibEntityStopBleeding);
-            SetNextThinkTime(level.time + FRAMETIME_S);
+		// Set effects to nothing.
+		SetEffects(0);
+		SetAngularVelocity( vec3_zero() );
+
+        SetThinkCallback(&GibEntity::GibEntityThink);
+        SetNextThinkTime(level.time + FRAMETIME_S);
         //}
     }
 }

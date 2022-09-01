@@ -64,10 +64,10 @@ const PushedEntityState SG_PushEntityState(GameEntity* gePusher) {
 
 	return returnedState;
 }
-
 void SG_PopPushedEntityState(GameEntity* gePusher) {
 	lastPushedEntityState--;
 }
+
 /**
 *	@brief	Utilitzes the EntityHandle class to retreive a valid GameEntity for
 *			the Pushed Entity State.
@@ -141,6 +141,30 @@ retry:
 	}
 
     return trace;
+}
+
+/**
+*	@brief	Tests whether the entity position would be trapped in a Solid.
+*	@return	(nullptr) in case it is free from being trapped. Worldspawn entity otherwise.
+**/
+static GameEntity *SG_TestEntityPosition( GameEntity *geTestSubject ) {
+	int32_t clipMask = 0;
+
+    if (geTestSubject->GetClipMask()) {
+	    clipMask = geTestSubject->GetClipMask();
+    } else {
+        clipMask = BrushContentsMask::Solid;
+    }
+
+    SGTraceResult trace = SG_Trace(geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask);
+
+    if (trace.startSolid) {
+		SGGameWorld *gameWorld = GetGameWorld();
+
+	    return (GameEntity*)(gameWorld->GetWorldspawnGameEntity());
+    }
+
+    return nullptr;
 }
 
 /**

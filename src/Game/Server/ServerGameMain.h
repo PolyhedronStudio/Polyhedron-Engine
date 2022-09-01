@@ -98,6 +98,7 @@ extern  cvar_t  *filterban;
 extern  cvar_t  *sv_gravity;
 extern  cvar_t  *sv_maxvelocity;
 
+
 /**
 *	View.
 **/

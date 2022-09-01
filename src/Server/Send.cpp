@@ -67,7 +67,7 @@ static qboolean SV_RateDrop(client_t *client)
     }
 
     // Divide the total by rate divisor.
-    totalRate /= SERVER_RATE_MULTIPLIER;
+    totalRate /= SERVER_RATE_DIVISOR;
 
     if (totalRate > client->rate) {
         SV_DPrintf(0, "Frame %d suppressed for %s (total = %" PRIz ")\n",

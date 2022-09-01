@@ -40,46 +40,6 @@ void SG_Physics_RootMotionMove(SGEntityHandle &entityHandle) {
 }
 
 /**
-*	@brief	Processes rotational friction calculations.
-**/
-const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) { 
-	// Assign handle to base entity.
-    GameEntity *ent = *entityHandle;
-
-    // Ensure it is a valid entity.
-    if ( !ent ) {
-	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
-        return vec3_zero();
-    }
-
-    // Acquire the rotational velocity first.
-    vec3_t angularVelocity = ent->GetAngularVelocity();
-
-    // Set angles in proper direction.
-    ent->SetAngles( vec3_fmaf(ent->GetAngles(), FRAMETIME_S.count(), angularVelocity) );
-
-    // Calculate adjustment to apply.
-    float adjustment = FRAMETIME_S.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
-
-    // Apply adjustments.
-    angularVelocity = ent->GetAngularVelocity();
-    for (int32_t n = 0; n < 3; n++) {
-        if (angularVelocity[n] > 0) {
-            angularVelocity[n] -= adjustment;
-            if (angularVelocity[n] < 0)
-                angularVelocity[n] = 0;
-        } else {
-            angularVelocity[n] += adjustment;
-            if (angularVelocity[n] > 0)
-                angularVelocity[n] = 0;
-        }
-    }
-
-	// Return the angular velocity.
-	return angularVelocity;
-}
-
-/**
 *	@brief	Checks if this entity should have a groundEntity set or not.
 *	@return	The number of the ground entity this entity is covering ground on.
 **/

@@ -64,36 +64,91 @@ void SG_AddGravity( GameEntity *sharedGameEntity ) {
 }
 
 /**
+*	@brief	The rotational friction is NOT SET to geRotateFriction!
+*	@return	The angular velocity of geRotateFriction after applying rotational friction.
+**/
+const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction ) { 
+    // Ensure it is a valid entity.
+    if ( !geRotateFriction ) {
+	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
+        return vec3_zero();
+    }
+
+    // Acquire the rotational velocity first.
+    vec3_t angularVelocity = geRotateFriction->GetAngularVelocity();
+
+    // Set angles in proper direction.
+    geRotateFriction->SetAngles( vec3_fmaf( geRotateFriction->GetAngles(), FRAMETIME_S.count(), angularVelocity ) );
+
+    // Calculate adjustment to apply.
+    const float adjustment = FRAMETIME_S.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
+
+    // Apply adjustments.
+    angularVelocity = geRotateFriction->GetAngularVelocity();
+    for (int32_t n = 0; n < 3; n++) {
+        if (angularVelocity[n] > 0) {
+            angularVelocity[n] -= adjustment;
+            if (angularVelocity[n] < 0)
+                angularVelocity[n] = 0;
+        } else {
+            angularVelocity[n] += adjustment;
+            if (angularVelocity[n] > 0)
+                angularVelocity[n] = 0;
+        }
+    }
+
+	// Return the angular velocity.
+	return angularVelocity;
+}
+
+/**
 *	@brief	Apply ground friction forces to entity.
 **/
 void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction ) {
 	if (!geGroundFriction) {
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): can't add ground friction, geGroundFriction == (nullptr)!\n", __func__, sharedModuleName ) );
+		return;
 	}
 
-	const vec3_t geVelocity = geGroundFriction->GetVelocity();
-	vec3_t groundVelocity = {
-		geVelocity.x,
-		geVelocity.y,
-		0.f
-	};
-
-	// Calculate speed velocity based on ground velocity.
-	vec3_t frictionVec = vec3_zero();
-	float speed = VectorNormalize2( groundVelocity, frictionVec );
-	if( speed ) {
-		// Calculate ground friction speed.
-		float fspeed = friction * FRAMETIME_S.count();
-		if( fspeed > speed ) {
-			fspeed = speed;
-		}
-
-		// Actual velocity.
-		const vec3_t velocity = geGroundFriction->GetVelocity();
-
-		// Update velocity.
-		geGroundFriction->SetVelocity(vec3_fmaf(velocity, -fspeed, frictionVec));
+	vec3_t newVelocity = geGroundFriction->GetVelocity();
+	const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
+	if (speed) {
+		const float friction = ROOTMOTION_MOVE_GROUND_FRICTION;
+		const float control = speed < ROOTMOTION_MOVE_STOP_SPEED ? ROOTMOTION_MOVE_STOP_SPEED : speed;
+		float newSpeed = speed - FRAMETIME_S.count() * control * friction;
+		if (newSpeed < 0) {
+			newSpeed = 0;
 	}
+		newSpeed /= speed;
+		newVelocity[0] *= newSpeed;
+		newVelocity[1] *= newSpeed;
+		// Set the velocity.
+		geGroundFriction->SetVelocity( newVelocity );
+	}
+
+	//const vec3_t geVelocity = geGroundFriction->GetVelocity();
+	//vec3_t groundVelocity = {
+	//	geVelocity.x,
+	//	geVelocity.y,
+	//	0.f
+	//};
+
+	//// Calculate speed velocity based on ground velocity.
+	//vec3_t frictionVec = vec3_zero();
+	//const float speed = VectorNormalize2( groundVelocity, frictionVec );
+	//if( speed ) {
+	//	// Calculate ground friction speed.
+	//	float fspeed = friction * FRAMETIME_S.count();
+	//	if( fspeed > speed ) {
+	//		fspeed = speed;
+	//	}
+
+	//	// Actual velocity.
+	//	const vec3_t velocity = geGroundFriction->GetVelocity();
+
+	//	// Update velocity.
+	//	geGroundFriction->SetVelocity( vec3_fmaf( velocity, -fspeed, frictionVec ) );
+	//}
 }
 
 /**
@@ -164,7 +219,7 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	if( !traceResult.startSolid && !traceResult.allSolid ) {
 		// We must've hit some entity, so set it.
 		geCheck->SetGroundEntity(traceResult.gameEntity);
-		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
+		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetGroundEntityLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
 		
 		// Since we hit ground, zero out the Z velocity in case it is lower than 0.
 		vec3_t geCheckVelocity = geCheck->GetVelocity();
@@ -172,6 +227,9 @@ void SG_CheckGround( GameEntity *geCheck ) {
 			geCheckVelocity.z = 0;
 			geCheck->SetVelocity(geCheckVelocity);
 		}
+
+		// Impact.
+		SG_Impact( geCheck, traceResult );
 	}
 }
 
@@ -194,29 +252,7 @@ void SG_CheckGround( GameEntity *geCheck ) {
 //solid_edge items only clip against bsp models.
 
 
-/**
-*	@brief	Tests whether the entity position would be trapped in a Solid.
-*	@return	(nullptr) in case it is free from being trapped. Worldspawn entity otherwise.
-**/
-GameEntity *SG_TestEntityPosition(GameEntity *geTestSubject) {
-	int32_t clipMask = 0;
 
-    if (geTestSubject->GetClipMask()) {
-	    clipMask = geTestSubject->GetClipMask();
-    } else {
-        clipMask = BrushContentsMask::Solid;
-    }
-
-    SGTraceResult trace = SG_Trace(geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask);
-
-    if (trace.startSolid) {
-		SGGameWorld *gameWorld = GetGameWorld();
-
-	    return (GameEntity*)(gameWorld->GetWorldspawnGameEntity());
-    }
-
-    return nullptr;
-}
 
 /**
 *	@brief	Keep entity velocity within bounds.
@@ -290,7 +326,7 @@ const bool SG_RunThink( GameEntity *geThinker ) {
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
-	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time + FRAMERATE_MS) {
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
 #endif
 #ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {

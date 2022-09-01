@@ -762,9 +762,8 @@ void ServerGameWorld::ThrowDebris(GameEntity* debrisser, const int32_t debrisMod
 *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
 */
 void ServerGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, uint32_t count, int32_t damage, int32_t gibType) { 
-	//GibEntity::Create(gibber, gibModel, damage, gibType);
 	if (!gibber) {
-		gi.DPrintf("SVGWarning: (%s): *gibber is (nullptr)!\n", __func__);
+		SVG_DPrint(fmt::format( "SVGWarning: ({}): *gibber is (nullptr)!\n", __func__ ) );
 		return;
 	}
     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
@@ -772,5 +771,12 @@ void ServerGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, 
     gi.MSG_WriteUint16(gibber->GetNumber());
 	//gi.MSG_WriteVector3(gibber->GetVelocity(), false);
     gi.MSG_WriteUint8(count);
+	if (damage <= 0) {
+		gi.MSG_WriteUint8(0);
+	} else if (damage < 4) {
+		gi.MSG_WriteUint8(1);
+	} else {
+		gi.MSG_WriteUint8(damage / 4);
+	}
     gi.Multicast(gibber->GetOrigin(), Multicast::PVS);
 }

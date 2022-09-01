@@ -892,13 +892,13 @@ static void SCR_Draw2D(void) {
 
 	//SCR_DrawFPS();
 
-    SCR_DrawTurtle();
 
     SCR_DrawPause();
 
     // debug stats have no alpha
     R_ClearColor();
-
+	
+    SCR_DrawTurtle();
 #ifdef _DEBUG
     SCR_DrawDebugStats();
     SCR_DrawDebugPMove();

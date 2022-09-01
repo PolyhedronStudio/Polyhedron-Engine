@@ -398,7 +398,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 
 	// If we got any angular velocity, apply friction.
     if (angularVelocity.x || angularVelocity.y || angularVelocity.z) {
-		SG_AddRotationalFriction( this );
+		SetAngularVelocity( SG_CalculateRotationalFriction( this ) );
 	}
 
 	// - Walking Monsters:
@@ -418,7 +418,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	} else {
 		// TODO: Move elsewhere.
 		static constexpr int32_t FRICTION = 10;
-		SG_AddGroundFriction( this, FRICTION );
+		//SG_AddGroundFriction( this, FRICTION );
 	}
 	// - Flying Monsters:
     if ( ( entityFlags & EntityFlags::Fly ) ) {
@@ -459,7 +459,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	//  /**
 	//  *	@brief //      // Apply friction: Let dead NPCs who aren't completely onground slide.
 	//  **/
-	//  if ( geBoxSlide->GetVelocity().z || geBoxSlide->GetVelocity().y || geBoxSlide->GetVelocity().x ) {
+	//if ( geBoxSlide->GetVelocity().z || geBoxSlide->GetVelocity().y || geBoxSlide->GetVelocity().x ) {
 	//      // Apply friction: Let dead NPCs who aren't completely onground slide.
 	//      if ( ( wasOnGround ) || ( geBoxSlide->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) ) {
 	//          if ( geBoxSlide->GetDeadFlag() == DeadFlags::Dead) {//!( geBoxSlide->GetHealth() <= 0.0 ) ) {
