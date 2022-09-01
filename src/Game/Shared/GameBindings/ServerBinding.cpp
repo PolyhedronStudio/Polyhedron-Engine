@@ -75,3 +75,26 @@ const int32_t SG_GetEntityNumber( GameEntity *gameEntity ) {
 	// Return the appropriate entity number.
 	return SG_GetEntityNumber( gameEntity->GetPODEntity() );
 }
+
+/**
+*	@brief	An easy way to acquire the proper POD Entity by its number.
+*	@return	(nullptr) in case of failure. Entity might be nonexistent.
+**/
+PODEntity *SG_GetPODEntityByNumber( const int32_t entityNumber ) {
+	ServerGameWorld *world = GetGameWorld();
+	if ( world ) {
+		return world->GetPODEntityByIndex( entityNumber );
+	}
+	return nullptr;
+}
+/**
+*	@brief	An easy way to acquire the proper POD Entity by its number.
+*	@return	(nullptr) in case of failure. Entity might be nonexistent.
+**/
+GameEntity *SG_GetGameEntityByNumber( const int32_t entityNumber ) {
+	ServerGameWorld *world = GetGameWorld();
+	if ( world ) {
+		return world->GetGameEntityByIndex( entityNumber );
+	}
+	return nullptr;
+}

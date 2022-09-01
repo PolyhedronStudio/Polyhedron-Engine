@@ -172,15 +172,41 @@ void FuncPlat::OnEventID( uint32_t eventID ) {
 	switch( eventID ) {
 	case 1: //: FUNC_PLAT_ENGAGE_LOWER_MOVE:
 		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_LOWER_MOVE')!\n", __func__, eventID ) );
+        // Calculate movement speed to use.
+    CalculateMoveSpeed();
+
+    // Setup move info.
+    moveInfo.speed = GetSpeed(); // 10
+    moveInfo.acceleration = GetAcceleration(); // 250
+    moveInfo.deceleration = GetDeceleration(); // 5
+    moveInfo.wait = GetWaitTime(); // 3.0 seconds
+    moveInfo.startOrigin = GetStartPosition(); // 0,0,0
+    moveInfo.startAngles = GetAngles(); // 0,0,0
+    moveInfo.endOrigin = GetEndPosition(); // 0,0,-376
+    moveInfo.endAngles = GetAngles(); // 0,0,0
+		
 		// Start now so we can catch up to last frame.
 		Callback_EngageLowerMove();
-		Callback_LowerPlatform();
+		//BrushMoveBegin();
+		//BrushAccelerateThink();
 		break;
 	case 2: //: FUNC_PLAT_ENGAGE_RAISE_MOVE:
 		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_RAISE_MOVE')!\n", __func__, eventID ) );
+        // Calculate movement speed to use.
+    CalculateMoveSpeed();
+    // Setup move info.
+    moveInfo.speed = GetSpeed(); // 10
+    moveInfo.acceleration = GetAcceleration(); // 250
+    moveInfo.deceleration = GetDeceleration(); // 5
+    moveInfo.wait = GetWaitTime(); // 3.0 seconds
+    moveInfo.startOrigin = GetStartPosition(); // 0,0,0
+    moveInfo.startAngles = GetAngles(); // 0,0,0
+    moveInfo.endOrigin = GetEndPosition(); // 0,0,-376
+    moveInfo.endAngles = GetAngles(); // 0,0,0
 		// Start now, so we can catch up to last frame.
 		Callback_EngageRaiseMove();
-		Callback_RaisePlatform();
+		//BrushMoveBegin();
+		//BrushAccelerateThink();
 		break;
 	default:
 

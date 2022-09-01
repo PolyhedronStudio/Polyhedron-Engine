@@ -89,7 +89,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     // Set solid and other properties.
     gibEntity->SetSolid( Solid::OctagonBox );
     gibEntity->SetEffects( gibEntity->GetEffects() | EntityEffectType::Gib );
-    gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
+    //gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
     //gibEntity->SetTakeDamage( 1 );
     //gibEntity->SetDieCallback( &GibEntity::GibEntityDie );
 
@@ -99,7 +99,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     // Is it an organic gib type?
     if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
-	    gibEntity->SetMoveType(MoveType::TossSlide);
+	    gibEntity->SetMoveType(MoveType::SlideBoxMove);
 
 	    // Most of all, we setup a touch callback too ofc.
 		gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
@@ -136,7 +136,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
 
     // Setup the Gib think function so it'll check for ground and add gravity.
     gibEntity->SetThinkCallback( &GibEntity::GibEntityThink );
-	gibEntity->SetNextThinkTime( level.time + FRAMETIME_S );
+	gibEntity->SetNextThinkTime( level.time + FRAMERATE_MS );
 
     // Link entity into the world.
     gibEntity->LinkEntity();
@@ -267,7 +267,7 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 void GibEntity::GibEntityThink() {
 	// Next Think.
 	SetThinkCallback(&GibEntity::GibEntityThink);
-    SetNextThinkTime(level.time + FRAMETIME_S);
+    SetNextThinkTime(level.time + FRAMERATE_MS);
     
 	// Increase frame and set a new think time.
     //SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
@@ -279,8 +279,18 @@ void GibEntity::GibEntityThink() {
         //SetNextThinkTime(level.time + 8s + Randomui() * 10s);
     //}
 
+	if (GetEffects() != 0) {
+		SetAngles( GetAngles() +
+			vec3_euler(  
+				  vec3_scale( vec3_normalize( GetAngularVelocity() ), 0.125 )
+			)
+		);
+	}
+
 	SG_CheckGround(this);
-	SG_AddGravity(this);
+	if (GetGroundEntityLinkCount() <= 0) {
+		SG_AddGravity(this);
+	}
 }
 
 //===============
@@ -290,7 +300,7 @@ void GibEntity::GibEntityThink() {
 void GibEntity::GibEntityStopBleeding() {
 	// Set effects to nothing.
 	SetEffects(0);
-
+	SetAngularVelocity(vec3_zero());
 	// Old, would remove it after some time. May want to reverse this later on.
 	//gibEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
     //gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
@@ -302,25 +312,27 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
     vec3_t  right;
 
 	// If we don't have ground we keep bleeding.
-    if (!ClientGameWorld::ValidateEntity(GetGroundEntityHandle()))
+    if (!ClientGameWorld::ValidateEntity(other))
         return;
-
-
-    // Reset touch callback to nullptr.
-    SetTouchCallback(nullptr);
 
     // Did we get a plane passed?
     if ( plane ) {
         //CLG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("misc/fhit3.wav"), 1, Attenuation::Normal, 0);
+		
+
+    // Reset touch callback to nullptr.
+    SetTouchCallback(nullptr);
 
 		// Calculate new angles to 'stop' at when hitting the plane.
         vec3_t normalAngles = vec3_euler( plane->normal );
         vec3_vectors( normalAngles, NULL, &right, NULL );
 		
-		SetAngles( vec3_euler( right ) );
+		//SetAngles( vec3_euler( right ) );
 
 		// New direction.
-        //vec3_t newDirection = vec3_dot(vec3_normalize( GetState().angles ), right);
+        vec3_t newDirection = vec3_cross( normalAngles, right );//vec3_dot( vec3_normalize( GetAngles() ), right );
+
+		SetAngles( vec3_euler( vec3_normalize( newDirection ) ) );
 
         //if (GetModelIndex() == sm_meat_index) {
             //SetAnimationFrame(GetAnimationFrame() + Frametime(2.5).count());

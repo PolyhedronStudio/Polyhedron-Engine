@@ -61,3 +61,46 @@ static constexpr float SLIDEBOX_SPEED_FALL_FAR		= -900;
 *
 *
 ***/
+/**
+*	@brief	For holding slide box movement state data. Each frame, this struct needs
+*			to be properly set up, after which it can be used to call slide move
+*			functions on and apply the final results to the entity. (If movement succeeded.)
+**/
+struct SlideBoxMove {
+	//! Velocity.
+	vec3_t velocity = vec3_zero();
+	//! Origin.
+	vec3_t origin = vec3_zero();
+
+	//! Mins/Maxs of our box to trace.
+	vec3_t mins = vec3_zero();
+	vec3_t maxs = vec3_zero();
+
+	//! Remaining time for a slidebox move.
+	float remainingTime = 0.f;
+
+	//! Direction to apply gravitational forces to.
+	vec3_t gravityDir = vec3_zero();
+
+	//! Slide Bounce reflection.
+	float slideBounce = SLIDEBOX_CLIP_BOUNCE;
+	//! The ground we're standing on, -1 if nothing.
+	int32_t groundEntity = -1;
+	//! Entity to skip for our box traces.
+	int32_t skipEntityNumber = -1;
+	//! Content Mask to trace with.
+	int32_t contentMask = 0;
+
+	// Number of touched plane normals.
+	int32_t numClipPlanes = 0;
+	vec3_t clipPlaneNormals[ MAX_SLIDEBOX_CLIPPING_PLANES ];
+
+	//! Number of touched entities.
+	int32_t numTouchEntities = 0;
+	int32_t touchEntities[ MAX_SLIDEBOX_TOUCH_ENTITIES ];
+};
+
+/**
+*	@brief
+**/
+const int32_t SG_SlideMove( SlideBoxMove *move );

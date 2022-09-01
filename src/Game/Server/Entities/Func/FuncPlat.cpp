@@ -258,7 +258,7 @@ void FuncPlat::Callback_EngageLowerMove() {
 
 	// Set EventID.
 	SetEventID(1);
-	gi.DPrintf( "%s: Setting (eventID: #%i, 'FUNC_PLAT_ENGAGE_RAISE_MOVE')!\n", __func__, GetEventID() );
+	gi.DPrintf( "%s: Setting (eventID: #%i, 'FUNC_PLAT_ENGAGE_LOWER_MOVE')!\n", __func__, GetEventID() );
 
 	// Begin lowering the platform, the callback will continue setting itself as 'think'
 	// callback until it has reached a passive state position again.

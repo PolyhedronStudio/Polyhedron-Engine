@@ -43,4 +43,13 @@ struct MoveType {
     static constexpr int32_t TossSlide  = 16;
     //! Similar to Toss but bounces back from the impacted surface instead.
     static constexpr int32_t Bounce     = 17;
+
+
+	/**
+	*
+	*	Experimental:
+	*
+	**/
+	static constexpr int32_t SlideBox		= 18;
+	static constexpr int32_t SlideBoxMove	= 19;
 };

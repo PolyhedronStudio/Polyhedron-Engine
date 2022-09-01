@@ -15,6 +15,7 @@
 // Physics.
 #include "Physics.h"
 #include "RootMotionMove.h"
+#include "SlideBox.h"
 
 // TODO: This needs some fixing hehe... ugly method but hey.
 #ifdef SHAREDGAME_SERVERGAME
@@ -96,7 +97,7 @@ void SG_AddGravity( GameEntity *sharedGameEntity ) {
     vec3_t velocity = sharedGameEntity->GetVelocity();
 
     // Apply gravity.
-    velocity.z -= sharedGameEntity->GetGravity() * sv_gravity->value * FRAMETIME_S.count();
+    velocity.z += -sharedGameEntity->GetGravity() * sv_gravity->value * FRAMETIME_S.count();
 
     // Apply new velocity to entity.
     sharedGameEntity->SetVelocity(velocity);
@@ -316,7 +317,7 @@ void SG_Impact( GameEntity *entityA, const SGTraceResult &traceResult ) {
 *			time is there for it to do so.
 *	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
 **/
-qboolean SG_RunThink(GameEntity *geThinker) {
+const bool SG_RunThink( GameEntity *geThinker ) {
 	if (!geThinker) {
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): Can't perform thinking routine, *geThinker == (nullptr)!\n", __func__, sharedModuleName ) );
 		return true;
@@ -329,7 +330,7 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
-	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time ) {
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time + FRAMERATE_MS) {
 #endif
 #ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
@@ -400,6 +401,17 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 		case MoveType::RootMotionMove:
 			SG_Physics_RootMotionMove(entityHandle);
 			break;
+	// SG_Physics_SlideBoxMove:
+		case MoveType::SlideBoxMove: {
+			GameEntity *geSlide = *entityHandle;
+			SlideBoxMove slideBoxMove;
+			int32_t geSlideContentMask = (geSlide && geSlide->GetClipMask() ? geSlide->GetClipMask() : BrushContentsMask::PlayerSolid);
+			const float slideBounce = 1.01f;
+			const float slideFriction = 10.f;
+
+			SG_Physics_SlideBoxMove( geSlide, geSlideContentMask, slideBounce, slideFriction, &slideBoxMove );
+			break;
+		}
 	// SG_Physics_Toss:
         case MoveType::Toss:
 		case MoveType::TossSlide:

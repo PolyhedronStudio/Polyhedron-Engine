@@ -65,13 +65,13 @@ void SG_Impact( GameEntity *entityA, const SGTraceResult &trace );
 /**
 *	@brief	Processes active game and physics logic of this entity for the current time/frame.
 **/
-void SG_RunEntity(SGEntityHandle &entityHandle);
+void SG_RunEntity( SGEntityHandle &entityHandle );
 /**
 *	@brief	Gives the entity a chance to process 'Think' callback logic if the
 *			time is there for it to do so.
 *	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
 **/
-qboolean SG_RunThink(GameEntity *geThinker);
+const bool SG_RunThink( GameEntity *geThinker );
 
 
 
@@ -120,3 +120,11 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle);
 *	@brief Logic for MoveType::(Push, Stop): Pushes all objects except for brush models. 
 **/
 void SG_Physics_Pusher( SGEntityHandle &gePusherHandle );
+
+
+
+/**
+*	@brief	Starts performing the RootMotion move process.
+**/
+struct SlideBoxMove;
+const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove );

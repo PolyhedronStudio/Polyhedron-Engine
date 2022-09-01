@@ -58,3 +58,15 @@ const int32_t SG_GetEntityNumber( const PODEntity *podEntity );
 *	@return	On success: POD Entity Number. On failure: -1 if the Game Entity or its belonging POD Entity was a (nullptr).
 **/
 const int32_t SG_GetEntityNumber( GameEntity *gameEntity );
+
+
+/**
+*	@brief	An easy way to acquire the proper POD Entity by its number.
+*	@return	(nullptr) in case of failure. Entity might be nonexistent.
+**/
+PODEntity *SG_GetPODEntityByNumber( const int32_t entityNumber );
+/**
+*	@brief	An easy way to acquire the proper POD Entity by its number.
+*	@return	(nullptr) in case of failure. Entity might be nonexistent.
+**/
+GameEntity *SG_GetGameEntityByNumber( const int32_t entityNumber );
