@@ -17,48 +17,8 @@
 #include "RootMotionMove.h"
 #include "SlideBox.h"
 
-// TODO: This needs some fixing hehe... ugly method but hey.
-#ifdef SHAREDGAME_SERVERGAME
-extern cvar_t *sv_maxvelocity;
-extern cvar_t *sv_gravity;
-cvar_t *GetSVMaxVelocity() {
-	return sv_maxvelocity;
-}
-cvar_t *GetSVGravity() {
-	return sv_gravity;
-}
-void CheckSVCvars() {
-
-}
-#endif
-
-#ifdef SHAREDGAME_CLIENTGAME
-static cvar_t *sv_maxvelocity = nullptr;
-static cvar_t *sv_gravity = nullptr;
-cvar_t *GetSVMaxVelocity() {
-	return sv_maxvelocity;
-}
-cvar_t *GetSVGravity() {
-	return sv_gravity;
-}
-static inline void CheckSVCvars() {
-	if (!sv_maxvelocity) {
-		#ifdef SHAREDGAME_CLIENTGAME
-		sv_maxvelocity = clgi.Cvar_Get("sv_maxvelocity", "2000", 0);
-		#endif	
-	}
-	if (!sv_gravity) {
-		#ifdef SHAREDGAME_CLIENTGAME
-		sv_gravity = clgi.Cvar_Get("sv_gravity", "875", 0);
-		#endif
-	}
-}
-#endif
-//========================================================================
-
-//================================================================================
 /*
-* GS_ClipVelocity
+* SG_ClipVelocity
 */
 vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
 	float backoff = vec3_dot( inVelocity, normal );
@@ -356,9 +316,6 @@ const bool SG_RunThink( GameEntity *geThinker ) {
 }
 
 void SG_RunEntity(SGEntityHandle &entityHandle) {
-	// TODO: Make this less hacky ofc, get normal sane access to cvars.
-	CheckSVCvars();
-
 	// Get GameEntity from handle.
 	if (!SGGameWorld::ValidateEntity(entityHandle)) {
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );

@@ -70,3 +70,15 @@ PODEntity *SG_GetPODEntityByNumber( const int32_t entityNumber );
 *	@return	(nullptr) in case of failure. Entity might be nonexistent.
 **/
 GameEntity *SG_GetGameEntityByNumber( const int32_t entityNumber );
+
+
+
+/***
+*
+*
+*	CVar Access.
+*
+*
+***/
+extern cvar_t *sv_maxvelocity;
+extern cvar_t *sv_gravity;

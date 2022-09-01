@@ -44,7 +44,7 @@ void SG_Print( int32_t printType, const std::string &printMessage ) {
 /***
 *
 *
-*	Utility Functions.
+*	Entity Functions.
 *
 *
 ***/
@@ -96,4 +96,26 @@ GameEntity *SG_GetGameEntityByNumber( const int32_t entityNumber ) {
 		return world->GetGameEntityByIndex( entityNumber );
 	}
 	return nullptr;
+}
+
+
+
+/***
+*
+*
+*	CVar Access.
+*
+*
+***/
+/**
+*	@return	Pointer to sv_maxvelocity cvar that resides on the client side.
+**/
+cvar_t *GetSVMaxVelocity() {
+	return sv_maxvelocity;
+}
+/**
+*	@return	Pointer to sv_gravity cvar that resides on the client side.
+**/
+cvar_t *GetSVGravity() {
+	return sv_gravity;
 }

@@ -16,18 +16,7 @@
 #include "../Physics.h"
 #include "../RootMotionMove.h"
 
-// TODO: This needs some fixing hehe... ugly method but hey.
-#ifdef SHAREDGAME_SERVERGAME
-extern cvar_t *sv_maxvelocity;
-extern cvar_t *sv_gravity;
-extern void CheckSVCvars();
-#endif
 
-#ifdef SHAREDGAME_CLIENTGAME
-extern cvar_t *GetSVMaxVelocity();
-extern cvar_t *GetSVGravity();
-#endif
-//========================================================================
 
 /**
 *	@brief Logic for MoveType::(None, PlayerMove): Gives the entity a chance to 'Think', does not execute any physics logic.

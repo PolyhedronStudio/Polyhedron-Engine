@@ -158,15 +158,20 @@ extern cvar_t* cl_chat_filter;
 **/
 extern cvar_t* cvar_pt_beam_lights;
 
+
 /**
 *	Server.
 **/
-extern cvar_t* sv_paused;
+extern cvar_t *sv_paused;
+extern cvar_t *sv_maxvelocity;
+extern cvar_t *sv_gravity;
+
 
 /**
 *	Video.
 **/
 extern cvar_t* vid_rtx;				// 1 if we're in RTX mode, 0 if not.
+
 
 /**
 *	Developer cvars.

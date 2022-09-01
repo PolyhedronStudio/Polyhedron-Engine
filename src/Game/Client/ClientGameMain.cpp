@@ -83,7 +83,9 @@ cvar_t* cvar_pt_beam_lights     = nullptr;
 /**
 *	Server.
 **/
-cvar_t *sv_paused   = nullptr;
+cvar_t *sv_paused		= nullptr;
+cvar_t *sv_maxvelocity	= nullptr;
+cvar_t *sv_gravity		= nullptr;
 
 /**
 *	Video.

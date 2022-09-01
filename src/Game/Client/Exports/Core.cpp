@@ -150,7 +150,12 @@ void ClientGameCore::Initialize() {
     cl_noskins->changed = cl_noskins_changed;
     cl_predict = clgi.Cvar_Get("cl_predict", NULL, 0);
     cl_rollhack = clgi.Cvar_Get("cl_rollhack", NULL, 0);
+
+	// Fetch server created cvars.
+	//
     sv_paused = clgi.Cvar_Get("sv_paused", NULL, 0);
+	sv_gravity = clgi.Cvar_Get("sv_gravity", NULL, 0);
+	sv_maxvelocity = clgi.Cvar_Get("sv_maxvelocity", NULL, 0);
 
     // Create the CG Module its own cvars here.
     cl_footsteps = clgi.Cvar_Get("cl_footsteps", "1", 0);

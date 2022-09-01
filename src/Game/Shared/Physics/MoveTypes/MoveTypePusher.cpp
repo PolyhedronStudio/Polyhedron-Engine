@@ -16,19 +16,7 @@
 #include "../Physics.h"
 #include "../RootMotionMove.h"
 
-// TODO: This needs some fixing hehe... ugly method but hey.
-#ifdef SHAREDGAME_SERVERGAME
-extern cvar_t *sv_maxvelocity;
-extern cvar_t *sv_gravity;
-extern void CheckSVCvars();
 
-#endif
-
-#ifdef SHAREDGAME_CLIENTGAME
-extern cvar_t *GetSVMaxVelocity();
-extern cvar_t *GetSVGravity();
-#endif
-//========================================================================
 
 /**
 *	@brief	Contains data of entities that are pushed by MoveType::Push objects. (BrushModels usually.)

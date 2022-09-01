@@ -128,6 +128,10 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 *			loaded up the BSP map data. This gives it a chance to initialize game objects.
 **/
 void ClientGameExports::ClientConnect() {
+	// First fetch ourselves the sv_ cvars we need.
+	sv_gravity = clgi.Cvar_Get("sv_gravity", NULL, 0);
+	sv_maxvelocity = clgi.Cvar_Get("sv_maxvelocity", NULL, 0);
+
 	// Setup a fresh game locals object.
 	game = ClientGameLocals{};
 	game.Initialize();
