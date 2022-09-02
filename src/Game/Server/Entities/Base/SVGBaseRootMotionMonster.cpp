@@ -391,7 +391,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	const float oldVelocityLength = vec3_length( GetVelocity() );
 
 	// Bound our velocity within sv_maxvelocity limits.
-	SG_CheckVelocity( this );
+	SG_BoundVelocity( this );
 
     // Get angular velocity for applying rotational friction.
     vec3_t angularVelocity = GetAngularVelocity();

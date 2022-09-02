@@ -17,37 +17,74 @@
 #include "RootMotionMove.h"
 #include "SlideBox.h"
 
-/*
-* SG_ClipVelocity
-*/
-vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
-	float backoff = vec3_dot( inVelocity, normal );
+//#define SG_SLIDEBOX_DEBUG_TRAPPED
+#define SG_VELOCITY_BOUNCE_CLAMPING
+#define SG_VELOCITY_CLIP_CLAMPING
 
-	if( backoff <= 0 ) {
-		backoff *= overbounce;
+static constexpr float STOP_EPSILON = 0.1;
+
+//static inline const bool IsGroundPlane( const CollisionPlane &plane, const vec3_t &gravityDir) {
+//	return ( vec3_dot( plane.normal, gravityDir ) < -0.45f);
+//}
+
+/***
+*
+*
+*	Velocity:
+*
+*
+***/
+/**
+*	@brief	Bounce Velocity.
+**/
+const vec3_t SG_BounceVelocity( const vec3_t &in, const vec3_t &normal, float overBounce ) {
+	// Calculate 'back off' factor.
+	float backOff = vec3_dot( in, normal );
+
+	if( backOff <= 0 ) {
+		backOff *= overBounce;
 	} else {
-		backoff /= overbounce;
+		backOff /= overBounce;
 	}
 
-	// Calculate out velocity vector.
-	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
+	// Change in velocity.
+	const vec3_t change = normal * backOff;
 
-	// SlideMove clamp it.
-#if defined(SG_ROOTMOTION_MOVE_CLAMPING) && SG_ROOTMOTION_MOVE_CLAMPING == 1
-	{
-		float oldSpeed = vec3_length(inVelocity);
-		float newSpeed = vec3_length(outVelocity);
-
-		if (newSpeed > oldSpeed) {
-			outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
-		}
+#ifndef SG_VELOCITY_BOUNCE_CLAMPING
+	// Our final bounce back velocity.
+	return in - change;
+#else
+	vec3_t bounceVelocity = in - change;
+	const float oldSpeed = vec3_length( in );
+	const float newSpeed = vec3_length( bounceVelocity );
+	if( newSpeed > oldSpeed ) {
+		bounceVelocity = vec3_normalize( bounceVelocity );
+		bounceVelocity = vec3_scale( bounceVelocity, oldSpeed );
 	}
+	return bounceVelocity;
 #endif
-
-	return outVelocity;
 }
 
-//================================================================================
+/**
+*	@brief	Clip Velocity.
+**/
+const vec3_t SG_ClipVelocity( const vec3_t &velocity, const vec3_t &normal ) {
+	// Calculate 'back off' factor.
+	const float backOff = vec3_dot( velocity, normal );
+	
+#ifndef SG_VELOCITY_CLIP_CLAMPING
+	return velocity - ( normal * backOff );
+#else
+	vec3_t clippedVelocity = velocity - ( normal * backOff );
+	const float oldSpeed = vec3_length( velocity );
+	const float newSpeed = vec3_length( clippedVelocity );
+	if( newSpeed > oldSpeed ) {
+		clippedVelocity = vec3_normalize( clippedVelocity );
+		clippedVelocity = vec3_scale( clippedVelocity, oldSpeed );
+	}
+	return clippedVelocity;
+#endif
+}
 
 /**
 *	@brief	Applies 'downward' gravity forces to the entity.
@@ -257,7 +294,7 @@ void SG_CheckGround( GameEntity *geCheck ) {
 /**
 *	@brief	Keep entity velocity within bounds.
 **/
-void SG_CheckVelocity( GameEntity *geCheck ) {
+void SG_BoundVelocity( GameEntity *geCheck ) {
 	
 	// Get Velocity.
 	const vec3_t entityVelocity = geCheck->GetVelocity();

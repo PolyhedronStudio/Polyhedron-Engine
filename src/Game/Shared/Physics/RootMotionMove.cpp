@@ -148,16 +148,16 @@ static void RM_AddClippingPlane( RootMotionMoveState *moveState, const vec3_t &p
 *	@return	Clipped by normal velocity.
 **/
 inline vec3_t RM_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, const float overbounce ) {
-	float backoff = vec3_dot( inVelocity, normal );
+	float backOff = vec3_dot( inVelocity, normal );
 
-	if( backoff <= 0 ) {
-		backoff *= overbounce;
+	if( backOff <= 0 ) {
+		backOff *= overbounce;
 	} else {
-		backoff /= overbounce;
+		backOff /= overbounce;
 	}
 
 	// Calculate out velocity vector.
-	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
+	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backOff ) );
 
 	// RootMotionMove clamp it.
 #if defined(RM_ROOTMOTION_MOVE_CLAMPING) && RM_ROOTMOTION_MOVE_CLAMPING == 1
@@ -182,7 +182,7 @@ static void RM_ClipVelocityToClippingPlanes( RootMotionMoveState *moveState ) {
 		const vec3_t &clipPlaneNormal = moveState->clipPlaneNormals[i];
 
 		// Skip if its looking in the same direction than the velocity,
-		if( vec3_dot( moveState->velocity, clipPlaneNormal ) > (FLT_EPSILON - 1.0f) ) {
+		if( vec3_dot( moveState->velocity, clipPlaneNormal ) > 0.015625) {//(FLT_EPSILON - 1.0f) ) {
 			continue;
 		}
 

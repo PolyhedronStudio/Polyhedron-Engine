@@ -35,7 +35,7 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	}
 	
 	// Bound our velocity within sv_maxvelocity limits.
-	SG_CheckVelocity( geSlider );
+	SG_BoundVelocity( geSlider );
 
     // Get angular velocity for applying rotational friction.
     const vec3_t angularVelocity = geSlider->GetAngularVelocity();

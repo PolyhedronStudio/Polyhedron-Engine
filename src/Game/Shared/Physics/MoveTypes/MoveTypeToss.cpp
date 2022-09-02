@@ -109,7 +109,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// Check velocity and maintain it in bounds.
-	SG_CheckVelocity( ent );
+	SG_BoundVelocity( ent );
 
 	// Add gravitational forces.
 	if( ent->GetMoveType()  != MoveType::Fly && !ent->GetGroundEntityHandle()) {
@@ -145,7 +145,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 		} */
 
 		// Clip velocity.
-		ent->SetVelocity(SG_ClipVelocity( ent->GetVelocity(), traceResult.plane.normal, backOff ));
+		ent->SetVelocity( SG_ClipVelocity( ent->GetVelocity(), traceResult.plane.normal ) );
 
 		// Store clipped velocity.
 		const vec3_t clippedVelocity = ent->GetVelocity();

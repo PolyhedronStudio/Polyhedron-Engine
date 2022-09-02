@@ -499,7 +499,7 @@ list( APPEND SRC_GAME_SHARED
 	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypeNoClip.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypeNone.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypePusher.cpp"
-	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypeSlideBoxMove.cpp"
+	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypeTossSlideBox.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/MoveTypes/MoveTypeToss.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/Physics.cpp"
 	"${SRC_GAME_SHARED_DIR}/Physics/RootMotionMove.cpp"

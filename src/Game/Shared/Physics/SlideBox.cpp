@@ -25,7 +25,7 @@
 static constexpr int32_t MAX_SLIDEBOX_CLIP_PLANES = 16;
 
 //! Epsilon value for plane interaction tests.
-static constexpr float SLIDEBOX_PLANEINTERACT_EPSILON = 0.05;
+static constexpr float SLIDEBOX_PLANEINTERACT_EPSILON = 0.015625;
 
 // 
 static constexpr int32_t SLIDEBOXFLAG_PLANE_TOUCHED = 16;
@@ -35,51 +35,12 @@ static constexpr int32_t SLIDEBOXFLAG_BLOCKED = 2;   // it was blocked at some p
 static constexpr int32_t SLIDEBOXFLAG_MOVED = 1;
 
 //#define SG_SLIDEBOX_DEBUG_TRAPPED
-#define SG_SLIDEBOX_CLAMPING
 
 static constexpr float STOP_EPSILON = 0.1;
 
 //static inline const bool IsGroundPlane( const CollisionPlane &plane, const vec3_t &gravityDir) {
 //	return ( vec3_dot( plane.normal, gravityDir ) < -0.45f);
 //}
-
-/***
-*
-*
-*	SlideBox Utilities:
-*
-*
-***/
-/**
-*	@brief	Clip velocity.
-**/
-void SG_ClipVelocity( const vec3_t &in, const vec3_t &normal, vec3_t &out, float overbounce ) {
-	// Calculate 'back off' factor.
-	float backOff = vec3_dot( in, normal );
-
-	if( backOff <= 0 ) {
-		backOff *= overbounce;
-	} else {
-		backOff /= overbounce;
-	}
-
-	const vec3_t change = normal * backOff;
-	out = in - change;
-	//for( i = 0; i < 3; i++ ) {
-	//	change = normal[i] * backoff;
-	//	out[i] = in[i] - change;
-	//}
-#ifdef SG_SLIDEBOX_CLAMPING
-	{
-		const float oldspeed = vec3_length( in );
-		const float newspeed = vec3_length( out );
-		if( newspeed > oldspeed ) {
-			out = vec3_normalize( out );
-			out = vec3_scale( out, oldspeed );
-		}
-	}
-#endif
-}
 
 
 
@@ -152,10 +113,10 @@ static void SG_ClipVelocityToClippingPlanes( SlideBoxMove *move ) {
 	int32_t i;
 
 	for( i = 0; i < move->numClipPlanes; i++ ) {
-		if( DotProduct( move->velocity, move->clipPlaneNormals[i] ) >= SLIDEBOX_PLANEINTERACT_EPSILON ) {
+		if( vec3_dot( move->velocity, move->clipPlaneNormals[i] ) >= SLIDEBOX_PLANEINTERACT_EPSILON ) {
 			continue; // looking in the same direction than the velocity
 		}
-		SG_ClipVelocity( move->velocity, move->clipPlaneNormals[i], move->velocity, move->slideBounce );
+		move->velocity = SG_BounceVelocity( move->velocity, move->clipPlaneNormals[i], move->slideBounce );
 	}
 }
 

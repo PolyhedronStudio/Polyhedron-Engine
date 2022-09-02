@@ -43,14 +43,17 @@ const bool SG_RunThink( GameEntity *geThinker );
 *
 **/
 /**
-*	@brief	Clips velocity.
+*	@brief	Bounce Velocity.
 **/
-vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, const float overbounce );
+const vec3_t SG_BounceVelocity( const vec3_t &in, const vec3_t &normal, float overbounce );
+/**
+*	@brief	Clip Velocity.
+**/
+const vec3_t SG_ClipVelocity( const vec3_t &velocity, const vec3_t &normal );
 /**
 *	@brief	Keep entity velocity within bounds.
 **/
-void SG_CheckVelocity( GameEntity *geCheck );
-
+void SG_BoundVelocity( GameEntity *geCheck );
 
 
 /**
@@ -72,7 +75,7 @@ const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction );
 /**
 *	@brief	Apply ground friction forces to entity.
 **/
-void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction, const float stopSpeed = 0.1f );
+void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction, const float stopSpeed );
 
 
 

@@ -114,25 +114,34 @@ static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 /**
 *   @brief  Slide off of the impacted plane.
 **/
-static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float bounce) {
-
-    float backoff = vec3_dot(in, normal);
-
-    if (backoff < 0.0f) {
-        backoff *= bounce;
-    } else {
-        backoff /= bounce;
-    }
-	vec3_t outVelocity = in - vec3_scale(normal, backoff);
+static const vec3_t PM_ClipVelocity( const vec3_t &in, const vec3_t &normal, float overBounce ) {
+	// Calculate 'back off' factor.
+	const float backOff = vec3_dot( in, normal );
 	
+	// Return clipped velocity.
+	return in - ( normal * backOff );
+
+// OLD CLIPVEL.
+//  float backoff = vec3_dot(in, normal);
+
+//  if (backoff < 0.0f) {
+//      backoff *= overBounce;
+//  } else {
+//      backoff /= overBounce;
+//  }
+//	vec3_t outVelocity = in - vec3_scale(normal, backoff);
+
+	///////// STARTOF CLAMPING PART, WAS DISABLED. ///////	
 	//const float oldSpeed = vec3_length(in);
 	//const float newSpeed = vec3_length(outVelocity);
 
 	//if (newSpeed > oldSpeed) {
 	//	outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
 	//}
-	
-    return outVelocity;
+	//
+	///////// END OF CLAMPING PART, WAS DISABLED. ///////
+
+//  return outVelocity;
 }
 
 /**

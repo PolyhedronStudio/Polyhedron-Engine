@@ -188,10 +188,6 @@ struct RootMotionMoveState {
 };
 
 /**
-*	@return	Clipped by normal velocity.
-**/
-vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce );
-/**
 *	@brief	Performs the actual movement making use of SG_RootMotion_MoveFrame.
 *	@return	An int32_t containing the move result mask ( RootMotionMoveResult Flags )
 **/

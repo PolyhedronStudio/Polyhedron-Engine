@@ -1287,7 +1287,6 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 						//auto *hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
 						auto *boneNode = entitySkeleton.bones[ boneNumber ].boneTreeNode;
 
-						CLG_Print( PrintType::DeveloperWarning, fmt::format( "BoneNr={}\n", boneNumber ) );
 						// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
 						clgi.ES_RecursiveBlendFromBone( blendActionBonePose, dominatingBlendPose, boneNode, baState->backLerp, fraction );
 
