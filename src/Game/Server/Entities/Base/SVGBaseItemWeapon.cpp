@@ -265,7 +265,7 @@ void SVGBaseItemWeapon::InstanceWeaponReload(SVGBasePlayer* player, SVGBaseItemW
     }
 
     // Ensure that the player has enough ammo to even be capable of reloading.
-    if (!player->CanReloadWeaponClip(weapon->GetIdentifier())) {
+    if ( !player->CanReloadWeaponClip( weapon->GetIdentifier() ) ) {
         // TODO:    This is a sad case, got to play a special sound for it AND...
         //          try and switch to another weapon?
         return;

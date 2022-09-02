@@ -113,7 +113,10 @@ public:
     *   @return False if the clip is empty. True otherwise.
     **/
     virtual uint32_t TakeWeaponClipAmmo(uint32_t weaponID, uint32_t amount);
-
+	/**
+	*	@return	The amount of ammo currently residing in the player's weapon clip.
+	**/
+	virtual uint32_t GetWeaponClipAmmoCount( uint32_t weaponID );
     /**
     *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
     **/

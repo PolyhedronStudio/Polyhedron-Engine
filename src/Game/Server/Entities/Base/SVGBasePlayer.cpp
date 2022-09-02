@@ -544,7 +544,7 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
 /**
 *   @return True if the player has any ammo left for this weapon to refill its clip.
 **/
-qboolean SVGBasePlayer::CanReloadWeaponClip(uint32_t weaponID) {
+qboolean SVGBasePlayer::CanReloadWeaponClip( uint32_t weaponID ) {
     // Get client.
     ServerClient* client = GetClient();
 
@@ -560,20 +560,27 @@ qboolean SVGBasePlayer::CanReloadWeaponClip(uint32_t weaponID) {
     if (!weaponInstance) {
 	    return false;
     }
-
-    // See if the player has any ammo left of this weapon type.
-    if (HasItem(weaponInstance->GetPrimaryAmmoIdentifier()) >= 1) {
-        return true;
+		
+	// Do NOT reload if the clip is full.
+	const int32_t clipAmmoCount = GetWeaponClipAmmoCount( weaponID );
+	const int32_t clipAmmoLimit = weaponInstance->GetClipAmmoLimit();
+	if ( clipAmmoCount == clipAmmoLimit ) {
+		return false;
+	}
+    // See if the player has any ammo left of this weapon type,
+    const int32_t carryingAmmoCount = HasItem(weaponInstance->GetPrimaryAmmoIdentifier());
+	if ( carryingAmmoCount <= 0 ) {
+        return false;
     }
 
-    // No ammo left to reload with.
-    return false;
+    // We can reload.
+    return true;
 }
 /**
 *   @brief  Refills the weapon's ammo clip.
 *   @return True on success, false when the player ran out of ammo to refill with.
 **/
-qboolean SVGBasePlayer::ReloadWeaponClip(uint32_t weaponID) {
+qboolean SVGBasePlayer::ReloadWeaponClip( uint32_t weaponID ) {
     // Get client.
     ServerClient* client = GetClient();
 
@@ -635,9 +642,6 @@ uint32_t SVGBasePlayer::TakeWeaponClipAmmo(uint32_t weaponID, uint32_t amount) {
 	    return false;
     }
 
-    // Acquire primary ammoID.
-    uint32_t ammoID = weaponInstance->GetPrimaryAmmoIdentifier();
-
     // Get amount of ammo currently in the clip as well as the clip ammo limit.
     uint32_t clipAmmo       = client->persistent.inventory.clipAmmo[weaponID];
     uint32_t clipAmmoLimit  = weaponInstance->GetClipAmmoLimit();
@@ -661,7 +665,26 @@ uint32_t SVGBasePlayer::TakeWeaponClipAmmo(uint32_t weaponID, uint32_t amount) {
     // Return the amount.
     return amount;
 }
+/**
+*	@return	The amount of ammo currently residing in the player's weapon clip.
+**/
+uint32_t SVGBasePlayer::GetWeaponClipAmmoCount( uint32_t weaponID ) {
+    // Get client.
+    ServerClient* client = GetClient();
+    // Sanity check.
+    if ( !client ) {
+	    return 0;
+    }
 
+    // Acquire the item instance of the weapon type.
+    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID( weaponID );
+    // If we can't find the instance, return false.
+    if ( !weaponInstance ) {
+	    return 0;
+    }
+
+	return client->persistent.inventory.clipAmmo[weaponID];
+}
 
 /**
 *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)

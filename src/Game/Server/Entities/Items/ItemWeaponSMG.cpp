@@ -176,7 +176,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
     switch (newState) {
         case WeaponState::Holster:
             // Let the player entity play the 'holster SMG' sound.
-            client->weaponSound = SVG_PrecacheSound("weapons/smg45/reload.wav");
+            client->weaponSound = SVG_PrecacheSound("weapons/smg45/holster_weapon1.wav");
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
