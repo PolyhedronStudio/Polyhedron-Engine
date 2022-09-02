@@ -98,36 +98,36 @@ void ItemAmmo9mm::Spawn() {
 **/
 qboolean ItemAmmo9mm::Ammo9mmPickup(IServerGameEntity *other) {
     // Ensure other is a valid pointer.
-    if (!other || !other->IsSubclassOf<SVGBasePlayer>()) {
+    if ( !other || !other->IsSubclassOf<SVGBasePlayer>() ) {
         return false;
     }
 
     // Cast to SVGBasePlayer.
-    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(other);
+    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>( other );
     // Get client.
     ServerClient* client = player->GetClient();
 
     // Last sanity check.
-    if (!client) {
+    if ( !client ) {
         return false;
     }
 
     // If the player can't add ammo, return false so this item won't get picked up.
-    if (!player->GiveAmmo(GetIdentifier(), 36)) {
-	    SVG_CenterPrint(player, "You're already carring too much 9mm ammo.");
+    if ( !player->GiveAmmo( GetIdentifier(), 36 )  ) {
+	    //SVG_CenterPrint(player, "You're already carring too much 9mm ammo.");
         return false;
     }
 
     // Play sound.
-    SVG_Sound(other, SoundChannel::Item, SVG_PrecacheSound("weapons/pickup1.wav"), 1, Attenuation::Normal, 0);
+    SVG_Sound( other, SoundChannel::Item, SVG_PrecacheSound("weapons/pickup1.wav"), 1, Attenuation::Normal, 0 );
 
     // Let it be known we picked the fucker up.
-    SVG_CenterPrint(other, std::string("Picked up item: ") + GetClassname());
+    SVG_CenterPrint( other, std::string("Picked up item: ") + GetClassname() );
 
     // Set a respawn think for after 2 seconds.
-    if (!GetGameMode()->IsClass<DefaultGameMode>()) {
-        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
-        SetNextThinkTime(level.time + 2s);
+    if ( !GetGameMode()->IsClass<DefaultGameMode>() ) {
+        SetThinkCallback( &SVGBaseItem::BaseItemDoRespawn );
+        SetNextThinkTime( level.time + 2s);
     }
 
     return true;

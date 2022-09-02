@@ -79,7 +79,7 @@ void ItemWeaponSMG::Spawn() {
     // Set the count for the amount of ammo this weapon will give by default.
     SetCount(36);
 
-    // Ensure it can be respawned.
+    // Ensure it can be respawned. 
     SetFlags(GetFlags() | EntityFlags::Respawn);
 
     // Setup our ItemWeaponSMG callbacks.
@@ -408,7 +408,7 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
             AngleVectors(angles, &forward, &right, NULL);
 
             // Calculate projected end point from source.
-            vec3_t offset = {0, 8, static_cast<float>(player->GetViewHeight() - 8)};
+            vec3_t offset = {0, 0, static_cast<float>(player->GetViewHeight() - 8)};
             vec3_t bulletStart = SVG_ProjectSource(player->GetOrigin(), offset, forward, right);
 
             // Fire a bullet.

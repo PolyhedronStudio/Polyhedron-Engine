@@ -26,9 +26,6 @@
 *   @brief  Client Entity Muzzleflash Effects.
 **/
 void MuzzleFlashEffects::ClientMuzzleFlash() {
-    vec3_t      fv, rv;
-    cdlight_t* dl;
-    PODEntity* pl;
     float       volume;
     char        soundname[MAX_QPATH];
     
@@ -38,13 +35,18 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
     }
 #endif
 
-    pl = &cs->entities[mzParameters.entity];
+    PODEntity *pl = &cs->entities[mzParameters.entity];
+    cdlight_t* dl = DynamicLights::GetDynamicLight(mzParameters.entity);
+    dl->origin = pl->currentState.origin;//, dl->origin;
 
-    dl = DynamicLights::GetDynamicLight(mzParameters.entity);
-    dl->origin = pl->currentState.origin, dl->origin;
-    AngleVectors(pl->currentState.angles, &fv, &rv, NULL);
-    dl->origin = vec3_fmaf(dl->origin, 18, fv);
-    dl->origin = vec3_fmaf(dl->origin, 16, rv);
+	// Get forward and right vectors to calculate origin with.
+    vec3_t vForward = vec3_zero();
+	vec3_t vRight = vec3_zero();
+	AngleVectors(pl->currentState.angles, &vForward, &vRight, NULL);
+	// Offset from said origin a tiny whee bit.
+    dl->origin = vec3_fmaf(dl->origin, RandomRangef(18, 32), vForward);
+    dl->origin = vec3_fmaf(dl->origin, 16, vRight);
+	
     if (mzParameters.silenced)
         dl->radius = 100 + (rand() & 31);
     else
@@ -60,27 +62,26 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
     switch (mzParameters.weapon) {
     case MuzzleFlashType::Smg45: {
         dl->color = vec3_t{0.95, 0.85, 0.65};
-        dl->die = cl->time + CLG_1_FRAMETIME * 8;
+        dl->die = cl->time + FRAMERATE_MS.count(); //CLG_1_FRAMETIME * 8;
         //dl->radius = 350 + (rand() & 31);
         dl->decay = CLG_1_FRAMETIME;
-        dl->velocity = vec3_fmaf(pl->currentState.origin, 5, pl->currentState.angles);//, vec3_t { 0.f, 0.f, 1.f };
+        //dl->velocity = vec3_fmaf(pl->currentState.origin, 5, pl->currentState.angles);//, vec3_t { 0.f, 0.f, 1.f };
         dl->radius = RandomRangeui(48, 64);
-     //   //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, Attenuation::Normal, 0);
-	    //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/v_mark23/fire0.wav"), volume, Attenuation::Normal, 0);
-            // Toss a dice, 50/50, which fire effect to play.
-            uint32_t fireSound = RandomRangeui(0, 2);
 
-            // Let the player entity play the 'draw SMG' sound.
-            if (fireSound == 0) {
-                clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/smg45/fire1.wav"), volume, Attenuation::Normal, 0);
-                //client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
-                //SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
-            } else {
-                clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/smg45/fire2.wav"), volume, Attenuation::Normal, 0);
-                //client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
-                //SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
-            }
-        break;
+        // Toss a dice, 50/50, which fire effect to play.
+        uint32_t fireSound = RandomRangeui(0, 2);
+
+        // Let the player entity play the 'draw SMG' sound.
+        if (fireSound == 0) {
+            clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/smg45/fire1.wav"), volume, Attenuation::Normal, 0);
+            //client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
+            //SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
+        } else {
+            clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/smg45/fire2.wav"), volume, Attenuation::Normal, 0);
+            //client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
+            //SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
+        }
+    break;
     }
     case MuzzleFlashType::MachineGun:
         dl->color = vec3_t{1, 1, 0};

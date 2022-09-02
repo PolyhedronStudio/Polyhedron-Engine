@@ -58,8 +58,8 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
         AngleVectors(direction, &forward, &right, &up);
 
         // Grab a random number within range of horizontalSpread and verticalSpread.
-        float rightOffset   = crandom() * horizontalSpread;
-        float upOffset      = crandom() * verticalSpread;
+        float rightOffset   = RandomRangef(-1.f, 1.f) * horizontalSpread; //crandom() * horizontalSpread;
+        float upOffset      = RandomRangef(-1.f, 1.f) * verticalSpread; //crandom() * verticalSpread;
 
         // Calculate end coordinate of where to trace to.
         shotEndPosition = vec3_fmaf(start, WORLD_SIZE, forward);
@@ -123,8 +123,8 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
                 AngleVectors(direction, &forward, &right, &up);
                 
                 // Grab a random number within range of horizontalSpread and verticalSpread.
-                float rightOffset   = crandom() * horizontalSpread * 2;
-                float upOffset      = crandom() * verticalSpread * 2;
+				float rightOffset   = RandomRangef(-1.f, 1.f) * horizontalSpread * 2; //crandom() * horizontalSpread * 2;
+				float upOffset      = RandomRangef(-1.f, 1.f) * verticalSpread * 2; //crandom() * verticalSpread * 2;
 
                 // Calculate end coordinate of where to trace to.
                 shotEndPosition = vec3_fmaf(start, WORLD_SIZE, forward);
@@ -171,7 +171,8 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
             trace = SVG_Trace(position, vec3_zero(), vec3_zero(), liquidStartPosition, trace.gameEntity, BrushContentsMask::Liquid);
         }
 
-        position = vec3_scale(liquidStartPosition + trace.endPosition, 0.5f);
+		position = liquidStartPosition + trace.endPosition;
+        position = vec3_scale(position, 0.5f);
 
         gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::BubbleTrailA);

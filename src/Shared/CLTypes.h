@@ -186,8 +186,8 @@ struct cdlight_t {
     vec3_t  color;
     vec3_t  origin;
     float   radius;
-    float   die;        // stop lighting after this time
-    float   decay;      // drop this each second
+    double   die;	      // stop lighting after this time
+    double	decay;	      // drop this each second
 	vec3_t  velocity;     // move this far each second
     //float   minlight;   // don't add when contributing less
 };

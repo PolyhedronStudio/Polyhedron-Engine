@@ -2035,7 +2035,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 			//	model_instance_idx++;
 			//}
 			//}
-
+			
 			if (entity->flags & RenderEffects::ViewerModel)
 				viewer_model_indices[viewer_model_num++] = i;
 			else if (entity->flags & RenderEffects::WeaponModel)
@@ -2056,7 +2056,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 
 			if (model->num_light_polys > 0) 			{
 				mat4_t transform;
-				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
+				const bool is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
 
 				// Instance Model Lights.

@@ -441,7 +441,7 @@ void ViewCamera::AddWeaponViewModel() {
 
 
     // Setup basic render entity flags for our view weapon.
-    rEntWeaponViewModel.flags =  RenderEffects::DepthHack | RenderEffects::WeaponModel | RenderEffects::MinimalLight;
+    rEntWeaponViewModel.flags = RenderEffects::MinimalLight | RenderEffects::DepthHack | RenderEffects::WeaponModel;
     if (info_hand->integer == 1) {
         rEntWeaponViewModel.flags |= RF_LEFTHAND;
     }
@@ -449,9 +449,6 @@ void ViewCamera::AddWeaponViewModel() {
     // Add vieworigin and add interpolated playerstate gunoffsets.
     PlayerState *currentPlayerState = &cl->frame.playerState;
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
-
-	// First calculate the actual bob move cycle for the current frame and state.
-	//CalculateBobMoveCycle( oldPlayerState, currentPlayerState );
 
 	// Calculate the weapon view bob.
 	CalculateWeaponViewBob( oldPlayerState, currentPlayerState );
@@ -496,12 +493,12 @@ void ViewCamera::AddWeaponViewModel() {
     // Add the gun render entity to the current render frame.
     clge->view->AddRenderEntity( rEntWeaponViewModel );
 
-    // OpenGL: Yeah... 
-    if (shellFlags && !vid_rtx->integer) {
-        rEntWeaponViewModel.alpha = 0.30f;
-        rEntWeaponViewModel.flags |= shellFlags | RenderEffects::Translucent;
-        clge->view->AddRenderEntity( rEntWeaponViewModel );
-    }
+    //// OpenGL: Yeah... 
+    //if (shellFlags && !vid_rtx->integer) {
+    //    rEntWeaponViewModel.alpha = 0.30f;
+    //    rEntWeaponViewModel.flags |= shellFlags | RenderEffects::Translucent;
+    //    clge->view->AddRenderEntity( rEntWeaponViewModel );
+    //}
 }
 
 
