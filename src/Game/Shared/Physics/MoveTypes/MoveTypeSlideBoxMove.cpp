@@ -18,30 +18,14 @@
 
 
 
-/**
-*	@brief	Performs a velocity based 'Root Motion' movement for general NPC's.
-*			If EntityFlags::Swim or EntityFlags::Fly are not set, it'll be affected
-*			by gravity and perform continious ground and step checks in order
-*			to navigate the terrain properly.
-**/
-void SG_Physics_SlideBoxMove( SGEntityHandle &entityHandle ) {
-    // Assign handle to base entity.
-    GameEntity* gameEntity = *entityHandle;
-
-    // Ensure it is a valid entity.
-    if (!gameEntity) {
-		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
-        return;
-    }
-
-    // Run think method.
-    SG_RunThink(gameEntity);
-}
 
 /**
-*	@brief	Starts performing the RootMotion move process.
+*	@brief	Performs a SlideBox move that expects the entity to have been 'tossed' by setting a 
+*			velocity and angular velocity into a random direction. Does not perform 'Stepping' up
+*			stairs. When touching a 'walkable' surface it'll gradually slow down by friction and
+*			stop rotating.
 **/
-const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove ) {
+const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove ) {
 	/**
 	*	Ensure our SlideMove Game Entity is non (nullptr).
 	**/
@@ -184,7 +168,7 @@ const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t conte
 
 		// Apply ground friction now since we're officially on-ground.
 		if (geNewGroundEntity) {
-			SG_AddGroundFriction( geSlider, friction );
+			SG_AddGroundFriction( geSlider, ( friction > 0 ? friction : SLIDEBOX_GROUND_FRICTION), SLIDEBOX_STOP_SPEED );
 		}
 
 		// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.

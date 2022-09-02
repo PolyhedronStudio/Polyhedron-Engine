@@ -670,7 +670,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
             refreshEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            refreshEntity.angles = vec3_mix_euler(refreshEntity.angles, podEntity->currentState.angles, cl->lerpFraction);//vec3_mix(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+            refreshEntity.angles = vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (currentState->modelIndex == 255 && cl_rollhack->integer) {

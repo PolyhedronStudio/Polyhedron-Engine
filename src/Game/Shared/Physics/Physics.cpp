@@ -104,7 +104,7 @@ const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction ) {
 /**
 *	@brief	Apply ground friction forces to entity.
 **/
-void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction ) {
+void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction, const float stopSpeed ) {
 	if (!geGroundFriction) {
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): can't add ground friction, geGroundFriction == (nullptr)!\n", __func__, sharedModuleName ) );
 		return;
@@ -113,8 +113,8 @@ void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction ) 
 	vec3_t newVelocity = geGroundFriction->GetVelocity();
 	const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
 	if (speed) {
-		const float friction = ROOTMOTION_MOVE_GROUND_FRICTION;
-		const float control = speed < ROOTMOTION_MOVE_STOP_SPEED ? ROOTMOTION_MOVE_STOP_SPEED : speed;
+		//const float friction = ROOTMOTION_MOVE_GROUND_FRICTION;
+		const float control = speed < stopSpeed ? stopSpeed : speed;
 		float newSpeed = speed - FRAMETIME_S.count() * control * friction;
 		if (newSpeed < 0) {
 			newSpeed = 0;
@@ -395,14 +395,14 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 			SG_Physics_RootMotionMove(entityHandle);
 			break;
 	// SG_Physics_SlideBoxMove:
-		case MoveType::SlideBoxMove: {
+		case MoveType::TossSlideBox: {
 			GameEntity *geSlide = *entityHandle;
 			SlideBoxMove slideBoxMove;
 			int32_t geSlideContentMask = (geSlide && geSlide->GetClipMask() ? geSlide->GetClipMask() : BrushContentsMask::PlayerSolid);
 			const float slideBounce = 1.01f;
-			const float slideFriction = 10.f;
+			const float slideFriction = 6.f;
 
-			SG_Physics_SlideBoxMove( geSlide, geSlideContentMask, slideBounce, slideFriction, &slideBoxMove );
+			SG_Physics_TossSlideBox( geSlide, geSlideContentMask, slideBounce, slideFriction, &slideBoxMove );
 			break;
 		}
 	// SG_Physics_Toss:

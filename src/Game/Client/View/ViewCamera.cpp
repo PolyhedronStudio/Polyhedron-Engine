@@ -492,7 +492,7 @@ void ViewCamera::AddWeaponViewModel() {
     if (vid_rtx->integer) {
         rEntWeaponViewModel.flags |= shellFlags;
     }
-
+	
     // Add the gun render entity to the current render frame.
     clge->view->AddRenderEntity( rEntWeaponViewModel );
 

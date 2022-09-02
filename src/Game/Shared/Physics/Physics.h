@@ -72,7 +72,7 @@ const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction );
 /**
 *	@brief	Apply ground friction forces to entity.
 **/
-void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction );
+void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction, const float stopSpeed = 0.1f );
 
 
 
@@ -153,7 +153,10 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle );
 
 
 /**
-*	@brief	Starts performing the RootMotion move process.
+*	@brief	Performs a SlideBox move that expects the entity to have been 'tossed' by setting a 
+*			velocity and angular velocity into a random direction. Does not perform 'Stepping' up
+*			stairs. When touching a 'walkable' surface it'll gradually slow down by friction and
+*			stop rotating.
 **/
 struct SlideBoxMove;
-const int32_t SG_Physics_SlideBoxMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove );
+const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove );

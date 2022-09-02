@@ -2466,7 +2466,7 @@ evaluate_taa_settings(const reference_mode_t* ref_mode) {
 
 	int flt_taa = cvar_flt_taa->integer;
 	// FSR RCAS needs upscaled input; if EASU was disabled, force to TAAU
-	qboolean force_upscaling = vkpt_fsr_is_enabled() && vkpt_fsr_needs_upscale();
+	bool force_upscaling = vkpt_fsr_is_enabled() && vkpt_fsr_needs_upscale();
 	if (force_upscaling) 	{
 		flt_taa = AA_MODE_UPSCALE;
 	}
@@ -2496,14 +2496,17 @@ prepare_sky_matrix(float time, vec3_t *sky_matrix)
 	}
 	else
 	{
-		VectorSet(sky_matrix[0], 1.f, 0.f, 0.f);
-		VectorSet(sky_matrix[1], 0.f, 1.f, 0.f);
-		VectorSet(sky_matrix[2], 0.f, 0.f, 1.f);
+		sky_matrix[0] = vec3_t { 1.f, 0.f, 0.f };
+		sky_matrix[1] = vec3_t { 0.f, 1.f, 0.f };
+		sky_matrix[2] = vec3_t { 0.f, 0.f, 1.f };
+		//VectorSet(sky_matrix[0], 1.f, 0.f, 0.f);
+		//VectorSet(sky_matrix[1], 0.f, 1.f, 0.f);
+		//VectorSet(sky_matrix[2], 0.f, 0.f, 1.f);
 	}
 }
 
 static void
-prepare_camera(const vec3_t position, const vec3_t direction, float *data)
+prepare_camera(const vec3_t &position, const vec3_t &direction, float *data)
 {
 	vec3_t forward, right, up;
 	VectorCopy(direction, forward);
@@ -2764,6 +2767,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	static float prev_adapted_luminance = 0.f;
 	float adapted_luminance = 0.f;
 	process_render_feedback(&fd->feedback, viewleaf, &sun_visible_prev, &adapted_luminance);
+	sun_visible_prev = (const bool)sun_visible_prev;
 
 	// Sometimes, the readback returns 1.0 luminance instead of the real value.
 	// Ignore these mysterious spikes.
@@ -2784,19 +2788,13 @@ R_RenderFrame_RTX(refdef_t *fd)
 	prepare_sky_matrix(fd->time, sky_matrix);
 
 	sun_light_t sun_light = {
-		.direction = vec3_zero(),
-		.direction_envmap = vec3_zero(),
-		.color = vec3_zero(),
-		.angular_size_rad = 0,
-		.use_physical_sky = false,
-		.visible = false,
 	};
 	if (render_world)
 	{
 		vkpt_evaluate_sun_light(&sun_light, sky_matrix, fd->time);
 
 		if (!vkpt_physical_sky_needs_update())
-			sun_light.visible = ( ( sun_light.visible > 0 && sun_visible_prev > 0 ) ? true : false );
+			sun_light.visible = static_cast<const bool>( sun_light.visible && sun_visible_prev );
 	}
 
 	reference_mode_t ref_mode;

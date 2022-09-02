@@ -100,7 +100,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     // Is it an organic gib type?
     if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
-	    gibEntity->SetMoveType(MoveType::SlideBoxMove);
+	    gibEntity->SetMoveType(MoveType::TossSlideBox);
 	    // Touch callback to stop the gib from bleeding as well as try and change into a halt.
 		gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
 		// Mass.

@@ -51,5 +51,5 @@ struct MoveType {
 	*
 	**/
 	static constexpr int32_t SlideBox		= 18;
-	static constexpr int32_t SlideBoxMove	= 19;
+	static constexpr int32_t TossSlideBox	= 19;
 };

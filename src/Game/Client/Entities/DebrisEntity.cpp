@@ -91,7 +91,7 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
     debrisEntity->SetVelocity( vec3_fmaf( debrisser->GetVelocity(), speed, velocity ) );
 
     // Set Movetype and Solid.
-    debrisEntity->SetMoveType(MoveType::SlideBoxMove);
+    debrisEntity->SetMoveType(MoveType::TossSlideBox);
     debrisEntity->SetSolid(Solid::OctagonBox);
 
     // Calculate and set angular velocity.
