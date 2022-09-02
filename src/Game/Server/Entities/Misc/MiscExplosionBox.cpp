@@ -392,16 +392,16 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
 
     // Calculate random direction vector.
     vec3_t randomDirection = {
-        RandomRangef(2.f, 0.f), //crandom(),
-        RandomRangef(2.f, 0.f),//crandom(),
-        RandomRangef(2.f, 0.f),//crandom()      
+        RandomRangef(-1.f, 1.f), //crandom(),
+        RandomRangef(-1.f, 1.f),//crandom(),
+        RandomRangef(-1.f, 1.f),//crandom()      
     };
 
     // Calculate origin to spawn them at.
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Throw debris!
-    gameworld->ThrowDebris(this, 1, origin, speed);
+    gameworld->ThrowDebris(this, 1, origin, speed, GetDamage() );
 }
 
 
@@ -418,16 +418,16 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
 
     // Calculate random direction vector.
     vec3_t randomDirection = {
-        RandomRangef(2.f, 0.f), //crandom(),
-        RandomRangef(2.f, 0.f),//crandom(),
-        RandomRangef(2.f, 0.f),//crandom()      
+        RandomRangef(-1.f, 1.f), //crandom(),
+        RandomRangef(-1.f, 1.f),//crandom(),
+        RandomRangef(-1.f, 1.f),//crandom()      
     };
 
     // Calculate origin to spawn them at.
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Last but not least, throw debris.
-    GetGameWorld()->ThrowDebris(this, 2, origin, speed);
+    GetGameWorld()->ThrowDebris(this, 2, origin, speed, GetDamage() );
 }
 
 //
@@ -442,5 +442,5 @@ void MiscExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 
     // Throw debris!
-    GetGameWorld()->ThrowDebris(this, 3, origin, speed);
+    GetGameWorld()->ThrowDebris(this, 3, origin, speed, GetDamage() );
 }

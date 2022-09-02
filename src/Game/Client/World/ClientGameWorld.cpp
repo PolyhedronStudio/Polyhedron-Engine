@@ -1032,7 +1032,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 * 
 *   @return A valid pointer to the entity game entity. nullptr on failure.
 **/
-IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
+IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityHandle, const bool requireClient, const bool requireInUse) {
 	// Ensure the handle is valid.
 	if (!entityHandle || 
 			!(
@@ -1051,7 +1051,7 @@ IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityH
 	return (* const_cast< SGEntityHandle& >( entityHandle ) );
 }
 //! Non const version of ValidateEntity, uses a const cast to call and return the results of the const version.
-IClientGameEntity* ClientGameWorld::ValidateEntity(SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
+IClientGameEntity* ClientGameWorld::ValidateEntity(SGEntityHandle &entityHandle, const bool requireClient, const bool requireInUse) {
 	return ValidateEntity(const_cast<const SGEntityHandle&>(entityHandle), requireClient, requireInUse);
 }
 
@@ -1066,15 +1066,15 @@ GameEntity* ClientGameWorld::GetClientGameEntity() {
 *   @brief  Spawns a debris model entity at the given origin.
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
-void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &debrisModel, const vec3_t& origin, float speed) { 
-	DebrisEntity::Create(debrisser, debrisModel, origin, speed); 
+void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &debrisModel, const vec3_t& origin, const float speed, const int32_t damage) { 
+	DebrisEntity::Create(debrisser, debrisModel, origin, speed, damage); 
 }
 
 /**
 *   @brief  Spawns a gib model entity flying at random velocities and directions.
 *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
 */
-void ClientGameWorld::ThrowGib(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType) { 
+void ClientGameWorld::ThrowGib(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, const std::string& gibModel, const int32_t damage, const int32_t gibType) { 
 	GibEntity::Create(origin, size, velocity, gibModel, damage, gibType);
 }
 

@@ -1067,7 +1067,7 @@ static void TE_SpawnGibs(const vec3_t &origin, const vec3_t &size, const vec3_t 
 /**
 *	@brief	Speaks to the actual GameWorld in order to spawn the debris entity.
 **/
-static void TE_SpawnDebris(GameEntity *geDebrisser, const int32_t debrisModelIndex, const vec3_t &origin, const float speed) {
+static void TE_SpawnDebris(GameEntity *geDebrisser, const int32_t debrisModelIndex, const vec3_t &origin, const float speed, const int32_t damage ) {
     // Throw some debris around, madness!
     ClientGameWorld* gameWorld = GetGameWorld();
 
@@ -1082,7 +1082,7 @@ static void TE_SpawnDebris(GameEntity *geDebrisser, const int32_t debrisModelInd
 		debrisModel = "models/objects/debris3/tris.md2";
 	}
 	// Let's go bonkers!
-    gameWorld->ThrowDebris(geDebrisser, debrisModel, origin, speed);
+    gameWorld->ThrowDebris(geDebrisser, debrisModel, origin, speed, damage);
 }
 
 
@@ -1124,11 +1124,13 @@ void CLG_ParseTempEntity(void)
 			GameEntity *geDebrisser = gameWorld->GetGameEntityByIndex(teParameters.entity1);
 
 			if (geDebrisser) {
+				// Get the 'debrisser' its origin and add our received offset position to that.
 				const vec3_t teOrigin = geDebrisser->GetOrigin() + teParameters.position1;
 				const int32_t teDebrisModelIndex = teParameters.modelIndex1;
 				const float teSpeed = teParameters.speed;
+				const float teDamage = teParameters.damage;
 
-				TE_SpawnDebris(geDebrisser, teDebrisModelIndex, teOrigin, teSpeed);
+				TE_SpawnDebris(geDebrisser, teDebrisModelIndex, teOrigin, teSpeed, teDamage);
 			}
 		break;
 	}

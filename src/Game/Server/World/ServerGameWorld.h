@@ -172,7 +172,7 @@ public:
     * 
     *   @return A valid pointer to the entity's SVGBasePlayer game entity. nullptr on failure.
     **/
-    static IServerGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
+    static IServerGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, const bool requireClient = false, const bool requireInUse = false);
 
 
     /**
@@ -225,7 +225,7 @@ public:
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
     **/
-    void ThrowDebris(GameEntity* debrisser, const int32_t debrisModelIndex, const vec3_t& origin, float speed);
+    void ThrowDebris(GameEntity* debrisser, const int32_t debrisModelIndex, const vec3_t& origin, const float speed, const int32_t damage );
 
     /**
     *   @brief  Sends a TempEntityEvent to all clients about spawning #(count) of body gibs.

@@ -224,8 +224,8 @@ public:
 	* 
 	*   @return A valid pointer to the entity game entity. nullptr on failure.
 	**/
-    static IClientGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
-	static IClientGameEntity* ValidateEntity(SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
+    static IClientGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, const bool requireClient = false, const bool requireInUse = false);
+	static IClientGameEntity* ValidateEntity(SGEntityHandle &entityHandle, const bool requireClient = false, const bool requireInUse = false);
 
 	/**
 	*	@return	Pointer to the current client game entity.
@@ -276,13 +276,13 @@ public:
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
     **/
-    void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
+    void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, const float speed, const int32_t damage );
 
     /**
     *   @brief  Spawns a gib model entity flying at random velocities and directions.
     *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
     */
-    void ThrowGib(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType);
+    void ThrowGib(const vec3_t &origin, const vec3_t &size, const vec3_t &velocity, const std::string& gibModel, const int32_t damage, const int32_t gibType);
 
 
 

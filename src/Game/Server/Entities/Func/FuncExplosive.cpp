@@ -106,7 +106,7 @@ void FuncExplosive::ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEnt
             chunkorigin[0] = origin[0] + crandom() * size[0] * 0.5f;
             chunkorigin[1] = origin[0] + crandom() * size[1] * 0.5f;
             chunkorigin[2] = origin[0] + crandom() * size[2] * 0.5f;
-            GetGameWorld()->ThrowDebris( this, 1, chunkorigin, 1 );
+            GetGameWorld()->ThrowDebris( this, 1, chunkorigin, 1, damage );
         }
     }
 
@@ -119,7 +119,7 @@ void FuncExplosive::ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEnt
         chunkorigin[0] = origin[0] + crandom() * size[0] * 0.5f;
         chunkorigin[1] = origin[0] + crandom() * size[1] * 0.5f;
         chunkorigin[2] = origin[0] + crandom() * size[2] * 0.5f;
-        GetGameWorld()->ThrowDebris( this, 2, chunkorigin, 2 );
+        GetGameWorld()->ThrowDebris( this, 2, chunkorigin, 2, damage );
     }
 
     UseTargets( attacker );

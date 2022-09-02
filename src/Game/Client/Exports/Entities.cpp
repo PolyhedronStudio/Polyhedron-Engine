@@ -40,7 +40,7 @@
 // WID: TODO: Gotta fix this one too.
 extern qhandle_t cl_mod_laser;
 
-
+//#define DEBUG_ENTITIES
 
 
 
@@ -123,7 +123,7 @@ qboolean ClientGameEntities::UpdateGameEntityFromState( PODEntity *clEntity, con
   //      clgEntity->Spawn();
 
 	    // Do a debug print.
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(DEBUG_ENTITIES)
         PODEntity *podEntity = clgEntity->GetPODEntity();
 
 	    const char *mapClass = clgEntity->GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.

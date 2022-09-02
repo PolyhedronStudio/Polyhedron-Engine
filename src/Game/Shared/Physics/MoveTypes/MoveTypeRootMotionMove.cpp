@@ -98,14 +98,14 @@ int32_t SG_RootMotionMove_CheckForGround( GameEntity *geCheck ) {
 		geCheck->SetGroundEntity(traceResult.gameEntity);
 		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
 
-		// Since we've found ground, we make sure that any negative Z velocity is zero-ed out.
-		if( geCheckVelocity .z < 0) {
-			geCheck->SetVelocity({ 
-				geCheckVelocity.x,
-				geCheckVelocity.y,
-				0
-			});
-		}
+		//// Since we've found ground, we make sure that any negative Z velocity is zero-ed out.
+		//if( geCheckVelocity .z < 0) {
+		//	geCheck->SetVelocity({ 
+		//		geCheckVelocity.x,
+		//		geCheckVelocity.y,
+		//		0
+		//	});
+		//}
 
 		return traceResult.gameEntity->GetNumber();
 	}

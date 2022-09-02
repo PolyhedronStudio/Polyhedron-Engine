@@ -171,7 +171,7 @@ void FuncPlat::OnEventID( uint32_t eventID ) {
 //		auto *playerEntity = GetGameWorld()->GetGameEntityByIndex(1);
 	switch( eventID ) {
 	case 1: //: FUNC_PLAT_ENGAGE_LOWER_MOVE:
-		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_LOWER_MOVE')!\n", __func__, eventID ) );
+	//	CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_LOWER_MOVE')!\n", __func__, eventID ) );
         // Calculate movement speed to use.
     CalculateMoveSpeed();
 
@@ -191,7 +191,7 @@ void FuncPlat::OnEventID( uint32_t eventID ) {
 		//BrushAccelerateThink();
 		break;
 	case 2: //: FUNC_PLAT_ENGAGE_RAISE_MOVE:
-		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_RAISE_MOVE')!\n", __func__, eventID ) );
+	//	CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_RAISE_MOVE')!\n", __func__, eventID ) );
         // Calculate movement speed to use.
     CalculateMoveSpeed();
     // Setup move info.
@@ -229,7 +229,7 @@ void FuncPlat::OnEventID( uint32_t eventID ) {
 **/
 void FuncPlat::Callback_Use( IClientGameEntity* other, IClientGameEntity* activator ) {
     if (HasThinkCallback()) {
-        CLG_Print( PrintType::DeveloperWarning, fmt::format( "func_plat(#{}): Already has a 'Think' callback set. Can't 'Use'.\n", GetNumber() ) );
+    //    CLG_Print( PrintType::DeveloperWarning, fmt::format( "func_plat(#{}): Already has a 'Think' callback set. Can't 'Use'.\n", GetNumber() ) );
         return;
     }
 

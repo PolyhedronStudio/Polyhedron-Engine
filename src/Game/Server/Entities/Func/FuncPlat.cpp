@@ -177,7 +177,7 @@ void FuncPlat::PostSpawn() {
 **/
 void FuncPlat::Callback_Use( IServerGameEntity* other, IServerGameEntity* activator ) {
     if (HasThinkCallback()) {
-        gi.DPrintf("FuncPlat already has a think callback! - returning!!\n");
+        //gi.DPrintf("FuncPlat already has a think callback! - returning!!\n");
         return;
     }
 
@@ -230,8 +230,8 @@ void FuncPlat::Callback_EngageRaiseMove(  ) {
     }
 
 	// Set EventID.
-	SetEventID(2);
-	gi.DPrintf( "%s: Setting (eventID: #%i, 'FUNC_PLAT_ENGAGE_RAISE_MOVE')!\n", __func__, GetEventID() );
+	//SetEventID(2);
+	//gi.DPrintf( "%s: Setting (eventID: #%i, 'FUNC_PLAT_ENGAGE_RAISE_MOVE')!\n", __func__, GetEventID() );
 
 	// Begin raising the platform, the callback will continue setting itself as 'think'
 	// callback until it has reached a passive state position again.
@@ -257,8 +257,8 @@ void FuncPlat::Callback_EngageLowerMove() {
     }
 
 	// Set EventID.
-	SetEventID(1);
-	gi.DPrintf( "%s: Setting (eventID: #%i, 'FUNC_PLAT_ENGAGE_LOWER_MOVE')!\n", __func__, GetEventID() );
+	//SetEventID(1);
+	//gi.DPrintf( "%s: Setting (eventID: #%i, 'FUNC_PLAT_ENGAGE_LOWER_MOVE')!\n", __func__, GetEventID() );
 
 	// Begin lowering the platform, the callback will continue setting itself as 'think'
 	// callback until it has reached a passive state position again.
@@ -461,7 +461,6 @@ void FuncPlat::SpawnTopTouchTrigger() {
     vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
     vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
 
-	gi.DPrintf("%s", "SPAWNTOPTOUCH BRUH\n");
     // Calculate a slightly larger box.
     triggerMins.x = mins.x + 25.f;
     triggerMins.y = mins.y + 25.f;
@@ -517,7 +516,6 @@ void FuncPlat::SpawnBottomTouchTrigger() {
     vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
     vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
 
-	gi.DPrintf("%s", "SpawnBottomTouchTrigger BRUH\n");
     // Calculate a slightly larger box.
     triggerMins.x = mins.x + 25.f;
     triggerMins.y = mins.y + 25.f;

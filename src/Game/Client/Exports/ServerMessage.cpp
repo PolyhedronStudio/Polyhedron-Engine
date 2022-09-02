@@ -274,6 +274,7 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
 			};
 			// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.
 			teParameters.speed = static_cast<float>(clgi.MSG_ReadUint8()) / 255.f;
+			teParameters.damage = clgi.MSG_ReadUint8() * 8;
 			break;
 		}
 

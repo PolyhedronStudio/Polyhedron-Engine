@@ -17,7 +17,7 @@ public:
     *   @brief  Used by game modes to spawn server side gibs.
     *   @param  debrisser The entity that is about to spawn debris.
     **/
-    static DebrisEntity* Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t &origin, float speed);
+    static DebrisEntity* Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t &origin, const float speed, const int32_t damage );
 
 private:
     DebrisEntity(PODEntity *svEntity);
@@ -41,8 +41,14 @@ public:
 	/**
 	*	@brief	Die callback.
 	**/
-	void DebrisEntityDie(GameEntity* inflictor, GameEntity* attacker, int32_t damage, const vec3_t& point);
-    //void GibEntityThink();
+	void DebrisEntityDie( GameEntity* inflictor, GameEntity* attacker, int32_t damage, const vec3_t& point );
+    
+	/**
+	*	@brief	Touch callback.
+	**/
+	void DebrisEntityTouch( GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+
+	//void GibEntityThink();
 	//void GibEntityStopBleeding();
     //void GibEntityDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     //void GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
