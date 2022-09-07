@@ -185,13 +185,14 @@ void ClientGameEntities::PacketEntityEvent( int32_t number ) {
 
 	// With a valid entity we can notify it about its new received event.
 	if (podEventTarget->currentState.eventID != 0) {
+		PODEntity* clientEntity = &cs->entities[ number ];
+		geEventTarget->OnEventID( clientEntity->currentState.eventID );
 		//Com_DPrint("(%s): eventID != 0 for PODEntity(#%i)! podEntityTarget=(%s), geEntityTarget=(%s)\n", __func__, number, (podEventTarget ? podEventTarget->clientEntityNumber : -1), (geEventTarget ? geEventTarget->GetNumber() : -1));
 	} else {
 		//Com_DPrint("(%s): PODEntity(#%i): eventID(#%i) origin(%s), oldOrigin(%s)\n", __func__, number, podEventTarget->currentState.eventID, Vec3ToString(podEventTarget->currentState.origin), Vec3ToString(podEventTarget->currentState.oldOrigin));
 	}
 
-	PODEntity* clientEntity = &cs->entities[ number ];
-	geEventTarget->OnEventID( clientEntity->currentState.eventID );
+
 }
 
 /**
@@ -211,9 +212,58 @@ void ClientGameEntities::LocalEntityEvent( int32_t number ) {
 *
 **/
 /**
+*	@brief	Determines whether this PODEntity is visible from the current calculated client view PVS.
+**/
+const bool CLG_EntityVisible( cm_t *cm, PODEntity *podEntity, byte *mask ) {
+	if ( !podEntity ) {
+		return false;
+	}
+
+ //   // Too many leafs for individual check, go by headNode
+	//if ( podEntity->numClusters == -1 ) {
+	//	if (clgi.CM_HeadnodeVisible(clgi.CM_NodeNum( &cl->cm, podEntity->headNode), cl->clientPVS.pvs)) {
+	//		return true;
+	//	}
+	//} else {
+	//	// Check individual leafs
+	//	int32_t i = 0;
+	//	for ( i = 0; i < podEntity->numClusters; i++ ) {
+	//		if ( Q_IsBitSet( cl->clientPVS.pvs, podEntity->clusterNumbers[i] ) ) {
+	//			break;
+	//		}
+	//	}
+	//	if (i == podEntity->numClusters) {
+	//		return false;
+	//	} else {
+	//		return true;
+	//	}
+	//}
+
+	//return false;
+
+    int i;
+	
+    if (podEntity->numClusters == -1) {
+        // too many leafs for individual check, go by headNode
+        return clgi.CM_HeadnodeVisible( clgi.CM_NodeNum( cm, podEntity->headNode ), mask );
+    }
+
+    // check individual leafs
+    for ( i = 0; i < podEntity->numClusters; i++ ) {
+        if ( Q_IsBitSet( mask, podEntity->clusterNumbers[i] ) ) {
+            return true;
+        }
+    }
+
+    return false;  // not visible
+}
+
+
+/**
 *   @brief  Prepares all parsed server entities, as well as local entities for rendering
 *			of the current frame.
 **/
+//static const bool CL_
 void ClientGameEntities::PrepareRefreshEntities() {
 	// Get Gameworld, we're about to iterate.
 	ClientGameWorld *gameWorld = GetGameWorld();
@@ -263,6 +313,8 @@ void ClientGameEntities::PrepareRefreshEntities() {
 			// TODO: Yeah, warn, maybe not..? Shouldn't really happen massively.
 			continue;
 		}
+
+
 
 		// Go on.
 		gameEntity->PrepareRefreshEntity( refreshEntityID, entityState, previousEntityState, cl->lerpFraction );

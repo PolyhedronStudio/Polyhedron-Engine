@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "GameModule.h"
 #include "Sound/Sound.h"
 #include "Entities/LocalEntities.h"
+#include "World.h"
 
 cvar_t  *rcon_address;
 
@@ -75,7 +76,6 @@ cvar_t  *cl_protocol;
 
 cvar_t  *cl_vwep;
 
-cvar_t  *cl_cinematics;
 
 //
 // userinfo
@@ -638,6 +638,7 @@ CL_ClearState
 
 =====================
 */
+extern void CM_FreeFromBSP(cm_t *cm);
 void CL_ClearState(void)
 {
     // Stop all sounds.
@@ -646,13 +647,14 @@ void CL_ClearState(void)
     // WID: Inform the CG Module.
     CL_GM_ClientClearState();
 
-    // Wipe the entire cl structure
-    BSP_Free(cl.bsp);
-	// Unload collision model as well.
-	CM_FreeMap(&cl.cm);
+	// Free Collision Model memory.
+	CM_FreeFromBSP( &cl.cm );
+
+	// Free BSP from memory.
+    BSP_Free( cl.bsp );
 
     //cl = ClientState();
-    memset(&cl, 0, sizeof(cl));
+    memset( &cl, 0, sizeof(cl) );
     // 
     //cs = ClientShared();
     //memset(&cs.entities, 0, sizeof(cs.entities));
@@ -666,6 +668,13 @@ void CL_ClearState(void)
 			// And ensure our main identifier has the correct entityNumber set.
 			.clientEntityNumber = i,
 		};
+
+		//PODEntity *podEntity = &cs.entities[i];
+
+		//// Ensure the states are assigned the correct entityNumber.
+		//podEntity->currentState.number = i;
+		//podEntity->previousState .number = i;
+		//podEntity->clientEntityNumber = i;
     }
 
     // In case we are more than connected, reset it to just connected.
@@ -1645,6 +1654,9 @@ void CL_Begin(void)
     // Set state to precached and send over a begin command.
     CL_LoadState(LOAD_NONE);
     cls.connectionState = ClientConnectionState::Precached;
+	
+	CL_ClearWorld();
+
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
 }
 
@@ -2587,8 +2599,6 @@ static void CL_InitLocal(void)
 
     cl_protocol = Cvar_Get("cl_protocol", std::to_string(PROTOCOL_VERSION_POLYHEDRON).c_str(), 0);
 
-    cl_cinematics = Cvar_Get("cl_cinematics", "1", CVAR_ARCHIVE);
-
     allow_download->changed = cl_allow_download_changed;
     cl_allow_download_changed(allow_download);
 
@@ -3157,7 +3167,7 @@ uint64_t CL_Frame(uint64_t msec)
 	// Predict all unacknowledged movements
     CL_PredictMovement();
 	// Check for prediction errors.
-    CL_CheckPredictionError();
+    //CL_CheckPredictionError();
 
 	// Run any console commands right now.
     Con_RunConsole();

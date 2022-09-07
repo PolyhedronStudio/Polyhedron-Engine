@@ -10,6 +10,7 @@
 // Basic Client.
 #include "../Client.h"
 #include "../GameModule.h"
+#include "../World.h"
 
 // Need Refresh and Sound Headers.
 #include "Refresh/Models.h"
@@ -56,7 +57,7 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
     clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-	if (!CL_GM_CreateFromNewState(clEntity, state)) {
+	if (!CL_GM_CreateFromNewState( clEntity, state ) ) {
 		// It failed somehow, render the entity for not in use and escape.
 		clEntity->inUse = false;
 		return;
@@ -66,8 +67,8 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
     clEntity->previousState = *state;
 
     // Ensure that when the entity has been teleported we adjust its lerp origin.
-    if (state->eventID == EntityEvent::PlayerTeleport || state->eventID == EntityEvent::OtherTeleport
-       || (state->renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
+    if ( state->eventID == EntityEvent::PlayerTeleport || state->eventID == EntityEvent::OtherTeleport
+       || ( state->renderEffects & ( RenderEffects::FrameLerp | RenderEffects::Beam ) ) ) 
     {
         // This entity has been teleported.
         clEntity->lerpOrigin = origin;
@@ -82,8 +83,7 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
 /**
 *   @brief  Updates an existing entity using the newly received state for it.
 **/
-static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const EntityState *state, const vec_t *origin)
-{
+static inline void PacketEntity_UpdateExisting( PODEntity *clEntity, const EntityState *state, const vec_t *origin ) {
     // Get event ID.
     const int32_t eventID = state->eventID;
 
@@ -125,30 +125,29 @@ static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const Entity
 *               - cl_nolerp 2, forced by developer option.
 *           False when none of the above conditions are met or cl_nolerp is set to 3:
 **/
-static inline qboolean PacketEntity_IsNew(const PODEntity *clEntity)
-{
+static inline qboolean PacketEntity_IsNew( const PODEntity *clEntity ) {
     // Last received frame was invalid.
-    if (!cl.oldframe.valid) {
+    if ( !cl.oldframe.valid ) {
         return true;
     }
 
     // Wasn't in last received frame.
-    if (clEntity->serverFrame != cl.oldframe.number) {
+    if ( clEntity->serverFrame != cl.oldframe.number ) {
         return true;
     }
 
     // Developer option, always new.
-    if (cl_nolerp->integer == 2) {
+    if ( cl_nolerp->integer == 2 ) {
         return true;
     }
 
     // Developer option, lerp from last received frame.
-    if (cl_nolerp->integer == 3) {
+    if ( cl_nolerp->integer == 3 ) {
         return false;
     }
 
     // Previous server frame was dropped.
-    if (cl.oldframe.number != cl.frame.number - 1) {
+    if ( cl.oldframe.number != cl.frame.number - 1 ) {
         return true;
     }
 
@@ -160,22 +159,41 @@ static inline qboolean PacketEntity_IsNew(const PODEntity *clEntity)
 *   @brief  Updates the entity belonging to the entity state. If it doesn't
 *           exist yet, it'll create it.
 **/
-void PacketEntity_UpdateState(const EntityState *state)
-{
+void PacketEntity_UpdateState( const EntityState *state ) {
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
     PODEntity *clEntity = &cs.entities[state->number];
 
-    // Add entity to the solids list if it has a solid.
-    if (state->solid && state->number != cl.frame.clientNumber + 1 && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
-        cl.solidEntities[cl.numSolidEntities++] = clEntity;
+	// Make sure to fetch and adjust solids here.
+    if (state->solid && state->number != cl.frame.clientNumber + 1 ) {
+        //cl.solidEntities[cl.numSolidEntities++] = clEntity;
 
-		// For non BRUSH models...
-        if (state->solid != PACKED_BBOX) {
-            // Update the actual bounding box.
-            clEntity->mins = state->mins;
-			clEntity->maxs = state->maxs; //MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
-        }
-    }
+		// For non brush models.
+        //if (state->solid == Solid::BSP) {
+			// Update the actual bounding box.
+            //clEntity->mins = state->mins;
+			//clEntity->maxs = state->maxs; //MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
+		if (state->solid == PACKED_BSP) {
+			clEntity->solid = Solid::BSP;
+			const mmodel_t *model = &cl.cm.cache->models[clEntity->currentState.modelIndex - 1];
+			clEntity->mins = model->mins;
+			clEntity->maxs = model->maxs;
+
+		} else {
+			clEntity->solid = state->solid;
+			clEntity->mins = state->mins;
+			clEntity->maxs = state->maxs;
+		}
+		//}// else {
+
+		//	clEntity->mins = model->mins;
+		//	clEntity->maxs = model->maxs;
+		//	clEntity->solid = PACKED_BSP;
+		//}
+	} else {
+		//clEntity->mins = vec3_zero();
+		//clEntity->mins = vec3_zero();
+		clEntity->solid = Solid::Not;
+	}
 
     // Work around Q2PRO server bandwidth optimization.
     const bool isPlayerEntity = PacketEntity_IsPlayer(state);
@@ -203,6 +221,9 @@ void PacketEntity_UpdateState(const EntityState *state)
 	
 	// Assign the fresh new received state as the entity's current.
     clEntity->currentState = *state;
+	
+	// Link Entity.
+	CL_PF_World_LinkEntity( clEntity );
 
     // work around Q2PRO server bandwidth optimization
     if (isPlayerEntity) {
@@ -229,6 +250,6 @@ void PacketEntity_SetHashedClassname(PODEntity* podEntity, EntityState* state) {
 /**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
-void PacketEntity_FireEvent(int32_t number) {
+void PacketEntity_FireEvent( int32_t number ) {
     CL_GM_PacketEntityEvent(number);
 }

@@ -23,7 +23,7 @@
 // Misc Server Model Entity.
 #include "Game/Client/Entities/Misc/MiscClientModel.h"
 
-
+#include "Game/Shared/Physics/Physics.h"
 
 //
 // Constructor/Deconstructor.
@@ -77,10 +77,10 @@ void MiscClientModel::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::TossSlideBox);
 
     // Since this is a "monster", after all...
-    //SetServerFlags(EntityServerFlags::Monster);
+    SetServerFlags(EntityServerFlags::Monster);
     
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -127,7 +127,7 @@ void MiscClientModel::Spawn() {
     // Set entity to allow taking damage.
     SetTakeDamage( TakeDamage::No );
 
-    //// Setup our MiscClientModel callbacks.
+    // Setup our MiscClientModel callbacks.
     SetThinkCallback( &MiscClientModel::MiscServerModelThink );
     SetDieCallback( &MiscClientModel::MiscServerModelDie );
 
@@ -269,35 +269,18 @@ void MiscClientModel::MiscServerModelThink(void) {
     }
 
     SetAnimationFrame(nextFrame);
+	
+	// Make sure it has no x/y velocity.
+	const vec3_t oldVelocity = GetVelocity();
+	SetVelocity( { 0, 0, oldVelocity.z } );
 
-    ////
-    //// Calculate direction.
-    ////
-    //if (GetHealth() > 0) {
-    //    vec3_t currentMoveAngles = GetAngles();
-    //
-    //    // Direction vector between player and other entity.
-    //    vec3_t wishMoveAngles = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
+	// Check for ground.
+	SG_AddGravity( this );
+	SG_CheckGround( this );
 
-    //    //  
-    //    vec3_t newModelAngles = vec3_euler(wishMoveAngles);
-    //    newModelAngles.x = 0;
-
-    //    SetAngles(newModelAngles);
-
-    //    // Calculate yaw to use based on direction.
-    //    float yaw = vec3_to_yaw(wishMoveAngles);
-
-    //    // Last but not least, move a step ahead.
-    //    SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME_S);
-    //}
-
-    // Link entity back in.
+	// Link entity back in.
     LinkEntity();
     
-    // Check for ground.
-    //SVG_StepMove_CheckGround(this);
-
     // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
 }

@@ -53,7 +53,7 @@ static int32_t areaType		= 0;
 /**
 *	@brief Builds a uniformly subdivided tree for the given world size
 **/
-areanode_t *CL_CreateAreaNode( int32_t depth, const vec3_t &mins, const vec3_t &maxs ) {
+static areanode_t *CL_CreateAreaNode( int32_t depth, const vec3_t &mins, const vec3_t &maxs ) {
     areanode_t  *anode;
     vec3_t      size;
     vec3_t      mins1, maxs1, mins2, maxs2;
@@ -99,24 +99,24 @@ void CL_ClearWorld() {
     memset(cl_areanodes, 0, sizeof(cl_areanodes));
     cl_numareanodes = 0;
 
-	if ( cl.cm.cache && cl.cm.cache->nodes ) {
-		mmodel_t *worldCollisionModel = &cl.cm.cache->models[0]; //cl.clipModels[ 0 ];//cl.cm.cache->models[i].headNode;;
-		CL_CreateAreaNode(0, worldCollisionModel->mins, worldCollisionModel->maxs);
-	}
+    if ( cl.bsp && cl.bsp->nodes ) {
+        mmodel_t *cm = &cl.bsp->models[0];
+        CL_CreateAreaNode(0, cm->mins, cm->maxs);
+    }
 
     // make sure all entities are unlinked
-    for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
-        PODEntity *ent = &cs.entities[i];
+    for (int32_t i = 0; i < MAX_PACKET_ENTITIES; i++) {
+        PODEntity *ent = cl.solidEntities[i];
 		if (ent) {
-			ent->area.prev = ent->area.next = NULL;
+	        ent->area.prev = ent->area.next = NULL;
 		}
     }
-	//for (int32_t i = 0; i < MAX_NON_WIRED_POD_ENTITIES; i++) {
- //       PODEntity *ent = cl.solidLocalEntities[i];
-	//	if (ent) {
-	//        ent->area.prev = ent->area.next = NULL;
-	//	}
- //   }
+	for (int32_t i = 0; i < MAX_NON_WIRED_POD_ENTITIES; i++) {
+        PODEntity *ent = cl.solidLocalEntities[i];
+		if (ent) {
+	        ent->area.prev = ent->area.next = NULL;
+		}
+    }
 }
 
 /**
@@ -140,7 +140,8 @@ const bool CL_EntityIsVisible( cm_t *cm, Entity *ent, byte *mask ) {
 }
 
 /**
-*	@brief	Links entity to PVS leafs.
+*	@brief	General purpose routine shared between game DLL and MVD code.
+*			Links entity to PVS leafs.
 **/
 void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
     mleaf_t	*leafs[MAX_TOTAL_ENT_LEAFS];
@@ -149,15 +150,15 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
     mnode_t *topnode = nullptr;
 
 	// Ensure map is loaded.
-	if ( !cm ) {
+	if ( cl.bsp && cl.bsp->nodes ) {
 		return;		
 	}
-
+	
 	// set the size
 	ent->size = ent->maxs - ent->mins;
 
     // set the abs box
-    if ( ( ent->solid == Solid::BSP || ent->solid == PACKED_BSP ) &&
+    if (ent->solid == Solid::BSP &&
         (ent->currentState.angles[0] || ent->currentState.angles[1] || ent->currentState.angles[2])) {
         // expand for rotation
         float max = 0;
@@ -180,25 +181,22 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
         // Normal.
         ent->absMin = ent->currentState.origin + ent->mins;
         ent->absMax = ent->currentState.origin + ent->maxs;
-
-		// Because movement is clipped an epsilon away from an actual edge,
-		// we must fully check even when bounding boxes don't quite touch
-		ent->absMin[0] -= 1;
-		ent->absMin[1] -= 1;
-		ent->absMin[2] -= 1;
-		ent->absMax[0] += 1;
-		ent->absMax[1] += 1;
-		ent->absMax[2] += 1;
     }
 
-
-
+    // Because movement is clipped an epsilon away from an actual edge,
+    // we must fully check even when bounding boxes don't quite touch
+    //ent->absMin[0] -= 1;
+    //ent->absMin[1] -= 1;
+    //ent->absMin[2] -= 1;
+    //ent->absMax[0] += 1;
+    //ent->absMax[1] += 1;
+    //ent->absMax[2] += 1;
 
 	// Link to PVS leafs.
     ent->numClusters = 0;
     ent->areaNumber = 0;
     ent->areaNumber2 = 0;
-	//Com_LPrintf( PrintType::Developer, "%s: %s\n", __func__, fmt::format("ent({}), absmin({},{},{}), absmaxs({},{},{})\n", ent->clientEntityNumber, ent->absMin.x,ent->absMin.y,ent->absMin.z,ent->absMax.x,ent->absMax.y,ent->absMax.z).c_str());
+
     // Get all leafs, including solids.
     const int32_t numberOfLeafs = CM_BoxLeafs( cm, ent->absMin, ent->absMax, leafs, MAX_TOTAL_ENT_LEAFS, &topnode );
 
@@ -210,7 +208,7 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
             // doors may legally straggle two areas,
             // but nothing should evern need more than that
             if ( ent->areaNumber && ent->areaNumber != area) {
-                if ( ent->areaNumber2 && ent->areaNumber2 != area && cls.connectionState == ClientConnectionState::Precached ) {
+                if ( ent->areaNumber2 && ent->areaNumber2 != area && cls.connectionState == ConnectionState::Primed ) {
                     Com_DPrintf("Object touching 3 areas at %f %f %f\n",
                                 ent->absMin[0], ent->absMin[1], ent->absMin[2]);
                 }
@@ -224,7 +222,7 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
     if ( numberOfLeafs >= MAX_TOTAL_ENT_LEAFS ) {
         // assume we missed some leafs, and mark by headNode
         ent->numClusters = -1;
-        ent->headNode = CM_NumNode( cm, topnode);
+        ent->headNode = CM_NumNode(cm, topnode);
     } else {
         ent->numClusters = 0;
         for ( int32_t i = 0; i < numberOfLeafs; i++ ) {
@@ -268,110 +266,68 @@ void CL_World_UnlinkEntity( Entity *ent ) {
 *			actual inline bsp model.
 **/
 void CL_PF_World_LinkEntity( Entity *ent ) {
-	if ( !ent ) {
-		Com_DPrintf( "%s: (nullptr) entity.\n", __func__ );
+	if (!ent) {
+		Com_DPrintf("%s: (nullptr) entity.\n", __func__);
 		return;
 	}
 
-	if ( !cl_numareanodes ) {
-		return;
-
-	}
 	// Entity number.
 	const int32_t entityNumber = ent->clientEntityNumber;
 
-	if (entityNumber == cl.frame.clientNumber + 1) {
-	//	return;
-	}
-
 	// Unlink from previous old position.
 	if ( ent->area.prev ) {
-        CL_World_UnlinkEntity( ent );
+        CL_World_UnlinkEntity(ent);
 	}
 
 	// Ensure a map is loaded properly in our cache.
-	if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
-		Com_DPrintf( "%s: no cl.cm.cache, cl.cm.cache.nodes, or cl.cm stuff\n", __func__ );
+	if ( !cl.bsp || !cl.bsp->nodes || !cl.cm.cache || !cl.cm.cache->nodes ) {
         return;
     }
 
 	// Ensure it isn't the worldspawn entity itself.
     if ( ent == cs.entities ) {
-		Com_DPrintf( "%s: ent == cs.entities\n", __func__ );
         return;        // Don't add the world
 	}
 
-	if (ent->isLocal) {
-		if ( !ent->inUse && ent->clientEntityNumber > 21) {
-			Com_DPrintf("%s: entity %d is not in use\n", __func__, ent->clientEntityNumber);
-			return;
-		}
-	} else {
-		if ( ent->serverFrame != cl.frame.number ) {
-			Com_DPrintf("%s: entity %d is not in use\n", __func__, ent->clientEntityNumber);
-			return;
-		}
-	}
+	//// Ensure it is in our frame..
+ //   if ( ent->isLocal == true && !ent->inUse ) {
+ //       Com_DPrintf("%s: entity %d is not in use\n", __func__, ent->clientEntityNumber);
+ //       return;
+ //   }
 
-	// Encode the size into the entity_state for client prediction reaspms/
+    // Encode the size into the entity_state for client prediction reaspms/
     switch ( ent->solid ) {
     case Solid::BoundingBox:
-        if ( ( ent->clientFlags & EntityClientFlags::DeadMonster ) || vec3_equal( ent->currentState.mins, ent->currentState.maxs ) ) {
-            ent->solid = Solid::Not;
+        if ( ( ent->serverFlags & EntityServerFlags::DeadMonster ) || vec3_equal( ent->mins, ent->maxs ) ) {
+            ent->currentState.solid = 0;
         } else {
-			ent->solid = Solid::BoundingBox;
+			ent->currentState.solid = Solid::BoundingBox;
 			ent->currentState.mins = ent->mins;
 			ent->currentState.maxs = ent->maxs;
         }
         break;
     case Solid::OctagonBox:
-        if ( ( ent->clientFlags & EntityClientFlags::DeadMonster ) || vec3_equal( ent->currentState.mins, ent->currentState.maxs ) ) {
-            ent->solid = Solid::Not;
+        if ( ( ent->serverFlags & EntityServerFlags::DeadMonster ) || vec3_equal( ent->mins, ent->maxs ) ) {
+            ent->currentState.solid = 0;
         } else {
-			ent->solid = Solid::OctagonBox;
+			ent->currentState.solid = Solid::OctagonBox;
 			ent->currentState.mins = ent->mins;
 			ent->currentState.maxs = ent->maxs;
         }
         break;
-    case PACKED_BSP: {
-		ent->currentState.solid = Solid::BSP;
-        ent->solid = Solid::BSP;
-		//const mmodel_t *model = &cl.cm.cache->models[ent->currentState.modelIndex - 1];
-		//ent->mins = model->mins;
-		//ent->maxs = model->maxs;
+    case Solid::BSP:
+        ent->currentState.solid = PACKED_BSP;
+		ent->currentState.mins = vec3_zero();
+		ent->currentState.maxs = vec3_zero();
         break;
-	}
-	case Solid::BSP: {
-        ent->currentState.solid = Solid::BSP;
-		//const mmodel_t *model = &cl.cm.cache->models[ent->currentState.modelIndex - 1];
-		//ent->mins = model->mins;
-		//ent->maxs = model->maxs;
-        break;
-	}
     default:
-        ent->currentState.solid = Solid::Not;
-		ent->mins = vec3_zero();
-		ent->maxs = vec3_zero();
+        ent->currentState.solid = 0;
+		ent->currentState.mins = vec3_zero();
+		ent->currentState.maxs = vec3_zero();
         break;
     }
 
-	// Create a 'fake cm'.
     CL_World_LinkEntity( &cl.cm, ent );
-	
-	//if (ent->currentState.number == 17 || ent->currentState.number == 18) {
-	//	Com_LPrintf( PrintType::Developer, "%s\n", 
-	//				fmt::format( "funcdoor({}), solid({}), currentState.solid({}), absmin({}, {}, {}), absmaxs({}, {}, {})", 
-	//				ent->currentState.number, ent->solid, ent->currentState.solid
-	//				, ent->absMin.x,ent->absMin.y,ent->absMin.z,ent->absMax.x,ent->absMax.y,ent->absMax.z
-	//	).c_str());
-	//}
-	//if (ent->currentState.number == 20 || ent->currentState.number == 21) {
-	//	Com_LPrintf( PrintType::Developer, "%s\n", 
-	//				fmt::format( "testdummy({}), solid({}), currentState.solid({}), absmin({}, {}, {}), absmaxs({}, {}, {})", 
-	//				ent->currentState.number, ent->solid, ent->currentState.solid
-	//				, ent->absMin.x,ent->absMin.y,ent->absMin.z,ent->absMax.x,ent->absMax.y,ent->absMax.z
-	//	).c_str());
-	//}
 
     // If first time, make sure oldOrigin is valid.
     if ( !ent->linkCount ) {
@@ -381,9 +337,6 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
 
 	// 
     if ( ent->solid == Solid::Not ) {
-		if ( ent->inUse == true ) {
-		//	Com_LPrintf( PrintType::DeveloperWarning, "%s\n", fmt::format( "ent(#{}): solid(Solid::Not), linkCount({})", ent->clientEntityNumber, ent->linkCount).c_str());
-		}
         return;
 	}
 
@@ -432,12 +385,23 @@ static void CL_World_AreaEntities_r( areanode_t *node ) {
     list_t *start = nullptr;
     PODEntity *check = nullptr;
 
+	if (!cl.bsp || !cl.bsp->nodes || !cl.cm.cache || !cl.cm.cache->nodes ) {
+		return;
+	}
+
     // touch linked edicts
     if ( areaType == AreaEntities::Solid || areaType == AreaEntities::LocalSolid ) {
         start = &node->solidEdicts;
+	//} else if (  ) {
+	//	start = &node->solidLocalClientEdicts;
 	} else {
         start = &node->triggerEdicts;
 	}
+ //   if (areaType == AreaEntities::LocalSolid) {
+	//	start = &node->solidLocalClientEdicts;
+	//} else {
+ //       start = &node->solidEdicts;
+	//}
 
     LIST_FOR_EACH(PODEntity, check, start, area) {
         if (check->solid == Solid::Not) {
@@ -483,9 +447,9 @@ int32_t CL_World_AreaEntities( const vec3_t &mins, const vec3_t &maxs, PODEntity
     areaMaxCount = maxcount;
     areaType = areatype;
 
-	//if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
+	if ( !cl.bsp || !cl.bsp->nodes || !cl.cm.cache || !cl.cm.cache->nodes ) {
 	    CL_World_AreaEntities_r(cl_areanodes);
-	//}
+	}
 
     return areaCount;
 	//return 0;
@@ -498,26 +462,26 @@ int32_t CL_World_AreaEntities( const vec3_t &mins, const vec3_t &maxs, PODEntity
 *	@return	Returns a headNode that can be used for testing or clipping an
 *			object of mins/maxs size.
 **/
-mnode_t *CL_World_HullForEntity(Entity *ent)
+static mnode_t *CL_World_HullForEntity(Entity *ent)
 {
-	if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
+	if ( !cl.bsp || !cl.bsp->nodes || !cl.cm.cache || !cl.cm.cache->nodes ) {
 		return nullptr;
 	}
 
-    if ( ent->solid == Solid::BSP || ent->solid == PACKED_BSP ) {//Solid::BSP ) {
-        const int32_t i = ent->currentState.modelIndex - 1;
+    if ( ent->solid == Solid::BSP ) {
+        int32_t i = ent->currentState.modelIndex - 1;
 
         // Explicit hulls in the BSP model.
         if ( i <= 0 || i >= cl.cm.cache->nummodels ) {
             Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
 		}
-		
-        return cl.cm.cache->models[i].headNode;
+
+        return cl.bsp->models[i].headNode;//cl.clipModels[i]->headNode;//cl.cm.cache->models[i].headNode;
     }
 
     // create a temp hull from bounding box sizes
     if ( ent->solid == Solid::OctagonBox ) {
-		return CM_HeadnodeForOctagon( ent->mins, ent->maxs );
+        return CM_HeadnodeForOctagon( ent->mins, ent->maxs );
     } else {
         return CM_HeadnodeForBox( ent->mins, ent->maxs );
     }
@@ -526,39 +490,30 @@ mnode_t *CL_World_HullForEntity(Entity *ent)
 /**
 *	@brief	Specialized server implementation of PointContents function.
 **/
-int32_t CL_World_PointContents( const vec3_t &point ) {
-    static PODEntity *touch[ MAX_CLIENT_POD_ENTITIES ];
+int32_t CL_World_PointContents( const vec3_t &point )
+{
+    static PODEntity     *touch[ MAX_CLIENT_POD_ENTITIES ], *hit = nullptr;
     
 	// Ensure all is sane.
-    if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
+    if ( !cl.bsp || !cl.bsp->nodes || !cl.cm.cache || !cl.cm.cache->nodes ) {
         Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
 		return 0;
 	}
 
     // get base contents from world
-    int32_t contents = CM_PointContents( point, cl.cm.cache->nodes );
+    int32_t contents = CM_PointContents( point, cl.bsp->nodes );
 
     // or in contents from all the other entities
     int32_t numberOfAreaEntities = CL_World_AreaEntities( point, point, touch, MAX_CLIENT_POD_ENTITIES, AreaEntities::Solid );
 
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {
 		// Acquire touch entity.
-        Entity *touchEntity= touch[i];
+        PODEntity*hit = touch[i];
 
-		// Get our hull to trace with.
-		mnode_t *traceEntityHull = CL_World_HullForEntity( touchEntity );
-
-		// Get origin and angles to box trace with.
-		vec3_t traceOrigin = touchEntity->currentState.origin;
-		vec3_t traceAngles = touchEntity->currentState.angles;
-		
-		// If rotating boxes is disabled, we only rotate world brush model entity boxes.
-		#ifndef CFG_CM_ALLOW_ROTATING_BOXES
-		if ( touchEntity->currentState.solid != PACKED_BSP && touchEntity->currentState.solid != Solid::BSP ) {
-            traceAngles = vec3_zero();
+        // Might intersect, so do an exact clip
+		if (hit != nullptr) {
+			contents |= CM_TransformedPointContents( point, CL_World_HullForEntity( hit ), hit->currentState.origin, hit->currentState.angles );
 		}
-		#endif
-		contents |= CM_TransformedPointContents( point, traceEntityHull, traceOrigin, traceAngles );//hit->currentState.angles );//hit->currentState.angles);
     }
 
     return contents;
@@ -575,7 +530,7 @@ static void CL_World_ClipMoveToEntities( const vec3_t &start, const vec3_t &mins
     // Create the bounding box of the entire move.
     for ( int32_t i = 0; i < 3; i++ ) {
         if ( end[i] > start[i] ) {
-            boxMins[i] = start[i] + mins[i]; - 1;
+            boxMins[i] = start[i] + mins[i] - 1;
             boxMaxs[i] = end[i] + maxs[i] + 1;
         } else {
             boxMins[i] = end[i] + mins[i] - 1;
@@ -590,47 +545,34 @@ static void CL_World_ClipMoveToEntities( const vec3_t &start, const vec3_t &mins
 
     // Be careful, it is possible to have an entity in this list removed before we get to it (killtriggered)
     for ( int32_t i = 0; i < numberOfAreaEntities; i++ ) {
-		// Entities in our touch list.
-		PODEntity *touchEntity = touchEntityList[i];
+        PODEntity *touchEntity = touchEntityList[i];
         
-		if (touchEntity->solid == Solid::Not) {
+		if ( touchEntity->solid == Solid::Not ) {
             continue;
 		}
-        if (touchEntity == passedict) {
+        if ( touchEntity == passedict ) {
             continue;
 		}
-		if (tr->allSolid) {
+		if ( tr->allSolid ) {
             return;
 		}
-        if (passedict) {
-            if (touchEntity->owner == passedict) {
-                continue;    // Don't clip against own missiles.
+        if ( passedict ) {
+			// Don't clip against own missiles or other objects that 'spawn inside' with a similar fashion.
+            if ( touchEntity->owner == passedict ) {
+                continue;    
 			}
-            if (passedict->owner == touchEntity) {
-                continue;    // Don't clip against owner.
+			// Don't clip against owner.
+            if ( passedict->owner == touchEntity ) {
+                continue;    
 			}
         }
 
-        if (!(contentMask & BrushContents::DeadMonster) && (touchEntity->clientFlags & EntityServerFlags::DeadMonster)) {
+        if ( !( contentMask & BrushContents::DeadMonster ) && ( touchEntity->serverFlags & EntityServerFlags::DeadMonster ) ) {
             continue;
 		}
 
-		// Get our hull to trace with.
-		mnode_t *traceEntityHull = CL_World_HullForEntity(touchEntity);
-
-		// Get origin and angles to box trace with.
-		vec3_t traceOrigin = touchEntity->currentState.origin;
-		vec3_t traceAngles = touchEntity->currentState.angles;
-		
-		// If rotating boxes is disabled, we only rotate world brush model entity boxes.
-		#ifndef CFG_CM_ALLOW_ROTATING_BOXES
-		if ( touchEntity->currentState.solid != PACKED_BSP && touchEntity->currentState.solid != Solid::BSP ) {
-            traceAngles = vec3_zero();
-		}
-		#endif
-
         // Might intersect, so do an exact clip
-		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, traceEntityHull, contentMask, traceOrigin, traceAngles);
+		TraceResult trace = CM_TransformedBoxTrace( start, end, mins, maxs, CL_World_HullForEntity(touchEntity), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles );
 
 		// Finalize trace results and clip to entity.
         CM_ClipEntity( tr, &trace, touchEntity );
@@ -647,8 +589,8 @@ static void CL_World_ClipMoveToEntities( const vec3_t &start, const vec3_t &mins
  //       if ( touchEntity->solid == Solid::Not ) {
  //           continue;
 	//	}
-	//	if ( touchEntity == passedict ) {
-	//		continue;
+ //       if ( touchEntity == passedict ) {
+ //           continue;
 	//	}
 	//	if ( tr->allSolid ) {
  //           return;
@@ -662,27 +604,12 @@ static void CL_World_ClipMoveToEntities( const vec3_t &start, const vec3_t &mins
 	//		}
  //       }
 
- //       if ( !( contentMask & BrushContents::DeadMonster ) && ( touchEntity->clientFlags & EntityClientFlags::DeadMonster ) ) {
+ //       if ( !( contentMask & BrushContents::DeadMonster ) && ( touchEntity->serverFlags & EntityServerFlags::DeadMonster ) ) {
  //           continue;
 	//	}
 
-	//	// Get our hull to trace with.
-	//	mnode_t *traceEntityHull = CL_World_HullForEntity(touchEntity);
-
-	//	// Get origin and angles to box trace with.
-	//	vec3_t traceOrigin = touchEntity->currentState.origin;
-	//	vec3_t traceAngles = touchEntity->currentState.angles;
-	//	
-	//	// If rotating boxes is disabled, we only rotate world brush model entity boxes.
-	//	#ifndef CFG_CM_ALLOW_ROTATING_BOXES
-	//	if ( touchEntity->currentState.solid != PACKED_BSP && touchEntity->currentState.solid != Solid::BSP ) {
- //           traceAngles = vec3_zero();
- //           traceOrigin = touchEntity->currentState.origin;
-	//	}
-	//	#endif
-
  //       // Might intersect, so do an exact clip
-	//	TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, traceEntityHull, contentMask, traceOrigin, traceAngles);
+	//	TraceResult trace = CM_TransformedBoxTrace( start, end, mins, maxs, CL_World_HullForEntity( touchEntity ), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles );
 
 	//	// Finalize trace results and clip to entity.
  //       CM_ClipEntity( tr, &trace, touchEntity );
@@ -694,19 +621,20 @@ static void CL_World_ClipMoveToEntities( const vec3_t &start, const vec3_t &mins
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
 const TraceResult CL_World_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask ) {
-    if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
+    if ( !cl.bsp || !cl.bsp->nodes ) {
         //Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
 		return TraceResult();
     }
 
     // clip to world
-    TraceResult trace = CM_TransformedBoxTrace( start, end, mins, maxs, cl.cm.cache->nodes, contentMask, vec3_zero(), vec3_zero() );
+    TraceResult trace = CM_TransformedBoxTrace( start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero() );
     trace.ent = &cs.entities[0];
-    if ( trace.fraction != 0 ) {
-		// clip to other solid entities
-		CL_World_ClipMoveToEntities( start, mins, maxs, end, passedict, contentMask, &trace );
-	}
+    if ( trace.fraction == 0 ) {
+        return trace;   // Blocked by the world
+    }
 
+    // clip to other solid entities
+    CL_World_ClipMoveToEntities( start, mins, maxs, end, passedict, contentMask, &trace );
     return trace;
 }
 

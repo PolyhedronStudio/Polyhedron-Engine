@@ -55,6 +55,8 @@ qhandle_t   cl_sfx_grenexp;
 qhandle_t   cl_sfx_water_explosion;
 qhandle_t   cl_sfx_footsteps[4];
 
+qhandle_t   cl_sfx_playerspawn;
+
 qhandle_t   cl_sfx_lightning;
 qhandle_t   cl_sfx_disrexp;
 
@@ -1179,7 +1181,7 @@ void CLG_ParseTempEntity(void)
 
 			CLG_PlainExplosion(false, teOrigin);
 			ParticleEffects::ExplosionSparks(teOrigin);
-			clgi.S_StartSound(&teOrigin, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
+			clgi.S_StartSound(&teOrigin, 0, 0, cl_sfx_explosion, 1, Attenuation::Idle, 0);
 		}
 		break;
 	}
@@ -1325,7 +1327,8 @@ void CLG_RegisterTempEntitySounds(void)
 	cl_sfx_spark6 = clgi.S_RegisterSound("world/spark6.wav");
 	cl_sfx_spark7 = clgi.S_RegisterSound("world/spark7.wav");
 	cl_sfx_railg = clgi.S_RegisterSound("weapons/railgf1a.wav");
-	cl_sfx_explosion = clgi.S_RegisterSound("weapons/rocklx1a.wav");
+	
+	cl_sfx_explosion = clgi.S_RegisterSound("fx/explosion1.wav");
 	cl_sfx_grenexp = clgi.S_RegisterSound("weapons/grenlx1a.wav");
 	cl_sfx_water_explosion = clgi.S_RegisterSound("weapons/xpld_wat.wav");
 
@@ -1333,6 +1336,9 @@ void CLG_RegisterTempEntitySounds(void)
 	clgi.S_RegisterSound("player/land1.wav");
 	clgi.S_RegisterSound("player/fall2.wav");
 	clgi.S_RegisterSound("player/fall1.wav");
+
+	// Player Spawn.
+	cl_sfx_playerspawn = clgi.S_RegisterSound("fx/playerspawn.wav");
 
 	// Register Footstep sounds.
 	for (i = 0; i < 4; i++) {

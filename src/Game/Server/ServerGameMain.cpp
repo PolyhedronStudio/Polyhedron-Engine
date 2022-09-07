@@ -534,7 +534,7 @@ void SVG_RunFrame(void) {
 	// Increment and use the frame number to calculate the current level time with.
 	level.frameNumber++;
     level.time += FRAMERATE_MS; //level.frameNumber * FRAMERATE_MS;
-
+	
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
         GetGameMode()->OnLevelExit();

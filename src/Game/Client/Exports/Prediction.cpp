@@ -330,28 +330,28 @@ TraceResult ClientGamePrediction::PM_Trace( const vec3_t& start, const vec3_t& m
 *   @brief  Player Move Simulation PointContents Wrapper.
 **/
 int32_t ClientGamePrediction::PM_PointContents( const vec3_t &point ) {
-	// Get world brush contents at 'point' coordinate.
-    PODEntity* ent = nullptr;
-    mmodel_t* cmodel = nullptr;
+	return clgi.PointContents( point );
+	//// Get world brush contents at 'point' coordinate.
+ //   PODEntity* ent = nullptr;
 
-    int32_t contents = clgi.CM_PointContents(point, cl->bsp->nodes);
+ //   int32_t contents = clgi.CM_PointContents(point, cl->bsp->nodes);
 
-    for (int32_t i = 0; i < cl->numSolidEntities; i++) {
-        ent = cl->solidEntities[i];
+ //   for (int32_t i = 0; i < cl->numSolidEntities; i++) {
+ //       ent = cl->solidEntities[i];
 
-        if (ent->currentState.solid != PACKED_BBOX) // special value for bmodel
-            continue;
+ //       if (ent->currentState.solid != PACKED_BSP) // special value for bmodel
+ //           continue;
 
-        cmodel = cl->clipModels[ent->currentState.modelIndex];
-        if (!cmodel)
-            continue;
+ //       mmodel_t *cmodel = cl->clipModels[ent->currentState.modelIndex - 1];
+ //       if (!cmodel)
+ //           continue;
 
-        contents |= clgi.CM_TransformedPointContents(
-            point, cmodel->headNode,
-            ent->currentState.origin,
-            ent->currentState.angles);
-    }
+ //       contents |= clgi.CM_TransformedPointContents(
+ //           point, cmodel->headNode,
+ //           ent->currentState.origin,
+ //           ent->currentState.angles);
+ //   }
 
-	// Return.
-    return contents;
+	//// Return.
+ //   return contents;
 }

@@ -34,7 +34,15 @@
 *   @brief  Called right after ClearScene.
 **/
 void ClientGameView::PreRenderView() {
+	// Calculate client view values.
+    clge->ClientUpdateOrigin();
 
+    // Finish calculating view values.
+    SetupViewCamera();
+
+    // Set view origin and angles to that of our view camera.
+    cl->refdef.vieworg      = viewCamera.GetViewOrigin();
+    cl->refdef.viewAngles   = viewCamera.GetViewAngles();
 }
 
 /**
@@ -50,12 +58,6 @@ void ClientGameView::ClearScene() {
 *   @brief  Called whenever the engine wants to render a valid frame.
 **/
 void ClientGameView::RenderView() {
-    // Calculate client view values.
-    clge->ClientUpdateOrigin();
-
-    // Finish calculating view values.
-    SetupViewCamera();
-
     // Add all entities of the last received(should be the current if all is stable)
     // server frame to the current frame view.
     clge->entities->PrepareRefreshEntities();
@@ -72,9 +74,6 @@ void ClientGameView::RenderView() {
     LightStyles::AddLightStylesToView();
 #endif
 
-    // Set view origin and angles to that of our view camera.
-    cl->refdef.vieworg      = viewCamera.GetViewOrigin();
-    cl->refdef.viewAngles   = viewCamera.GetViewAngles();
 
     // Last but not least, pass our array over to the client.
     cl->refdef.num_entities = num_renderEntities;

@@ -314,21 +314,21 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 **/
 void CLGBasePacketEntity::UpdateFromState(const EntityState* state) {
 	assert(state);
-	SetOrigin(state->origin);
-	SetAngles(state->angles);
-	SetOldOrigin(state->oldOrigin);
-	SetModelIndex(state->modelIndex);
-	SetModelIndex2(state->modelIndex2);
-	SetModelIndex3(state->modelIndex3);
-	SetModelIndex4(state->modelIndex4);
-	SetSkinNumber(state->skinNumber);
-	SetEffects(state->effects);
-	SetRenderEffects(state->renderEffects);
-	SetSolid(state->solid);
-	SetMins(state->mins);
-	SetMaxs(state->maxs);
-	SetSound(state->sound);
-	SetEventID(state->eventID);
+	//SetOrigin(state->origin);
+	//SetAngles(state->angles);
+	//SetOldOrigin(state->oldOrigin);
+	//SetModelIndex(state->modelIndex);
+	//SetModelIndex2(state->modelIndex2);
+	//SetModelIndex3(state->modelIndex3);
+	//SetModelIndex4(state->modelIndex4);
+	//SetSkinNumber(state->skinNumber);
+	//SetEffects(state->effects);
+	//SetRenderEffects(state->renderEffects);
+	//SetSolid(state->solid);
+	//SetMins(state->mins);
+	//SetMaxs(state->maxs);
+	//SetSound(state->sound);
+	//SetEventID(state->eventID);
 
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
@@ -346,21 +346,21 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState* state) {
 	if (!state) {
 		return;
 	}
-	SetOrigin(state->origin);
-	SetAngles(state->angles);
-	SetOldOrigin(state->oldOrigin);
-	SetModelIndex(state->modelIndex);
-	SetModelIndex2(state->modelIndex2);
-	SetModelIndex3(state->modelIndex3);
-	SetModelIndex4(state->modelIndex4);
-	SetSkinNumber(state->skinNumber);
-	SetEffects(state->effects);
-	SetRenderEffects(state->renderEffects);
-	SetSolid(state->solid);
-	SetMins(state->mins);
-	SetMaxs(state->maxs);
-	SetSound(state->sound);
-	SetEventID(state->eventID);
+	//SetOrigin(state->origin);
+	//SetAngles(state->angles);
+	//SetOldOrigin(state->oldOrigin);
+	//SetModelIndex(state->modelIndex);
+	//SetModelIndex2(state->modelIndex2);
+	//SetModelIndex3(state->modelIndex3);
+	//SetModelIndex4(state->modelIndex4);
+	//SetSkinNumber(state->skinNumber);
+	//SetEffects(state->effects);
+	//SetRenderEffects(state->renderEffects);
+	//SetSolid(state->solid);
+	//SetMins(state->mins);
+	//SetMaxs(state->maxs);
+	//SetSound(state->sound);
+	//SetEventID(state->eventID);
 
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);

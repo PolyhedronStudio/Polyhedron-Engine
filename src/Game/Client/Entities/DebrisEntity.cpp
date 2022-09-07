@@ -61,8 +61,7 @@ DebrisEntity* DebrisEntity::Create( GameEntity* debrisser, const std::string& de
 
 	// Create a gib entity.
     DebrisEntity *debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>(nullptr, true, false);
-
-
+	
 	// Set actual size of 
     vec3_t size = vec3_scale(debrisser->GetSize() , 0.5f);
     debrisEntity->SetSize(size);
@@ -70,28 +69,21 @@ DebrisEntity* DebrisEntity::Create( GameEntity* debrisser, const std::string& de
     // Set the origin.
     debrisEntity->SetOrigin(origin);
 	debrisEntity->SetInUse(true);
+
+	// Set Movetype and Solid.
+    debrisEntity->SetMoveType(MoveType::TossSlideBox);
+    debrisEntity->SetSolid(Solid::OctagonBox);
+    //debrisEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );
+
     // Set the model.
     debrisEntity->SetModel(debrisModel);
-	//const float velocityScale = 1.f;
- //   // Comment later...
+
+	// Comment later...
     const vec3_t velocityDamage = CalculateDamageVelocity( damage );
 
-	//vec3_t velocity = vec3_t{ speed, speed, speed };
- //   // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
- //   // adding it on to 'velocityDamage' its old value.
- //   vec3_t gibVelocity = vec3_fmaf( velocityDamage, velocityScale,  velocity );
-
- //   // Be sure to clip our velocity, just in case.
- //   ClipGibVelocity(gibVelocity);
-	//debrisEntity->SetMoveType(MoveType::TossSlide);
- //   debrisEntity->SetVelocity(gibVelocity);
-    // Calculate and set the velocity.
-    const vec3_t velocity = { 250.f + (Randomf() * 500.f), 250.f + (Randomf() * 500.f), 250.f + (Randomf() * 900.f) };
-    debrisEntity->SetVelocity( vec3_fmaf( debrisser->GetVelocity(), speed, velocity ) );
-
-    // Set Movetype and Solid.
-    debrisEntity->SetMoveType(MoveType::TossSlideBox);
-    debrisEntity->SetSolid(Solid::BoundingBox);
+	// Calculate and set the velocity.
+    const vec3_t velocity = { RandomRangef(-725.f, 725.f), RandomRangef(-725.f, 725.f), RandomRangef(-825, 825.f) };
+    debrisEntity->SetVelocity( vec3_fmaf( velocity, speed, debrisser->GetVelocity() ) );
 
     // Generate angular velocity.
     debrisEntity->SetAngularVelocity({

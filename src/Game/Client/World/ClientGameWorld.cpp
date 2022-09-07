@@ -330,7 +330,12 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 		PODEntity *podEntity = nullptr;
 		
 		// If the dictionary has a classname, and it has client_ residing in it, change the entity index to use.
-		if (parsedKeyValues.contains("classname") && (parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)) {
+		if (parsedKeyValues.contains("classname") && 
+			(
+				(parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)
+			||
+				(parsedKeyValues["classname"].find("func_areaportal") != std::string::npos))
+		) {
 			// Increment local entity count.
 			localEntityIndex++;
 		//	//entityIndex = localEntityIndex;
@@ -628,7 +633,7 @@ qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
 		//podEntity->clientEntityNumber = stateNumber;
 
 		// Failed.
-		CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: Spawning entity({}) failed.\n", dictionary["classname"].c_str() ) );
+		//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: Spawning entity({}) failed.\n", dictionary["classname"].c_str() ) );
 		return false;
 	}
 	

@@ -109,7 +109,7 @@ void SVGBasePlayer::Spawn() {
     SetMins(vec3_scale(PM_MINS, PM_SCALE));
     SetMaxs(vec3_scale(PM_MAXS, PM_SCALE));
     // Fresh view height.
-    SetViewHeight(22);
+    SetViewHeight(72);
     // Zero out velocity in case it had any at all.
     SetVelocity(vec3_zero());
 

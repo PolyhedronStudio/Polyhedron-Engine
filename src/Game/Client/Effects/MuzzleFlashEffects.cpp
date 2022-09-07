@@ -22,6 +22,7 @@
 #include "Game/Client/Effects/ParticleEffects.h"
 
 
+
 /**
 *   @brief  Client Entity Muzzleflash Effects.
 **/
@@ -35,8 +36,11 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
     }
 #endif
 
+	// Determine whether to flash, we don't wanna flash each shot.
+	const bool addDynamicLight = (RandomRangeui(0, 2048) < 128 ? true : false);
+
     PODEntity *pl = &cs->entities[mzParameters.entity];
-    cdlight_t* dl = DynamicLights::GetDynamicLight(mzParameters.entity);
+    cdlight_t* dl = DynamicLights::GetDynamicLight( mzParameters.entity );
     dl->origin = pl->currentState.origin;//, dl->origin;
 
 	// Get forward and right vectors to calculate origin with.
@@ -61,8 +65,20 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
 
     switch (mzParameters.weapon) {
     case MuzzleFlashType::Smg45: {
-        dl->color = vec3_t{0.95, 0.85, 0.65};
-        dl->die = cl->time + FRAMERATE_MS.count(); //CLG_1_FRAMETIME * 8;
+//0,886274509
+//0,756862745
+//0,607843137
+        dl->color = vec3_t{
+			0.886274509,
+			0.756862745,
+			0.607843137
+		};
+		if (addDynamicLight) {
+	        dl->die = cl->time + FRAMERATE_MS.count(); //CLG_1_FRAMETIME * 8;
+		} else {
+			dl->die = 0;
+		}
+
         //dl->radius = 350 + (rand() & 31);
         dl->decay = CLG_1_FRAMETIME;
         //dl->velocity = vec3_fmaf(pl->currentState.origin, 5, pl->currentState.angles);//, vec3_t { 0.f, 0.f, 1.f };
@@ -84,35 +100,35 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
     break;
     }
     case MuzzleFlashType::MachineGun:
-        dl->color = vec3_t{1, 1, 0};
-        Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound(soundname), volume, Attenuation::Normal, 0);
+        //dl->color = vec3_t{1, 1, 0};
+        //Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
+        //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound(soundname), volume, Attenuation::Normal, 0);
         break;
     case MuzzleFlashType::Shotgun:
-        dl->color = vec3_t{1, 1, 0};
-        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, Attenuation::Normal, 0);
-        //  S_StartSound(NULL, mzParameters.entity, SoundChannel::Auto,   S_RegisterSound("weapons/shotgr1b.wav"), volume, Attenuation::Normal, 0.1);
+        //dl->color = vec3_t{1, 1, 0};
+        //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, Attenuation::Normal, 0);
+        ////  S_StartSound(NULL, mzParameters.entity, SoundChannel::Auto,   S_RegisterSound("weapons/shotgr1b.wav"), volume, Attenuation::Normal, 0.1);
         break;
     case MuzzleFlashType::SuperShotgun:
-        dl->color = vec3_t{1, 1, 0};
-        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, Attenuation::Normal, 0);
+        //dl->color = vec3_t{1, 1, 0};
+        //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, Attenuation::Normal, 0);
         break;
     case MuzzleFlashType::Login:
         dl->color = vec3_t{0, 1, 0};
         dl->die = cl->time + 1.0f;
-        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("fx/playerspawn.wav"), 1, Attenuation::Normal, 0);
         ParticleEffects::Logout(pl->currentState.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Logout:
         dl->color = vec3_t{1, 0, 0};
         dl->die = cl->time + 1.0f;
-        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("fx/playerspawn.wav"), 1, Attenuation::Normal, 0);
         ParticleEffects::Logout(pl->currentState.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Respawn:
         dl->color = vec3_t{1, 1, 0};
         dl->die = cl->time + 1.0f;
-        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("fx/playerspawn.wav"), 1, Attenuation::Normal, 0);
         ParticleEffects::Logout(pl->currentState.origin, mzParameters.weapon);
         break;
     }

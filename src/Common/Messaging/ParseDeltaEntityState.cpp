@@ -153,11 +153,4 @@ void MSG_ParseDeltaEntityState(const EntityState* from, EntityState* to, int32_t
     if (byteMask & EntityMessageBits::AnimationIndex) {
 	    to->currentAnimation.animationIndex = MSG_ReadUint8();
     }
-
-    //if (byteMask & EntityMessageBits::AnimationFrameEnd) {
-	   // to->animationEndFrame = MSG_ReadUint16();
-    //}
-    //if (byteMask & EntityMessageBits::AnimationFrameTime) {
-    //	to->animationFramerate = MSG_ReadHalfFloat();
-    //}
 }

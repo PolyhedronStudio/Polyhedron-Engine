@@ -48,6 +48,7 @@ CL_RegisterBspModels
 Registers main BSP file and inline models
 =================
 */
+extern const cm_t &&CM_CreateFromBSP(bsp_t *bsp, const char *name);
 void CL_RegisterBspModels(void)
 {
     qerror_t ret;
@@ -57,14 +58,13 @@ void CL_RegisterBspModels(void)
 	// Load Refresh BSP parts.
     ret = BSP_Load(cl.configstrings[ConfigStrings::Models+ 1], &cl.bsp);
 
-	// Load collision model BSP parts.
-	//if (ret) {
-	ret = CM_LoadMap(&cl.cm, cl.configstrings[ConfigStrings::Models + 1]);
-	//}
-    if (cl.bsp == NULL || cl.cm.cache == NULL) {
+    if ( cl.bsp == NULL ) {
         Com_Error(ErrorType::Drop, "Couldn't load %s: %s",
                   cl.configstrings[ConfigStrings::Models+ 1], Q_ErrorString(ret));
     }
+
+	// Create Collision Model.
+	cl.cm = CM_CreateFromBSP( cl.bsp, cl.configstrings[ConfigStrings::Models+ 1] );
 
 #if USE_MAPCHECKSUM
     if (cl.bsp->checksum != atoi(cl.configstrings[ConfigStrings::MapCheckSum])) {
@@ -84,7 +84,7 @@ void CL_RegisterBspModels(void)
             break;
         }
         if (name[0] == '*')
-            cl.clipModels[i] = BSP_InlineModel(cl.bsp, name);
+			cl.clipModels[i] = BSP_InlineModel(cl.bsp, name);
         else
             cl.clipModels[i] = NULL;
     }
@@ -187,16 +187,6 @@ void CL_UpdateConfigstring(int index)
     }
 
     // TODO: Move all over to CG Module and ONLY
-    // handle the BSP Model loading. EXAMPLE:
-    //if (index >= ConfigStrings::Models+ 2 && index < ConfigStrings::Models+ MAX_MODELS) {
-    //    if (*s == '*') {
-    //        int i = index - ConfigStrings::Models;
-    //        cl.drawModels[i] = R_RegisterModel(s);
-    //        cl.clipModels[i] = BSP_InlineModel(cl.bsp, s);
-    //    }
-    //    return;
-    //}
-    
     if (index >= ConfigStrings::Models + 2 && index < ConfigStrings::Models + MAX_MODELS) {
         int i = index - ConfigStrings::Models;
 

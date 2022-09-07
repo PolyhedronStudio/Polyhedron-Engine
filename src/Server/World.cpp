@@ -162,30 +162,30 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
     if (ent->solid == Solid::BSP &&
         (ent->currentState.angles[0] || ent->currentState.angles[1] || ent->currentState.angles[2])) {
         // expand for rotation
-        float   max, v;
-        int     i;
-
-        max = 0;
-        for (i = 0; i < 3; i++) {
+        float max = 0;
+		float v = 0;
+        for ( int32_t i = 0; i < 3; i++ ) {
             v = fabs(ent->mins[i]);
-            if (v > max)
+            if (v > max) {
                 max = v;
+			}
             v = fabs(ent->maxs[i]);
-            if (v > max)
+            if (v > max) {
                 max = v;
+			}
         }
-        for (i = 0; i < 3; i++) {
-            ent->absMin[i] = ent->currentState.origin[i] - max;
-            ent->absMax[i] = ent->currentState.origin[i] + max;
-        }
+
+		// Calcualte absMin and absMax for rotated BSP Entity.
+		ent->absMin = ent->currentState.origin - vec3_t{ max, max, max };
+		ent->absMax = ent->currentState.origin + vec3_t{ max, max, max };
     } else {
-        // normal
-        VectorAdd(ent->currentState.origin, ent->mins, ent->absMin);
-        VectorAdd(ent->currentState.origin, ent->maxs, ent->absMax);
+        // Normal.
+        ent->absMin = ent->currentState.origin + ent->mins;
+        ent->absMax = ent->currentState.origin + ent->maxs;
     }
 
-    // because movement is clipped an epsilon away from an actual edge,
-    // we must fully check even when bounding boxes don't quite touch
+    // Because movement is clipped an epsilon away from an actual edge,
+    // we must fully check even when bounding boxes don't quite touch.
     ent->absMin[0] -= 1;
     ent->absMin[1] -= 1;
     ent->absMin[2] -= 1;
@@ -193,25 +193,25 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
     ent->absMax[1] += 1;
     ent->absMax[2] += 1;
 
-// link to PVS leafs
+	// Link to PVS leafs.
     ent->numClusters = 0;
     ent->areaNumber = 0;
     ent->areaNumber2 = 0;
 
-    //get all leafs, including solids
-    int32_t numberOfLeafs = CM_BoxLeafs(cm, ent->absMin, ent->absMax, leafs, MAX_TOTAL_ENT_LEAFS, &topnode);
+    // Get all leafs, including solids.
+    const int32_t numberOfLeafs = CM_BoxLeafs( cm, ent->absMin, ent->absMax, leafs, MAX_TOTAL_ENT_LEAFS, &topnode );
 
-    // set areas
-    for (int32_t i = 0; i < numberOfLeafs; i++) {
-        clusters[i] = CM_LeafCluster(leafs[i]);
-        area = CM_LeafArea(leafs[i]);
-        if (area) {
+    // Set areas.
+    for ( int32_t i = 0; i < numberOfLeafs; i++ ) {
+        clusters[i] = CM_LeafCluster( leafs[i] );
+        area = CM_LeafArea( leafs[i] );
+        if ( area ) {
             // doors may legally straggle two areas,
             // but nothing should evern need more than that
-            if (ent->areaNumber && ent->areaNumber != area) {
-                if (ent->areaNumber2 && ent->areaNumber2 != area && sv.serverState == ServerState::Loading) {
-                    Com_DPrintf("Object touching 3 areas at %f %f %f\n",
-                                ent->absMin[0], ent->absMin[1], ent->absMin[2]);
+            if ( ent->areaNumber && ent->areaNumber != area) {
+                if ( ent->areaNumber2 && ent->areaNumber2 != area && sv.serverState == ServerState::Loading ) {
+                    Com_DPrintf( "Object touching 3 areas at %f %f %f\n",
+                                ent->absMin[0], ent->absMin[1], ent->absMin[2] );
                 }
                 ent->areaNumber2 = area;
             } else
@@ -219,27 +219,27 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
         }
     }
 
-    if (numberOfLeafs >= MAX_TOTAL_ENT_LEAFS) {
+    if ( numberOfLeafs >= MAX_TOTAL_ENT_LEAFS  ) {
         // assume we missed some leafs, and mark by headNode
         ent->numClusters = -1;
-        ent->headNode = CM_NumNode(cm, topnode);
+        ent->headNode = CM_NumNode( cm, topnode );
     } else {
         ent->numClusters = 0;
-        for (int32_t i = 0; i < numberOfLeafs; i++) {
-            if (clusters[i] == -1) {
+        for (  int32_t i = 0; i < numberOfLeafs; i++ ) {
+            if ( clusters[i] == -1) {
                 continue;        // not a visible leaf
 			}
 			int32_t j = 0;
-            for (j = 0; j < i; j++) {
-                if (clusters[j] == clusters[i]) {
+            for ( j = 0; j < i; j++ ) {
+                if ( clusters[j] == clusters[i] ) {
                     break;
 				}
 			}
-            if (j == i) {
-                if (ent->numClusters == MAX_ENT_CLUSTERS) {
+            if ( j == i) {
+                if ( ent->numClusters == MAX_ENT_CLUSTERS ) {
                     // assume we missed some leafs, and mark by headNode
                     ent->numClusters = -1;
-                    ent->headNode = CM_NumNode(cm, topnode);
+                    ent->headNode = CM_NumNode( cm, topnode );
                     break;
                 }
 
@@ -252,11 +252,11 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
 /**
 *	@brief	Removes the entity for collision testing.
 **/
-void PF_UnlinkEntity(Entity *ent) {
-    if (!ent->area.prev) {
+void PF_UnlinkEntity( Entity *ent ) {
+    if ( !ent->area.prev ) {
         return;        // not linked in anywhere
 	}
-    List_Remove(&ent->area);
+    List_Remove( &ent->area );
     ent->area.prev = ent->area.next = NULL;
 }
 
@@ -265,36 +265,36 @@ void PF_UnlinkEntity(Entity *ent) {
 *			Finds the area to link the entity in to and sets its bounding box in case it is an
 *			actual inline bsp model.
 **/
-void PF_LinkEntity(Entity *ent) {
+void PF_LinkEntity( Entity *ent ) {
 	// Unlink from previous old position.
-	if (ent->area.prev) {
-        PF_UnlinkEntity(ent);
+	if ( ent->area.prev ) {
+        PF_UnlinkEntity( ent );
 	}
 
 	// Ensure it isn't the worldspawn entity itself.
-    if (ent == ge->entities) {
+    if ( ent == ge->entities ) {
         return;        // Don't add the world
 	}
 
 	// Ensure it is in use.
-    if (!ent->inUse) {
-        Com_DPrintf("%s: entity %d is not in use\n", __func__, NUM_FOR_EDICT(ent));
+    if ( !ent->inUse ) {
+        Com_DPrintf( "%s: entity %d is not in use\n", __func__, NUM_FOR_EDICT( ent ) );
         return;
     }
 
 	// Ensure a map is loaded properly in our cache.
-    if (!sv.cm.cache) {
+    if ( !sv.cm.cache ) {
         return;
     }
 
 	// Find the actual server entity.
-    int32_t entityNumber = NUM_FOR_EDICT(ent);
+    const int32_t entityNumber = NUM_FOR_EDICT(ent);
     server_entity_t *serverEntity = &sv.entities[entityNumber];
 
     // Encode the size into the entity_state for client prediction reaspms/
     switch (ent->solid) {
     case Solid::BoundingBox:
-        if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
+        if ( ( ent->serverFlags & EntityServerFlags::DeadMonster ) || vec3_equal( ent->mins, ent->maxs ) ) {
             ent->currentState.solid = 0;
             serverEntity->solid32 = 0;
         } else {
@@ -305,7 +305,7 @@ void PF_LinkEntity(Entity *ent) {
         }
         break;
     case Solid::OctagonBox:
-        if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
+        if ((ent->serverFlags & EntityServerFlags::DeadMonster ) || vec3_equal( ent->mins, ent->maxs ) ) {
             ent->currentState.solid = 0;
             serverEntity->solid32 = 0;
         } else {
@@ -316,10 +316,10 @@ void PF_LinkEntity(Entity *ent) {
         }
         break;
     case Solid::BSP:
-        ent->currentState.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
+        ent->currentState.solid = PACKED_BSP;      // a Solid::BoundingBox will never create this value
 		//ent->currentState.mins = vec3_zero();
 		//ent->currentState.maxs = vec3_zero();
-		serverEntity->solid32 = PACKED_BBOX;     // FIXME: use 255?
+		serverEntity->solid32 = PACKED_BSP;     // FIXME: use 255?
         break;
     default:
         ent->currentState.solid = 0;
@@ -329,28 +329,28 @@ void PF_LinkEntity(Entity *ent) {
         break;
     }
 
-    SV_LinkEntity(&sv.cm, ent);
+    SV_LinkEntity( &sv.cm, ent );
 
     // If first time, make sure oldOrigin is valid.
-    if (!ent->linkCount) {
+    if ( !ent->linkCount ) {
         ent->currentState.oldOrigin = ent->currentState.origin;
     }
     ent->linkCount++;
 
 	// 
-    if (ent->solid == Solid::Not) {
+    if ( ent->solid == Solid::Not ) {
         return;
 	}
 
 	// Find the first node that the ent's box crosses.
     areanode_t *node = sv_areanodes;
-    while (1) {
-		if (node->axis == -1) {
+    while ( 1 ) {
+		if ( node->axis == -1 ) {
             break;
 		}
-        if (ent->absMin[node->axis] > node->dist) {
+        if ( ent->absMin[node->axis] > node->dist ) {
             node = node->children[0];
-		} else if (ent->absMax[node->axis] < node->dist) {
+		} else if ( ent->absMax[node->axis] < node->dist ) {
             node = node->children[1];
 		} else {
             break; // Crosses the node
@@ -358,10 +358,10 @@ void PF_LinkEntity(Entity *ent) {
     }
 
     // Link it in
-    if (ent->solid == Solid::Trigger) {
-        List_Append(&node->triggerEdicts, &ent->area);
+    if ( ent->solid == Solid::Trigger ) {
+        List_Append( &node->triggerEdicts, &ent->area );
 	} else {
-        List_Append(&node->solidEdicts, &ent->area);
+        List_Append( &node->solidEdicts, &ent->area );
 	}
 }
 
@@ -369,21 +369,21 @@ void PF_LinkEntity(Entity *ent) {
 /**
 *	@brief	The inner workings of SV_AreaEntities.
 **/
-static void SV_AreaEntities_r(areanode_t *node) {
+static void SV_AreaEntities_r( areanode_t *node ) {
     list_t *start = nullptr;
     Entity *check = nullptr;
 
     // touch linked edicts
-    if (areaType == AreaEntities::Solid) {
+    if ( areaType == AreaEntities::Solid ) {
         start = &node->solidEdicts;
 	} else {
         start = &node->triggerEdicts;
 	}
 
     LIST_FOR_EACH(Entity, check, start, area) {
-        if (check->solid == Solid::Not)
+        if ( check->solid == Solid::Not )
             continue;        // deactivated
-        if (check->absMin[0] > areaMaxs[0]
+        if ( check->absMin[0] > areaMaxs[0]
             || check->absMin[1] > areaMaxs[1]
             || check->absMin[2] > areaMaxs[2]
             || check->absMax[0] < areaMins[0]
@@ -391,8 +391,8 @@ static void SV_AreaEntities_r(areanode_t *node) {
             || check->absMax[2] < areaMins[2])
             continue;        // not touching
 
-        if (areaCount == areaMaxCount) {
-            Com_WPrintf("SV_AreaEntities: MAXCOUNT\n");
+        if ( areaCount == areaMaxCount ) {
+            Com_WPrintf( "SV_AreaEntities: MAXCOUNT\n" );
             return;
         }
 
@@ -400,14 +400,14 @@ static void SV_AreaEntities_r(areanode_t *node) {
         areaCount++;
     }
 
-    if (node->axis == -1)
+    if ( node->axis == -1 )
         return;        // terminal node
 
     // recurse down both sides
-    if (areaMaxs[node->axis] > node->dist)
-        SV_AreaEntities_r(node->children[0]);
-    if (areaMins[node->axis] < node->dist)
-        SV_AreaEntities_r(node->children[1]);
+    if ( areaMaxs[ node->axis ] > node->dist )
+        SV_AreaEntities_r( node->children[0] );
+    if ( areaMins[ node->axis ] < node->dist )
+        SV_AreaEntities_r( node->children[1] );
 }
 
 /**
@@ -540,7 +540,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 		}
 		vec3_t traceAngles = vec3_zero();
 		vec3_t traceOrigin = vec3_zero();
-        if (touchEntity->currentState.solid == PACKED_BBOX) {
+        if (touchEntity->currentState.solid == PACKED_BSP) {
             // Setup angles and origin for our trace.
             traceAngles = touchEntity->currentState.angles;
             traceOrigin = touchEntity->currentState.origin;

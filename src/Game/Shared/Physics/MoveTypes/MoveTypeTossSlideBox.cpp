@@ -46,8 +46,6 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 		geSlider->SetAngularVelocity( SG_CalculateRotationalFriction( geSlider ) );
 	}
 
-    // Run think method.
-    SG_RunThink(geSlider);
 
 	/**
 	*	Store old origin and velocity. We'll need them to perhaps reset in case of any invalid movement.
@@ -185,6 +183,9 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	// Execute touch triggers (Since entities might move during touch callbacks, we might've
 	// hit new entities.)
     SG_TouchTriggers( geSlider );
+	
+    // Run think method.
+    SG_RunThink(geSlider);
 
 	return blockedMask;
 }

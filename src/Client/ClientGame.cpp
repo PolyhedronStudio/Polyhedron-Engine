@@ -109,14 +109,9 @@ mmodel_t *_wrp_BSP_InlineModel(const char *name) {
 		return nullptr;
 	}
     
-	return BSP_InlineModel(cl.bsp, name);
+	return BSP_InlineModel(cl.cm.cache, name);
 }
-void _wrp_CL_LinkEntity(PODEntity *podEntity) {
-    CL_LinkEntity(podEntity);
-}
-void _wrp_CL_UnlinkEntity(PODEntity *podEntity) {
-    CL_UnlinkEntity(podEntity);
-}
+
 void _wrp_CL_World_LinkEntity(PODEntity *podEntity) {
     CL_PF_World_LinkEntity(podEntity);
 }
@@ -131,6 +126,19 @@ mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
     return CM_InlineModel(cm, name);
 }
 
+// CModel PVS.
+mnode_t *_wrp_CM_NodeNum( cm_t *cm, const int32_t number ) {
+	return CM_NodeNum( cm, number );
+}
+mleaf_t *_wrp_CM_LeafNum( cm_t *cm, const int32_t number ) {
+	return CM_LeafNum( cm, number );
+}
+const bool _wrp_CM_HeadnodeVisible( mnode_t *node, byte *visBits ) {
+	return CM_HeadnodeVisible( node, visBits );
+}
+void _wrp_CM_SetAreaPortalState(int portalnum, qboolean open) {
+	return CM_SetAreaPortalState( &cl.cm, portalnum, open );
+}
 // COMMON
 unsigned _prt_Com_GetEventTime(void) {
     return com_eventTime;
@@ -500,16 +508,41 @@ void CL_InitGameProgs(void)
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;
 
-	importAPI.CL_HullForEntity = CL_HullForEntity;
-	importAPI.LinkEntity = _wrp_CL_LinkEntity;
-	importAPI.World_LinkEntity = _wrp_CL_World_LinkEntity;
-	importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;
-	importAPI.World_UnlinkEntity = _wrp_CL_World_UnlinkEntity;
-	importAPI.BoxEntities = CL_AreaEntities;
+	//importAPI.CL_HullForEntity = CL_HullForEntity;
+	//importAPI.LinkEntity = _wrp_CL_LinkEntity;
+	//importAPI.World_LinkEntity = _wrp_CL_World_LinkEntity;
+	//importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;
+	//importAPI.World_UnlinkEntity = _wrp_CL_World_UnlinkEntity;
+	//importAPI.BoxEntities = CL_AreaEntities;
+	//importAPI.World_BoxEntities = CL_World_AreaEntities;
+	//importAPI.PointContents = CL_PointContents;
+	//importAPI.World_PointContents = CL_World_PointContents;
+	//importAPI.Trace = CL_Trace;
+	//importAPI.World_Trace = CL_World_Trace;
+
+	//importAPI.CL_HullForEntity = CL_HullForEntity;
+	//importAPI.LinkEntity = _wrp_CL_LinkEntity;
+	//importAPI.World_LinkEntity = _wrp_CL_World_LinkEntity;
+	//importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;
+	//importAPI.World_UnlinkEntity = _wrp_CL_World_UnlinkEntity;
+	//importAPI.BoxEntities = CL_AreaEntities;
+	//importAPI.World_BoxEntities = CL_World_AreaEntities;
+	//importAPI.PointContents = CL_PointContents;
+	//importAPI.World_PointContents = CL_World_PointContents;
+ //   importAPI.Trace = CL_Trace;
+	//importAPI.World_Trace = CL_World_Trace;
+
+	// For actually using the 'world' PVS API.
+	importAPI.CL_HullForEntity = CL_World_HullForEntity;
+	importAPI.LinkEntity = CL_PF_World_LinkEntity;
+	importAPI.World_LinkEntity = CL_PF_World_LinkEntity;
+	importAPI.UnlinkEntity = CL_World_UnlinkEntity;
+	importAPI.World_UnlinkEntity = CL_World_UnlinkEntity;
+	importAPI.BoxEntities = CL_World_AreaEntities;
 	importAPI.World_BoxEntities = CL_World_AreaEntities;
-	importAPI.PointContents = CL_PointContents;
+	importAPI.PointContents = CL_World_PointContents;
 	importAPI.World_PointContents = CL_World_PointContents;
-    importAPI.Trace = CL_Trace;
+    importAPI.Trace = CL_World_Trace;
 	importAPI.World_Trace = CL_World_Trace;
 
     // Command Buffer.
@@ -528,6 +561,12 @@ void CL_InitGameProgs(void)
     importAPI.CM_BoxTrace = CM_BoxTrace;
     importAPI.CM_TransformedBoxTrace = CM_TransformedBoxTrace;
     importAPI.CM_ClipEntity = CM_ClipEntity;
+	importAPI.CM_SetAreaPortalState = _wrp_CM_SetAreaPortalState;
+
+	// Collision Model PVS.
+	importAPI.CM_NodeNum = _wrp_CM_NodeNum;
+	importAPI.CM_LeafNum = _wrp_CM_LeafNum;
+	importAPI.CM_HeadnodeVisible = _wrp_CM_HeadnodeVisible;
 
     // Command.
     importAPI.Cmd_AddCommand = Cmd_AddCommand;

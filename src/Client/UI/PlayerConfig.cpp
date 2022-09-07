@@ -318,7 +318,7 @@ static qboolean Push(menuFrameWork_t *self)
 	m_player.view.curvalue = Cvar_VariableInteger("cl_player_model");
 	clamp(m_player.view.curvalue, 0, 3);
 
-    m_player.menu.banner = R_RegisterPic("m_banner_plauer_setup");
+    m_player.menu.banner = 0; //R_RegisterPic("m_banner_plauer_setup");
     if (m_player.menu.banner) {
         R_GetPicSize(&m_player.menu.banner_rc.width,
                      &m_player.menu.banner_rc.height, m_player.menu.banner);

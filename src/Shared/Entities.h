@@ -72,7 +72,7 @@ struct PODEntity {
 	*	net code..
 	**/
 	//! Linked to a division node or leaf
-	list_t area = {};
+	list_t area = { .next = nullptr, .prev = nullptr };
 
     //! If numClusters is -1, use headNode instead.
     int32_t numClusters = 0;

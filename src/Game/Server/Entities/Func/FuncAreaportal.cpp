@@ -29,7 +29,9 @@ FuncAreaportal::FuncAreaportal( Entity* entity )
 // FuncAreaportal::Spawn
 //===============
 void FuncAreaportal::Spawn() {
+	// Start closed.
 	gi.SetAreaPortalState( GetStyle(), false );
+	SetUseCallback( &FuncAreaportal::FuncAreaportalUse );
 }
 
 //===============
@@ -53,14 +55,14 @@ void FuncAreaportal::SpawnKey( const std::string& key, const std::string& value 
 //===============
 // FuncAreaportal::PortalUse
 //===============
-void FuncAreaportal::PortalUse( IServerGameEntity* other, IServerGameEntity* activator ) {
+void FuncAreaportal::FuncAreaportalUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	ActivatePortal( !turnedOn );
 }
 
 //===============
 // FuncAreaportal::ActivatePortal
 //===============
-void FuncAreaportal::ActivatePortal( bool open ) {
+void FuncAreaportal::ActivatePortal( const bool open ) {
 	gi.SetAreaPortalState( GetStyle(), open );
 	turnedOn = open;
 }

@@ -11,6 +11,7 @@
 // Client & GM.
 #include "Client.h"
 #include "GameModule.h"
+#include "World.h"
 
 // Refresh & Sound.
 #include "Refresh/Models.h"
@@ -43,9 +44,9 @@ extern ClientShared cs;
 *
 **/
 /**
-*   @brief  Updates the player's state between previous and current frame.
+*   @brief  Updates the player's state between previous and current frame inspecting whether to LERP or NOT.
 **/
-static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *currentFrame, int framediv)
+static void Player_UpdateLerp(ServerFrame *previousFrame, ServerFrame *currentFrame, int framediv)
 {
     // Fetch states to interpolate between.
     PlayerState *currentPlayerState  = &currentFrame->playerState;
@@ -93,7 +94,7 @@ static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *current
 		return;
     }
 
-    // No lerping if POV number changed.
+    // No lerping if POV number changed. (Happens when ChaseCam for spectating is on, to name an example.)
     if (previousFrame->clientNumber != currentFrame->clientNumber) {
 		// Duplicate the currentState as the previousState so lerping doesn't hurt anything.
 		*previousPlayerState = *currentPlayerState;
@@ -208,7 +209,7 @@ void CL_DeltaFrame(void)
     Com_PlayerToEntityState(&cl.frame.playerState, &playerClientEntity->currentState);
 
 	// Process the entities that are 'in-frame' of the received server game frame packet data.
-    for (int32_t i = 0; i < cl.frame.numEntities; i++) {
+    for ( int32_t i = 0; i < cl.frame.numEntities; i++ ) {
 		// Calculate the actual state index of this entity.
         const int32_t stateIndex = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
         EntityState *state = &cl.entityStates[stateIndex];
@@ -225,7 +226,7 @@ void CL_DeltaFrame(void)
         // Fire entity event.
         PacketEntity_FireEvent(state->number);
     }
-
+		
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }
@@ -242,7 +243,7 @@ void CL_DeltaFrame(void)
     }
 
     // Update player state between previous and current frame.
-    Player_UpdateStates(&cl.oldframe, &cl.frame, 1);
+    Player_UpdateLerp(&cl.oldframe, &cl.frame, 1);
 		
 	// Call into client game module its delta frame function.
 	// This gives packet entities a chance to "predict" the next frame before
@@ -250,7 +251,7 @@ void CL_DeltaFrame(void)
 	CL_GM_ClientPacketEntityDeltaFrame();
 
     // Check for prediction errors.
-    //CL_CheckPredictionError();
+    CL_CheckPredictionError();
 }
 
 
@@ -294,7 +295,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     LerpVector(ent->previousState.origin, ent->currentState.origin, cl.lerpFraction, org);
 
     // offset the origin for BSP models
-    if (ent->currentState.solid == PACKED_BBOX) {
+    if (ent->currentState.solid == PACKED_BSP) {
         cm = cl.clipModels[ent->currentState.modelIndex];
         if (cm) {
             VectorAverage(cm->mins, cm->maxs, mid);

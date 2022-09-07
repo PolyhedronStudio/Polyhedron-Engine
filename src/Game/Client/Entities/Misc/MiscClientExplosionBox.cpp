@@ -96,7 +96,7 @@ void MiscClientExplosionBox::Spawn() {
         // Maxs.
         { 16.f, 16.f, 40.f }
     );
-    SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
+    //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
     // Set default values in case we have none.
     if (!GetMass()) {
@@ -201,16 +201,6 @@ void MiscClientExplosionBox::ExplosionBoxDropToFloor(void) {
 
     // Do a check ground for the step move of this pusher.
     SG_CheckGround(this); //CLG_StepMove_CheckGround(this);
-
-    // Setup its next think time, for a frame ahead.
-    //SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
-    //SetNextThinkTime(level.time + FRAMETIME_S);
-
-    // Do a check ground for the step move of this pusher.
-    //CLG_StepMove_CheckGround(this);
-    //M_CatagorizePosition(ent); <-- This shit, has to be moved to CLG_Stepmove_CheckGround.
-    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
-    // Not important for this one atm.
 }
 
 
@@ -430,4 +420,19 @@ void MiscClientExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
 
     // Throw debris!
 //    GetGameWorld()->ThrowDebris(this, "models/objects/debris3/tris.md2", origin, speed);
+}
+
+/**
+*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
+**/
+const bool CLG_EntityVisible( cm_t *cm, PODEntity *podEntity, byte *mask );
+void MiscClientExplosionBox::PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) {
+	
+	//if ( CLG_EntityVisible( &cl->cm, GetPODEntity(), cl->clientPVS.pvs)) {
+	//	CLG_Print( PrintType::DeveloperWarning, fmt::format( "MiscClientExploBox(#{}), refresh(#{}): VISIBLE!\n", GetNumber(), refreshEntityID ) );
+	//} else {
+	//	CLG_Print( PrintType::DeveloperWarning, fmt::format( "MiscClientExploBox(#{}), refresh(#{}): HIDDEN!\n", GetNumber(), refreshEntityID ) );
+	//}
+
+	Base::PrepareRefreshEntity( refreshEntityID, currentState, previousState, lerpFraction );
 }

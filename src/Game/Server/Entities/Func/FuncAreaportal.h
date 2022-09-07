@@ -20,9 +20,9 @@ public:
 	void SpawnKey( const std::string& key, const std::string& value ) override;
 
 	// For triggering by mappers
-	void PortalUse( IServerGameEntity* other, IServerGameEntity* activator );
+	void FuncAreaportalUse( IServerGameEntity* other, IServerGameEntity* activator );
 	// For doors and other autonomous entities
-	void ActivatePortal( bool open );
+	void ActivatePortal( const bool open );
 
 protected:
 	bool turnedOn{ false };

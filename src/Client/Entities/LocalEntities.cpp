@@ -10,6 +10,7 @@
 // Basic Client.
 #include "../Client.h"
 #include "../GameModule.h"
+#include "../World.h"
 
 // Need Refresh and Sound Headers.
 #include "Refresh/Models.h"
@@ -42,6 +43,9 @@ static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState 
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->previousState = *state;
 
+	// Link entity in.
+	//CL_PF_World_LinkEntity( clEntity );
+
     // Ensure that when the entity has been teleported we adjust its lerp origin.
     if (state->eventID == EntityEvent::PlayerTeleport || state->eventID == EntityEvent::OtherTeleport
        || (state->renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
@@ -63,6 +67,9 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
 {
     // Fetch event ID.
     int32_t eventID = state->eventID;
+	
+	// Link entity in.
+	//CL_PF_World_LinkEntity( clEntity );
 
     if (//state->hashedClassname != clEntity->previousState.hashedClassname
 		state->modelIndex != clEntity->previousState.modelIndex
@@ -139,8 +146,8 @@ static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 void LocalEntity_Update(const EntityState *state)
 {
 	// Ensure that its state number is > MAX_WIRED_POD_ENTITIES
-	if (state->number < MAX_WIRED_POD_ENTITIES) {
-		Com_DPrintf("(%s): state.number(#%i) < MAX_WIRED_POD_ENTITIES\n", __func__, state->number);
+	if ( state->number < MAX_WIRED_POD_ENTITIES ) {
+		Com_DPrintf( "(%s): state.number(#%i) < MAX_WIRED_POD_ENTITIES\n", __func__, state->number );
 		return;
 	}
 
@@ -152,31 +159,30 @@ void LocalEntity_Update(const EntityState *state)
 	}
 
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
-    PODEntity *clEntity = &podEntities[state->number];
+    PODEntity *clEntity = &podEntities[ state->number ];
 	
 	// Ensure client entity number matches the state.
-	if (clEntity->clientEntityNumber != state->number) {
-		Com_DPrintf("(%s): (clEntity->clientEntityNumber != state.number): Correcting clEntity->clientEntityNumber. \n");
+	if ( clEntity->clientEntityNumber != state->number ) {
+		Com_DPrintf( "(%s): (clEntity->clientEntityNumber != state.number): Correcting clEntity->clientEntityNumber. \n" );
 		clEntity->clientEntityNumber = state->number;
 	}
 
+	//  // Add entity to the solids list if it has a solid.
+	//	if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < 3072) {
+	//	// Increment num solid local entities.
+	//	//cl.numSolidLocalEntities++;
 
-  //  // Add entity to the solids list if it has a solid.
-  //  if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < 3072) {
-  //      // Increment num solid local entities.
-		//cl.numSolidLocalEntities++;
+	//// Remember to subtract MAX_WIRED_POD_ENTITIES to get the actual array index.
+	//const int32_t solidLocalEntityIndex = (cl.numSolidLocalEntities < 3072 ? cl.numSolidLocalEntities : 3071);
+	//cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
 
-		//// Remember to subtract MAX_WIRED_POD_ENTITIES to get the actual array index.
-		//const int32_t solidLocalEntityIndex = (cl.numSolidLocalEntities < 3072 ? cl.numSolidLocalEntities : 3071);
-		//cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
-
-		//// For non BRUSH models...
-  //      if (state.solid != PACKED_BBOX) {
-  //          // Update the actual bounding box.
-  //          clEntity->mins = state.mins;
-		//	clEntity->maxs = state.maxs;
-  //      }
-  //  }
+	//// For non BRUSH models...
+	//      if (state.solid != PACKED_BSP) {
+	//          // Update the actual bounding box.
+	//          clEntity->mins = state.mins;
+	//			clEntity->maxs = state.maxs;
+	//      }
+	//  }
 
     // Was this entity in our previous frame, or not?
     if (LocalEntity_IsNew(clEntity)) {

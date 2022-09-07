@@ -300,6 +300,14 @@ extern "C" {
         const TraceResult (*CM_BoxTrace)(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask);
         const TraceResult (*CM_TransformedBoxTrace) (const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin, const vec3_t& angles);
         void        (*CM_ClipEntity) (TraceResult* dst, const TraceResult* src, struct PODEntity* ent);
+		void (*CM_SetAreaPortalState)(int portalnum, qboolean open);
+
+		//---------------------------------------------------------------------
+		// Collision Model PVS.
+		//---------------------------------------------------------------------
+		mnode_t *(*CM_NodeNum) (cm_t *cm, const int32_t number);
+		mleaf_t *(*CM_LeafNum) (cm_t *cm, const int32_t number);
+		const bool (*CM_HeadnodeVisible) (mnode_t *node, byte *visBits);
 
         //---------------------------------------------------------------------
         // Command

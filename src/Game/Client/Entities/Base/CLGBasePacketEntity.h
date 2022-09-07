@@ -318,8 +318,8 @@ public:
     **/
     virtual inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) override {
 		if (podEntity) {
-			podEntity->currentState.mins = mins;
-			podEntity->currentState.maxs = maxs;
+			podEntity->mins = mins;
+			podEntity->maxs = maxs;
 		}
     }
 
@@ -516,13 +516,13 @@ public:
     **/
     virtual const vec3_t&   GetMaxs() override { 
 		if (podEntity) {
-			return podEntity->currentState.maxs;
+			return podEntity->maxs;
 		}
 		return ZeroVec3;
 	};
     virtual void            SetMaxs(const vec3_t& maxs) override {
 		if (podEntity) {
-			podEntity->currentState.maxs = maxs;
+			podEntity->maxs = maxs;
 		}
 	};
     /**
@@ -536,13 +536,13 @@ public:
     **/
     virtual const vec3_t&   GetMins() override { 
 		if (podEntity) {
-			return podEntity->currentState.mins;
+			return podEntity->mins;
 		}
 		return ZeroVec3;
 	};
     virtual void            SetMins(const vec3_t& mins) override {
 		if (podEntity) {
-			podEntity->currentState.mins = mins;
+			podEntity->mins = mins;
 		}
 	};
    
@@ -554,21 +554,42 @@ public:
 			// Set modelstr.
 			this->model = model;
 
-			// If it is an inline model, get the size information for it.
-			if (model[0] == '*') {
-				mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
+			// Register model.
+			qhandle_t modelHandle = clgi.R_RegisterModel( model.c_str() );
 
-				if (inlineModel) {
-					podEntity->mins = inlineModel->mins;
-					podEntity->maxs = inlineModel->maxs;
+			// Model index.
+			if (podEntity) {
+				// Set model handle.
+				SetModelIndex( modelHandle );
+
+				// If it is an inline model, get the size information for it.
+				if (model[0] == '*') {
+					mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
+
+					if (inlineModel) {
+						podEntity->mins = inlineModel->mins;
+						podEntity->maxs = inlineModel->maxs;
 					
-					// Link it for collision testing.
-					LinkEntity();
+						// Link it for collision testing.
+						LinkEntity();
+					}
 				}
 			}
+			//// If it is an inline model, get the size information for it.
+			//if (model[0] == '*') {
+			//	mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
 
-			// Update model index.
-			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
+			//	if (inlineModel) {
+			//		podEntity->mins = inlineModel->mins;
+			//		podEntity->maxs = inlineModel->maxs;
+			//		
+			//		// Link it for collision testing.
+			//		LinkEntity();
+			//	}
+			//}
+
+			//// Update model index.
+			//SetModelIndex(clgi.R_RegisterModel(model.c_str()));
 	};
 
     /**
@@ -780,14 +801,14 @@ public:
     **/
     virtual const uint32_t  GetSolid() override { 
 		if (podEntity) {
-			return podEntity->currentState.solid;
+			return podEntity->solid;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetSolid(const uint32_t solid) override {
 		if (podEntity) {
-			podEntity->currentState.solid = solid;
+			podEntity->solid = solid;
 		}
 	};
 

@@ -320,7 +320,7 @@ struct ClientState {
     int32_t numSolidEntities = 0;
 
     //! Solid Local Entities, these are REBUILT during EACH FRAME.
-    PODEntity *solidLocalEntities[3072];// = {};
+    PODEntity *solidLocalEntities[MAX_NON_WIRED_POD_ENTITIES];// = {};
     int32_t numSolidLocalEntities = 0;
 
     //! Stores the so called entity state 'baselines' which are transmitted during connecting.
@@ -412,15 +412,37 @@ struct ClientState {
     float fov_x = 0.f; //! Interpolated
     //! Y Field of View.
     float fov_y = 0.f; //! Derived from fov_x assuming 4/3 aspect ratio
-    //! UNUSED: LightLevel, server has no concept of where rays are so... not done.
+    
+	//! Client Possible Visibility Set, used for local entities.
+	struct ClientPVS {
+		// PVS Set.
+		byte pvs[8192];
+		// Last valid cluster.
+		int32_t lastValidCluster = -1;
+
+		//! Leaf, Area, and Current Cluster.
+		mleaf_t *leaf = nullptr;
+		int32_t leafArea = -1;
+		int32_t leafCluster = -1;
+
+		// Area Bits.
+		byte areaBits[32];
+		// Area Btes.
+		int32_t areaBytes;
+	} clientPVS;
+
+	//! UNUSED: LightLevel, server has no concept of where rays are so... not done.
     int32_t lightLevel  = 0;
 
+	//! Whether in third person or not.
     qboolean thirdPersonView = false;
-
     //! Predicted values, used for smooth player entity movement in thirdperson view
     vec3_t playerEntityOrigin = vec3_zero();
     vec3_t playerEntityAngles = vec3_zero();
-    
+
+    bsp_t *bsp = nullptr;	//! BSP For rendering.
+	cm_t cm;				//! Collision Model for local entities.
+
 
     /**
     *
@@ -460,9 +482,6 @@ struct ClientState {
     *   Locally Derived Information from Server State.
     *
     **/
-    bsp_t *bsp = nullptr;	//! BSP For rendering.
-	cm_t cm;				//! Collision Model for local entities.
-
     qhandle_t drawModels[MAX_MODELS] = {};   //! Handles for loaded draw models (MD2, MD3, ...).
     mmodel_t *clipModels[MAX_MODELS] = {};   //! mmodel_t ptr handles for loaded clip models (Brush models).
 

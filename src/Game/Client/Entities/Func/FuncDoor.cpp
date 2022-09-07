@@ -14,7 +14,7 @@
 //! BaseMover.
 #include "Game/Client/Entities/Base/CLGBaseMover.h"
 //#include "Game/Entities/Trigger/TriggerAutoDoor.h"
-//#include "Game/Entities/Func/FuncAreaportal.h"
+#include "Game/Client/Entities/Func/FuncAreaportal.h"
 #include "Game/Client/Entities/Func/FuncDoor.h"
 //! Game World.
 #include "Game/Client/World/ClientGameWorld.h"
@@ -550,10 +550,10 @@ void FuncDoor::UseAreaportals( bool open ) const {
     }
 
     CLGBasePacketEntity* ent = nullptr;
-    //for (auto& areaPortalEntity : GetGameWorld()->GetGameEntityRange<0, MAX_WIRED_POD_ENTITIES>() | 
-    //    cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::IsSubclassOf<FuncAreaportal>() | cef::HasKeyValue("targetname", targetStr)) {
-	   // dynamic_cast<FuncAreaportal*>(areaPortalEntity)->ActivatePortal(open);
-    //}
+    for (auto& areaPortalEntity : GetGameWorld()->GetGameEntityRange<MAX_WIRED_POD_ENTITIES, MAX_NON_WIRED_POD_ENTITIES>() | 
+        cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::IsSubclassOf<FuncAreaportal>() | cef::HasKeyValue("targetname", targetStr)) {
+	    dynamic_cast<FuncAreaportal*>(areaPortalEntity)->ActivatePortal(open);
+    }
     
         //while ( ent = CLG_FindEntityByKeyValue( "targetname", targetStr, ent ) ) {
     //    if ( ent->IsClass<FuncAreaportal>() ) {
@@ -561,6 +561,44 @@ void FuncDoor::UseAreaportals( bool open ) const {
     //    }
     //}
 }
+
+/**
+*	@brief	Implements triggering door state, effectively allowing a slight client-side prediction.
+**/
+void FuncDoor::OnEventID(uint32_t eventID) {
+	// TODO: Acquire the activator entity?
+	uint16_t activatorEntityNumber = 0;
+	
+	// Get Game World.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	auto *playerEntity = gameWorld->GetClientGameEntity();
+//		auto *playerEntity = GetGameWorld()->GetGameEntityByIndex(1);
+	switch( eventID ) {
+	case 1: //: DOOR_OPEN:
+		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'DOOR_OPEN')!\n", __func__, eventID ) );
+
+		// Start now so we can catch up to last frame.
+		//DoGoUp();
+		//DoGoUp();
+		//DoorGoUp( playerEntity );
+		UseAreaportals( true );
+
+		//DoorUse(playerEntity, nullptr);
+		break;
+	case 2: //: DOOR_CLOSE.
+		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'DOOR_CLOSE')!\n", __func__, eventID ) );
+		// Start now, so we can catch up to last frame.
+		//DoGoDown();
+		//DoGoDown();
+
+		UseAreaportals( false );
+		break;
+	default:
+
+		break;
+	}
+}
+
 
 //===============
 // Light::SpawnKey

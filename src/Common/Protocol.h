@@ -265,7 +265,7 @@ static constexpr int32_t CLIENTNUM_NONE     = MAX_CLIENTS - 1;
 static constexpr int32_t CLIENTNUM_RESERVED = MAX_CLIENTS - 1;
 
 // a Solid::BoundingBox will never create this value
-static constexpr uint32_t PACKED_BBOX   = 31;
+static constexpr uint32_t PACKED_BSP   = 31;
 
 
 // q2pro frame flags sent by the server

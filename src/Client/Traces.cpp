@@ -12,6 +12,7 @@
 #include "Traces.h"
 #include "GameModule.h"
 #include "Refresh/Models.h"
+#include "World.h"
 
 extern ClientShared cs;
 
@@ -48,7 +49,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             continue;
         }
 
-        if (solidEntity->currentState.solid == PACKED_BBOX) {
+        if (solidEntity->currentState.solid == PACKED_BSP) {
             // special value for bmodel
             cmodel = cl.clipModels[solidEntity->currentState.modelIndex];
             if (!cmodel)
@@ -116,7 +117,7 @@ void CL_ClipMoveToLocalClientEntities(const vec3_t &start, const vec3_t &mins, c
             continue;
         }
 
-        if (solidEntity->currentState.solid == PACKED_BBOX) {
+        if (solidEntity->currentState.solid == PACKED_BSP) {
             // special value for bmodel
             cmodel = cl.clipModels[solidEntity->currentState.modelIndex];
             if (!cmodel)
@@ -189,22 +190,22 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
 }
 
 void CL_LinkEntity(PODEntity* entity) {
-
-
 	// Ensure it is in use.
     if (!entity) {
         Com_DPrintf("%s: PODEntity == (nullptr)!\n", __func__);
         return;
     }
-	if (!entity->inUse) {
+	if (entity->isLocal && !entity->inUse) {
         Com_DPrintf("%s: PODEntity(#i)->inUse == false!!\n", __func__, entity->clientEntityNumber);
 		return;
+	} else {
+		entity->inUse = true;
 	}
 
 	// Unlink from previous old position.
 	//if (ent->area.prev) {
 	if (entity && entity->linkCount) {
-        CL_UnlinkEntity(entity);
+//        CL_UnlinkEntity(entity);
 	}
 
 	// Ensure it isn't the worldspawn entity itself.
@@ -235,13 +236,13 @@ void CL_LinkEntity(PODEntity* entity) {
         if ((entity->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(entity->mins, entity->maxs)) {
             entity->currentState.solid = 0;
         } else {
-			entity->currentState.solid = Solid::OctagonBox; //MSG_PackBoundingBox32(entity->mins, entity->maxs);
-			entity->currentState.mins = entity->mins;
-			entity->currentState.maxs = entity->maxs;
+		entity->currentState.solid = Solid::OctagonBox; //MSG_PackBoundingBox32(entity->mins, entity->maxs);
+		entity->currentState.mins = entity->mins;
+		entity->currentState.maxs = entity->maxs;
         }
         break;
     case Solid::BSP:
-        entity->currentState.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
+        entity->currentState.solid = PACKED_BSP;      // a Solid::BoundingBox will never create this value
 		entity->currentState.mins = vec3_zero();
 		entity->currentState.maxs = vec3_zero();
         break;
@@ -251,6 +252,18 @@ void CL_LinkEntity(PODEntity* entity) {
 		entity->currentState.maxs = vec3_zero();
         break;
     }
+	
+	//if ( entity->solid == PACKED_BSP ) {
+	//	entity->solid = Solid::BSP;
+	//}
+
+	// Link entity into the area grid world as well.
+	/**
+	*	@brief	Links entity to PVS leafs.
+	**/
+	void CL_World_LinkEntity( cm_t *cm, Entity *ent );
+	
+	CL_World_LinkEntity( &cl.cm, entity );
 
     //SV_LinkEntity(&sv.cm, ent);
 	if (entity->solid == Solid::BSP &&
@@ -301,23 +314,25 @@ void CL_UnlinkEntity(PODEntity* entity) {
 	if (entity) {
 		entity->linkCount = 0;
 	}
+
+	CL_World_UnlinkEntity( entity );
 }
 
 /**
 *	@return	Returns a headNode that can be used for testing or clipping an
 *			entity's BoundingBox or OctagonBox of mins/maxs size.
 **/
- mnode_t *CL_HullForEntity(Entity *ent)
+mnode_t *CL_HullForEntity(Entity *ent)
 {
-    if (ent->solid == Solid::BSP) {
+    if (ent->solid == Solid::BSP || ent->solid == PACKED_BSP) {
         int32_t i = ent->currentState.modelIndex - 1;
 
         // Explicit hulls in the BSP model.
-        if (i <= 0 || i >= sv.cm.cache->nummodels) {
+        if (i <= 0 || i >= cl.bsp->nummodels) {
             Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
 		}
 
-        return sv.cm.cache->models[i].headNode;
+        return cl.clipModels[i]->headNode;
     }
 
     // create a temp hull from bounding box sizes
@@ -332,7 +347,7 @@ void CL_UnlinkEntity(PODEntity* entity) {
 *	@return	Returns the bit flags of what contents are there at position 'point'.
 **/
 int32_t CL_PointContents(const vec3_t& point) {
-    static PODEntity     *touch[MAX_WIRED_POD_ENTITIES], *hit = nullptr;
+    static PODEntity     *touch[MAX_CLIENT_POD_ENTITIES], *hit = nullptr;
     
 	// Ensure all is sane.
     if (!cl.bsp || !cl.bsp->nodes) {
@@ -344,19 +359,19 @@ int32_t CL_PointContents(const vec3_t& point) {
     int32_t contents = CM_PointContents(point, cl.bsp->nodes);
 
     // or in contents from all the other entities
-    int32_t numberOfAreaEntities = CL_AreaEntities(point, point, touch, MAX_WIRED_POD_ENTITIES, AreaEntities::Solid);
+//    int32_t numberOfAreaEntities = CL_AreaEntities(point, point, touch, MAX_CLIENT_POD_ENTITIES, AreaEntities::Solid);
 
-    for (int32_t i = 0; i < numberOfAreaEntities; i++) {
-		// Acquire touch entity.
-        Entity *hit = touch[i];
-
-        // Might intersect, so do an exact clip
-#ifdef CFG_CM_ALLOW_ROTATING_BOXES
-			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
-#else
-			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, vec3_zero());//hit->currentState.angles);
-#endif
-    }
+//    for (int32_t i = 0; i < numberOfAreaEntities; i++) {
+//		// Acquire touch entity.
+//        Entity *hit = touch[i];
+//
+//        // Might intersect, so do an exact clip
+//#ifdef CFG_CM_ALLOW_ROTATING_BOXES
+//			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+//#else
+//			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, vec3_zero());//hit->currentState.angles);
+//#endif
+//    }
 
     return contents;
 }
@@ -408,18 +423,18 @@ static void CL_AreaEntities_r() {
 	// Local Client Only entities that got Linked.
 	else if (areaType == AreaEntities::LocalSolid) {
 		for (int i = 0; i < cl.numSolidLocalEntities; i++) {
-			PODEntity *solidEntity = cl.solidLocalEntities[i];
+			PODEntity *solidLocalEntity = cl.solidLocalEntities[i];
 
-			if (!solidEntity || solidEntity->solid == Solid::Not) {
+			if (!solidLocalEntity || solidLocalEntity->solid == Solid::Not) {
 				continue;
 			}
 
-			if (solidEntity->absMin[0] > areaMaxs[0]
-				|| solidEntity->absMin[1] > areaMaxs[1]
-				|| solidEntity->absMin[2] > areaMaxs[2]
-				|| solidEntity->absMax[0] < areaMins[0]
-				|| solidEntity->absMax[1] < areaMins[1]
-				|| solidEntity->absMax[2] < areaMins[2]) {
+			if (solidLocalEntity->absMin[0] > areaMaxs[0]
+				|| solidLocalEntity->absMin[1] > areaMaxs[1]
+				|| solidLocalEntity->absMin[2] > areaMaxs[2]
+				|| solidLocalEntity->absMax[0] < areaMins[0]
+				|| solidLocalEntity->absMax[1] < areaMins[1]
+				|| solidLocalEntity->absMax[2] < areaMins[2]) {
 				continue;        // not touching
 			}
 
@@ -428,7 +443,7 @@ static void CL_AreaEntities_r() {
 				return;
 			}
 
-			areaList[areaCount] = solidEntity;
+			areaList[areaCount] = solidLocalEntity;
 			areaCount++;
 		}
 	}
@@ -449,7 +464,6 @@ int32_t CL_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity **list
     CL_AreaEntities_r();
 
     return areaCount;
-	//return 0;
 }
 
 
@@ -491,7 +505,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             continue;
         }
 
-        if (solidEntity->currentState.solid == PACKED_BBOX) {
+        if (solidEntity->currentState.solid == PACKED_BSP) {
             // special value for bmodel
             cmodel = cl.clipModels[solidEntity->currentState.modelIndex];
             if (!cmodel)

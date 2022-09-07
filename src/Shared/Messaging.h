@@ -193,7 +193,7 @@ struct EntityState {
     int32_t renderEffects = 0;
     
 	//! For client side prediction.
-    int32_t solid = 0;	//! gi.LinkEntity sets this properly.
+    int32_t solid = 0;	//! LinkEntity sets this properly from entity state to podentity itself.
 	//! For client side prediction. x/y need to be integral values(we won't go less than 1 unit.)
 	vec3_t mins = vec3_zero();
 	vec3_t maxs = vec3_zero();

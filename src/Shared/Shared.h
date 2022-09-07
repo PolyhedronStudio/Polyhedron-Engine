@@ -162,9 +162,10 @@ static constexpr int32_t MAX_CLIENT_NAME = 16;     //! Maximum length of a clien
 
 //! The actual maximum amount of entities that we want to allow to be packetized.
 static constexpr int32_t MAX_WIRED_POD_ENTITIES = 1024; //! Maximum amount of "wired" entities we can handle.
+static constexpr int32_t MAX_NON_WIRED_POD_ENTITIES = 3072; //! Maximum amount of "wired" entities we can handle.
 
-static constexpr int32_t MAX_CLIENT_POD_ENTITIES = MAX_WIRED_POD_ENTITIES + 3072; // Maximum amount of client-only entities we can handle.
-static constexpr int32_t MAX_SERVER_POD_ENTITIES = MAX_WIRED_POD_ENTITIES + 3072; // Maximum amount of client-only entities we can handle.
+static constexpr int32_t MAX_CLIENT_POD_ENTITIES = MAX_WIRED_POD_ENTITIES + MAX_NON_WIRED_POD_ENTITIES; // Maximum amount of client-only entities we can handle.
+static constexpr int32_t MAX_SERVER_POD_ENTITIES = MAX_WIRED_POD_ENTITIES + MAX_NON_WIRED_POD_ENTITIES; // Maximum amount of client-only entities we can handle.
 
 
 /**

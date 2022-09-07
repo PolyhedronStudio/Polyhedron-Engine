@@ -550,10 +550,10 @@ void FuncDoor::SpawnDoorTrigger() {
         return; // Only the team leader spawns a trigger
     }
     
-    for (IServerGameEntity* teamMember = dynamic_cast<SVGBaseEntity*>(GetTeamChainEntity()); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+    for ( IServerGameEntity* teamMember = dynamic_cast< SVGBaseEntity* >( GetTeamChainEntity() ); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity() ) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
-	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
-	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	    if ( !teamMember->IsSubclassOf< SVGBaseMover >() ) {
+	        gi.DPrintf( "Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber() );
 	        break;
 	    }
 

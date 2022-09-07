@@ -587,6 +587,7 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePlayer.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseTrigger.cpp"
 
+		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncAreaportal.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncDoor.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncDoorRotating.cpp"	
 		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncPlat.cpp"
@@ -653,6 +654,7 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePlayer.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseTrigger.h"
 
+		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncAreaportal.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncDoor.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncDoorRotating.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Func/FuncPlat.h"

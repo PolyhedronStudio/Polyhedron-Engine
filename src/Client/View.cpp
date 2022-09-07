@@ -83,19 +83,66 @@ static int entitycmpfnc(const void *_a, const void *_b)
         return a->model - b->model;
 }
 
+/**
+*	@brief	Calculates the client's local PVS, used for culling out local entities. 
+**/
+static void V_CalculateViewPVS( const vec3_t &viewOrigin ) {
+    
+	// Get leaf, area, cluster for our view origin.
+	cl.clientPVS.leaf = BSP_PointLeaf( cl.cm.cache->nodes, viewOrigin );
+    cl.clientPVS.leafArea	 = cl.clientPVS.leaf->area;
+    cl.clientPVS.leafCluster = cl.clientPVS.leaf->cluster;
 
+	// Copy area bytes from frame.  ////------------ Write our area bytes.
+	//cl.clientPVS.areaBytes = cl.frame.areaBytes;//CM_WriteAreaBits( &cl.cm, cl.clientPVS.areaBits, cl.clientPVS.leafArea	);
+	//memcpy( &cl.clientPVS.areaBytes, cl.frame.areaBits, sizeof(byte) * 32 );
+	cl.clientPVS.areaBytes = CM_WriteAreaBits( &cl.cm, cl.clientPVS.areaBits, cl.clientPVS.leafArea );
+
+    if ( cl.clientPVS.leafCluster >= 0 ) {
+        CM_FatPVS( &cl.cm, cl.clientPVS.pvs, cl.refdef.vieworg, DVIS_PVS2 );
+		// Store old valid cluster.
+        cl.clientPVS.lastValidCluster = cl.clientPVS.leafCluster;
+    } else {
+        BSP_ClusterVis( cl.cm.cache, cl.clientPVS.pvs, cl.clientPVS.leafCluster, DVIS_PVS2 );
+    }
+
+	//Com_LPrintf(PrintType::Developer, fmt::format(
+	//	"V_CalculateViewPVS(leafArea({}), leafCluster({})): {}, {}, {}\n",
+	// cl.clientPVS.leafArea, cl.clientPVS.leafCluster, viewOrigin.x, viewOrigin.y, viewOrigin.z ).c_str());
+}
+//static void V_CalculateViewPVS( const vec3_t &viewOrigin ) {
+//    
+//	// Get leaf, area, cluster for our view origin.
+//	cl.clientPVS.leaf = BSP_PointLeaf( cl.bsp->nodes, viewOrigin );
+//    cl.clientPVS.leafArea	 = cl.clientPVS.leaf->area;
+//    cl.clientPVS.leafCluster = cl.clientPVS.leaf->cluster;
 //
-//===============
-// V_RenderView
-// 
-// This is where all entities that are rendered per frame are added to the
-// scene.
+//	// Copy area bytes from frame.  ////------------ Write our area bytes.
+//	cl.clientPVS.areaBytes = cl.frame.areaBytes;//CM_WriteAreaBits( &cl.cm, cl.clientPVS.areaBits, cl.clientPVS.leafArea	);
+//	memcpy( &cl.clientPVS.areaBytes, cl.frame.areaBits, sizeof(byte) * 32 );
 //
-// Calls into the CG Module so it can add it can run its own scene.
-//===============
+//	cm_t bspCm = { .cache = cl.bsp };
 //
-void V_RenderView(void)
-{
+//    if ( cl.clientPVS.leafCluster >= 0 ) {
+//        CM_FatPVS( &bspCm, cl.clientPVS.pvs, cl.refdef.vieworg, DVIS_PVS2 );
+//		// Store old valid cluster.
+//        cl.clientPVS.lastValidCluster = cl.clientPVS.leafCluster;
+//    } else {
+//        BSP_ClusterVis( cl.bsp, cl.clientPVS.pvs, cl.clientPVS.leafCluster, DVIS_PVS2 );
+//    }
+//
+//	Com_LPrintf(PrintType::Developer, fmt::format(
+//		"V_CalculateViewPVS(leafArea({}), leafCluster({})): {}, {}, {}\n",
+//	 cl.clientPVS.leafArea, cl.clientPVS.leafCluster, viewOrigin.x, viewOrigin.y, viewOrigin.z ).c_str());
+//}
+
+/**
+*	@brief	This is where all entities that are rendered per frame are added to the
+*			scene.
+*
+*			Calls into the CG Module so it can add it can run its own scene.
+**/
+void V_RenderView(void) {
 
     // an invalid frame will just use the exact previous refdef
     // we can't use the old frame if the video mode has changed, though...
@@ -106,15 +153,21 @@ void V_RenderView(void)
         // PreRender CG Module View.
         CL_GM_PreRenderView();
 
+		// Calculate the new client's PVS.
+		V_CalculateViewPVS( cl.refdef.vieworg );
+
         // Add CG Module entities.
         CL_GM_RenderView();
 
+		// Old Original Comment:
         // never let it sit exactly on a node line, because a water plane can
         // dissapear when viewed with the eye exactly on it.
         // the server protocol only specifies to 1/8 pixel, so add 1/16 in each axis
-        cl.refdef.vieworg[0] += 1.0 / 32;
-        cl.refdef.vieworg[1] += 1.0 / 32;
-        cl.refdef.vieworg[2] += 1.0 / 32;
+		// New:
+		// Our offsets are 0.015625, so 1/64 pixel at max in case of 4096x4096
+        cl.refdef.vieworg[0] += 1.0 / 64;
+        cl.refdef.vieworg[1] += 1.0 / 64;
+        cl.refdef.vieworg[2] += 1.0 / 64;
 
         // Setup refresh X, Y, Width and Height.
         cl.refdef.x = scr_vrect.x;
@@ -150,7 +203,11 @@ void V_RenderView(void)
 
         // sort entities for better cache locality
         qsort(cl.refdef.entities, cl.refdef.num_entities, sizeof(cl.refdef.entities[0]), entitycmpfnc);
-    }
+	} else {
+
+		// Calculate the new client's PVS.
+		V_CalculateViewPVS( cl.refdef.vieworg );
+	}
 
     // Pass the actual scene render definiiton over to the Renderer for rendering.  
     R_RenderFrame(&cl.refdef);

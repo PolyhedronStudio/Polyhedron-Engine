@@ -390,29 +390,38 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
             //    client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
             //    SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
             //}
-
-            float xPositive = crandom() * 0.35f;
-            float xNegative = crandom() * -0.35f;
-            float yPositive = crandom() * 0.35f;
-            float yNegative = crandom() * -0.35f;
-            float zPositive = crandom() * 0.35f;
-            float zNegative = crandom() * -0.35f;
         
             client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
             client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
 
             // TODO: Tracing should start from a bone on the weapon mesh.
             // get start / end positions
-            vec3_t angles = client->aimAngles + client->kickAngles;
+            vec3_t angles = client->aimAngles;// + client->kickAngles;
             vec3_t forward = vec3_zero(), right = vec3_zero();
             AngleVectors(angles, &forward, &right, NULL);
 
             // Calculate projected end point from source.
-            vec3_t offset = {0, 0, static_cast<float>(player->GetViewHeight() - 8)};
+            vec3_t offset = {0, 0, static_cast<float>(player->GetViewHeight())};
             vec3_t bulletStart = SVG_ProjectSource(player->GetOrigin(), offset, forward, right);
 
+			// Calculate spread based on crouch, walk, run, and the general velocity.
+			//if ( client->playerState.pmove.velocity )
+			const bool isCrouched = ( client->playerState.pmove.flags & PMF_DUCKED );
+			const bool isOnGround = ( client->playerState.pmove.flags & PMF_ON_GROUND );
+			
+			// Default spread is based on velocity and velocity alone.
+			float hSpread = RandomRangef(20, 325);
+			float vSpread = RandomRangef(20, 325);
+
+			if ( isCrouched && isOnGround ) {
+				hSpread = RandomRangef(5, 150);
+				vSpread = RandomRangef(5, 150);
+			} else {
+
+			}
+
             // Fire a bullet.
-            SVG_FireBullet(player, bulletStart, forward, 10, 50, RandomRangef(-150, 150), RandomRangef(-150, 150), 0);
+            SVG_FireBullet(player, bulletStart, forward, 10, 50, hSpread, vSpread, 0);
 
             // send muzzle flash
             gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);

@@ -122,12 +122,44 @@ qerror_t CM_LoadMap(cm_t *cm, const char *name)
     }
 
     cm->cache = cache;
-    cm->floodnums = (int*)Z_TagMallocz(sizeof(int) * cm->cache->numareas +      // CPP: Cast
-                                 sizeof(qboolean) * (cm->cache->lastareaportal + 1), TAG_CMODEL);
-    cm->portalopen = (qboolean *)(cm->floodnums + cm->cache->numareas);
+    cm->floodnums = (int*)Z_TagMallocz( sizeof( int ) * cm->cache->numareas + sizeof( qboolean ) * ( cm->cache->lastareaportal + 1 ), TAG_CMODEL );
+    cm->portalopen = (qboolean *)( cm->floodnums + cm->cache->numareas );
     FloodAreaConnections(cm);
 
     return Q_ERR_SUCCESS;
+}
+
+/**
+*   @brief  Creates the collision model using the already loaded BSP as its cache.
+**/
+const cm_t &&CM_CreateFromBSP(bsp_t *bsp, const char *name)
+{
+	cm_t cm{
+		.cache = bsp,
+	};
+
+    cm.floodnums = (int*)Z_TagMallocz(sizeof(int) * cm.cache->numareas		+		sizeof(qboolean) * (cm.cache->lastareaportal + 1), TAG_CMODEL);
+    cm.portalopen = (qboolean *)(cm.floodnums + cm.cache->numareas);
+    FloodAreaConnections(&cm);
+
+    return std::move(cm);
+}
+/**
+*	@brief	Frees the floodnums from memory after unsetting the cache pointer.
+**/
+void CM_FreeFromBSP(cm_t *cm) {
+	if (!cm) {
+		// Error?
+		return;
+	}
+
+	// Unset BSP pointer to free the collision model cache.
+	cm->cache = nullptr;
+
+	// Free floodnums.
+	if (cm->floodnums) {
+		Z_Free(cm->floodnums);
+	}
 }
 
 /**

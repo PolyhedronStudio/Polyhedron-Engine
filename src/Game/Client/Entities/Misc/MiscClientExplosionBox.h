@@ -46,6 +46,12 @@ public:
 	**/
     void MiscExplosionBoxExplode(void);
 
+
+	/**
+	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
+	**/
+	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
+
 private:
     // Function to spawn "debris1/tris.md2" chunks.
     void SpawnDebris1Chunk();

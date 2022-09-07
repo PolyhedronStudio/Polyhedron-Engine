@@ -232,13 +232,13 @@ static const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, con
 
 		// Entity has to be linked in.
 #if SHAREDGAME_CLIENTGAME
-		if ( !geCheck->GetLinkCount() ) {
-		//if ( !geCheck->GetPODEntity()->area.prev ) {
+		//if ( !geCheck->GetLinkCount() ) {
+		if ( !geCheck->GetPODEntity()->area.prev ) {
 			auto client = geCheck->GetClient();
 			if (client) {
 			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(#{})]: Not linked in anywhere", geCheck->GetNumber(), client->clientNumber ) );
 			} else {
-			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(nullptr)]: Not linked in anywhere", geCheck->GetNumber() ) );
+				SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(nullptr)]: Not linked in anywhere", geCheck->GetNumber() ) );
 			}
 #endif
 #if SHAREDGAME_SERVERGAME

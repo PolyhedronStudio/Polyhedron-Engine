@@ -502,6 +502,7 @@ void V_Init(void);
 void V_Shutdown(void);
 void V_RenderView(void);
 
+
 //
 // predict.c
 //

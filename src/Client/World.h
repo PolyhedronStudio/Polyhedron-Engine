@@ -23,13 +23,25 @@
 #include "World.h"
 
 /**
+*	@brief	Clears out the old areagrid, and generates a new one with the currently cached data.
+**/
+void CL_ClearWorld();
+
+/**
+*	@brief	Determines what area an entity resides in and "links it in for collision testing".
+*			Finds the area to link the entity in to and sets its bounding box in case it is an
+*			actual inline bsp model.
+**/
+mnode_t *CL_World_HullForEntity(Entity *ent);
+
+/**
 *	@brief	Removes the entity for collision testing.
 **/
 void CL_World_UnlinkEntity(Entity *ent);
 /**
-*	@brief	General purpose routine shared between game DLL and MVD code.
-*			Links entity to PVS leafs.
+*	@brief	Links entity to PVS leafs.
 **/
+void CL_World_LinkEntity(Entity *ent);
 void CL_PF_World_LinkEntity(Entity *ent);
 
 /**

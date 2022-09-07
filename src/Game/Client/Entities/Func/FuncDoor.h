@@ -28,6 +28,11 @@ public:
     void        PostSpawn() override;
 	void		SpawnKey( const std::string& key, const std::string& value ) override;
 
+		/**
+	*	@brief	Implements triggering door state, effectively allowing a slight client-side prediction.
+	**/
+	void OnEventID( uint32_t eventID ) override;
+
 protected:
     void        DoorUse( GameEntity* other, GameEntity* activator );
     void        DoorShotOpen( GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point );

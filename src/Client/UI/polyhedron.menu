@@ -273,8 +273,6 @@ begin screen
     style --compact
     title "Screen Setup"
     blank
-    toggle "cutscenes" cl_cinematics
-    blank
 	pairs "selected inventory item" scr_showitemname "do not show" 0 "show on change" 1 "always show" 2
     toggle "ping graph" scr_lag_draw
     values "demo bar" scr_demobar no yes verbose
