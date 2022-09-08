@@ -2992,9 +2992,15 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 			// Fire local entity events.
 			LocalEntity_FireEvent(&podEntity->currentState);
 		}
+		
+		// Run the received packet entities for a frame so we can "predict".
+		CL_GM_ClientPacketEntityDeltaFrame();
 
 		// Give the client game module a chance to run its local entities for a frame.
 		CL_GM_ClientLocalEntitiesFrame();
+
+		// Check for prediction errors.
+		CL_CheckPredictionError();
 	}
 
 	#if USE_CLIENT

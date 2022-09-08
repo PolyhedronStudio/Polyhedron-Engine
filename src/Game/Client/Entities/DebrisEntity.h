@@ -24,7 +24,7 @@ private:
     virtual ~DebrisEntity() = default;
 
 public:
-    DefineClass(DebrisEntity, CLGBaseLocalEntity);
+    DefineGameClass(DebrisEntity, CLGBaseLocalEntity);
 
 	/**
 	*

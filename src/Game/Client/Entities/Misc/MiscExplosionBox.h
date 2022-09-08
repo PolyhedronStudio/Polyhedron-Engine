@@ -19,7 +19,7 @@ public:
     virtual ~MiscExplosionBox() = default;
 
     //DefineMapClass( "misc__explobox", MiscExplosionBox, CLGBasePacketEntity ); // Should be CLGBaseTrigger inherited.
-	DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseTrigger ); // Should be CLGBaseTrigger inherited.
+	DefineMapClass( "xmisc_explobox", MiscExplosionBox, CLGBaseTrigger ); // Should be CLGBaseTrigger inherited.
     
 	/**
     *	Interface functions. 

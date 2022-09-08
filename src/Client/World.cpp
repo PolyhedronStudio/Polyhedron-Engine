@@ -181,18 +181,17 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
         ent->absMin = ent->currentState.origin + ent->mins;
         ent->absMax = ent->currentState.origin + ent->maxs;
 
-		// Because movement is clipped an epsilon away from an actual edge,
-		// we must fully check even when bounding boxes don't quite touch
-		ent->absMin[0] -= 1;
-		ent->absMin[1] -= 1;
-		ent->absMin[2] -= 1;
-		ent->absMax[0] += 1;
-		ent->absMax[1] += 1;
-		ent->absMax[2] += 1;
+
     }
 
-
-
+	// Because movement is clipped an epsilon away from an actual edge,
+	// we must fully check even when bounding boxes don't quite touch
+	ent->absMin[0] -= 1;
+	ent->absMin[1] -= 1;
+	ent->absMin[2] -= 1;
+	ent->absMax[0] += 1;
+	ent->absMax[1] += 1;
+	ent->absMax[2] += 1;
 
 	// Link to PVS leafs.
     ent->numClusters = 0;
@@ -303,12 +302,12 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
 
 	if (ent->isLocal) {
 		if ( !ent->inUse && ent->clientEntityNumber > 21) {
-			Com_DPrintf("%s: entity %d is not in use\n", __func__, ent->clientEntityNumber);
-			return;
+			Com_DPrintf("%s: local entity %d is not in use\n", __func__, ent->clientEntityNumber);
+		//	return;
 		}
 	} else {
 		if ( ent->serverFrame != cl.frame.number ) {
-			Com_DPrintf("%s: entity %d is not in use\n", __func__, ent->clientEntityNumber);
+			Com_DPrintf("%s: packet entity %d is not in use\n", __func__, ent->clientEntityNumber);
 			return;
 		}
 	}
@@ -320,8 +319,8 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
             ent->solid = Solid::Not;
         } else {
 			ent->solid = Solid::BoundingBox;
-			ent->currentState.mins = ent->mins;
-			ent->currentState.maxs = ent->maxs;
+			ent->mins = ent->currentState.mins;
+			ent->maxs = ent->currentState.maxs;
         }
         break;
     case Solid::OctagonBox:
@@ -329,8 +328,8 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
             ent->solid = Solid::Not;
         } else {
 			ent->solid = Solid::OctagonBox;
-			ent->currentState.mins = ent->mins;
-			ent->currentState.maxs = ent->maxs;
+			ent->mins = ent->currentState.mins;
+			ent->maxs = ent->currentState.maxs;
         }
         break;
     case PACKED_BSP: {

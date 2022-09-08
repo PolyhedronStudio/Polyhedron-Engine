@@ -331,10 +331,7 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 		
 		// If the dictionary has a classname, and it has client_ residing in it, change the entity index to use.
 		if (parsedKeyValues.contains("classname") && 
-			(
-				(parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)
-			||
-				(parsedKeyValues["classname"].find("func_areaportal") != std::string::npos))
+			( parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos || parsedKeyValues["classname"].find("func_areaportal") != std::string::npos)
 		) {
 			// Increment local entity count.
 			localEntityIndex++;
@@ -724,28 +721,34 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
     clgi.UnlinkEntity(podEntity);
 
     // Get entity number.
-    const int32_t entityNumber = podEntity->clientEntityNumber;
-	const int32_t previousEntityNumber = podEntity->previousState.number;
+    const int32_t clientEntityNumber	= podEntity->clientEntityNumber;
+	const int32_t currentStateNumber	= podEntity->currentState.number;
+	const int32_t previousStateNumber	= podEntity->previousState.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
 	static constexpr int32_t BODY_QUEUE_SIZE = 8;
-    if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
-		CLG_Print( PrintType::DeveloperWarning, fmt::format( "Tried to free special edict: {}\n", entityNumber ) );
+    if (clientEntityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "Tried to free special edict: {}\n", clientEntityNumber ) );
 		return;
     }
 
     // Delete the actual entity class pointer.
     FreeGameEntity(podEntity);
 
+	// Was it local or not?
+	const bool wasLocal = podEntity->isLocal;
+
     // Reset the entities values.
 	(*podEntity) = {
 		// Ensure the states are assigned the correct entityNumber.
 		.currentState = {
-			.number = entityNumber,
+			.number = currentStateNumber,
 		},
 		.previousState = {
-			.number = previousEntityNumber,
+			.number = previousStateNumber,
 		},
+		// Was it local?
+		.isLocal = wasLocal, 
 		// Ensure it is not in use.
 		.inUse = false,
 		// It has no Game Entity anymore.
@@ -755,7 +758,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 		// was taking up this current slot.
 		.freeTime = level.time,
 		// And ensure our main identifier has the correct entityNumber set.
-		.clientEntityNumber = entityNumber,
+		.clientEntityNumber = clientEntityNumber,
 	};
 	
 }

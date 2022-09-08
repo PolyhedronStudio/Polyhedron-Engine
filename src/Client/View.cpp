@@ -165,9 +165,9 @@ void V_RenderView(void) {
         // the server protocol only specifies to 1/8 pixel, so add 1/16 in each axis
 		// New:
 		// Our offsets are 0.015625, so 1/64 pixel at max in case of 4096x4096
-        cl.refdef.vieworg[0] += 1.0 / 64;
-        cl.refdef.vieworg[1] += 1.0 / 64;
-        cl.refdef.vieworg[2] += 1.0 / 64;
+        cl.refdef.vieworg[0] += 1.0 / 16;
+        cl.refdef.vieworg[1] += 1.0 / 16;
+        cl.refdef.vieworg[2] += 1.0 / 16;
 
         // Setup refresh X, Y, Width and Height.
         cl.refdef.x = scr_vrect.x;

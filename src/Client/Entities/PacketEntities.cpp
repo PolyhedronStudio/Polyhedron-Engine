@@ -165,13 +165,6 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 
 	// Make sure to fetch and adjust solids here.
     if (state->solid && state->number != cl.frame.clientNumber + 1 ) {
-        //cl.solidEntities[cl.numSolidEntities++] = clEntity;
-
-		// For non brush models.
-        //if (state->solid == Solid::BSP) {
-			// Update the actual bounding box.
-            //clEntity->mins = state->mins;
-			//clEntity->maxs = state->maxs; //MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
 		if (state->solid == PACKED_BSP) {
 			clEntity->solid = Solid::BSP;
 			const mmodel_t *model = &cl.cm.cache->models[clEntity->currentState.modelIndex - 1];
@@ -183,15 +176,9 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 			clEntity->mins = state->mins;
 			clEntity->maxs = state->maxs;
 		}
-		//}// else {
-
-		//	clEntity->mins = model->mins;
-		//	clEntity->maxs = model->maxs;
-		//	clEntity->solid = PACKED_BSP;
-		//}
 	} else {
-		//clEntity->mins = vec3_zero();
-		//clEntity->mins = vec3_zero();
+		clEntity->mins = vec3_zero();
+		clEntity->mins = vec3_zero();
 		clEntity->solid = Solid::Not;
 	}
 
@@ -222,13 +209,13 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 	// Assign the fresh new received state as the entity's current.
     clEntity->currentState = *state;
 	
-	// Link Entity.
-	CL_PF_World_LinkEntity( clEntity );
-
     // work around Q2PRO server bandwidth optimization
     if (isPlayerEntity) {
         Com_PlayerToEntityState(&cl.frame.playerState, &clEntity->currentState);
     }
+
+	// Link Entity.
+	CL_PF_World_LinkEntity( clEntity );
 }
 
 /**

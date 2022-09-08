@@ -206,22 +206,12 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     
     // Set new entity origin.
     SetOrigin(trace.endPosition);
-    
+
+    // Do a check ground for the step move of this pusher.
+    SG_CheckGround(this);
+
     // Link entity back in.
     LinkEntity();
-
-    // Do a check ground for the step move of this pusher.
-    SG_CheckGround(this);//SVG_StepMove_CheckGround(this);
-
-    // Setup its next think time, for a frame ahead.
-    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-    //SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
-
-    // Do a check ground for the step move of this pusher.
-    //SVG_StepMove_CheckGround(this);
-    //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
-    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
-    // Not important for this one atm.
 }
 
 //
@@ -300,9 +290,22 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         SetDelayTime(save);
     }
 
+	// Notify the server this is, specifically a monster, by adding the Monster flag.
+    SetServerFlags( GetServerFlags() | EntityServerFlags::DeadMonster );
+	// Unset movetype and solid.
+    SetMoveType(MoveType::None);
+    SetSolid(Solid::Not);
+	// Entity is alive.
+	SetDeadFlag( DeadFlags::Dead );
+    // Set entity to allow taking damage.
+    SetTakeDamage( TakeDamage::No );
+	// Link it in.
+	LinkEntity();
+
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
-    SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
+    //SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
+    //SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
+	Remove();
 }
 
 //

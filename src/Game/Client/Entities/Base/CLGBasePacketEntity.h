@@ -37,7 +37,7 @@ public:
     virtual ~CLGBasePacketEntity() = default;
 
     // Runtime type information
-	DefineGameClass( CLGBasePacketEntity, IClientGameEntity );
+	DefinePacketClass( CLGBasePacketEntity, IClientGameEntity );
 
 	//! Used for returning vectors from a const vec3_t & reference.
     static vec3_t ZeroVec3;
