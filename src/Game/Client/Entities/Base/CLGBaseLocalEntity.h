@@ -100,6 +100,17 @@ public:
     *
     * 
     ***/
+	bool isExtrapolating = false;
+	virtual void EnableExtrapolation() override {
+		isExtrapolating = true;
+	}
+	virtual void DisableExtrapolation() override {
+		isExtrapolating = false;
+	}
+	virtual const bool IsExtrapolating() override {
+		return isExtrapolating;
+	}
+
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/

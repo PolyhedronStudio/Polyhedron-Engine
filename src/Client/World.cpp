@@ -181,17 +181,16 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
         ent->absMin = ent->currentState.origin + ent->mins;
         ent->absMax = ent->currentState.origin + ent->maxs;
 
-
+		// Because movement is clipped an epsilon away from an actual edge,
+		// we must fully check even when bounding boxes don't quite touch
+		ent->absMin[0] -= 1;
+		ent->absMin[1] -= 1;
+		ent->absMin[2] -= 1;
+		ent->absMax[0] += 1;
+		ent->absMax[1] += 1;
+		ent->absMax[2] += 1;
     }
 
-	// Because movement is clipped an epsilon away from an actual edge,
-	// we must fully check even when bounding boxes don't quite touch
-	ent->absMin[0] -= 1;
-	ent->absMin[1] -= 1;
-	ent->absMin[2] -= 1;
-	ent->absMax[0] += 1;
-	ent->absMax[1] += 1;
-	ent->absMax[2] += 1;
 
 	// Link to PVS leafs.
     ent->numClusters = 0;

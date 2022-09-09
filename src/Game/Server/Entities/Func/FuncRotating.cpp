@@ -33,19 +33,19 @@ FuncRotating::FuncRotating( Entity* entity )
 void FuncRotating::Spawn() {
 
 	// Allow for angles to determine direction.
-	SetMoveDirection(vec3_normalize(GetAngles()));
+	//SetMoveDirection(vec3_normalize(GetAngles()));
 
-	// Reset Angles.
-	SetAngles(vec3_zero());
+	//// Reset Angles.
+	//SetAngles(vec3_zero());
 
 	// TODO: Implement properly. Someone, feel free to submit a PR :)
 	// Set the axis of rotation, support custom axes as well
 	if ( GetSpawnFlags() & SF_XAxis ) {
-	    SetMoveDirection(vec3_t { 0.0f, 0.0f, 1.0f }, true);
+	    moveDirection = { 0.0f, 0.0f, 1.0f };
 	} else if ( GetSpawnFlags() & SF_YAxis ) {
-		SetMoveDirection(vec3_t { 1.0f, 0.0f, 0.0f }, true);
-	} else if ( !vec3_length( moveDirection ) ) { // If moveDirection had no specific angles or X/Y flag set, default to Z.
-		SetMoveDirection(vec3_t { 0.0f, 1.0f, 0.0f }, true);
+		moveDirection = { 1.0f, 0.0f, 0.0f };
+	} else {
+		moveDirection = vec3_t { 0.0f, 1.0f, 0.0f };
 	}
 
 	SetSolid(Solid::BSP);
@@ -56,30 +56,33 @@ void FuncRotating::Spawn() {
 	    moveDirection = vec3_negate(moveDirection);
 	}
 
-	if ( !GetSpeed() ) {
-		SetSpeed( 100.0f );
+	if ( !speed ) {
+		speed = 100.0f;
 	}
-	if ( !GetDamage() ) {
+	if ( GetDamage() ) {
 		SetDamage( 2.0f );
+		SetBlockedCallback( &FuncRotating::RotatorBlocked );
 	}
 
 	SetUseCallback( &FuncRotating::RotatorUse );
-	SetBlockedCallback( &FuncRotating::RotatorBlocked );
-
-	if ( GetSpawnFlags() & SF_StartOn ) {
-		DispatchUseCallback( nullptr, nullptr );
-	}
 
 	if ( GetSpawnFlags() & SF_Animated ) {
-		SetEffects(GetEffects() | EntityEffectType::AnimCycleAll2hz);
+		SetEffects( GetEffects() | EntityEffectType::AnimCycleAll2hz );
 	} else if ( GetSpawnFlags() & SF_AnimatedFast ) {
-		SetEffects(GetEffects() | EntityEffectType::AnimCycleAll30hz);
+		SetEffects( GetEffects() | EntityEffectType::AnimCycleAll30hz );
 	}
 
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &FuncRotating::RotatorThink );
 
 	LinkEntity();
 }
 
+void FuncRotating::PostSpawn() {
+	if ( GetSpawnFlags() & SF_StartOn ) {
+		DispatchUseCallback( nullptr, nullptr );
+	}
+}
 //===============
 // FuncRotating::RotatorBlocked
 //===============
@@ -100,19 +103,35 @@ void FuncRotating::RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity*
 // FuncRotating::RotatorUse
 //===============
 void FuncRotating::RotatorUse( IServerGameEntity* other, IServerGameEntity* activator ) {
-	if ( !vec3_equal( GetAngularVelocity(), vec3_zero() ) ) {
+	if ( !( angularVelocity[0] == 0 && angularVelocity[1] == 0 &&angularVelocity[2] == 0 ) ) {
 		SetSound( 0 );
 		SetAngularVelocity( vec3_zero() );
 		SetTouchCallback( nullptr );
 	} else {
-		SetSound( moveInfo.middleSoundIndex );
-		SetAngularVelocity( vec3_scale( moveDirection, GetSpeed() ) );
+		//SetSound( moveInfo.middleSoundIndex );
+		SetAngularVelocity( vec3_scale( moveDirection, speed ) );
 		if ( GetSpawnFlags() & SF_HurtTouch ) {
 			SetTouchCallback( &FuncRotating::RotatorHurtTouch );
 		}
 	}
 }
 
+void FuncRotating::RotatorThink() {
+			SetAngularVelocity( vec3_scale( moveDirection, speed ) );
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &FuncRotating::RotatorThink );
+}
 void FuncRotating::SpawnKey(const std::string& key, const std::string& value) { 
-	Base::SpawnKey(key, value); 
+	if (key == "speed") {
+        // Parsed int.
+        float parsedFloat = 0.f;
+
+        // Parse.
+        ParseKeyValue(key, value, parsedFloat);
+
+		// Assign.
+		speed = parsedFloat;
+	} else {
+		Base::SpawnKey(key, value); 
+	}
 }

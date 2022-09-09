@@ -141,33 +141,6 @@ struct EntityState {
     //! Extended model indices.
     int32_t modelIndex2 = 0, modelIndex3 = 0, modelIndex4 = 0;
 
-    //----------------------------------------------------------
-    //! Server time at which this animation started.
-    //uint32_t animationEventStartTime = 0;
-    ////! Animation Index
-    //uint16_t animationEventIndex = 0;
-    ////! Animation Start Frame
-    //uint16_t animationStartFrame = 0;
-    ////! Animation End Frame
-    //uint16_t animationEndFrame = 0;
-    ////! Animation Frame Time. (30fps for a 30fps mesh = 1 second, etc.)
-    //float animationEventframeTime = 30.f;
-
-    //+++ Get the below working first, then do the on top, use events??
-    
-    ////    Events might be easier to use with regards to possible predictions?
-    ////! Server start time of current animation.
-    //uint64_t animationStartTime = 0;
-    ////! Animation Start Frame
-    //uint16_t animationStartFrame = 0;
-    ////! Animation End Frame
-    //uint16_t animationEndFrame = 0;
-    ////! Current animation playback framerate.
-    //float animationFramerate = 0;
-    ////! Amount of loops to do.
-    //uint8_t animationLoopCount = 0;
-    ////! Force loop?
-    //uint8_t animationForceLoop = false;
 
 	/**
 	*	An Entity State, stores two Animation States:
@@ -177,14 +150,37 @@ struct EntityState {
 	//! Current Animation for the moment in time of EntityState.
 	EntityAnimationState currentAnimation	= {};
 	//! Previous Animation for the moment in time of EntityState.
-	EntityAnimationState previousAnimation	={};
+	EntityAnimationState previousAnimation	= {};
 
-    //--- Part of the old frame code :P
-    
+	/**
+	*	General 'old' animation data. TODO: Have another close look, no need to keep it as float anymore is there?
+	**/
     //! Current animation frame the entity is at.
     float animationFrame = 0.f;
-    //----------------------------------------------------------
 
+
+    /**
+	*	Linear Movement, used for prediction:
+	*		- Currently in try-out for 'func_plat'.
+	**/
+	//! Whether we are moving along a linear movement path, or not.
+	bool linearMovement				= false;
+	//! The current velocity that this entity is traveling along its linear movement path.
+	vec3_t linearMovementVelocity	= vec3_zero();
+	//! The starting origin for the entity's linear movement path
+	vec3_t linearMovementBeginOrigin	= vec3_zero();
+	//! The end origin for the entity's linear movement path
+	vec3_t linearMovementEndOrigin		= vec3_zero();
+
+	//! uint32_t movement duration.
+	uint32_t linearMovementDuration	= 0;
+	//! Movement start timestamp.
+	int64_t linearMovementTimeStamp	= 0;
+
+
+	/**
+	*	General Physical and Rendering State Data.
+	**/
     //! Model skin number.
     int32_t skinNumber = 0;
     //! Entity Effects. (Rotating etc.)

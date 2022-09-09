@@ -276,7 +276,7 @@ void FuncPlat::Callback_RaisePlatform() {
 	    SetSound(moveInfo.middleSoundIndex);
     }
     moveInfo.state = MoverState::Up;
-    LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+    BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 }
 
 /**
@@ -291,7 +291,7 @@ void FuncPlat::Callback_LowerPlatform() {
     }
 
     moveInfo.state = MoverState::Down;
-    LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);//BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
+    BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
 }
 
 /**

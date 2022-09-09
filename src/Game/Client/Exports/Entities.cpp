@@ -354,6 +354,7 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 	if (clTime > svTime) {
 		level.time = svTime;
 		//level.extrapolatedTime = svTime;
+		level.extrapolatedTime = GameTime( cl->extrapolatedTime );
 	} else {
 		level.time = clTime;
 	}
@@ -422,7 +423,9 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
         // Ensure the entity is in posession of a client that controls it.
         ServerClient* client = geClient->GetClient();
         if ( client && geClient->GetTypeInfo()->IsSubclassOf( CLGBasePlayer::ClassInfo ) ) {
-			// Last but not least, begin its server frame.
+			// Make sure it is set as the current entity.
+			level.currentEntity = geClient;
+			// Call into its begin local frame hook.
 			GetGameMode()->ClientBeginLocalFrame( dynamic_cast< CLGBasePlayer* >( geClient ), client );   
         }
     }
@@ -490,7 +493,9 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
         // Ensure the entity is in posession of a client that controls it.
         ServerClient* client = geClient->GetClient();
         if ( client && geClient->GetTypeInfo()->IsSubclassOf( CLGBasePlayer::ClassInfo ) ) {
-			// Last but not least, begin its server frame.
+			// Make sure it is set as the current entity.
+			level.currentEntity = geClient;
+			// Call into its end local frame hook.
 			GetGameMode()->ClientEndLocalFrame( dynamic_cast< CLGBasePlayer* >( geClient ), client );   
         }
     }

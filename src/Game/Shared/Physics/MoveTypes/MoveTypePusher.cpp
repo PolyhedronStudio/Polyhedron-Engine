@@ -166,12 +166,53 @@ static GameEntity *SG_TestEntityPosition( GameEntity *geTestSubject ) {
 
     return nullptr;
 }
+static GameEntity *SG_TestEntityRotation(GameEntity *geTestSubject) {
+	
+	// Get mins and maxs.
+	vec3_t mins = geTestSubject->GetMins();
+	vec3_t maxs = geTestSubject->GetMaxs();
+
+    // expand for rotation
+    float max = 0;
+	float v = 0;
+    for ( int32_t i = 0; i < 3; i++ ) {
+        v = fabs(mins[i]);
+        if (v > max) {
+            max = v;
+		}
+        v = fabs(maxs[i]);
+        if (v > max) {
+            max = v;
+		}
+    }
+
+	// Calcualte absMin and absMax for rotated BSP Entity.
+	const vec3_t rotatedBoxMins = vec3_t{-max, -max, mins[2] };
+	const vec3_t rotatedBoxMaxs = vec3_t{ max, max,  maxs[2] };
+
+	int32_t clipMask = 0;
+    if (geTestSubject->GetClipMask()) {
+	    clipMask = geTestSubject->GetClipMask();
+    } else {
+        clipMask = BrushContentsMask::Solid;
+    }
+
+    SGTraceResult trace = SG_Trace(geTestSubject->GetOrigin(), rotatedBoxMins, rotatedBoxMaxs, geTestSubject->GetOrigin(), geTestSubject, clipMask);
+
+    if (trace.startSolid) {
+		SGGameWorld *gameWorld = GetGameWorld();
+
+	    return (GameEntity*)(gameWorld->GetWorldspawnGameEntity());
+    }
+
+    return nullptr;
+}
 
 /**
 *	@brief	Objects need to be moved back on a failed push, otherwise 
 *			riders would continue to slide.
 **/
-static const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
+const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
     GameEntity* geCheck = nullptr;
     GameEntity* geBlock = nullptr;
     PushedEntityState *p = nullptr;
@@ -326,25 +367,27 @@ static const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, con
 			// Test whether entity is inside of another, if not, push was okay so link it and move
 			// on to the next entity that needs pushing.
             geBlock = SG_TestEntityPosition( geCheck );
-            if ( !geBlock ) {
+			//GameEntity *geBlock2 = SG_TestEntityRotation( geCheck );
+            if ( !geBlock /*&& !geBlock2 */) {
                 // pushed ok
                 geCheck->LinkEntity();
                 // impact?
                 continue;
-            }
+            } else {
 
-            // Of it is ok to leave in the old position, do it.
-            // This is only relevent for riding entities, not pushed
-            // FIXME: this doesn't acount for rotation
-            geCheck->SetOrigin( geCheck->GetOrigin() - move );//geCheck->state.origin -= move;
-			geCheck->SetAngles( geCheck->GetAngles() - move2 );
-            geBlock = SG_TestEntityPosition( geCheck );
+				// Of it is ok to leave in the old position, do it.
+				// This is only relevent for riding entities, not pushed
+				// FIXME: this doesn't acount for rotation
+				geCheck->SetOrigin( geCheck->GetOrigin() - move );//geCheck->state.origin -= move;
+				geCheck->SetAngles( geCheck->GetAngles() - move2 );
+				geBlock = SG_TestEntityPosition( geCheck );
+				//GameEntity* geBlock2 = SG_TestEntityRotation( geCheck );
+				if ( !geBlock /*|| !geBlock2 */) { //} || !geBlock2) {
+					SG_PopPushedEntityState( geCheck );
 
-            if ( !geBlock ) {
-				SG_PopPushedEntityState( geCheck );
-
-                continue;
-            }
+					continue;
+				}
+			}
         }
 
         // Save off the obstacle so we can call the block function later on.
@@ -434,9 +477,16 @@ retry:
         if (partVelocity.x || partVelocity.y || partVelocity.z ||
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
-            // object is moving
-            move = vec3_scale(part->GetVelocity(), FRAMETIME_S.count());
-            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME_S.count());
+			PODEntity *partPODEntity = part->GetPODEntity();
+			if ( partPODEntity->currentState.linearMovement ) {
+				SG_LinearMovement( &partPODEntity->currentState, level.time.count(), move);
+				move -= part->GetOrigin(); //VectorSubtract( move, part->s.origin, move );
+				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
+			} else {
+				// object is moving
+				move = vec3_scale(part->GetVelocity(), FRAMETIME_S.count());
+				amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME_S.count());
+			}
 
             SGEntityHandle partHandle(part);
             if (!SG_Push(partHandle, move, amove))

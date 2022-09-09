@@ -42,8 +42,9 @@ public:
 	//!
 	//!	None as of yet.
 	//!
-
-
+	virtual void EnableExtrapolation() = 0;
+	virtual void DisableExtrapolation() = 0;
+	virtual const bool IsExtrapolating() = 0;
 
     /***
     *

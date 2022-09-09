@@ -13,8 +13,27 @@
 // Client Game GameEntity Interface.
 #include "Game/Client/Entities/Base/CLGBaseTrigger.h"
 
+
+
 // Callbacks used at the end of a pushmove action.
 using PushMoveEndFunction = void(GameEntity*);
+
+/**
+*	@brief 
+**/
+const int64_t SG_LinearMovement( const EntityState *entityState, const int64_t &time, vec3_t &dest );
+
+/**
+*	@brief 
+**/
+void SG_LinearMovementDelta( const EntityState *entityState, const int64_t &oldTime, const int64_t &curTime, vec3_t dest );
+
+void LinearMove_Calc( CLGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunction *pushMoveEndFunction );
+void LinearMove_Begin( CLGBaseMover *geMover );
+void LinearMove_Watch( CLGBaseMover *geMover );
+void LinearMove_Done( CLGBaseMover *geMover );
+void LinearMove_UpdateLinearVelocity( CLGBaseMover *geMover, float dist, const int32_t speed );
+
 
 struct MoverState
 {
@@ -145,6 +164,10 @@ public:
     virtual inline void SetLip(const float& lip) {
         this->lip = lip;
     }
+
+	void LinearBrushMoveDone();
+	void LinearBrushMoveWatch();
+	void LinearBrushMoveBegin();
 
 protected:
     // Calculates and returns the destination point

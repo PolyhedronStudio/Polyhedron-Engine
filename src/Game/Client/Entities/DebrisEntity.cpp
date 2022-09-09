@@ -73,7 +73,8 @@ DebrisEntity* DebrisEntity::Create( GameEntity* debrisser, const std::string& de
 	// Set Movetype and Solid.
     debrisEntity->SetMoveType(MoveType::TossSlideBox);
     debrisEntity->SetSolid(Solid::OctagonBox);
-    //debrisEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );
+    debrisEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );   
+	//debrisEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );
 
     // Set the model.
     debrisEntity->SetModel(debrisModel);
@@ -82,8 +83,8 @@ DebrisEntity* DebrisEntity::Create( GameEntity* debrisser, const std::string& de
     const vec3_t velocityDamage = CalculateDamageVelocity( damage );
 
 	// Calculate and set the velocity.
-    const vec3_t velocity = { RandomRangef(-725.f, 725.f), RandomRangef(-725.f, 725.f), RandomRangef(-825, 825.f) };
-    debrisEntity->SetVelocity( vec3_fmaf( velocity, speed, debrisser->GetVelocity() ) );
+    const vec3_t velocity = { RandomRangef(-725.f, 725.f), RandomRangef(-725.f, 725.f), RandomRangef(0, 825.f) };
+    debrisEntity->SetVelocity( vec3_fmaf( debrisser->GetVelocity(), speed, velocity ) );
 
     // Generate angular velocity.
     debrisEntity->SetAngularVelocity({
@@ -118,6 +119,8 @@ void DebrisEntity::DebrisEntityThink() {
 	SG_CheckGround( this );
 	// Apply gravity.
 	SG_AddGravity( this );
+	// Link it in.
+	LinkEntity();
 
 	// Set free think, IF, deathtime has passed.
 	if ( deathTime != GameTime::zero() && level.time >= deathTime ) {

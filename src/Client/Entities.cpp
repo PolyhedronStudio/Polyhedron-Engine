@@ -248,10 +248,10 @@ void CL_DeltaFrame(void)
 	// Call into client game module its delta frame function.
 	// This gives packet entities a chance to "predict" the next frame before
 	// the current data arrives.
-	CL_GM_ClientPacketEntityDeltaFrame();
+	//CL_GM_ClientPacketEntityDeltaFrame();
 
-    // Check for prediction errors.
-    CL_CheckPredictionError();
+ //   // Check for prediction errors.
+ //   CL_CheckPredictionError();
 }
 
 

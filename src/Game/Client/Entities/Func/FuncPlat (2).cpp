@@ -21,6 +21,7 @@
 
 
 
+
 /**
 *	Constructor.
 **/
@@ -185,8 +186,8 @@ void FuncPlat::OnEventID( uint32_t eventID ) {
     moveInfo.endAngles = GetAngles(); // 0,0,0
 		
 		// Start now so we can catch up to last frame.
-		Callback_EngageLowerMove();
-		//Callback_LowerPlatform();
+		//Callback_EngageLowerMove();
+		Callback_LowerPlatform();
 		//BrushMoveBegin();
 		//BrushAccelerateThink();
 		break;
@@ -328,7 +329,7 @@ void FuncPlat::Callback_RaisePlatform() {
     //}
     moveInfo.state = MoverState::Up;
 	EnableExtrapolation();
-    LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+    BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 }
 
 /**
@@ -344,7 +345,7 @@ void FuncPlat::Callback_LowerPlatform() {
 
     moveInfo.state = MoverState::Down;
 	EnableExtrapolation();
-    LinearMove_Calc( this, GetEndPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+    BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
 }
 
 /**
@@ -404,6 +405,7 @@ void FuncPlat::Callback_ReachedLoweredPosition() {
 	//} else {
 	//	SetThinkCallback( &CLGBasePacketEntity::CLGBasePacketEntityThinkNull );
 	//}
+
 }
 
 

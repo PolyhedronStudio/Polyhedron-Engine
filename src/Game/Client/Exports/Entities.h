@@ -122,7 +122,7 @@ public:
 	*
 	**/
 	/**
-	*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+	*   @brief  Called right before RunLocalEntitiesFrame.
 	**/
     void RunPacketEntitiesDeltaFrame();
 	/**

@@ -3,12 +3,12 @@
 class SVGBaseEntity;
 class SVGBaseMover;
 
-class FuncRotating : public SVGBaseMover {
+class FuncRotating : public SVGBaseEntity {
 public:
 	FuncRotating( Entity* entity );
 	virtual ~FuncRotating() = default;
 
-	DefineMapClass( "func_rotating", FuncRotating, SVGBaseMover );
+	DefineMapClass( "func_rotating", FuncRotating, SVGBaseEntity );
 
 	// Spawn flags
 	static constexpr int32_t SF_StartOn = 1;//1 << 0;
@@ -21,10 +21,16 @@ public:
 	static constexpr int32_t SF_AnimatedFast = 128;//1 << 7;
 
 	void Spawn() override;
+	void PostSpawn() override;
 
 	void SpawnKey(const std::string& key, const std::string& value) override;
 
 	void RotatorBlocked( IServerGameEntity* other );
 	void RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 	void RotatorUse( IServerGameEntity* other, IServerGameEntity* activator );
+	void RotatorThink();
+
+private:
+	vec3_t moveDirection = vec3_zero();
+	float speed = 0.f;
 };

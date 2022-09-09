@@ -363,13 +363,22 @@ const bool SG_RunThink( GameEntity *geThinker ) {
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
-	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+	// For non extrapolating entities:
+	if ( !geThinker->IsExtrapolating() ) {
+		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+			return true;
+		}
+	} else {
+		if (nextThinkTime <= GameTime::zero() || nextThinkTime > GameTime( cl->serverTime ) + FRAMERATE_MS) {
+			return true;
+		}
+	}
 #endif
 #ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
-#endif
 		return true;
     }
+#endif
 
     // Reset think time before thinking.
     geThinker->SetNextThinkTime( GameTime::zero() );

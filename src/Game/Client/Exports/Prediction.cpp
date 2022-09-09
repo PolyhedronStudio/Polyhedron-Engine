@@ -17,6 +17,17 @@
 #include "Game/Client/Exports/Prediction.h"
 #include "Game/Client/Exports/View.h"
 
+// Server Game Base Entity.
+//#include "../Entities/Base/BodyCorpse.h"
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
+#include "Game/Client/Entities/Base/CLGBasePlayer.h"
+
+//! Plat entity for prediction.
+#include "Game/Client/Entities/Func/FuncPlat.h"
+
+// World.
+#include "Game/Client/World/ClientGameWorld.h"
+
 // ClientBinding to SharedGame for SG_GetEntityNumber utility.
 #include "Game/Shared/GameBindings/ClientBinding.h"
 

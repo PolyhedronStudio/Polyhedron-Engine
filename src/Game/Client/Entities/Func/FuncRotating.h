@@ -9,15 +9,15 @@
 ***/
 #pragma once
 
-class CLGBaseEntity;
+class CLGBasePacketEntity;
 class CLGBaseMover;
 
-class FuncRotating : public CLGBaseMover {
+class FuncRotating : public CLGBasePacketEntity {
 public:
 	FuncRotating( Entity* entity );
 	virtual ~FuncRotating() = default;
 
-	DefineMapClass( "xfunc_rotating", FuncRotating, CLGBaseMover );
+	DefineMapClass( "xfunc_rotating", FuncRotating, CLGBasePacketEntity );
 
 	// Spawn flags
 	static constexpr int32_t SF_StartOn = 1;//1 << 0;
@@ -30,10 +30,16 @@ public:
 	static constexpr int32_t SF_AnimatedFast = 128;//1 << 7;
 
 	void Spawn() override;
+	void PostSpawn() override;
 
 	void SpawnKey(const std::string& key, const std::string& value) override;
 
-	void RotatorBlocked( GameEntity* other );
-	void RotatorHurtTouch( GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
-	void RotatorUse( GameEntity* other, GameEntity* activator );
+	void RotatorBlocked( IClientGameEntity* other );
+	void RotatorHurtTouch( IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+	void RotatorUse( IClientGameEntity* other, IClientGameEntity* activator );
+	void RotatorThink();
+
+private:
+	vec3_t moveDirection = vec3_zero();
+	float speed = 0.f;
 };

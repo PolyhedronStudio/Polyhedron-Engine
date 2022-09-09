@@ -290,6 +290,7 @@ void GibEntity::GibEntityThink() {
 
 	SG_CheckGround(this);
 	SG_AddGravity(this);
+	LinkEntity();
 	//const vec3_t avel = GetAngularVelocity();
 	//if (!GetGroundEntityHandle() && (avel.x || avel.y || avel.z) ) {
 	//	SetAngularVelocity( vec3_scale( GetAngularVelocity(), 0.98 ) );

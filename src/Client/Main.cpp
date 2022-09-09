@@ -2712,13 +2712,13 @@ static void CL_SetClientTime( int64_t msec ) {
 	// We extrapolate starting at each newly received serverTime. Ensuring that the extrapolated steps
 	// are as minimal as can be.
 	const int64_t nextFrameTime = cl.serverTime + CL_FRAMETIME_UI64;
-	if (cl.extrapolatedTime < cl.serverTime) {
-		cl.extrapolatedTime = cl.serverTime;
-	} else if ( cl.extrapolatedTime > nextFrameTime ) {
+	if ( cl.extrapolatedTime > nextFrameTime ) {
 		cl.extrapolatedTime = nextFrameTime;
+	} else if (cl.extrapolatedTime < cl.serverTime) {
+		cl.extrapolatedTime = cl.serverTime;
 	}
 
-//	Com_DPrintf( "time=%i, servertime=%i, xtratime=%i, msec=%i\n", cl.time, cl.serverTime, cl.extrapolatedTime, msec );
+	//Com_DPrintf( "time=%i, servertime=%i, xtratime=%i, msec=%i\n", cl.time, cl.serverTime, cl.extrapolatedTime, msec );
 
 	SHOWCLAMP(2, "time %d %d, lerpFraction %.3f\n",
               cl.time, cl.serverTime, cl.lerpFraction);
@@ -2962,16 +2962,15 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 	// We'll be processing them here.
 	cl.numSolidLocalEntities = 0;
 
-	// Run the received packet entities for a frame so we can "predict".
-	//CL_GM_ClientPacketEntityDeltaFrame();
-
-	// Check for prediction errors.
-	//CL_CheckPredictionError();
-
 	// Make sure to have a valid pointer to the actual array. (It is the IGameWorld who manages it.)
 	PODEntity *podEntities = CL_GM_GetClientPODEntities();
 
 	if ( podEntities ) {
+		// Run the received packet entities for a frame so we can "predict".
+		CL_GM_ClientPacketEntityDeltaFrame();
+
+		// Give the client game module a chance to run its local entities for a frame.
+		CL_GM_ClientLocalEntitiesFrame();
 
 		// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
 		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
@@ -2992,12 +2991,7 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 			// Fire local entity events.
 			LocalEntity_FireEvent(&podEntity->currentState);
 		}
-		
-		// Run the received packet entities for a frame so we can "predict".
-		CL_GM_ClientPacketEntityDeltaFrame();
 
-		// Give the client game module a chance to run its local entities for a frame.
-		CL_GM_ClientLocalEntitiesFrame();
 
 		// Check for prediction errors.
 		CL_CheckPredictionError();

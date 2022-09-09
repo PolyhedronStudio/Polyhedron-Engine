@@ -32,7 +32,7 @@
 #include "Game/Client/World/ClientGameWorld.h"
 
 // Shared Game API
-//#include "Game/Shared/GameBindings/ServerBinding.h"
+#include "Game/Shared/GameBindings/ClientBinding.h"
 
 //
 // Constructor/Deconstructor.
@@ -56,7 +56,7 @@ void DefaultGameMode::OnLevelExit() {
 **/
 void DefaultGameMode::ClientBeginLocalFrame(CLGBasePlayer* player, ServerClient *client) {
 	ViewCamera *viewCamera = clge->view->GetViewCamera();
-	viewCamera->CalculateBobMoveCycle( &cl->oldframe.playerState, &cl->frame.playerState );
+	//viewCamera->CalculateBobMoveCycle( &cl->oldframe.playerState, &cl->frame.playerState );
 }
 
 
@@ -65,7 +65,7 @@ void DefaultGameMode::ClientBeginLocalFrame(CLGBasePlayer* player, ServerClient 
 **/
 void DefaultGameMode::ClientEndLocalFrame(CLGBasePlayer* player, ServerClient* client) {
 	ViewCamera *viewCamera = clge->view->GetViewCamera();
-	//viewCamera->CalculateWeaponViewBob( &cl->oldframe.playerState, &cl->frame.playerState );
+	viewCamera->CalculateBobMoveCycle( &cl->oldframe.playerState, &cl->frame.playerState );
 }
 
 /**

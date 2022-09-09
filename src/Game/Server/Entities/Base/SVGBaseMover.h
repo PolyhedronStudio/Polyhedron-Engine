@@ -12,6 +12,7 @@
 
 
 // Predeclarations.
+class IServerGameEntity;
 class SVGBaseTrigger;
 
 
@@ -19,6 +20,23 @@ class SVGBaseTrigger;
 *	Callbacks used at the end of a pushmove action.
 **/
 using PushMoveEndFunction = void(IServerGameEntity*);
+
+/**
+*	@brief 
+**/
+const int64_t SG_LinearMovement( const EntityState *entityState, const int64_t &time, vec3_t &dest );
+
+/**
+*	@brief 
+**/
+void SG_LinearMovementDelta( const EntityState *entityState, const int64_t &oldTime, const int64_t &curTime, vec3_t dest );
+
+void LinearMove_Calc( SVGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunction *pushMoveEndFunction );
+void LinearMove_Begin( SVGBaseMover *geMover );
+void LinearMove_Watch( SVGBaseMover *geMover );
+void LinearMove_Done( SVGBaseMover *geMover );
+void LinearMove_UpdateLinearVelocity( SVGBaseMover *geMover, float dist, const int32_t speed );
+
 
 struct MoverState
 {
@@ -156,7 +174,9 @@ public:
         this->lip = lip;
     }
 
-
+	void LinearBrushMoveDone();
+	void LinearBrushMoveWatch();
+	void LinearBrushMoveBegin();
 
 protected:
     // Calculates and returns the destination point
