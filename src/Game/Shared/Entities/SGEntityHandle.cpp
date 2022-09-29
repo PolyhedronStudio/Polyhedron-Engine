@@ -101,7 +101,7 @@ SGEntityHandle::SGEntityHandle(PODEntity* podEntity) {
 /**
 *	@brief Simple constructor that will accept a server entity and an entity number.
 **/
-SGEntityHandle::SGEntityHandle(PODEntity* _podEntity, const uint32_t number) : podEntity(_podEntity), entityID(number) { }
+SGEntityHandle::SGEntityHandle(PODEntity* _podEntity, const int32_t number) : podEntity(_podEntity), entityID(number) { }
 
 /**
 *	@brief	Acquire a pointer to the server entity.
@@ -154,8 +154,8 @@ PODEntity* SGEntityHandle::Set(PODEntity* entity) {
 /**
 *	@return	The entityID stored in this handle.
 **/
-const uint32_t SGEntityHandle::ID() { return entityID; }
-const uint32_t SGEntityHandle::ID() const { return entityID; }
+const int32_t SGEntityHandle::ID() { return entityID; }
+const int32_t SGEntityHandle::ID() const { return entityID; }
 
 /**
 *	@brief * operator implementations.

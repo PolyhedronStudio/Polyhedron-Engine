@@ -141,6 +141,93 @@ qboolean ClientGameEntities::UpdateGameEntityFromState( PODEntity *clEntity, con
 	return false;
 }
 
+/**
+*	@brief
+**/
+const bool ClientGameEntities::PacketNewHashedClassname( PODEntity *clEntity, const EntityState *state ) {
+	/**
+	*	We're not dealing with a player client entity, so move ahead and start comparing the entity state's
+	*	current and previous hashed classnames. 
+	**/
+    TypeInfo* info = TypeInfo::GetInfoByHashedMapName( state->hashedClassname );
+
+	// Get the current game entity.
+	GameEntity *geCurrent = static_cast<GameEntity*>( clEntity->gameEntity );
+
+	// The newly arrived state has a mismatch with the current. Meaning that on the server, we now
+	// have a different game entity class than on our client.
+	const bool differentHashes = state->hashedClassname != clEntity->currentState.hashedClassname;
+	// Whether the type info is usable or not.
+	const bool validTypeInfo = ( info && info->AllocateInstance != nullptr && ( info->IsMapSpawnable() || info->IsGameSpawnable() ) );
+
+	// The newly arrived state differs from current, and it has a valid spawnable hashedClassname type.
+	if ( differentHashes && validTypeInfo ) {
+		// Only free the old, and allocate the new one in case the actual set hashedClassname on the entity itself
+		// isn't already the same.
+		// Determine whether to delete the old, and reinstance a new hashedclassname game entity.
+		if ( clEntity->hashedClassname != info->hashedMapClass ) {
+			// Now we've found it, let's deallocate the old one and allocate our new one.
+			ClientGameWorld *gw = GetGameWorld();
+			gw->FreeGameEntity( clEntity );			
+
+			// Allocate and set the new pointer to our POD object.
+			clEntity->gameEntity = gw->GetGameEntities()[ state->number ] = info->AllocateInstance( clEntity );
+				
+			// Call from state.
+			static_cast< GameEntity* >( clEntity->gameEntity )->SpawnFromState( state );
+
+			// We're done, successfully.
+			return true;
+		} else {
+			// Warn?
+		}
+	}
+
+	// The hashes differ, but we were unable to find a valid typeinfo. Let's resort to CLGBasePacketEntity instead.
+	if ( differentHashes && !validTypeInfo ) {
+		// Base classname.
+		std::string baseClassname = "CLGBasePacketEntity";
+
+		// This should NEVER happen.
+		if ( clEntity->isLocal ) {
+			baseClassname = "CLGBaseLocalEntity";
+		}
+		if ( ( info = TypeInfo::GetInfoByName( baseClassname.c_str() ) ) == nullptr ) {
+			// Warn.
+		    CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLG ({}): info = TypeInfo::GetInfoByName(\"{}\")) == nullptr\n", __func__, baseClassname ) );
+
+			// Bail out, we didn't find one.
+			return false;
+		}
+
+		// Only proceed to reallocate it in case it isn't an actual CLGBasePacketEntity already.
+		if ( clEntity->hashedClassname != info->hashedMapClass ) {
+			// Now we've found it, let's deallocate the old one and allocate our new one.
+			ClientGameWorld *gw = GetGameWorld();
+			gw->FreeGameEntity( clEntity );			
+
+			// Allocate and set the new pointer to our POD object.
+			clEntity->gameEntity = gw->GetGameEntities()[ state->number ] = info->AllocateInstance( clEntity );
+				
+			// Call from state.
+			static_cast< GameEntity* >( clEntity->gameEntity )->SpawnFromState( state );
+
+			// We're done, successfully.
+			return true;
+		} else {
+			// Warn?
+		}
+	}
+
+	// Otherwise, just call the update from state callback instead.
+	if ( clEntity->gameEntity ) {
+		static_cast< GameEntity* >( clEntity->gameEntity )->UpdateFromState( state );
+		return true;
+	} else {
+		return false;
+	}
+	
+}
 
 
 /**
@@ -185,14 +272,14 @@ void ClientGameEntities::PacketEntityEvent( int32_t number ) {
 
 	// With a valid entity we can notify it about its new received event.
 	if (podEventTarget->currentState.eventID != 0) {
-		PODEntity* clientEntity = &cs->entities[ number ];
-		geEventTarget->OnEventID( clientEntity->currentState.eventID );
+
 		//Com_DPrint("(%s): eventID != 0 for PODEntity(#%i)! podEntityTarget=(%s), geEntityTarget=(%s)\n", __func__, number, (podEventTarget ? podEventTarget->clientEntityNumber : -1), (geEventTarget ? geEventTarget->GetNumber() : -1));
 	} else {
 		//Com_DPrint("(%s): PODEntity(#%i): eventID(#%i) origin(%s), oldOrigin(%s)\n", __func__, number, podEventTarget->currentState.eventID, Vec3ToString(podEventTarget->currentState.origin), Vec3ToString(podEventTarget->currentState.oldOrigin));
 	}
 
-
+	//PODEntity* clientEntity = &cs->entities[ number ];
+	geEventTarget->OnEventID( podEventTarget->currentState.eventID );
 }
 
 /**
@@ -276,7 +363,7 @@ void ClientGameEntities::PrepareRefreshEntities() {
 		// Get frame entity current state.
         EntityState *currentEntityState = &cl->entityStates[ entityStateIndex ];
 		// Get POD Entity matching to the entity number.
-        PODEntity *podEntity = &cs->entities[ currentEntityState->number ];
+        PODEntity *podEntity = gameWorld->GetPODEntityByIndex( currentEntityState->number );
 		// Get previous entity state 
 		EntityState *previousEntityState = &podEntity->previousState;
 
@@ -336,6 +423,31 @@ void ClientGameEntities::AddViewEntities() {
 }
 
 /**
+*	@brief	Sets the current 'server' packet entity 'level time'.
+**/
+void ClientGameEntities::SetDeltaFrameLevelTime() {
+	// Unlike for the server game, the level's framenumber, time and timeStamp
+	GameTime svTime = GameTime(cl->serverTime);
+    GameTime clTime = GameTime(cl->time);
+
+	// Set level time, increases only with each received delta frame.
+	if (clTime > svTime) {
+		// If this if statement triggers we limit it to serverTime until we receive another frame.
+		level.time = GameTime( cl->serverTime );
+	// Otherwise, set it to client time.
+	} else {
+		level.time = GameTime( cl->time );
+	}	
+
+	//
+	// TODO: Move elsewhere: Sets our client player entity its playerstate pmove state to that of the received server frame.
+	//
+	ClientGameWorld *gameWorld = GetGameWorld();
+	GameEntity *gePlayer = gameWorld->GetClientGameEntity();
+	gePlayer->GetClient()->playerState.pmove = cl->frame.playerState.pmove;
+};
+
+/**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
@@ -347,73 +459,8 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 		return;
 	}
 
-	// Unlike for the server game, the level's framenumber, time and timeStamp
-	GameTime svTime = GameTime(cl->serverTime);
-    GameTime clTime = GameTime(cl->time);
+	level.extrapolatedTime = GameTime( cl->extrapolatedTime );
 
-	if (clTime > svTime) {
-		level.time = svTime;
-		//level.extrapolatedTime = svTime;
-		level.extrapolatedTime = GameTime( cl->extrapolatedTime );
-	} else {
-		level.time = clTime;
-	}
-
-    // Iterate up till the amount of entities active in the current frame.
-    for (int32_t entityNumber = 0; entityNumber < cl->frame.numEntities; entityNumber++) {
-		// Fetch the entity index.
-        const int32_t entityIndex = (cl->frame.firstEntity + entityNumber) & PARSE_ENTITIES_MASK;
-
-		// Get POD Entity, and validate it to get our Game Entity.
-		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-		GameEntity *gameEntity = ClientGameWorld::ValidateEntity(podEntity);
-
-        // If invalid for whichever reason, warn and continue to next iteration.
-        if (!podEntity || !gameEntity || !podEntity->inUse) {
-            //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
-            continue;
-        }
-
-		// Let the world know about the current entity we're running.
-		level.currentEntity = gameEntity;
-		
-        // Store previous(old) origin.
-        gameEntity->SetOldOrigin(gameEntity->GetOrigin());
-
-        // If the ground entity moved, make sure we are still on it
-		if (!gameEntity->GetClient()) {
-			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
-			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
-				// Reset ground entity.
-				//gameEntity->SetGroundEntity( SGEntityHandle() );
-
-				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
-					// Check for a new ground entity that resides below this entity.
-					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
-				//}
-			}
-		}
-
-        // Run it for a frame.
-		SGEntityHandle handle = podEntity;
-		SG_RunEntity(handle);
-    }
-}
-
-
-/**
-*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
-**/
-void ClientGameEntities::RunLocalEntitiesFrame() {
-	// Get GameWorld.
-	ClientGameWorld *gameWorld = GetGameWorld();
-
-	// This needs to be set of course.
-	if ( !gameWorld ) {
-		return;
-	}
-	
 	/**
 	*	#0: Call upon BeginLocalFrame for the client.
 	**/
@@ -430,6 +477,96 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
         }
     }
 
+	/**
+	*	#1: Iterate through our packet entities, and run their local 'think' if demanded.
+	**/
+    for (int32_t entityNumber = 0; entityNumber < MAX_WIRED_POD_ENTITIES; entityNumber++) {
+		//// Get frame entity current state.
+		//EntityState *currentEntityState = &cl->entityStates[ entityStateIndex ];
+		//// Fetch the entity index.
+		//const int32_t entityIndex = (cl->frame.firstEntity + entityNumber) & PARSE_ENTITIES_MASK;
+
+		// Get POD Entity, and validate it to get our Game Entity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityNumber);
+		GameEntity *gameEntity = gameWorld->GetGameEntityByIndex( podEntity->clientEntityNumber );//ClientGameWorld::ValidateEntity(podEntity);
+
+        // If invalid for whichever reason, warn and continue to next iteration.
+        if ( !podEntity || !gameEntity|| !gameEntity->IsInUse() ) {
+        //    CLG_Print( PrintType::DeveloperWarning, fmt::format( "ClientGameEntites::RunFrame: Entity #{} is nullptr\n", entityNumber ));
+            continue;
+        }
+
+		// Let the world know about the current entity we're running.
+		level.currentEntity = gameEntity;
+		
+        // Store previous(old) origin.
+        gameEntity->SetOldOrigin( gameEntity->GetOrigin() );
+
+        // For non client entities: If the ground entity moved, make sure we are still on it
+		if ( !gameEntity->GetClient() ) {
+			// Validate handle.
+			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
+			// Redo a Check for Ground if the link count does not match to its ground link count.
+			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
+				// Reset ground entity.
+				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+
+				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+				//if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
+					// Check for a new ground entity that resides below this entity.
+					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
+				//}
+			}
+		}
+
+        // Run it for a frame.
+		SGEntityHandle geHandle = gameEntity;
+		SG_RunEntity(geHandle);
+    }
+
+	/**
+	*	#0: Call upon BeginLocalFrame for the client.
+	**/
+	//if ( geClient ) {
+	//	// Ensure the entity is in posession of a client that controls it.
+	//	ServerClient* client = geClient->GetClient();
+	//	if ( client && geClient->GetTypeInfo()->IsSubclassOf( CLGBasePlayer::ClassInfo ) ) {
+	//		// Make sure it is set as the current entity.
+	//		level.currentEntity = geClient;
+	//		// Call into its end local frame hook.
+	//		GetGameMode()->ClientEndLocalFrame( dynamic_cast< CLGBasePlayer* >( geClient ), client );   
+	//	}
+	//}
+}
+
+
+/**
+*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+**/
+void ClientGameEntities::RunLocalEntitiesFrame() {
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
+	// This needs to be set of course.
+	if ( !gameWorld ) {
+		return;
+	}
+
+	/**
+	*	#0: Call upon BeginLocalFrame for the client.
+	**/
+	GameEntity *geClient = gameWorld->GetClientGameEntity();
+
+	//if ( geClient ) {
+    //    // Ensure the entity is in posession of a client that controls it.
+    //    ServerClient* client = geClient->GetClient();
+    //    if ( client && geClient->GetTypeInfo()->IsSubclassOf( CLGBasePlayer::ClassInfo ) ) {
+	//		// Make sure it is set as the current entity.
+	//		level.currentEntity = geClient;
+	//		// Call into its begin local frame hook.
+	//		GetGameMode()->ClientBeginLocalFrame( dynamic_cast< CLGBasePlayer* >( geClient ), client );   
+    //    }
+    //}
 
 	/**
 	*	#1: Iterate through our local client side entities, and run 'think' if demanded.
@@ -445,7 +582,7 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
         }
 
         // Admer: entity was marked for removal at the previous tick
-        if ( podEntity && gameEntity && ( gameEntity->GetClientFlags() & EntityServerFlags::Remove ) ) {
+        if ( podEntity && gameEntity && ( gameEntity->GetClientFlags() & EntityClientFlags::Remove ) ) {
             // Free server entity.
             game.world->FreePODEntity(podEntity);
 
@@ -461,19 +598,21 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 
 		// Let the world know about the current entity we're running.
 		level.currentEntity = gameEntity;
-
+		
         // Store previous(old) origin.
-        gameEntity->SetOldOrigin(gameEntity->GetOrigin());
+        gameEntity->SetOldOrigin( gameEntity->GetOrigin() );
 
-        // If the ground entity moved, make sure we are still on it
-		if (!gameEntity->GetClient()) {
-			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle() );
+        // For non client entities: If the ground entity moved, make sure we are still on it
+		if ( !gameEntity->GetClient() ) {
+			// Validate handle.
+			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
+			// Redo a Check for Ground if the link count does not match to its ground link count.
 			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
 				// Reset ground entity.
-				//gameEntity->SetGroundEntity( SGEntityHandle() );
+				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+				//if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
 					// Check for a new ground entity that resides below this entity.
 					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
 				//}

@@ -248,7 +248,7 @@ struct ClientShared {
     virtual ~ClientShared() = default;
 
     // Stores the entities.
-    PODEntity entities[MAX_CLIENT_POD_ENTITIES];
+    PODEntity *entities = nullptr;//PODEntity entities[MAX_CLIENT_POD_ENTITIES];
     int num_entities;
 };
 
@@ -271,6 +271,9 @@ struct ClientPredictedState {
 
     // Prediction error that is interpolated over the server frame.
     vec3_t error;
+
+	vec3_t testClientOrigin = vec3_zero();
+	vec3_t testClientVelocity = vec3_zero();
 };
 
 //
@@ -375,9 +378,12 @@ struct ClientState {
 	//! Always >= cl.serverTime
 	int64_t extrapolatedTime = 0;
 
-    //! between oldframe and frame
+    //! Linear interpolation fraction between cl.oldframe and cl.frame.
     double		lerpFraction = 0.f;
+    //! Linear extrapolation fraction between cl.oldframe and cl.frame.
+    double		xerpFraction = 0.f;
 
+	//! 
 
     /**
     *

@@ -146,7 +146,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
 
     // Ensure there is no ground entity set anymore in case velocity is UPWARDS.
     if (geEnemyEntity->GetVelocity().z > 0)
-        geEnemyEntity->SetGroundEntity( SGEntityHandle() );
+        geEnemyEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 
     return true;
 }

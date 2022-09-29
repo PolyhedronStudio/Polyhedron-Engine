@@ -77,26 +77,6 @@ unsigned Com_ParseExtensionString(const char *s, const char *const extnames[])
 }
 #endif
 
-/**
-*	@brief	Restores entity origin and angles from player state
-**/
-void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es)
-{
-    vec_t pitch;
-
-    // PH: FF Precision.
-    es->origin = ps->pmove.origin; //VectorCopy(ps->pmove.origin, es->origin);
-    //VectorScale(ps->pmove.origin, 0.125f, es->origin);
-
-    pitch = ps->pmove.viewAngles[vec3_t::Pitch];
-    if (pitch > 180) {
-        pitch -= 360;
-    }
-    es->angles[vec3_t::Pitch] = pitch / 3;
-    es->angles[vec3_t::Yaw] = ps->pmove.viewAngles[vec3_t::Yaw];
-    es->angles[vec3_t::Roll] = 0;
-}
-
 
 
 /***

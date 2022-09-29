@@ -34,7 +34,8 @@ public:
     //
     // Callback Functions.
     //
-    void ExplosionBoxUse( IServerGameEntity* caller, IServerGameEntity* activator );
+    void ExplosionBoxThink(void);
+	void ExplosionBoxUse( IServerGameEntity* caller, IServerGameEntity* activator );
     void ExplosionBoxDropToFloor(void);
     void ExplosionBoxDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
     void ExplosionBoxTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);

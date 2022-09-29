@@ -23,4 +23,4 @@ void LocalEntity_FireEvent( EntityState *state );
 /**
 *   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
 **/
-void LocalEntity_SetHashedClassname( PODEntity* podEntity, EntityState* state );
+void LocalEntity_SetHashedClassname( PODEntity* podEntity, const EntityState* state );

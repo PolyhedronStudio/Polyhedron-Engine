@@ -25,11 +25,13 @@ struct EnginePlayerMoveType {
 static constexpr int32_t PMF_ENGINE = (1 << 0);                    // Engine flags first.
 static constexpr int32_t PMF_TIME_TELEPORT = (PMF_ENGINE << 1);    // time frozen in place
 static constexpr int32_t PMF_NO_PREDICTION = (PMF_ENGINE << 2);    // temporarily disables client side prediction
-static constexpr int32_t PMF_GAME = (PMF_ENGINE << 3);             // Game flags start from here.
+static constexpr int32_t PMF_EXTRAPOLATING_GROUND_MOVER = (PMF_ENGINE << 3); // temporarily disables setting client origin and velocity.
+static constexpr int32_t PMF_GAME = (PMF_ENGINE << 4);             // Game flags start from here.
 
 /**
 *   This structure needs to be communicated bit-accurate from the server to the 
-*   client to guarantee that prediction stays in sync, so no floats are used.
+*   client to guarantee that prediction stays in sync, [so no floats are used.]
+*													   ------------------------ <-- Not anymore :-)
 *   
 *   If any part of the game code modifies this struct, it will result in a 
 *   prediction error of some degree.
@@ -46,7 +48,7 @@ struct PlayerMoveState {
 	//! Flags indicating the state, ducked, jump held, etc.
     uint16_t flags = 0;
 	//! Time (Each unit = 8ms).
-    uint16_t time= 0;
+    uint16_t time = 0;
 	//! Player gravity.
     uint16_t gravity = 0;
 
@@ -91,12 +93,12 @@ struct ClientMoveCommand {
     uint64_t commandNumber = 0; // Current commandNumber for this move command frame
 
     struct {
-        uint64_t simulationTime = 0;	// The simulation time when prediction was run
-        vec3_t origin = vec3_zero();    // The predicted origin for this command.
-		vec3_t velocity = vec3_zero();  // The predicted velocity for this command.
-        vec3_t error = vec3_zero();     // The prediction error for this command.
-		int32_t groundEntityNumber = -1; // The predicted ground entity for this command.
-		uint64_t moverTime = 0;
-		uint64_t moverTimeExtrapolated = 0;
+        uint64_t simulationTime = 0;		// The simulation time when prediction was run
+        vec3_t origin = vec3_zero();		// The predicted origin for this command.
+		vec3_t velocity = vec3_zero();		// The predicted velocity for this command.
+        vec3_t error = vec3_zero();			// The prediction error for this command.
+		int32_t groundEntityNumber = -1;	// The predicted ground entity for this command.
+		uint64_t moverTime = 0;				// The actual time of this mover at arrival of our server frame.
+		uint64_t moverTimeExtrapolated = 0;	// The actual extrapolated time of this mover during transition to next frame.
     } prediction;
 };

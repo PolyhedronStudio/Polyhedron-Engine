@@ -68,8 +68,7 @@ struct PODEntity {
 	//EntityAnimationState previousAnimationState = {};
 
 	/**
-	*	World Data: Members that are used for determining where we are in the PVS, used for tracing, and
-	*	net code..
+	*	PVS Data: Members that are used for determining where we are in the PVS, useful for trace work and net code.
 	**/
 	//! Linked to a division node or leaf
 	list_t area = { .next = nullptr, .prev = nullptr };
@@ -101,12 +100,37 @@ struct PODEntity {
     //! Absolute world transform bounding box.
     vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
     
+	/**
+	*	Game Physics POD:
+	**/
+    /**
+	*	Linear Movement, used for prediction:
+	*		- Currently in try-out for 'func_plat'.
+	**/
+	//! When extrapolating, parsed entity states will NOT set the origin.
+	bool isExtrapolating			= false;
+	//! Whether we are moving along a linear movement path, or not.
+	bool linearMovement				= false;
+	//! The current velocity that this entity is traveling along its linear movement path.
+	vec3_t linearMovementVelocity	= vec3_zero();
+	//! The starting origin for the entity's linear movement path
+	vec3_t linearMovementBeginOrigin	= vec3_zero();
+	//! The end origin for the entity's linear movement path
+	vec3_t linearMovementEndOrigin		= vec3_zero();
+
+	//! uint32_t movement duration.
+	uint32_t linearMovementDuration	= 0;
+	//! Movement start timestamp.
+	int64_t linearMovementTimeStamp	= 0;
 
 	/**
 	*	Game Specific POD:
 	**/
 	//! Pointer to the owning entity (if any.)
     PODEntity *owner = nullptr;
+
+	//! The actual current active game entity's hashed classname.
+	uint32_t hashedClassname = 0;
 
 	//! Actual game entity implementation pointer.
     ISharedGameEntity* gameEntity = nullptr;

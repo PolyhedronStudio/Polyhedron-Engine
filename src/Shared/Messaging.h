@@ -163,19 +163,19 @@ struct EntityState {
 	*	Linear Movement, used for prediction:
 	*		- Currently in try-out for 'func_plat'.
 	**/
-	//! Whether we are moving along a linear movement path, or not.
-	bool linearMovement				= false;
-	//! The current velocity that this entity is traveling along its linear movement path.
-	vec3_t linearMovementVelocity	= vec3_zero();
-	//! The starting origin for the entity's linear movement path
-	vec3_t linearMovementBeginOrigin	= vec3_zero();
-	//! The end origin for the entity's linear movement path
-	vec3_t linearMovementEndOrigin		= vec3_zero();
+	////! Whether we are moving along a linear movement path, or not.
+	//bool linearMovement				= false;
+	////! The current velocity that this entity is traveling along its linear movement path.
+	//vec3_t linearMovementVelocity	= vec3_zero();
+	////! The starting origin for the entity's linear movement path
+	//vec3_t linearMovementBeginOrigin	= vec3_zero();
+	////! The end origin for the entity's linear movement path
+	//vec3_t linearMovementEndOrigin		= vec3_zero();
 
-	//! uint32_t movement duration.
-	uint32_t linearMovementDuration	= 0;
-	//! Movement start timestamp.
-	int64_t linearMovementTimeStamp	= 0;
+	////! uint32_t movement duration.
+	//uint32_t linearMovementDuration	= 0;
+	////! Movement start timestamp.
+	//int64_t linearMovementTimeStamp	= 0;
 
 
 	/**

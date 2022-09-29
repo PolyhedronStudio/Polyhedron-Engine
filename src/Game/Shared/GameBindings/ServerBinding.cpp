@@ -120,3 +120,44 @@ cvar_t *GetSVMaxVelocity() {
 cvar_t *GetSVGravity() {
 	return sv_gravity;
 }
+
+
+
+/***
+*
+*
+*	BoxEntities/Tracework.
+*
+*
+***/
+/**
+*	@return	GameEntityVector filled with the entities that were residing inside the box. Will not exceed listCount limit.
+**/
+GameEntityVector SG_BoxEntities( const vec3_t& mins, const vec3_t& maxs, int32_t listCount, const int32_t areaType ) {
+    // Boxed entities set by gi.BoxEntities.
+    PODEntity* boxedEntities[MAX_WIRED_POD_ENTITIES];
+
+    // Vector of the boxed game entities to return.
+    GameEntityVector boxedGameEntities;
+
+    // Ensure the listCount can't exceed the max edicts.
+    if (listCount > MAX_WIRED_POD_ENTITIES) {
+        listCount = MAX_WIRED_POD_ENTITIES;
+    }
+
+    // Box the entities.
+    const int32_t numEntities = gi.BoxEntities( mins, maxs, boxedEntities, listCount, areaType );
+
+    // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
+	SGGameWorld *gameWorld = GetGameWorld();
+    GameEntityVector gameEntities = gameWorld->GetGameEntities();
+
+	for ( int32_t i = 0; i < numEntities; i++ ) {
+        if ( gameEntities[ boxedEntities[i]->currentState.number ] != nullptr ) {
+            boxedGameEntities.push_back( gameEntities[ boxedEntities[i]->currentState.number ] );
+        }
+    }
+
+    // Return our boxed base entities vector.
+    return boxedGameEntities;
+}

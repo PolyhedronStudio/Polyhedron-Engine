@@ -81,6 +81,10 @@ public:
     **/
     void ClientFrame() final;
 	/**
+	*	@brief	Calledeach VALID client frame. Sets the proper level.time for the current received delta frame.
+	**/
+	void SetDeltaFrameLevelTime() final;
+	/**
     *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
     **/
     void ClientPacketEntityDeltaFrame() final;

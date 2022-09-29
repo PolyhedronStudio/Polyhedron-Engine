@@ -511,13 +511,19 @@ void SVG_CheckDMRules(void)
 
 void SVG_UpdateHashedClassName(PODEntity *podEntity) {
 	if (podEntity) {
-		podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-		
-		if (podEntity->gameEntity) {
-			// Keep it up to date with whatever the game entities type info 
-			podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
-		} else {
-			podEntity->currentState.hashedClassname = 0;
+		//if (podEntity->gameEntity) {
+		//	// Keep it up to date with whatever the game entities type info 
+		//	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+		//	podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+		//} else {
+		//	podEntity->currentState.hashedClassname = 0;
+		//}
+		// The TypeInfo AllocateInstance has allocated a new game entity. We make sure to update the
+		// 'wired' current state data to match it so that all client's can update their own local packet
+		// entity derived instance.
+		if ( podEntity->hashedClassname != podEntity->currentState.hashedClassname ) {
+			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+			podEntity->currentState.hashedClassname = podEntity->hashedClassname;
 		}
 	}
 }
@@ -589,18 +595,34 @@ void SVG_RunFrame(void) {
         // Store previous(old) origin.
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
-        // If the ground entity moved, make sure we are still on it
-		if (!gameEntity->GetClient()) {
-			GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
-			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+  //      // If the ground entity moved, make sure we are still on it
+		//if (!gameEntity->GetClient()) {
+		//	GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
+		//	if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
+		//		// Reset ground entity.
+		//		//gameEntity->SetGroundEntity( SGEntityHandle() );
+
+		//		// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+		//		if ( !( gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) && ( gameEntity->GetServerFlags() & EntityServerFlags::Monster ) ) {
+		//			// Check for a new ground entity that resides below this entity.
+		//			SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
+		//		}
+		//	}
+		//}
+        // For non client entities: If the ground entity moved, make sure we are still on it
+		if ( !gameEntity->GetClient() ) {
+			// Validate handle.
+			GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
+			// Redo a Check for Ground if the link count does not match to its ground link count.
+			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
 				// Reset ground entity.
-				//gameEntity->SetGroundEntity( SGEntityHandle() );
+				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+				if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
 					// Check for a new ground entity that resides below this entity.
-					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
-				//}
+					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
+				}
 			}
 		}
 

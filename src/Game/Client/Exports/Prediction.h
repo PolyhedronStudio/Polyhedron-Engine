@@ -43,7 +43,7 @@ private:
 	*	@brief	Called by DispatchPredictTouchCallbacks to apply the current player move results
 	*			to the actual player entity itself.
 	**/
-	void PlayerMoveToClientEntity( PlayerMove *pm, GameEntity *gePlayer );
+	void PlayerMoveToClientEntity( PlayerMove *pm, GameEntity *gePlayer, const vec3_t &groundMoverOffset );
 
 	/**
 	*	@brief	Will compensate the player's origin by adding the predicted linear base movement offset

@@ -315,16 +315,6 @@ private:
 	void PrepareBodyQueue();
 
 private:
-    //// Array storing the POD server entities.
-    //Entity serverEntities[MAX_WIRED_POD_ENTITIES];
-
-    ////! Array for storing the server game's class entities.
-    //GameEntity* gameEntities[MAX_WIRED_POD_ENTITIES];
-
-    ////! Total number of actively spawned entities.
-    //int32_t numberOfEntities = 0;
-
-
     /**
     *   @brief Nothing yet.
     **/
@@ -393,7 +383,11 @@ template<typename ClassType> ClassType* ClientGameWorld::CreateGameEntity(PODEnt
 
 	// Get actual entity number.
 	const int32_t entityNumber = podEntity->clientEntityNumber;
-        
+       
+	if (entityNumber < 0 || entityNumber > MAX_ENTITIES) {
+		return nullptr;
+	}
+
 	// Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
 	if (ClassType::ClassInfo.AllocateInstance) {
 		if (nullptr == gameEntities[entityNumber]) {

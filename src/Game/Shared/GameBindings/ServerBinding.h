@@ -83,3 +83,17 @@ extern cvar_t *sv_maxvelocity;
 extern cvar_t *sv_gravity;
 extern cvar_t *sv_friction;
 extern cvar_t *sv_stopspeed;
+
+
+
+/***
+*
+*
+*	BoxEntities/Tracework.
+*
+*
+***/
+/**
+*	@return	GameEntityVector filled with the entities that were residing inside the box. Will not exceed listCount limit.
+**/
+GameEntityVector SG_BoxEntities( const vec3_t& mins, const vec3_t& maxs, int32_t listCount, const int32_t areaType );

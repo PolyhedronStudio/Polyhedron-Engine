@@ -36,7 +36,7 @@ void CLG_DrawDebugLine(const vec3_t& start, const vec3_t& end, const vec4_t& col
 	vec3_t right, up;
     MakeNormalVectors(vec, right, up);
 	
-    int32_t dec = 1;   
+    int32_t dec = 8;   
 	vec = vec3_scale(vec, dec);
 
 

@@ -37,7 +37,7 @@ public:
 	/**
 	*	Class Definition.
 	**/
-    DefineMapClass( "func_plat", FuncPlat, CLGBaseMover );
+    DefineMapClass( "xxfunc_plat", FuncPlat, CLGBaseMover );
 
 
 

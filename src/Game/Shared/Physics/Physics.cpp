@@ -197,7 +197,7 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
 	}
 
 	const int32_t geClipMask = gameEntity->GetClipMask();
-	return (geClipMask ? geClipMask : BrushContentsMask::Solid);
+	return ( geClipMask ? geClipMask : BrushContentsMask::Solid );
 }
 
 /**
@@ -205,26 +205,28 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
 **/
 void SG_CheckGround( GameEntity *geCheck ) {
 	// Actual offset to determine for when a Hull is on-ground.
-	static constexpr float groundOffset = 0.3125f;
+	static constexpr float groundOffset = 0.3125;
 
 	// Sanity Check.
 	if (!geCheck) {
 		return;
 	}
+	
+	// Get velocity.
+	const vec3_t geCheckVelocity = geCheck->GetVelocity();
 
 	// Check For: (EntityFlags::Swim | EntityFlags::Fly)
 	// If an entity suddenly has the Swim, or Fly flag set, unset its ground entity
 	// and return. It does not need GroundEntity behavior.
 	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		return;
 	}
 
 	// Check For: Client Entity.
 	if( geCheck->GetClient() && geCheck->GetVelocity().z > 180) { // > 100
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		//geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
@@ -236,19 +238,19 @@ void SG_CheckGround( GameEntity *geCheck ) {
 		geOrigin.z - groundOffset 
 	};
 
-	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck));
+	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck) );
 
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		//geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	// Unset Ground Entity For Non Clients: When the trace result was not in a solid, and the velocity is > 1.
 	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		//geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
@@ -256,14 +258,12 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	if( !traceResult.startSolid && !traceResult.allSolid ) {
 		// We must've hit some entity, so set it.
 		geCheck->SetGroundEntity(traceResult.gameEntity);
-		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetGroundEntityLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
-		
-		// Since we hit ground, zero out the Z velocity in case it is lower than 0.
-		vec3_t geCheckVelocity = geCheck->GetVelocity();
-		if( geCheckVelocity.z < 0) {
-			geCheckVelocity.z = 0;
-			geCheck->SetVelocity(geCheckVelocity);
+		if ( traceResult.gameEntity ) {
+			geCheck->SetGroundEntityLinkCount( traceResult.gameEntity->GetLinkCount() ); //ent->groundentity_linkcount = ent->groundentity->linkcount;
 		}
+
+		// Since we hit ground, zero out the Z velocity in case it is lower than 0.
+		geCheck->SetVelocity( vec3_t { geCheckVelocity.x, geCheckVelocity.y, 0.f } );
 
 		// Impact.
 		SG_Impact( geCheck, traceResult );
@@ -364,12 +364,13 @@ const bool SG_RunThink( GameEntity *geThinker ) {
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
 	// For non extrapolating entities:
-	if ( !geThinker->IsExtrapolating() ) {
+	if ( !geThinker->IsExtrapolating() && !geThinker->GetPODEntity()->linearMovement ) {
 		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
 			return true;
 		}
+
 	} else {
-		if (nextThinkTime <= GameTime::zero() || nextThinkTime > GameTime( cl->serverTime ) + FRAMERATE_MS) {
+		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime + FRAMERATE_MS ) { //nextThinkTime > level.extrapolatedTime ) {
 			return true;
 		}
 	}
@@ -424,7 +425,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	// SG_Physics_Pusher:
 		case MoveType::Push:
         case MoveType::Stop:
-	        SG_Physics_Pusher(entityHandle);
+			SG_Physics_Pusher(entityHandle);
         break;
 	// SG_Physics_NoClip:
         case MoveType::NoClip:
@@ -445,7 +446,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 			GameEntity *geSlide = *entityHandle;
 			SlideBoxMove slideBoxMove;
 			int32_t geSlideContentMask = (geSlide && geSlide->GetClipMask() ? geSlide->GetClipMask() : BrushContentsMask::PlayerSolid);
-			const float slideBounce = 1.01f;
+			const float slideBounce = 1.02f;
 			const float slideFriction = 6.f;
 
 			SG_Physics_TossSlideBox( geSlide, geSlideContentMask, slideBounce, slideFriction, &slideBoxMove );

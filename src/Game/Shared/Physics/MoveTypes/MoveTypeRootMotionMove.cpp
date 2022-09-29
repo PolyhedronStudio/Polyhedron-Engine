@@ -53,8 +53,7 @@ int32_t SG_RootMotionMove_CheckForGround( GameEntity *geCheck ) {
 	// If anything we clear out the ground pointer in case the entity did acquire
 	// flying skills.
 	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		return -1;
 	}
 
@@ -79,16 +78,14 @@ int32_t SG_RootMotionMove_CheckForGround( GameEntity *geCheck ) {
 
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		return -1;
 	}
 
 	// If velocity is up, and the actual trace result did not start inside of a solid, it means we have no ground.
 	const vec3_t geCheckVelocity = geCheck->GetVelocity();
 	if( geCheckVelocity.z > 1 && !traceResult.startSolid ) {
-		geCheck->SetGroundEntity( SGEntityHandle() );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		return -1;
 	}
 
@@ -96,8 +93,9 @@ int32_t SG_RootMotionMove_CheckForGround( GameEntity *geCheck ) {
 	if( !traceResult.startSolid && !traceResult.allSolid ) {
 		//VectorCopy( trace.endpos, ent->s.origin );
 		geCheck->SetGroundEntity(traceResult.gameEntity);
-		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
-
+		if ( traceResult.gameEntity ) {
+			geCheck->SetGroundEntityLinkCount( traceResult.gameEntity->GetLinkCount() ); //ent->groundentity_linkcount = ent->groundentity->linkcount;
+		}
 		//// Since we've found ground, we make sure that any negative Z velocity is zero-ed out.
 		//if( geCheckVelocity .z < 0) {
 		//	geCheck->SetVelocity({ 

@@ -23,10 +23,6 @@
 **/
 void Com_PageInMemory(void *buffer, size_t size);
 /**
-*	@brief	Restores entity origin and angles from player state
-**/
-void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es);
-/**
 *	@brief	Helper function to parse an OpenGL-style extension string.
 **/
 #if USE_REF == REF_GL

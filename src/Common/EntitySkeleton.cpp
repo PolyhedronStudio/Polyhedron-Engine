@@ -217,14 +217,16 @@ const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es ) {
 	*	#0: Clear any old skeleton data if there was any.
 	**/
 	// Scan our linear bone list and check each bone's boneNode for children, and clear those out.
-	for ( int32_t i = 0; i < es->bones.size(); i++ ) {
-		// Get boneNode pointer.
-		EntitySkeletonBoneNode *boneNode = es->bones[i].boneTreeNode;
+	if (!es->bones.empty()) {
+		for ( int32_t i = 0; i < es->bones.size(); i++ ) {
+			// Get boneNode pointer.
+			auto boneNode = es->bones[i].boneTreeNode;
 
-		// Make sure it is valid.
-		if ( boneNode ) {
-			// Clear children.
-			boneNode->GetChildren().clear();
+			// Make sure it is valid.
+			if ( boneNode ) {
+				// Clear children.
+				boneNode->GetChildren().clear();
+			}
 		}
 	}
 
@@ -527,11 +529,14 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 **/
 void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction ) {
 	// If the bone node is invalid, escape.
-	if ( !boneNode ) {
+	if ( !boneNode || !addBonePoses || !addToBonePoses ) {
 		// TODO: Warn.
 		return;
 	}
 
+	if (boneNode->GetChildren().size()) {
+		return;
+	}
 	// Get the bone.
 	const EntitySkeletonBone *esBone = boneNode->GetEntitySkeletonBone();
 	

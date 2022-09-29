@@ -51,27 +51,30 @@ void FuncPlat::Precache() {
 **/
 void FuncPlat::Spawn() {
     // Zero out angles here for SetMoveDirection in Base::Spawn.
-    SetAngles(vec3_zero());
+    SetAngles( vec3_zero() );
 
     // Spawn base class.
     Base::Spawn();
 
+	// For debugging.
+	//SetRenderEffects( GetRenderEffects() | RenderEffects::DebugBoundingBox );
+
     // Basic properties.
     //SetMoveDirection(GetAngles(), true);
-    SetMoveType(MoveType::Push);
-    SetSolid(Solid::BSP);
-    SetModel(GetModel());
+    SetMoveType( MoveType::Push );
+    SetSolid( Solid::BSP );
+    SetModel( GetModel() );
 
     //SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
-    SetBlockedCallback(&FuncPlat::Callback_Blocked);
-    SetUseCallback(&FuncPlat::Callback_Use);
+    SetBlockedCallback( &FuncPlat::Callback_Blocked );
+    SetUseCallback( &FuncPlat::Callback_Use );
 
     // Make sure to have default KeyValues set in case they were not set
 	// by the mapper.
     if ( !GetSpeed() ) {
-        SetSpeed(20.f);
+        SetSpeed( 300.f );
     } else {
-        SetSpeed(GetSpeed() * 0.1f);
+        //SetSpeed(GetSpeed() * 0.1f);
     }
 	if ( GetWaitTime() == Frametime::zero()) {
 		SetWaitTime( 3s );
@@ -135,7 +138,7 @@ void FuncPlat::PostSpawn() {
 	//}
 
     // Calculate movement speed to use.
-    CalculateMoveSpeed();
+    //CalculateMoveSpeed();
 
 	// Start at state up.
 	if ( (spawnFlags & SF_PlatformStartRaised) ) {
@@ -156,7 +159,6 @@ void FuncPlat::PostSpawn() {
     moveInfo.startAngles = GetAngles();
     moveInfo.endOrigin = GetEndPosition();
     moveInfo.endAngles = GetAngles();
-
     // Link it.
     LinkEntity();
 }
@@ -181,8 +183,15 @@ void FuncPlat::Callback_Use( IServerGameEntity* other, IServerGameEntity* activa
         return;
     }
 
-
-    Callback_EngageLowerMove();
+	// Action is determined by move state.
+	if (moveInfo.state == MoverState::Bottom) {
+		Callback_EngageRaiseMove();
+	} else if (moveInfo.state == MoverState::Top) {
+		Callback_EngageLowerMove();
+		//platformEntity->SetNextThinkTime(level.time + FRAMERATE_MS);
+		//platformEntity->SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
+	}
+    //Callback_EngageLowerMove();
 }
 
 /**
@@ -496,7 +505,7 @@ void FuncPlat::SpawnTopTouchTrigger() {
     }
     
     // At last, create platform trigger entity.
-    TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
+    TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, GetEndPosition(), triggerMins, triggerMaxs );
 }
 
 /**
@@ -552,7 +561,7 @@ void FuncPlat::SpawnBottomTouchTrigger() {
     }
     
     // At last, create platform trigger entity.
-    TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
+    TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, GetEndPosition(), triggerMins, triggerMaxs );
 }
 
 //===============

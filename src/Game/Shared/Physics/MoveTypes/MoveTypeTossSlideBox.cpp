@@ -67,7 +67,7 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	**/
 	int32_t blockedMask = 0;
 
-	if ( oldVelocityLength > 0 ) {
+	//if ( oldVelocityLength > 0 ) {
 		// Setup our SlideBoxMove structure. Keeps track of state for the current frame's move we're about to perform.
 		*slideBoxMove = {
 			// Working State & Final Move Attributes.
@@ -112,13 +112,12 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 				geSlider->SetGroundEntityLinkCount( geGroundEntity->GetLinkCount() );
 			}
 		} else {
-			geSlider->SetGroundEntity( SGEntityHandle() );
-			geSlider->SetGroundEntityLinkCount( 0 );
+			geSlider->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		}
 
 		// Link it in.
 		geSlider->LinkEntity();
-	}
+	//}
 
 	/**
 	*	Touch Callbacks.
@@ -166,7 +165,7 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 
 		// Apply ground friction now since we're officially on-ground.
 		if (geNewGroundEntity) {
-			SG_AddGroundFriction( geSlider, ( friction > 0 ? friction : SLIDEBOX_GROUND_FRICTION), SLIDEBOX_STOP_SPEED );
+			SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION), SLIDEBOX_STOP_SPEED );
 		}
 
 		// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.

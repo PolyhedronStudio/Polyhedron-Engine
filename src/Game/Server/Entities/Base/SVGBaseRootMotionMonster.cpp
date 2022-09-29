@@ -647,7 +647,7 @@ void SVGBaseRootMotionMonster::ApplyMoveState(RootMotionMoveState* moveState) {
 		SetGroundEntity( geNewGroundEntity );
 		SetGroundEntityLinkCount( geNewGroundEntity->GetLinkCount() );
 	} else {
-		SetGroundEntity( SGEntityHandle() );
+		SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		SetGroundEntityLinkCount( 0 );
 	}
 }

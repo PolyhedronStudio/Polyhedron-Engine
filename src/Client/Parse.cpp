@@ -51,12 +51,24 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
         Com_LPrintf(PrintType::Developer, "\n");
     }
 #endif
-
     MSG_ParseDeltaEntityState(oldEntityState, entityState, newEntityNumber, byteMask, cl.entityStateFlags);
 
-    // Shuffle previous origin to old
-    if (!(byteMask & EntityMessageBits::OldOrigin) && !(entityState->renderEffects & RenderEffects::Beam))
-        entityState->oldOrigin = oldEntityState->origin;//VectorCopy(old->origin, state->oldOrigin);
+	if (!(byteMask & EntityMessageBits::OldOrigin) && !(entityState->renderEffects & RenderEffects::Beam))
+		entityState->oldOrigin = oldEntityState->origin;
+    
+	// Shuffle previous origin to old
+	//if ( /*!cs.entities[ newEntityNumber ].isExtrapolating &&*/ !cs.entities[ newEntityNumber ].linearMovement ) {//&&*/ !cs.entities[newEntityNumber].linearMovement ) {
+	//    if (!(byteMask & EntityMessageBits::OldOrigin) && !(entityState->renderEffects & RenderEffects::Beam))
+	//		entityState->oldOrigin = oldEntityState->origin;
+	//} else {
+	//	//*entityState = *oldEntityState;
+	if ( cs.entities[ newEntityNumber ].linearMovement ) {
+		EntityState *currentState  = &cs.entities[ newEntityNumber ].currentState;
+		EntityState *previousState = &cs.entities[ newEntityNumber ].previousState;
+		entityState->oldOrigin = previousState->origin;
+		entityState->origin = currentState->origin;
+		cs.entities[ newEntityNumber ].lerpOrigin = previousState->origin;
+	}
 }
 
 static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {

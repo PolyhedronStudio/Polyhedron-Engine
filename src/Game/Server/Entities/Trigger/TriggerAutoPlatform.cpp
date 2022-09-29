@@ -92,15 +92,16 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 	FuncPlat* platformEntity = dynamic_cast<FuncPlat*>(ownerEntity);
 	
 	// Fetch move info.
-	PushMoveInfo *moveInfo = platformEntity->GetPushMoveInfo();
+//	PushMoveInfo *moveInfo = platformEntity->GetPushMoveInfo();
 	
-	// Action is determined by move state.
-	if (moveInfo->state == MoverState::Bottom) {
-		platformEntity->Callback_EngageRaiseMove();
-	} else if (moveInfo->state == MoverState::Top) {
-		platformEntity->SetNextThinkTime(level.time + 1 * FRAMETIME_S);
-		platformEntity->SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
-	}
+	//// Action is determined by move state.
+	//if (moveInfo->state == MoverState::Bottom) {
+	//	platformEntity->Callback_EngageRaiseMove();
+	//} else if (moveInfo->state == MoverState::Top) {
+	//	platformEntity->Callback_EngageLowerMove();
+	//	//platformEntity->SetNextThinkTime(level.time + FRAMERATE_MS);
+	//	//platformEntity->SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
+	//}
 
 	//if ( other->GetHealth() <= 0 ) {
 	//	return; // If you're dead, you can't pass
@@ -122,14 +123,14 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 //===============
 // TriggerAutoPlatform::Create
 //===============
-TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
+TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity *ownerEntity, const vec3_t triggerOrigin, const vec3_t &triggerMins, const vec3_t &triggerMaxs  ) {
     TriggerAutoPlatform* autoPlatform = GetGameWorld()->CreateGameEntity<TriggerAutoPlatform>();
-    autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
+    autoPlatform->SetOrigin( triggerOrigin );
 	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();
 	autoPlatform->SetSolid(Solid::Trigger);
-	autoPlatform->SetMins( ownerMins );
-	autoPlatform->SetMaxs( ownerMaxs );
+	autoPlatform->SetMins( triggerMins );
+	autoPlatform->SetMaxs( triggerMaxs );
 	autoPlatform->SetOwner( ownerEntity );
 	autoPlatform->SetEnemy( ownerEntity );
 	autoPlatform->LinkEntity();

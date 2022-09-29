@@ -71,6 +71,10 @@ public:
     **/
     qboolean UpdateGameEntityFromState( PODEntity *clEntity, const EntityState *state ) final;
 	/**
+	*	@brief
+	**/
+	const bool PacketNewHashedClassname( PODEntity *clEntity, const EntityState *state ) final;
+	/**
 	*   @brief  Gives local entities a chance to think. These are called "synchroniously" to the server frames.
 	*	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
 	**/
@@ -121,6 +125,10 @@ public:
     *	(Prediction is placeholder for now.)
 	*
 	**/
+	/**
+	*	@brief	Sets the current 'server' packet entity 'level time'.
+	**/
+	void SetDeltaFrameLevelTime() final;
 	/**
 	*   @brief  Called right before RunLocalEntitiesFrame.
 	**/

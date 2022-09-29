@@ -88,15 +88,14 @@ public:
     *
     * 
     ***/
-	bool isExtrapolating = false;
 	virtual void EnableExtrapolation() override {
-		isExtrapolating = true;
+		podEntity->isExtrapolating = true;
 	}
 	virtual void DisableExtrapolation() override {
-		isExtrapolating = false;
+		podEntity->isExtrapolating = false;
 	}
 	virtual const bool IsExtrapolating() override {
-		return isExtrapolating;
+		return podEntity->isExtrapolating;
 	}
 
     /**
@@ -477,7 +476,7 @@ public:
     **/
     virtual const qboolean        IsInUse() override { //return 0; };
         if (podEntity) {
-            return cl->frame.number == podEntity->serverFrame;
+            return podEntity->inUse || ( IsExtrapolating() ) || ( cl->frame.number == podEntity->serverFrame );
         } 
 
         return false;

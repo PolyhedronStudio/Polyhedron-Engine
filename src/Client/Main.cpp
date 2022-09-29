@@ -641,6 +641,9 @@ CL_ClearState
 extern void CM_FreeFromBSP(cm_t *cm);
 void CL_ClearState(void)
 {
+	
+	cs.entities = CL_GM_GetClientPODEntities();
+
     // Stop all sounds.
     S_StopAllSounds();
  
@@ -660,22 +663,25 @@ void CL_ClearState(void)
     //memset(&cs.entities, 0, sizeof(cs.entities));
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
     //cl = {};
-    for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		cs.entities[i] = {
-			// Ensure the states are assigned the correct entityNumber.
-			.currentState = { .number = i },
-			.previousState = { .number = i },
-			// And ensure our main identifier has the correct entityNumber set.
-			.clientEntityNumber = i,
-		};
+		cs.entities = CL_GM_GetClientPODEntities();
+	if ( cs.entities != nullptr ) {
+		for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
+			cs.entities[i] = {
+				// Ensure the states are assigned the correct entityNumber.
+				.currentState = { .number = i },
+				.previousState = { .number = i },
+				// And ensure our main identifier has the correct entityNumber set.
+				.clientEntityNumber = i,
+			};
 
-		//PODEntity *podEntity = &cs.entities[i];
+			//PODEntity *podEntity = &cs.entities[i];
 
-		//// Ensure the states are assigned the correct entityNumber.
-		//podEntity->currentState.number = i;
-		//podEntity->previousState .number = i;
-		//podEntity->clientEntityNumber = i;
-    }
+			//// Ensure the states are assigned the correct entityNumber.
+			//podEntity->currentState.number = i;
+			//podEntity->previousState .number = i;
+			//podEntity->clientEntityNumber = i;
+		}
+	}
 
     // In case we are more than connected, reset it to just connected.
     if (cls.connectionState > ClientConnectionState::Connected) {
@@ -717,7 +723,7 @@ void CL_Disconnect(int32_t errorType)
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
     // PH: Call into the CG Module to inform that we're disconnected.
-    CL_GM_ClientDisconnect();
+    //CL_GM_ClientDisconnect();
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);
@@ -2693,6 +2699,7 @@ static void CL_SetClientTime( int64_t msec ) {
     if (com_timedemo->integer) {
         cl.time = cl.serverTime;
         cl.lerpFraction = 1.0f;
+		//cl.xerpFraction = 0.f;
         return;
     }
 
@@ -2709,17 +2716,38 @@ static void CL_SetClientTime( int64_t msec ) {
         cl.lerpFraction = (cl.time - prevtime) * CL_1_FRAMETIME;
     }
 
-	// We extrapolate starting at each newly received serverTime. Ensuring that the extrapolated steps
-	// are as minimal as can be.
-	const int64_t nextFrameTime = cl.serverTime + CL_FRAMETIME_UI64;
-	if ( cl.extrapolatedTime > nextFrameTime ) {
+	/**
+	*	Maintain our extrapolated time to be between frame and nextframe so we can keep
+	*	track of an estimated time of where our server is at.
+	*
+	*	And calculate the linear extrapolated frame fraction.
+	**/
+	// Calculate linear extrapolation fraction, between frame and nextframe first, so we can correct it
+	// afterwards based on our extrapolated time.
+	int64_t prevServerTime = (cl.oldframe.number - cl.serverDelta) * CL_FRAMETIME_UI64;
+	int64_t nextServerTime = prevServerTime + CL_FRAMETIME_UI64;
+	cl.xerpFraction = (double)( cl.extrapolatedTime - prevServerTime ) / ( nextServerTime - prevServerTime );
+
+	// Correct the calculated extrapolated time and fraction.
+	const int64_t nextFrameTime = prevServerTime + CL_FRAMETIME_UI64;
+	if ( cl.extrapolatedTime >= nextFrameTime ) {
 		cl.extrapolatedTime = nextFrameTime;
-	} else if (cl.extrapolatedTime < cl.serverTime) {
-		cl.extrapolatedTime = cl.serverTime;
+		cl.xerpFraction = 1.0f;
+	} else if (cl.extrapolatedTime < prevServerTime) {
+		cl.extrapolatedTime = prevServerTime;
+		cl.xerpFraction = 0.f;
 	}
 
+	//const std::string xerpdebug = fmt::format(
+	//	"fraction[lerp({}), xerp({})], time[time({}), xerpt({}), servert({})]",
+	//	cl.lerpFraction,
+	//	cl.xerpFraction,
+	//	cl.time,
+	//	cl.extrapolatedTime,
+	//	cl.serverTime
+	//);
+	//Com_LPrintf(PrintType::Developer, "%s\n", xerpdebug.c_str() );
 	//Com_DPrintf( "time=%i, servertime=%i, xtratime=%i, msec=%i\n", cl.time, cl.serverTime, cl.extrapolatedTime, msec );
-
 	SHOWCLAMP(2, "time %d %d, lerpFraction %.3f\n",
               cl.time, cl.serverTime, cl.lerpFraction);
 }
@@ -2969,9 +2997,6 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 		// Run the received packet entities for a frame so we can "predict".
 		CL_GM_ClientPacketEntityDeltaFrame();
 
-		// Give the client game module a chance to run its local entities for a frame.
-		CL_GM_ClientLocalEntitiesFrame();
-
 		// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
 		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
 			// Get entity pointer.
@@ -2985,13 +3010,13 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 			// Update local entity.
 			LocalEntity_Update(&podEntity->currentState);
 
-			// Run the Client Game entity for a frame.		
-			LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
 
 			// Fire local entity events.
 			LocalEntity_FireEvent(&podEntity->currentState);
 		}
 
+		// Give the client game module a chance to run its local entities for a frame.
+		CL_GM_ClientLocalEntitiesFrame();
 
 		// Check for prediction errors.
 		CL_CheckPredictionError();
@@ -3163,15 +3188,13 @@ uint64_t CL_Frame(uint64_t msec)
 
     // Send pending clientUserCommands
     CL_SendCmd();
-
+	
 	// Predict all unacknowledged movements
     CL_PredictMovement();
-	// Check for prediction errors.
-    //CL_CheckPredictionError();
 
 	// Run any console commands right now.
     Con_RunConsole();
-
+	
     // Update RMLUI
     RMLUI_UpdateFrame();
 
@@ -3194,7 +3217,8 @@ uint64_t CL_Frame(uint64_t msec)
         R_FRAMES++;
 
 run_fx:
-        // Advance local game effects for next frame
+
+		// Advance local game effects for next frame
         CL_GM_ClientFrame();
         
 		// Update audio after the 3D view was drawn

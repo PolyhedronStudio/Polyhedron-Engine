@@ -95,6 +95,10 @@ public:
     *           well... file an issue lmao.)
     **/
     virtual qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState *state) = 0;
+	/**
+	*	@brief
+	**/
+	virtual const bool PacketNewHashedClassname( PODEntity *clEntity, const EntityState *state ) = 0;
 
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.
@@ -121,6 +125,11 @@ public:
 	*	@brief	Returns a pointer to the actual client game POD Entities array residing in the ClientGame's world.
 	**/
 	virtual PODEntity *GetClientPODEntities() = 0;
+
+	/**
+	*	@brief	Sets the current 'server' packet entity 'level time'.
+	**/
+	virtual void SetDeltaFrameLevelTime() = 0;
 };
 
 
@@ -458,6 +467,10 @@ public:
     *   @brief  Called each client frame. Handle per frame basis things here.
     **/
     virtual void ClientFrame() = 0;
+	/**
+	*	@brief	Calledeach VALID client frame. Sets the proper level.time for the current received delta frame.
+	**/
+	virtual void SetDeltaFrameLevelTime() = 0;
 	/**
     *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
     **/

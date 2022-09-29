@@ -820,13 +820,29 @@ qboolean CL_GM_SpawnEntitiesFromBSPString(const char *mapName, const char* bspSt
 }
 
 /**
-*   @brief  Notifies the client game module that we should update/spawn an entity from a newly received state.
+*   @brief  Notifies the client game module that this entity has newly arrived in our frame in order
+*			for it to check whether we need any game entity specific updating. (When hashed classnames
+*			differ for example.)
 **/
 qboolean CL_GM_CreateFromNewState(PODEntity* clEntity, const EntityState* state) {
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
 	        return entities->UpdateGameEntityFromState(clEntity, state);
+        }
+    }
+
+    return false;
+}
+
+/**
+*   @brief  Notifies the client game module of new state updates for already in-frame entities.
+**/
+const bool CL_GM_PacketNewHashedClassname( PODEntity *clEntity, const EntityState *state ) {
+    if (cge) {
+        IClientGameExportEntities *entities = cge->GetEntityInterface();
+        if (entities) {
+	        return entities->PacketNewHashedClassname(clEntity, state);
         }
     }
 
@@ -928,6 +944,15 @@ void CL_GM_ClientFrame(void) {
     if (cge) {
         cge->ClientFrame();
     }
+}
+
+/**
+*	@brief	Sets the proper level.time for the current received delta frame.
+**/
+void CL_GM_SetDeltaFrameLevelTime(void) {
+	if (cge) {
+		cge->SetDeltaFrameLevelTime();
+	}
 }
 
 /**
@@ -1199,13 +1224,13 @@ void CL_GM_InitMedia(void) {
 /**
 *   @brief  Call into the CG Module for notifying about "Media Load State Name"
 **/
-const char *CL_GM_GetMediaLoadStateName(int32_t loadState)
+const std::string CL_GM_GetMediaLoadStateName(int32_t loadState)
 {
     if (cge) {
         IClientGameExportMedia *media = cge->GetMediaInterface();
 
         if (media) {
-            return media->GetLoadStateName(loadState).c_str();
+            return media->GetLoadStateName(loadState);
         }
     }
 

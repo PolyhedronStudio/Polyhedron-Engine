@@ -49,7 +49,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	// Refresh the ground entity for said MoveType entities:
 	if( ent->GetMoveType() == MoveType::Bounce || ent->GetMoveType() == MoveType::TossSlide) {/*MOVETYPE_BOUNCE || ent->movetype == MOVETYPE_BOUNCEGRENADE ) {*/
 		if( ent->GetVelocity().z > 0.1f) {
-			ent->SetGroundEntity( SGEntityHandle() );
+			ent->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		}
 	}
 
@@ -57,7 +57,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	GameEntity *entGroundEntity = SGGameWorld::ValidateEntity( ent->GetGroundEntityHandle() );
 	//	if( ent->groundentity && ent->groundentity != world && !ent->groundentity->r.inuse ) {
 	if (entGroundEntity && !entGroundEntity->IsInUse()) {
-		ent->SetGroundEntity( SGEntityHandle() ); //ent->groundentity = NULL;
+		ent->SetGroundEntity( SGEntityHandle( nullptr, -1 ) ); //ent->groundentity = NULL;
 	}
 
 	// Calculate old speed based on velocity vec length.
@@ -76,7 +76,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 			// 8 = 1 Unit on the Quake scale I think.
 			if( ent->GetVelocity().z >= 8) {
 				// it's moving in-air so unset the ground entity.
-				ent->SetGroundEntity( SGEntityHandle() );
+				ent->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 			} else {
 				// Otherwise, let it fall to a stop.
 				ent->SetVelocity(vec3_zero());

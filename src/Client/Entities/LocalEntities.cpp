@@ -30,7 +30,7 @@
 /**
 *   @brief  Creates a new entity based on the newly received entity state.
 **/
-static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState *state, const vec3_t &origin)
+static void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState *state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
     
@@ -63,7 +63,7 @@ static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState 
 /**
 *   @brief  Updates an existing entity and ensures that if it needs to lerp it can do so safely.
 **/
-static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityState *state, const vec_t *origin)
+static void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityState *state, const vec_t *origin)
 {
     // Fetch event ID.
     int32_t eventID = state->eventID;
@@ -110,20 +110,20 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
 **/
 static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 {
-	// Last received frame was invalid.
+	// Always new on the first frame.
     if ( cl.frame.number == 0 ) {
         return true;
     }
 
 	// Wasn't in last local frame.
     if ( clEntity->serverFrame != cl.frame.number ) {
-        return true;
+        //return true;
     }
 
 	// Hashname changed.
-	//if ( clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname ) {
-	//	return true;
-	//}
+	if ( clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname ) {
+		return true;
+	}
 
 	// Developer option, always new.
     if ( cl_nolerp->integer == 2 ) {
@@ -192,6 +192,13 @@ void LocalEntity_Update(const EntityState *state)
         // Updates the current and previous state so lerping won't hurt.
         LocalEntity_UpdateExisting(clEntity, state, state->origin);
     }
+	
+	//// Update the local entities for possible hashed name changes.	
+	//LocalEntity_SetHashedClassname (clEntity, state );
+
+	//// Ensure it gets done properly.
+	//CL_GM_PacketNewHashedClassname( clEntity, state );
+
 
     // Assign the fresh new received server frame number that belongs to this frame.
     clEntity->serverFrame = cl.frame.number;
@@ -203,7 +210,7 @@ void LocalEntity_Update(const EntityState *state)
 /**
 *   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
 **/
-void LocalEntity_SetHashedClassname(PODEntity* podEntity, EntityState* state) {
+void LocalEntity_SetHashedClassname(PODEntity* podEntity, const EntityState* state) {
 	// Only continue IF we got a podEntity.
 	if (!podEntity || !state) {
 		return;
@@ -213,7 +220,7 @@ void LocalEntity_SetHashedClassname(PODEntity* podEntity, EntityState* state) {
 	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
 
 	//Retreive and update its current/(possibly, new) hashedClassname after this frame.
-	podEntity->currentState.hashedClassname = CL_GM_GetHashedGameEntityClassname(podEntity); 
+	podEntity->currentState.hashedClassname = podEntity->hashedClassname;
 }
 
 /**

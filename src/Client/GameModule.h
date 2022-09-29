@@ -35,6 +35,7 @@ void		CL_GM_ClientUpdateOrigin(void);
 **/
 void		CL_GM_ClientConnect();
 void		CL_GM_ClientBegin(void);
+void		CL_GM_SetDeltaFrameLevelTime(void);
 void		CL_GM_ClientPacketEntityDeltaFrame(void);
 /**
 *   @brief  Called each time the client wants to predict movement for other entities.
@@ -65,6 +66,7 @@ void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 //
 qboolean	CL_GM_SpawnEntitiesFromBSPString(const char *mapName, const char *entities);
 qboolean	CL_GM_CreateFromNewState(PODEntity *clEntity, const EntityState *state);
+const bool	CL_GM_PacketNewHashedClassname( PODEntity *clEntity, const EntityState *state );
 void		CL_GM_PacketEntityEvent(int32_t number);
 void		CL_GM_LocalEntityEvent(int32_t number);
 
@@ -72,7 +74,7 @@ void		CL_GM_LocalEntityEvent(int32_t number);
 // Media
 //
 void        CL_GM_InitMedia(void);
-const char	*CL_GM_GetMediaLoadStateName(int32_t loadState);
+const std::string CL_GM_GetMediaLoadStateName(int32_t loadState);
 void        CL_GM_RegisterScreenMedia(void);
 void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);

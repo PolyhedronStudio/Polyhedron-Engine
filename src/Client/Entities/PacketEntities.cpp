@@ -33,14 +33,36 @@
 * 
 *   @return True if the entity comes from an optimized packet, false otherwise.
 **/
-static inline qboolean PacketEntity_IsPlayer(const EntityState* state) {
-    if (state->number != cl.frame.clientNumber + 1)
+static inline qboolean PacketEntity_IsPlayer( const EntityState* state ) {
+    if ( state->number != cl.frame.clientNumber + 1 )
         return false;
 
-    if (cl.frame.playerState.pmove.type >= EnginePlayerMoveType::Dead)
+    if ( cl.frame.playerState.pmove.type >= EnginePlayerMoveType::Dead )
         return false;
 
     return true;
+}
+
+/**
+*	@brief	Restores entity origin and angles from player state
+**/
+void PacketEntity_PlayerToEntityState(const PlayerState *ps, EntityState *es) {
+    vec_t pitch;
+
+    // Take the predicted state origin in case we are extrapolating ground movers.
+	if ( cl.frame.playerState.pmove.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
+		es->origin = cl.predictedState.viewOrigin;
+	} else {
+	    es->origin = ps->pmove.origin;
+	}
+
+    pitch = ps->pmove.viewAngles[vec3_t::Pitch];
+    if (pitch > 180) {
+        pitch -= 360;
+    }
+    es->angles[vec3_t::Pitch] = pitch / 3;
+    es->angles[vec3_t::Yaw] = ps->pmove.viewAngles[vec3_t::Yaw];
+    es->angles[vec3_t::Roll] = 0;
 }
 
 /**
@@ -52,16 +74,10 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
 	// Ensure it is not local anymore.
 	clEntity->isLocal = false;
 	// Update the client entity number to match the state's number.
-    clEntity->clientEntityNumber = state->number; // used to be: clEntity->id = ++entity_ctr;
+    //clEntity->clientEntityNumber = state->number; // used to be: clEntity->id = ++entity_ctr;
 	// 
     clEntity->trailCount = 1024;
 
-    // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-	if (!CL_GM_CreateFromNewState( clEntity, state ) ) {
-		// It failed somehow, render the entity for not in use and escape.
-		clEntity->inUse = false;
-		return;
-	}
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->previousState = *state;
@@ -117,15 +133,15 @@ static inline void PacketEntity_UpdateExisting( PODEntity *clEntity, const Entit
 }
 
 /**
-*   @brief  Checks whether the parsed entity is a newcomer or has been around 
-*           in previous frames.
+*   @brief  Checks whether the parsed entity from received from the server frame packet is
+*			a new comer to our client's view or not. (ie, was it in previous frames?)
 *   @return True when either of these conditions are met: 
 *               - Last frame was invalid, meaning we can't compare to any previous state.
 *               - Last frame was dropped, once again, can't compare to any previous state.
 *               - cl_nolerp 2, forced by developer option.
 *           False when none of the above conditions are met or cl_nolerp is set to 3:
 **/
-static inline qboolean PacketEntity_IsNew( const PODEntity *clEntity ) {
+static inline qboolean PacketEntity_IsNew( const PODEntity *clEntity, const EntityState *state ) {
     // Last received frame was invalid.
     if ( !cl.oldframe.valid ) {
         return true;
@@ -161,77 +177,81 @@ static inline qboolean PacketEntity_IsNew( const PODEntity *clEntity ) {
 **/
 void PacketEntity_UpdateState( const EntityState *state ) {
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
-    PODEntity *clEntity = &cs.entities[state->number];
+    PODEntity *clEntity = &cs.entities[ state->number ];
 
 	// Make sure to fetch and adjust solids here.
-    if (state->solid && state->number != cl.frame.clientNumber + 1 ) {
-		if (state->solid == PACKED_BSP) {
+    if ( state->solid && state->number != cl.frame.clientNumber + 1 ) {
+		if ( state->solid == PACKED_BSP ) {
 			clEntity->solid = Solid::BSP;
-			const mmodel_t *model = &cl.cm.cache->models[clEntity->currentState.modelIndex - 1];
+			const mmodel_t *model = &cl.cm.cache->models[ clEntity->currentState.modelIndex - 1 ];
 			clEntity->mins = model->mins;
 			clEntity->maxs = model->maxs;
-
 		} else {
 			clEntity->solid = state->solid;
 			clEntity->mins = state->mins;
 			clEntity->maxs = state->maxs;
 		}
 	} else {
-		clEntity->mins = vec3_zero();
-		clEntity->mins = vec3_zero();
-		clEntity->solid = Solid::Not;
+		if ( state->number != cl.frame.clientNumber + 1 ) {
+			clEntity->mins = vec3_zero();
+			clEntity->mins = vec3_zero();
+			clEntity->solid = Solid::Not;
+		}
 	}
 
     // Work around Q2PRO server bandwidth optimization.
-    const bool isPlayerEntity = PacketEntity_IsPlayer(state);
+    const bool isPlayerEntity = PacketEntity_IsPlayer( state );
 
     // Fetch the entity's origin.
     vec3_t entityOrigin = state->origin;
-    if (isPlayerEntity) {
-        entityOrigin = cl.frame.playerState.pmove.origin;
+    if ( isPlayerEntity ) {
+		if ( cl.frame.playerState.pmove.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
+			entityOrigin = cl.predictedState.viewOrigin;
+		} else {
+			entityOrigin = cl.frame.playerState.pmove.origin;
+		}
     }
 
 	// Assign its clientEntity number.
 	clEntity->clientEntityNumber = state->number;
 
     // Was this entity in our previous frame, or not?
-    if (PacketEntity_IsNew(clEntity)) {
+    if ( PacketEntity_IsNew( clEntity, state ) ) {
         // Wasn't in last update, so initialize some things.
-        PacketEntity_UpdateNew(clEntity, state, entityOrigin);
+        PacketEntity_UpdateNew( clEntity, state, entityOrigin );
     } else {
         // It already exists, update it accordingly.
-        PacketEntity_UpdateExisting(clEntity, state, entityOrigin);
+        PacketEntity_UpdateExisting( clEntity, state, entityOrigin );
     }
+	
+	// In case of non player entities, inspect whether their
+	// game entity hashname changed.
+	if ( !isPlayerEntity ) {
+		CL_GM_PacketNewHashedClassname( clEntity, state );
+	}
 
     // Assign the fresh new received server frame number that belongs to this frame.
     clEntity->serverFrame = cl.frame.number;
-	
+
 	// Assign the fresh new received state as the entity's current.
     clEntity->currentState = *state;
-	
-    // work around Q2PRO server bandwidth optimization
-    if (isPlayerEntity) {
-        Com_PlayerToEntityState(&cl.frame.playerState, &clEntity->currentState);
-    }
 
-	// Link Entity.
-	CL_PF_World_LinkEntity( clEntity );
+    // work around Q2PRO server bandwidth optimization
+    if ( isPlayerEntity ) {
+        PacketEntity_PlayerToEntityState( &cl.frame.playerState, &clEntity->currentState );
+    }
+	
+
 }
 
 /**
 *   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
 **/
-void PacketEntity_SetHashedClassname(PODEntity* podEntity, EntityState* state) {
+void PacketEntity_SetHashedClassname(PODEntity* podEntity, const EntityState* state) {
 	// Only continue IF we got a podEntity.
 	if (!podEntity) {
 		return;
 	}
-
-	// No matter what, ensure that the previous frame hashed classname is set to our current.
-	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-
-	//Retreive and update its current/(possibly, new) hashedClassname after this frame.
-	podEntity->currentState.hashedClassname = CL_GM_GetHashedGameEntityClassname(podEntity); 
 }
 
 /**

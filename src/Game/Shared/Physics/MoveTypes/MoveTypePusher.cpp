@@ -46,11 +46,17 @@ static GameEntity *pushObstacle = nullptr;
 /**
 *	@brief	Pushes a new Pushed Entity State for the gePusher Game Entity.
 **/
-const PushedEntityState SG_PushEntityState(GameEntity* gePusher) {
+const PushedEntityState &&SG_PushEntityState(GameEntity* gePusher) {
 	const bool isClientEntity = ( gePusher->GetClient() != nullptr ? true : false );
 	const float deltaYaw = ( isClientEntity ? gePusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] : gePusher->GetAngles()[vec3_t::Yaw] );
+	#ifdef SHAREDGAME_CLIENTGAME
+	const vec3_t playerMoveOrigin = ( isClientEntity ? cl->predictedState.viewOrigin : vec3_zero() ); //gePusher->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
+	#else
 	const vec3_t playerMoveOrigin = ( isClientEntity ? gePusher->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
-
+	#endif
+	#ifdef SHAREDGAME_CLIENTGAME
+	gePusher->EnableExtrapolation();
+	#endif
 	// Create state.
 	PushedEntityState returnedState = *lastPushedEntityState;
 	*lastPushedEntityState = {
@@ -62,10 +68,13 @@ const PushedEntityState SG_PushEntityState(GameEntity* gePusher) {
 	};
 	lastPushedEntityState++;
 
-	return returnedState;
+	return std::move(returnedState);
 }
 void SG_PopPushedEntityState(GameEntity* gePusher) {
 	lastPushedEntityState--;
+	#ifdef SHAREDGAME_CLIENTGAME
+	gePusher->DisableExtrapolation();
+	#endif
 }
 
 /**
@@ -113,11 +122,11 @@ retry:
     else
         mask = BrushContentsMask::Solid;
 
-    trace = SG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
+    trace = SG_Trace( start, ent->GetMins(), ent->GetMaxs(), end, ent, mask );
 
-	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
-	if (!trace.startSolid) {//if (!trace.startSolid) {
-		ent->SetOrigin(trace.endPosition);
+	if ( ent->GetMoveType() == MoveType::Push || !trace.startSolid ) {
+	//if (!trace.startSolid) {//if (!trace.startSolid) {
+		ent->SetOrigin( trace.endPosition);
 	}
 	//}
     //ent->SetOrigin(trace.endPosition);
@@ -150,23 +159,23 @@ retry:
 static GameEntity *SG_TestEntityPosition( GameEntity *geTestSubject ) {
 	int32_t clipMask = 0;
 
-    if (geTestSubject->GetClipMask()) {
+    if ( geTestSubject->GetClipMask() ) {
 	    clipMask = geTestSubject->GetClipMask();
     } else {
         clipMask = BrushContentsMask::Solid;
     }
 
-    SGTraceResult trace = SG_Trace(geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask);
+    SGTraceResult trace = SG_Trace( geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask );
 
-    if (trace.startSolid) {
+    if ( trace.startSolid ) {
 		SGGameWorld *gameWorld = GetGameWorld();
 
-	    return (GameEntity*)(gameWorld->GetWorldspawnGameEntity());
+	    return (GameEntity*)( gameWorld->GetWorldspawnGameEntity() );
     }
 
     return nullptr;
 }
-static GameEntity *SG_TestEntityRotation(GameEntity *geTestSubject) {
+static GameEntity *SG_TestEntityRotation( GameEntity *geTestSubject ) {
 	
 	// Get mins and maxs.
 	vec3_t mins = geTestSubject->GetMins();
@@ -176,12 +185,12 @@ static GameEntity *SG_TestEntityRotation(GameEntity *geTestSubject) {
     float max = 0;
 	float v = 0;
     for ( int32_t i = 0; i < 3; i++ ) {
-        v = fabs(mins[i]);
-        if (v > max) {
+        v = fabs( mins[i] );
+        if ( v > max ) {
             max = v;
 		}
-        v = fabs(maxs[i]);
-        if (v > max) {
+        v = fabs( maxs[i] );
+        if ( v > max ) {
             max = v;
 		}
     }
@@ -212,6 +221,22 @@ static GameEntity *SG_TestEntityRotation(GameEntity *geTestSubject) {
 *	@brief	Objects need to be moved back on a failed push, otherwise 
 *			riders would continue to slide.
 **/
+const bool SG_Push_IsSameEntity( GameEntity *geFirst, GameEntity *geSecond ) {
+	// The same by pointer.
+	const int32_t numberGeFirst = ( geFirst ? geFirst->GetNumber() : -1 );
+	const int32_t numberGeSecond= ( geSecond ? geSecond->GetNumber() : -1 );
+
+	// If first or second is -1, it is a false. (We do not return true in case of it being empty space)
+	if ( numberGeFirst == -1 || numberGeSecond == -1 ) {
+		return false;
+	}
+
+	if ( numberGeFirst == numberGeSecond ) {
+		return true;
+	}
+
+	return false;
+}
 const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
     GameEntity* geCheck = nullptr;
     GameEntity* geBlock = nullptr;
@@ -240,13 +265,13 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 	/**	
 	*	Store the needed pushed entity information in a pushed entity state.
 	**/
-	SG_PushEntityState(gePusher);
+	SG_PushEntityState( gePusher );
 
 	/**	
 	*	Move the Pusher to its wished final position.
 	**/
-    gePusher->SetOrigin(gePusher->GetOrigin() + move);
-    gePusher->SetAngles(gePusher->GetAngles() + angularMove);
+    gePusher->SetOrigin( gePusher->GetOrigin() + move );
+    gePusher->SetAngles( gePusher->GetAngles() + angularMove );
     gePusher->LinkEntity();
 
 	/**	
@@ -254,6 +279,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 	**/
 	// Get a range of all pushable entities in our world. (A valid GameEntity and Inuse.)
 	SGGameWorld *gameWorld = GetGameWorld();
+	//auto gePushables = SG_BoxEntities( mins, maxs, MAX_POD_ENTITIES, AreaEntities::Solid );
 	auto gePushables = gameWorld->GetGameEntityRange(0, MAX_POD_ENTITIES) | cef::IsValidPointer | cef::InUse;
 
 	// Iterate over the pushable entities.
@@ -272,30 +298,25 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 		}
 
 		// Entity has to be linked in.
-#if SHAREDGAME_CLIENTGAME
-		//if ( !geCheck->GetLinkCount() ) {
-		if ( !geCheck->GetPODEntity()->area.prev ) {
-			auto client = geCheck->GetClient();
-			if (client) {
-			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(#{})]: Not linked in anywhere", geCheck->GetNumber(), client->clientNumber ) );
-			} else {
-				SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(nullptr)]: Not linked in anywhere", geCheck->GetNumber() ) );
-			}
-#endif
-#if SHAREDGAME_SERVERGAME
+		//#if SHAREDGAME_CLIENTGAME
+		//		//if ( !geCheck->GetLinkCount() ) {
+		//		if ( !geCheck->GetPODEntity()->area.prev ) {
+		//			auto client = geCheck->GetClient();
+		//			if (client) {
+		//			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(#{})]: Not linked in anywhere", geCheck->GetNumber(), client->clientNumber ) );
+		//			} else {
+		//			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(nullptr)]: Not linked in anywhere\n", geCheck->GetNumber() ) );
+		//			}
+		//#endif
+		//#if SHAREDGAME_SERVERGAME
         if ( !geCheck->GetPODEntity()->area.prev ) {
-#endif
+		//#endif
             continue;       // not linked in anywhere
-#if SHAREDGAME_CLIENTGAME
 		}
-#endif
-#if SHAREDGAME_SERVERGAME
-		}
-#endif
-        // if the entity is standing on the pusher, it will definitely be moved
-		GameEntity *geCheckGroundEntity = SGGameWorld::ValidateEntity(geCheck->GetGroundEntityHandle());
 
-        if ( geCheckGroundEntity != gePusher ) {
+        // if the entity is standing on the pusher, it will definitely be moved
+		GameEntity *geCheckGroundEntity = SGGameWorld::ValidateEntity( geCheck->GetGroundEntityHandle() );
+		if ( !SG_Push_IsSameEntity( geCheckGroundEntity, gePusher ) ) {
             // see if the ent needs to be tested
             if ( absMin[0] >= maxs[0]	||
                 absMin[1] >= maxs[1]	||
@@ -313,30 +334,25 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
             
         }
 
-        if ( (gePusher->GetMoveType() == MoveType::Push) || (geCheckGroundEntity == gePusher) ) {
+		// See if any solid entities are inside the final position
+		if ( (gePusher->GetMoveType() == MoveType::Push) || SG_Push_IsSameEntity( geCheckGroundEntity, gePusher ) ) {
 			/**
 			*	Store the needed pushed entity information in a pushed entity state.	
 			**/
-			SG_PushEntityState(geCheck);
+			SG_PushEntityState( geCheck );
 
 			/**
 			*	Try moving the contacted entity.
 			**/
-            geCheck->SetOrigin(geCheck->GetOrigin() + move);
-#if USE_SMOOTH_DELTA_ANGLES
-            if (geCheck->GetClient()) {
+            geCheck->SetOrigin( geCheck->GetOrigin() + move );
+            if ( geCheck->GetClient() ) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
-				//#ifdef SHAREDGAME_CLIENTGAME
-				//SG_Print( PrintType::DeveloperWarning, fmt::format("[Ent(#{}) Client(#{})]:", geCheck->GetNumber(), geCheck->GetClient()->clientNumber, 
-				//		 angularMove[vec3_t::Pitch],
-				//		 angularMove[vec3_t::Yaw],
-				//		angularMove[vec3_t::Roll]
-				//	)
-				//);
-				//#endif
-                geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
+				#if USE_SMOOTH_DELTA_ANGLES
+				geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
+				#endif
 			} else {
+				#if USE_SMOOTH_DELTA_ANGLES
 				vec3_t angles = geCheck->GetAngles();
 				//angles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
 				//				SG_Print( PrintType::DeveloperWarning, fmt::format("[Ent(#{}) Client(nullptr)]:", geCheck->GetNumber(), 
@@ -346,40 +362,56 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 				//	)
 				//);
 				geCheck->SetAngles(angles);
+				#endif
 			}
-#endif
+
 
 			/**
 			*	Figure movement due to the pusher's Angular Move.
 			**/
-            org = geCheck->GetOrigin() - gePusher->GetOrigin(); //VectorSubtract(geCheck->state.origin, pusher->state.origin, org);
+            org = geCheck->GetOrigin() - gePusher->GetOrigin();
             org2[0] = vec3_dot(org, forward);
             org2[1] = -vec3_dot(org, right);
             org2[2] = vec3_dot(org, up);
             move2 = org2 - org;
-            geCheck->SetOrigin(geCheck->GetOrigin() + move2);//VectorAdd(geCheck->state.origin, move2, geCheck->state.origin);
+            geCheck->SetOrigin( geCheck->GetOrigin() + move2 );
+
+			// Client pmove.
+            if ( geCheck->GetClient() ) {
+				org = geCheck->GetClient()->playerState.pmove.origin - gePusher->GetOrigin(); //VectorSubtract(geCheck->state.origin, pusher->state.origin, org);
+				org2[0] = vec3_dot(org, forward);
+				org2[1] = -vec3_dot(org, right);
+				org2[2] = vec3_dot(org, up);
+				move2 = org2 - org;
+				geCheck->GetClient()->playerState.pmove.origin += move2;
+			}
 
             // May have pushed them off an edge
-            if ( geCheckGroundEntity != gePusher ) {
-                geCheck->SetGroundEntity( SGEntityHandle() );
+			if ( !SG_Push_IsSameEntity( geCheckGroundEntity, gePusher ) ) {
+                geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 			}
 
 			// Test whether entity is inside of another, if not, push was okay so link it and move
 			// on to the next entity that needs pushing.
             geBlock = SG_TestEntityPosition( geCheck );
+
 			//GameEntity *geBlock2 = SG_TestEntityRotation( geCheck );
             if ( !geBlock /*&& !geBlock2 */) {
                 // pushed ok
                 geCheck->LinkEntity();
                 // impact?
                 continue;
-            } else {
-
+            }// else {
 				// Of it is ok to leave in the old position, do it.
 				// This is only relevent for riding entities, not pushed
 				// FIXME: this doesn't acount for rotation
 				geCheck->SetOrigin( geCheck->GetOrigin() - move );//geCheck->state.origin -= move;
+				// Client origin.
+				if ( geCheck->GetClient() ) {
+					geCheck->GetClient()->playerState.pmove.origin -= move;
+				}
 				geCheck->SetAngles( geCheck->GetAngles() - move2 );
+
 				geBlock = SG_TestEntityPosition( geCheck );
 				//GameEntity* geBlock2 = SG_TestEntityRotation( geCheck );
 				if ( !geBlock /*|| !geBlock2 */) { //} || !geBlock2) {
@@ -387,7 +419,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 
 					continue;
 				}
-			}
+			//}
         }
 
         // Save off the obstacle so we can call the block function later on.
@@ -411,6 +443,9 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
             if (pusherEntity->GetClient()) {
                 pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
 				pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
+				#ifdef SHAREDGAME_CLIENTGAME
+				pusherEntity->SetOrigin( p->playerMoveOrigin );
+				#endif
 			} else {
 				vec3_t newAngles = pusherEntity->GetAngles();
 				newAngles[vec3_t::Yaw] = p->deltaYaw;
@@ -419,6 +454,14 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 #endif
 			// Link Entity back in.
             pusherEntity->LinkEntity();
+		
+			// Be sure to check for ground.
+			#ifdef SHAREDGAME_CLIENTGAME
+			if ( !pusherEntity->GetClient() ) {
+				SG_CheckGround( pusherEntity );
+			}
+			#endif
+
         }
 
         return false;
@@ -446,8 +489,10 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 *	@brief Logic for MoveType::(Push, Stop): Pushes all objects except for brush models. 
 **/
 void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
-	    vec3_t      move, amove;
-    GameEntity     *part = nullptr, *mv = nullptr;
+	vec3_t move = vec3_zero();
+	vec3_t amove = vec3_zero();
+	GameEntity *part = nullptr;
+	GameEntity *mv = nullptr;
 
     // Assign handle to base entity.
     GameEntity* ent = SGGameWorld::ValidateEntity(gePusherHandle);
@@ -464,10 +509,10 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 	}
 
 	// First clear out the vector.
-retry:
+//retry:
 	lastPushedEntityState = pushedEntities;
 
-    for (part = ent ; part ; part = part->GetTeamChainEntity()) {
+    for (part = ent; part ; part = part->GetTeamChainEntity()) {
         // Fetch pusher part, its Velocity.
         vec3_t partVelocity = part->GetVelocity();
 
@@ -478,18 +523,59 @@ retry:
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
 			PODEntity *partPODEntity = part->GetPODEntity();
-			if ( partPODEntity->currentState.linearMovement ) {
-				SG_LinearMovement( &partPODEntity->currentState, level.time.count(), move);
+
+			if ( partPODEntity->linearMovement ) {
+			#ifdef SHAREDGAME_CLIENTGAME
+				const vec3_t fromMove = part->GetOrigin();
+				const vec3_t toMove = fromMove + move;
+				SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
+				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
+				SG_Print( PrintType::Developer, 
+						 fmt::format( "[CLG SG_Physics_Pusher(#{}, 'func_plat', level.time({})]: move({}, {}, {}), fromMove({}, {}, {}), toMove({}, {}, {})\n",
+						 ent->GetNumber(),
+						 level.time.count(),
+						 move.x,
+						 move.y,
+						 move.z,
+						 fromMove.x,
+						 fromMove.y,
+						 fromMove.z,
+						 toMove.x,
+						 toMove.y,
+						 toMove.z
+				));
+			#endif
+			#ifdef SHAREDGAME_SERVERGAME
+				SG_LinearMovement( partPODEntity, level.time.count(), move);
 				move -= part->GetOrigin(); //VectorSubtract( move, part->s.origin, move );
 				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
+				const vec3_t fromMove = part->GetOrigin();
+				const vec3_t toMove = fromMove + move;
+				//SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
+				//amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
+				SG_Print( PrintType::Developer, 
+						 fmt::format( "[SVG SG_Physics_Pusher(#{}, 'func_plat', level.time({})]: move({}, {}, {}), fromMove({}, {}, {}), toMove({}, {}, {})\n",
+						 ent->GetNumber(),
+						 level.time.count(),
+						 move.x,
+						 move.y,
+						 move.z,
+						 fromMove.x,
+						 fromMove.y,
+						 fromMove.z,
+						 toMove.x,
+						 toMove.y,
+						 toMove.z
+				));
+			#endif
 			} else {
 				// object is moving
-				move = vec3_scale(part->GetVelocity(), FRAMETIME_S.count());
-				amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME_S.count());
+				move = vec3_scale( part->GetVelocity(), FRAMETIME_S.count() );
+				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() );
 			}
 
             SGEntityHandle partHandle(part);
-            if (!SG_Push(partHandle, move, amove))
+            if ( !SG_Push( partHandle, move, amove ) )
                 break;  // move was Blocked
         }
     }
@@ -503,7 +589,14 @@ retry:
         // the move failed, bump all nextThinkTime times and back out moves
         for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
             if (mv->GetNextThinkTime() > GameTime::zero()) {
-                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);//);//FRAMETIME_S);// 1_hz);
+				#ifdef SHAREDGAME_CLIENTGAME
+				mv->EnableExtrapolation();
+				//mv->SetNextThinkTime(level.extrapolatedTime);//mv->GetNextThinkTime() + FRAMERATE_MS);//);//FRAMETIME_S);// 1_hz);
+				//mv->EnableExtrapolation();
+				mv->SetNextThinkTime( mv->GetNextThinkTime() + FRAMERATE_MS );
+				#else
+				mv->SetNextThinkTime( mv->GetNextThinkTime() + FRAMERATE_MS );//);//FRAMETIME_S);// 1_hz);
+				#endif
             }
         }
 
@@ -513,12 +606,12 @@ retry:
             part->DispatchBlockedCallback(pushObstacle);
         }
 
-//#if 0
+#if 0
         // if the pushed entity went away and the pusher is still there
         if ((pushObstacle && !pushObstacle->IsInUse()) && (part && part->IsInUse())) {
             goto retry;
 		}
-//#endif
+#endif
     } else {
         // the move succeeded, so call all Think functions
         for (part = ent ; part ; part = part->GetTeamChainEntity()) {

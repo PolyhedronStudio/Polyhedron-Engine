@@ -795,6 +795,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetSpawner.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetSpeaker.cpp"
 		#Entities/Target/TargetSplash.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetGibSpawn.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetTempEntity.cpp"
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerCounter.cpp"
@@ -903,6 +904,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetEarthquake.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetExplosion.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetSpeaker.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetGibSpawn.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetTempEntity.h"
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAlways.h"

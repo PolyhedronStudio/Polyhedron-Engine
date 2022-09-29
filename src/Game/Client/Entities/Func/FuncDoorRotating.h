@@ -9,7 +9,7 @@ public:
 	FuncDoorRotating( Entity* entity );
 	virtual ~FuncDoorRotating() = default;
 
-	DefineMapClass( "__func_door_rotating", FuncDoorRotating, FuncDoor );
+	DefineMapClass( "func_door_rotating", FuncDoorRotating, FuncDoor );
 
 	void Spawn() override;
 	void SpawnKey( const std::string& key, const std::string& value ) override;

@@ -80,7 +80,7 @@ void MiscClientModel::Spawn() {
     SetMoveType(MoveType::TossSlideBox);
 
     // Since this is a "monster", after all...
-    SetServerFlags(EntityServerFlags::Monster);
+    SetClientFlags(EntityServerFlags::Monster);
     
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -236,53 +236,40 @@ void MiscClientModel::SpawnKey(const std::string& key, const std::string& value)
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MiscClientModel::MiscServerModelThink(void) {
-    // First, ensure our origin is +1 off the floor.
-    //vec3_t newOrigin = GetOrigin() + vec3_t{
-    //    0.f, 0.f, 1.f
-    //};
-
-    //SetOrigin(newOrigin);
-    
-    //// Calculate the end origin to use for tracing.
-    //vec3_t end = newOrigin + vec3_t{
-    //    0, 0, -256.f
-    //};
-    //
-    //
-    //// Exceute the trace.
-    //SVGTraceResult trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::MonsterSolid);
-    //
-    //// Return in case we hit anything.
-    //if (trace.fraction == 1 || trace.allSolid)
-    //    return;
-    //
-    //// Set new entity origin.
-    //SetOrigin(trace.endPosition);
-    float currentFrame = GetAnimationFrame();
-    float nextFrame = GetAnimationFrame() + 1.f;
-
-    if (nextFrame > endFrame) {
-
-        //if (GetHealth() > 0) {
-	        nextFrame = startFrame;
-	    //}
-    }
-
-    SetAnimationFrame(nextFrame);
-	
-	// Make sure it has no x/y velocity.
-	const vec3_t oldVelocity = GetVelocity();
-	SetVelocity( { 0, 0, oldVelocity.z } );
-
-	// Check for ground.
-	SG_AddGravity( this );
-	SG_CheckGround( this );
-
-	// Link entity back in.
-    LinkEntity();
-    
     // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
+    SetNextThinkTime(level.time + FRAMERATE_MS );
+	SetThinkCallback( &MiscClientModel::MiscServerModelThink );
+
+    // Calculate the end origin to use for tracing.
+    vec3_t end = GetOrigin() + vec3_t {
+        0, 0, -1.03125f
+    };
+    
+    // Exceute the trace.
+    CLGTraceResult trace = CLG_Trace( GetOrigin() + vec3_t { 0, 0, 1.f }, GetMins(), GetMaxs(), end, this, SG_SolidMaskForGameEntity(this));
+
+    // If all solid, no need to seek ground or add gravity.
+    if ( trace.allSolid ) {
+		LinkEntity();
+        return;
+	}
+
+	// If nothing was hit, add gravity.
+	if ( trace.fraction == 1 ) {
+		SG_AddGravity( this );
+		const vec3_t oldVelocity = GetVelocity();
+		SetVelocity( { 0, 0, oldVelocity.z } );
+		LinkEntity();
+		return;
+	}
+
+	// Otherwise, assume we hit something, and set our position.
+	if (trace.startSolid || trace.podEntity) {
+		SetOrigin( trace.endPosition );
+		SetVelocity( vec3_zero() );
+		LinkEntity();
+		return;
+	}
 }
 
 //===============
@@ -316,8 +303,8 @@ void MiscClientModel::MiscServerModelDie(GameEntity* inflictor, GameEntity* atta
     //SetEndFrame(119.f);
     //SetStartFrame(4.f);
     //// Setup the next think and think time.
-    SetNextThinkTime(level.time + 1 * FRAMETIME_S);
+    //SetNextThinkTime(level.time + 1 * FRAMETIME_S);
 
     // Set think function.
-    SetThinkCallback(&MiscClientModel::CLGBaseLocalEntityThinkFree);
+    //SetThinkCallback(&MiscClientModel::CLGBaseLocalEntityThinkFree);
 }

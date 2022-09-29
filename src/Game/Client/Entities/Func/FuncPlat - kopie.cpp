@@ -163,7 +163,6 @@ void FuncPlat::UpdateFromState(const EntityState* state) {
 	if (!state) {
 		return;
 	}
-
 }
 
 /**
@@ -171,38 +170,8 @@ void FuncPlat::UpdateFromState(const EntityState* state) {
 *			calculate the move speed and fill in the basemover's MoveInfo settings.
 **/
 void FuncPlat::PostSpawn() {
-	// Calculate movement speed to use.
-	// Start at state up.
-	if ( (spawnFlags & SF_PlatformStartRaised) ) {
-		moveInfo.state = MoverState::Top;
-		moveInfo.destOrigin =  GetEndPosition();
-	} else {
-		// Default to end(bottom) position.
-		SetOrigin( GetEndPosition() );
-		// Change its state.
-		moveInfo.state = MoverState::Bottom;
-		moveInfo.destOrigin = GetStartPosition();
-	}
 
-    // Setup move info.
-    moveInfo.speed = GetSpeed();
-    moveInfo.acceleration = GetAcceleration();
-    moveInfo.deceleration = GetDeceleration();
-    moveInfo.wait = GetWaitTime();
-    moveInfo.startOrigin = GetStartPosition();
-    moveInfo.startAngles = GetAngles();
-    moveInfo.endOrigin = GetEndPosition();
-    moveInfo.endAngles = GetAngles();
 
-    // To simplify logic elsewhere, make non-teamed func_plats into a team of one
-    if ( GetTeam().empty() ) {
-        SetTeamMasterEntity( this );
-    }
-
-	//SetInUse( true );
-	//SetThinkCallback( &FuncPlat::Callback_RegularFrameThink );
-	//SetNextThinkTime( level.time + FRAMERATE_MS );
-	// We're done, link the entity in for collision.
     LinkEntity();
 }
 
@@ -220,9 +189,23 @@ void FuncPlat::OnEventID( uint32_t eventID ) {
 	switch( eventID ) {
 	case 1: {//: FUNC_PLAT_ENGAGE_LOWER_MOVE:
 		Callback_EngageLowerMove();
+		const std::string debugStr = fmt::format( "LowerMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
+					moveInfo.speed,
+					moveInfo.wait.count(),
+					moveInfo.destOrigin.x, moveInfo.destOrigin.y, moveInfo.destOrigin.z,
+					moveInfo.startOrigin.x, moveInfo.startOrigin.y, moveInfo.startOrigin.z,
+					moveInfo.endOrigin.x, moveInfo.endOrigin.y, moveInfo.endOrigin.z);
+		CLG_Print( PrintType::DeveloperWarning, debugStr );
 		break;
 	} case 2: { //: FUNC_PLAT_ENGAGE_RAISE_MOVE:
 		Callback_EngageRaiseMove();
+		const std::string debugStr = fmt::format( "RaiseMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
+					moveInfo.speed,
+					moveInfo.wait.count(),
+					moveInfo.destOrigin.x, moveInfo.destOrigin.y, moveInfo.destOrigin.z,
+					moveInfo.startOrigin.x, moveInfo.startOrigin.y, moveInfo.startOrigin.z,
+					moveInfo.endOrigin.x, moveInfo.endOrigin.y, moveInfo.endOrigin.z);
+		CLG_Print( PrintType::DeveloperWarning, debugStr );
 		break;
 	} default:
 
@@ -347,24 +330,13 @@ void FuncPlat::Callback_RaisePlatform() {
 	EnableExtrapolation();
 
 	LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
-	const std::string debugStr = fmt::format( "RaiseMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
-				moveInfo.speed,
-				moveInfo.wait.count(),
-				moveInfo.destOrigin.x, moveInfo.destOrigin.y, moveInfo.destOrigin.z,
-				moveInfo.startOrigin.x, moveInfo.startOrigin.y, moveInfo.startOrigin.z,
-				moveInfo.endOrigin.x, moveInfo.endOrigin.y, moveInfo.endOrigin.z);
-	CLG_Print( PrintType::DeveloperWarning, debugStr );
 
-	//SGEntityHandle handlePusher;
-	//handlePusher = this;
-	//level.time -= FRAMERATE_MS;
-	//	SG_Physics_Pusher( handlePusher );
-	//level.time += FRAMERATE_MS;
-
-	//GameTime oldLevelTime = level.time;
-	//level.time = GameTime( cl->serverTime ) - FRAMERATE_MS; //level.time + FRAMERATE_MS;
-	
-	//level.time = oldLevelTime;
+	SGEntityHandle handlePusher;
+	handlePusher = this;
+	GameTime oldLevelTime = level.time;
+	level.time = GameTime( cl->serverTime ) - FRAMERATE_MS; //level.time + FRAMERATE_MS;
+	SG_Physics_Pusher( handlePusher );
+	level.time = oldLevelTime;
 }
 
 /**
@@ -375,25 +347,13 @@ void FuncPlat::Callback_LowerPlatform() {
 	EnableExtrapolation();
 	
 	LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
-	const std::string debugStr = fmt::format( "LowerMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
-				moveInfo.speed,
-				moveInfo.wait.count(),
-				moveInfo.destOrigin.x, moveInfo.destOrigin.y, moveInfo.destOrigin.z,
-				moveInfo.startOrigin.x, moveInfo.startOrigin.y, moveInfo.startOrigin.z,
-				moveInfo.endOrigin.x, moveInfo.endOrigin.y, moveInfo.endOrigin.z);
-	CLG_Print( PrintType::DeveloperWarning, debugStr );
-	//SGEntityHandle handlePusher;
-	//handlePusher = this;
-	//level.time -= FRAMERATE_MS;
-	//SG_Physics_Pusher( handlePusher );
-	//level.time += FRAMERATE_MS;
 
-	//SGEntityHandle handlePusher;
-	//handlePusher = this;
-	//GameTime oldLevelTime = level.time;
-	//level.time = GameTime( cl->serverTime ) - FRAMERATE_MS;
-	//SG_Physics_Pusher( handlePusher );
-	//level.time = oldLevelTime;
+	SGEntityHandle handlePusher;
+	handlePusher = this;
+	GameTime oldLevelTime = level.time;
+	level.time = GameTime( cl->serverTime ) - FRAMERATE_MS;
+	SG_Physics_Pusher( handlePusher );
+	level.time = oldLevelTime;
 }
 
 /**
@@ -412,7 +372,7 @@ void FuncPlat::Callback_ReachedRaisedPosition() {
 	// We set the origin here so it won't be slightly off (timing.)
 	SetOrigin( GetStartPosition() );
 	LinkEntity();
-	//DisableExtrapolation();
+	DisableExtrapolation();
 
 
 	//// When SF_PlatformToggle is set we..
@@ -445,7 +405,7 @@ void FuncPlat::Callback_ReachedLoweredPosition() {
     moveInfo.state = MoverState::Bottom;
 	SetOrigin( GetEndPosition() );
 	LinkEntity();
-	//DisableExtrapolation();
+	DisableExtrapolation();
 
 	
 	//// When SF_PlatformToggle is set we..

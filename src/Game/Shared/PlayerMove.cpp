@@ -800,11 +800,11 @@ static void PM_CheckWater(void) {
 }
 
 /**
-*   @brief  Checks for ground interaction, enabling trick jumpingand dealing with landings.
+*   @brief  Checks for ground interaction, enabling trick jumping and dealing with landings.
 **/
 static void PM_CheckGround(void) {
     // If we jumped, or been pushed, do not attempt to seek ground
-    if (pm->state.flags & (PMF_JUMPED | PMF_TIME_PUSHED | PMF_ON_LADDER)) {
+    if ( pm->state.flags & ( PMF_JUMPED | PMF_TIME_PUSHED | PMF_ON_LADDER ) ) {
         return;
     }
 
@@ -812,8 +812,8 @@ static void PM_CheckGround(void) {
     const qboolean trick_jump = PM_CheckTrickJump();
     vec3_t pos;
 
-    if (trick_jump) {
-        pos = vec3_fmaf(pm->state.origin, playerMoveLocals.frameTime, pm->state.velocity);
+    if ( trick_jump ) {
+        pos = vec3_fmaf( pm->state.origin, playerMoveLocals.frameTime, pm->state.velocity );
         pos.z -= PM_GROUND_DIST_TRICK;
     } else {
         pos = pm->state.origin;
@@ -821,53 +821,71 @@ static void PM_CheckGround(void) {
     }
 
     // Seek the ground
-    TraceResult trace = playerMoveLocals.groundTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
+    TraceResult trace = playerMoveLocals.groundTrace = PM_TraceCorrectAllSolid( pm->state.origin, pm->mins, pm->maxs, pos );
 
     // If we hit an upward facing plane, make it our ground
-    if (trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL) {
+    if ( trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL ) {
 
         // If we had no ground, then handle landing events
-        if (pm->groundEntityNumber == -1) {//	if (!pm->groundEntityPtr) {
+        if ( pm->groundEntityNumber == -1 ) {//	if (!pm->groundEntityPtr) {
 
             // Any landing terminates the water jump
-            if (pm->state.flags & PMF_TIME_WATER_JUMP) {
+            if ( pm->state.flags & PMF_TIME_WATER_JUMP ) {
                 pm->state.flags &= ~PMF_TIME_WATER_JUMP;
                 pm->state.time = 0;
             }
 
             // Hard landings disable jumping briefly
-            if (playerMoveLocals.previousVelocity.z <= PM_SPEED_LAND) {
+            if ( playerMoveLocals.previousVelocity.z <= PM_SPEED_LAND ) {
                 pm->state.flags |= PMF_TIME_LAND;
                 pm->state.time = 1;
 
-                if (playerMoveLocals.previousVelocity.z <= PM_SPEED_FALL) {
+                if ( playerMoveLocals.previousVelocity.z <= PM_SPEED_FALL ) {
                     pm->state.time = 16;
 
-                    if (playerMoveLocals.previousVelocity.z <= PM_SPEED_FALL_FAR) {
+                    if ( playerMoveLocals.previousVelocity.z <= PM_SPEED_FALL_FAR ) {
                         pm->state.time = 256;
                     }
                 }
             } else {
                 // Soft landings with upward momentum grant trick jumps
-                if (trick_jump) {
+                if ( trick_jump ) {
                     pm->state.flags |= PMF_TIME_TRICK_JUMP;
                     pm->state.time = 32;
                 }
             }
         }
 
+		// See if the old ground entity number matches the traced ent number.
+		const int32_t traceEntityGroundNumber = SG_GetEntityNumber( trace.ent );
+
+		// See if we should keep our 'extrapolating ground mover' flag set.
+		if ( traceEntityGroundNumber != pm->groundEntityNumber ) {
+			// See if this ground is an extrapolating mover by chance.
+			GameEntity *geGround = SG_GetGameEntityByNumber( pm->groundEntityNumber );
+			if ( geGround && geGround->IsClass<FuncPlat>() ) {//geGround->IsExtrapolating() ) {
+				pm->state.flags |= PMF_EXTRAPOLATING_GROUND_MOVER;
+			} else {
+				pm->state.flags &= ~PMF_EXTRAPOLATING_GROUND_MOVER;
+			}
+		}
+
         // Save a reference to the ground
         pm->state.flags |= PMF_ON_GROUND;
-		pm->groundEntityNumber = SG_GetEntityNumber(trace.ent);
+		pm->groundEntityNumber = SG_GetEntityNumber( trace.ent );
 
         // Sink down to it if not trick jumping
-        if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
+        if ( !(pm->state.flags & PMF_TIME_TRICK_JUMP) ) {
             pm->state.origin = trace.endPosition;
-            pm->state.velocity = PM_ClipVelocity(pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE);
-        }
+            pm->state.velocity = PM_ClipVelocity( pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE );
+		}
     } else {
+		// We're not on ground anymore.
         pm->state.flags &= ~PMF_ON_GROUND;
-        pm->groundEntityNumber = -1;
+		pm->groundEntityNumber = -1;
+
+		// Without ground, we can't be on any extrapolating movers.
+        pm->state.flags &= ~PMF_EXTRAPOLATING_GROUND_MOVER;       
     }
 
     // Always touch the entity, even if we couldn't stand on it

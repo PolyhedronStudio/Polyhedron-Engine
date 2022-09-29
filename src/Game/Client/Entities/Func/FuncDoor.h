@@ -31,7 +31,7 @@ public:
 		/**
 	*	@brief	Implements triggering door state, effectively allowing a slight client-side prediction.
 	**/
-	void OnEventID( uint32_t eventID ) override;
+	virtual void OnEventID( uint32_t eventID ) override;
 
 protected:
     void        DoorUse( GameEntity* other, GameEntity* activator );

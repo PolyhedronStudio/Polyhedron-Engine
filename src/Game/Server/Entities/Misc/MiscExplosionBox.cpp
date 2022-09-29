@@ -68,19 +68,14 @@ void MiscExplosionBox::Precache() {
 void MiscExplosionBox::Spawn() {
     // Always call parent class method.
     Base::Spawn();
+    //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
     // Set solid.
-    SetSolid(Solid::OctagonBox);
-
-    // Set move type.
-    SetMoveType(MoveType::Toss);
-	
+    SetSolid( Solid::OctagonBox );
     // Set clip mask.
-    SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
-
+    SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
     // Set the barrel model, and model index.
-    SetModel("models/env/barrels/barrel_red.iqm");
-
+    SetModel( "models/env/barrels/barrel_red.iqm" );
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
@@ -89,26 +84,29 @@ void MiscExplosionBox::Spawn() {
         { 16.f, 16.f, 58.f }
     );
 
-    //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
+    // Set move type.
+    SetMoveType( MoveType::TossSlideBox );
+	// Since this is a "monster", after all...
+    SetServerFlags(EntityServerFlags::Monster);
 
     // Set default values in case we have none.
-    if (!GetMass()) {
-        SetMass(100);
+    if ( !GetMass() ) {
+        SetMass( 100 );
     }
-    if (!GetHealth()) {
+    if ( !GetHealth() ) {
         SetHealth(80);
     }
-    if (!GetDamage()) {
-        SetDamage(150);
+    if ( !GetDamage() ) {
+        SetDamage( 150 );
     }
 
     // We need it to take damage in case we want it to explode.
-    SetTakeDamage(TakeDamage::Yes);
+    SetTakeDamage( TakeDamage::Yes );
 
     // Setup our MiscExplosionBox callbacks.
-    SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
-	SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
-    SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
+    SetUseCallback( &MiscExplosionBox::ExplosionBoxUse );
+	SetDieCallback( &MiscExplosionBox::ExplosionBoxDie );
+    SetTouchCallback( &MiscExplosionBox::ExplosionBoxTouch );
 
 	// Physics callbacks.
 	SetStopCallback(&MiscExplosionBox::ExplosionBoxStop);
@@ -176,6 +174,84 @@ void MiscExplosionBox::ExplosionBoxUse( IServerGameEntity* caller, IServerGameEn
     ExplosionBoxDie( caller, activator, 999, GetOrigin() );
 }
 
+void MiscExplosionBox::ExplosionBoxThink(void) {
+   // Store whether we had a ground entity at all.
+    const qboolean wasOnGround = ( ServerGameWorld::ValidateEntity(GetGroundEntityHandle()) ? true : false );
+
+	// Stores whether to play a "surface hit" sound.
+    qboolean    hitSound = false;
+	// Entity flags that were set at start of the think move.
+	const int32_t entityFlags = GetFlags();
+	// Get velocity length.
+	const float oldVelocityLength = vec3_length( GetVelocity() );
+
+	// Bound our velocity within sv_maxvelocity limits.
+	//SG_BoundVelocity( this );
+	SG_AddGravity( this );
+
+    // Get angular velocity for applying rotational friction.
+    vec3_t angularVelocity = GetAngularVelocity();
+
+	// If we got any angular velocity, apply friction.
+    if (angularVelocity.x || angularVelocity.y || angularVelocity.z) {
+		SetAngularVelocity( SG_CalculateRotationalFriction( this ) );
+	}
+
+	// - Walking Monsters:
+	if ( !wasOnGround ) {
+		// In case of: Walking Monsters:
+		if ( !( entityFlags & EntityFlags::Fly ) && !( entityFlags & EntityFlags::Swim ) ) {
+			// Set HitSound Playing to True in case the velocity was a downfall one.
+            if ( GetVelocity().z < sv_gravity->value * -0.1f ) {
+                hitSound = true;
+            }
+
+            // They don't fly, and if it ain't in any water... well, add gravity.
+            if ( GetWaterLevel() == 0 ) {
+            }
+		}
+
+		/**
+		*	Apply friction: Let it slide.
+		**/
+	}// else {
+		//const vec3_t currentVelocity = GetVelocity();
+		//if ( currentVelocity.z || currentVelocity.y || currentVelocity.x ) {
+		//	// Apply friction: Let dead NPCs who aren't completely onground slide.
+		//	if ( ( wasOnGround ) || ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) ) {
+		//	//if ( geBoxSlide->GetDeadFlag() == DeadFlags::Dead) {//!( geBoxSlide->GetHealth() <= 0.0 ) ) {
+		//		vec3_t newVelocity = currentVelocity;
+		//		const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
+		//		if (speed) {
+		//			// TODO: Defines?
+		//			constexpr float GROUNDFRICTION = 6.f; // Ground friction.
+		//			constexpr float STOPSPEED = 100.f / GROUNDFRICTION; // Divided by mass.
+
+		//			// Calculate friction, and ground control.
+		//			const float friction = GROUNDFRICTION;
+		//			const float control = speed < STOPSPEED ? STOPSPEED : speed;
+		//			float newSpeed = speed - FRAMETIME_S.count() * control * friction;
+		//			if (newSpeed < 0) {
+		//				newSpeed = 0;
+		//		}
+		//			newSpeed /= speed;
+		//			newVelocity[0] *= newSpeed;
+		//			newVelocity[1] *= newSpeed;
+		//			newVelocity[2] *= newSpeed;
+		//			// Set the velocity.
+		//			SetVelocity( newVelocity );
+		//		}
+		//	//}
+		//	}    
+		//}
+	//}
+
+	LinkEntity();
+
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &MiscExplosionBox::ExplosionBoxThink );
+}
+
 //
 //===============
 // MiscExplosionBox::ExplosionBoxDropToFloor
@@ -184,6 +260,8 @@ void MiscExplosionBox::ExplosionBoxUse( IServerGameEntity* caller, IServerGameEn
 //===============
 //
 void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
+	constexpr float groundOffset = 0.03125;
+
     // First, ensure our origin is +1 off the floor.
     vec3_t traceStart = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
@@ -193,7 +271,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
 
     // Calculate the end origin to use for tracing.
     vec3_t traceEnd = traceStart + vec3_t{
-        0, 0, -256.f
+        0, 0, -1.f + groundOffset
     };
     
     // Exceute the trace.
@@ -208,10 +286,13 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     SetOrigin(trace.endPosition);
 
     // Do a check ground for the step move of this pusher.
-    SG_CheckGround(this);
+    //SG_CheckGround(this);
 
     // Link entity back in.
     LinkEntity();
+
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &MiscExplosionBox::ExplosionBoxThink );
 }
 
 //

@@ -11,7 +11,6 @@
 #include "Game/Shared/GameBindings/GameModuleImports.h"
 
 
-
 /**
 *
 *
@@ -76,7 +75,7 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a GameEntity is in use.
 	*   @return Returns true if the GameEntity is in use.
 	**/
-	inline bool GameEntityInUse(GameEntity* ent) { return ent->IsInUse(); }
+	inline bool GameEntityInUse(GameEntity* ent) { return (ent->IsSubclassOf<FuncPlat>() ? true : ent->IsInUse()); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity is a valid pointer or not.
 	*   @return Returns true if the GameEntity is a valid pointer. (Non nullptr)

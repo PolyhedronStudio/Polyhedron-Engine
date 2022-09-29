@@ -17,7 +17,7 @@ public:
 	// Responds to players touching this trigger
 	void					AutoPlatformTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 	// Creates an automatic platform trigger and sets everything up for it
-	static TriggerAutoPlatform* Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs );
+	static TriggerAutoPlatform* Create( SVGBaseEntity *ownerEntity, const vec3_t triggerOrigin, const vec3_t &triggerMins, const vec3_t &triggerMaxs );
 
 protected:
 	GameTime					debounceTouchTime = GameTime::zero();

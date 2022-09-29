@@ -152,43 +152,6 @@ const int32_t SG_PointContents(const vec3_t &point) {
 #endif
 }
 
-/**
-*	@return	GameEntityVector filled with the entities that were residing inside the box. Will not exceed listCount limit.
-**/
-GameEntityVector SG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
-    // Boxed server entities set by gi.BoxEntities.
-    PODEntity* boxedServerEntities[MAX_WIRED_POD_ENTITIES];
-
-    // Vector of the boxed class entities to return.
-    GameEntityVector boxedClassEntities;
-
-    // Acquire pointer to the class entities array.
-	SGGameWorld *gameWorld = GetGameWorld();
-    GameEntityVector gameEntities = gameWorld->GetGameEntities();
-
-    // Ensure the listCount can't exceed the max edicts.
-    if (listCount > MAX_WIRED_POD_ENTITIES) {
-        listCount = MAX_WIRED_POD_ENTITIES;
-    }
-
-    // Box the entities.
-#ifdef SHAREDGAME_CLIENTGAME
-	int32_t numEntities = clgi.BoxEntities(mins, maxs, boxedServerEntities, listCount, areaType);
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-    int32_t numEntities = gi.BoxEntities(mins, maxs, boxedServerEntities, listCount, areaType);
-#endif
-
-    // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
-    for (int32_t i = 0; i < numEntities; i++) {
-        if (gameEntities[boxedServerEntities[i]->currentState.number] != nullptr) {
-            boxedClassEntities.push_back(gameEntities[boxedServerEntities[i]->currentState.number]);
-        }
-    }
-
-    // Return our boxed base entities vector.
-    return boxedClassEntities;
-}
 
 /**
 *	@brief	Scans whether this entity is touching any others, and if so, dispatches their touch callback function.

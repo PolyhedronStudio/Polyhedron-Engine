@@ -74,7 +74,7 @@ public:
     /**
 	*	@brief Simple constructor that will accept a server entity and an entity number.
 	**/
-    SGEntityHandle(PODEntity* podEntity, const uint32_t number);
+    SGEntityHandle(PODEntity* podEntity, const int32_t number);
 
     /**
 	*	@brief Default destructor
@@ -101,8 +101,8 @@ public:
     /**
 	*	@return	The entityID stored in this handle.
 	**/
-    const uint32_t ID();
-	const uint32_t ID() const;
+    const int32_t ID();
+	const int32_t ID() const;
 
     /**
 	*	@brief * operator implementations.
@@ -143,5 +143,5 @@ private:
 
     //! Stores the server entity's number(ID). Used to determine whether the
     //! currently stored classentity pointer is still pointing to a valid entity.
-    uint32_t entityID = 0;
+    int32_t entityID = 0;
 };

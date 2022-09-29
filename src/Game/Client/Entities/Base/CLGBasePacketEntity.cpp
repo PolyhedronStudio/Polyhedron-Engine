@@ -217,13 +217,13 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 		SetTargetName(parsedString);
 	
 	// Spawnflags.
-	//else if (key == "spawnflags") {
-	//	// Parse damage.
-	//	int32_t parsedSpawnFlags = 0;
-	//	ParseKeyValue(key, value, parsedSpawnFlags);
+	} else if (key == "spawnflags") {
+		// Parse damage.
+		int32_t parsedSpawnFlags = 0;
+		ParseKeyValue(key, value, parsedSpawnFlags);
 
-	//	// Set SpawnFlags.
-	//	SetSpawnFlags(parsedSpawnFlags);
+		// Set SpawnFlags.
+		SetSpawnFlags(parsedSpawnFlags);
 	// Style.
 	//}
 	//else if (key == "style") {
@@ -281,32 +281,39 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 		return nullptr;
 	}
 
-	// Create our skeleton for this model.
-	clgi.ES_CreateFromModel( entityModel, es );
-
-	// Ensure its set to 0 by default.
-	for (auto& anim : skm->actionMap) {
-		anim.second.rootBoneAxisFlags = 0;//SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation; //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;  //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation | SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
+	// If the ES already had a modelptr, and it is identical we're done.
+	if (es->modelPtr != nullptr) {
+		return es->modelPtr->skeletalModelData;
 	}
 
-	// TODO: Remove this after implementing a RootAxisFlags command for 
-	const int32_t ZeroAllAxis = ( SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation );
+	// Create our skeleton for this model.
+	if ( clgi.ES_CreateFromModel( entityModel, es ) ) {
 
-	skm->actionMap["Idle"].rootBoneAxisFlags	=
-		SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-		SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	skm->actionMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-	skm->actionMap["WalkForwardLeft"].rootBoneAxisFlags	= 
-	skm->actionMap["WalkForwardRight"].rootBoneAxisFlags =
-		SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation |
-		SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	skm->actionMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	skm->actionMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	skm->actionMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-		SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	skm->actionMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+		// Ensure its set to 0 by default.
+		if (!skm->actionMap.empty()) {
+		for (auto& anim : skm->actionMap) {
+			anim.second.rootBoneAxisFlags = 0;//SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation; //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;  //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation | SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
+		}
 
+		// TODO: Remove this after implementing a RootAxisFlags command for 
+		const int32_t ZeroAllAxis = ( SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation );
+
+		skm->actionMap["Idle"].rootBoneAxisFlags	=
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+		skm->actionMap["WalkForwardLeft"].rootBoneAxisFlags	= 
+		skm->actionMap["WalkForwardRight"].rootBoneAxisFlags =
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation |
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+		}
+	}
 	 return skm;
 }
 /**
@@ -331,12 +338,14 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState* state) {
 	//SetEventID(state->eventID);
 
 	// This should go elsewhere, but alas prototyping atm.
-	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
-
+//	if (GetModelIndex() != state->modelIndex) {
+	
+//	}
+	//SetInUse( true );
 	
 	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + FRAMETIME_S);
-	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+	//SetNextThinkTime(level.time + FRAMETIME_S);
+	//SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
 /**
@@ -362,13 +371,15 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState* state) {
 	//SetSound(state->sound);
 	//SetEventID(state->eventID);
 
-	// This should go elsewhere, but alas prototyping atm.
-	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
+	if (!skm) {
+		skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
+	}
 
-	
+	//SetInUse( true );
+
 	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + FRAMETIME_S);
-	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+	//SetNextThinkTime(level.time + FRAMETIME_S);
+	//SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
 /**
@@ -558,7 +569,7 @@ void CLGBasePacketEntity::DispatchStopCallback() {
 **/
 void CLGBasePacketEntity::Remove()
 {
-	podEntity->clientFlags |= EntityServerFlags::Remove;
+	podEntity->clientFlags |= EntityClientFlags::Remove;
 }
 
 /**
@@ -932,76 +943,81 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 	EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
 
 	// Model Index 3.
-	if ( currentState->modelIndex3 != 0 ) {
-		// Seek right hand bone.
-		EntitySkeletonBoneNode *rightHandeNode = entitySkeleton.boneMap["mixamorig8:RightHand"];
+	//if ( currentState->modelIndex3 != 0 && entitySkeleton.modelPtr && entitySkeleton.bones.size() > 0) {
+	//	if (entitySkeleton.boneMap.contains("mixamorig8:RightHand")) {
+	//		// Seek right hand bone.
+	//		EntitySkeletonBoneNode *rightHandeNode = entitySkeleton.boneMap["mixamorig8:RightHand"];
 
-		// Get the number.
-		const int32_t poseNumber = rightHandeNode->GetEntitySkeletonBone()->index;
+	//		// Get the number.
+	//		if (!rightHandeNode) {
+	//			return;
+	//		}
+	//		const int32_t poseNumber = rightHandeNode->GetEntitySkeletonBone()->index;
 
-		// Get the transform.
-		EntitySkeletonBonePose *bonePose = &bonePoses[poseNumber];
+	//		// Get the transform.
+	//		EntitySkeletonBonePose *bonePose = &bonePoses[poseNumber];
 
-		// Now let's get funky, create a copy of what we had so far as to keep
-		// and make sure ith as the same properties.
-		r_entity_t refreshAttachmentEntity = refreshEntity;
+	//		// Now let's get funky, create a copy of what we had so far as to keep
+	//		// and make sure ith as the same properties.
+	//		r_entity_t refreshAttachmentEntity = refreshEntity;
 
-		// Set the modelindex3 model for this refresh entity.
-		refreshAttachmentEntity.model = cl->drawModels[ currentState->modelIndex3 ];
+	//		// Set the modelindex3 model for this refresh entity.
+	//		refreshAttachmentEntity.model = cl->drawModels[ currentState->modelIndex3 ];
 
-		// Compose the world and local pose matrices.
-		// TODO: We oughta only do this once.
-		clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-		
-		// Generate entity matrix to transform the actual pose with.
-		mat4_t matEntity;
-		refreshAttachmentEntity.origin = GetOrigin();
-		refreshAttachmentEntity.angles = GetAngles();
-		create_entity_matrix(matEntity, &refreshAttachmentEntity, false);
+	//		// Compose the world and local pose matrices.
+	//		// TODO: We oughta only do this once.
+	//		clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+	//	
+	//		// Generate entity matrix to transform the actual pose with.
+	//		mat4_t matEntity;
+	//		refreshAttachmentEntity.origin = GetOrigin();
+	//		refreshAttachmentEntity.angles = GetAngles();
+	//		create_entity_matrix(matEntity, &refreshAttachmentEntity, false);
 
-		/**
-		*	Convert bone matrix to 4x4 matrix, rotate to entity angles, and get the 
-		*	translate & rotate of our bone.
-		**/
-		// Get our bone's 3x4 matrix.
-		float *matRefreshBonePose = &localPoseMatrices[poseNumber * 12];
+	//		/**
+	//		*	Convert bone matrix to 4x4 matrix, rotate to entity angles, and get the 
+	//		*	translate & rotate of our bone.
+	//		**/
+	//		// Get our bone's 3x4 matrix.
+	//		float *matRefreshBonePose = &localPoseMatrices[poseNumber * 12];
 
-		// Convert to 4x4 matrix.
-		mat4_t matBonePose = mat4_from_mat3x4( matRefreshBonePose );
-		mat4_t matRotatedPoseBone = mult_matrix_matrix( matEntity, matBonePose );
+	//		// Convert to 4x4 matrix.
+	//		mat4_t matBonePose = mat4_from_mat3x4( matRefreshBonePose );
+	//		mat4_t matRotatedPoseBone = mult_matrix_matrix( matEntity, matBonePose );
 
-		vec3_t translate = {
-			matRotatedPoseBone[12], matRotatedPoseBone[13], matRotatedPoseBone[14]
-		};
+	//		vec3_t translate = {
+	//			matRotatedPoseBone[12], matRotatedPoseBone[13], matRotatedPoseBone[14]
+	//		};
 
 
-		vec3_t rotate = {
-			matRotatedPoseBone[4], matRotatedPoseBone[5], matRotatedPoseBone[6]
-		};
+	//		vec3_t rotate = {
+	//			matRotatedPoseBone[4], matRotatedPoseBone[5], matRotatedPoseBone[6]
+	//		};
 
-		/**
-		*	Update our origin and slerp the attachment angles.
-		**/
-		// Set the bone attachment's origin to the bone's translate coordinates.
-		refreshAttachmentEntity.origin = translate;
-		// Same for old origin.
-		refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
-		
-		// Get old angles, 
-		const vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
-		// Normalize rotation and get euler coordinates.
-		const vec3_t boneAngles = vec3_euler( rotate );
-		// Lerp.
-		vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngles, boneAngles, 1.0 - refreshAnimation.backLerp);
-		// Store old angles.
-		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
+	//		/**
+	//		*	Update our origin and slerp the attachment angles.
+	//		**/
+	//		// Set the bone attachment's origin to the bone's translate coordinates.
+	//		refreshAttachmentEntity.origin = translate;
+	//		// Same for old origin.
+	//		refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+	//	
+	//		// Get old angles, 
+	//		const vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
+	//		// Normalize rotation and get euler coordinates.
+	//		const vec3_t boneAngles = vec3_euler( rotate );
+	//		// Lerp.
+	//		vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngles, boneAngles, 1.0 - refreshAnimation.backLerp);
+	//		// Store old angles.
+	//		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
 
-		// Set angles.
-		refreshAttachmentEntity.angles = finalBoneAngles;
+	//		// Set angles.
+	//		refreshAttachmentEntity.angles = finalBoneAngles;
 
-		// Add to our view.
-		clge->view->AddRenderEntity(refreshAttachmentEntity);
-	}
+	//		// Add to our view.
+	//		clge->view->AddRenderEntity(refreshAttachmentEntity);
+	//	}
+	//}
 
 	// Model Index 4.
 	if (currentState->modelIndex4) {
@@ -1287,8 +1303,10 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 						//auto *hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
 						auto *boneNode = entitySkeleton.bones[ boneNumber ].boneTreeNode;
 
-						// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
-						clgi.ES_RecursiveBlendFromBone( blendActionBonePose, dominatingBlendPose, boneNode, baState->backLerp, fraction );
+						if (boneNode && boneNode->GetChildren().size() > 0) {
+							// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+							clgi.ES_RecursiveBlendFromBone( blendActionBonePose, dominatingBlendPose, boneNode, baState->backLerp, fraction );
+						}
 
 						// Assign our currentbonePose pointer. It gets unset in case of any issues. (Better not render than glitch render.)
 						refreshEntity.currentBonePoses = dominatingBlendPose;
@@ -1450,12 +1468,12 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
     /**
     *	Origin:
     **/
-    if (renderEffects& RenderEffects::FrameLerp) {
-        // Step origin discretely, because the model frames do the animation properly.
+    // Step origin discretely, because the model frames do the animation properly.
+	if (renderEffects& RenderEffects::FrameLerp) {
         refreshEntity.origin = podEntity->currentState.origin;
         refreshEntity.oldorigin = podEntity->currentState.oldOrigin;
-    } else if (renderEffects& RenderEffects::Beam) {
-        // Interpolate start and end points for beams
+	// Interpolate start and end points for beams
+	} else if (renderEffects& RenderEffects::Beam) {
         refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
         refreshEntity.oldorigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
     } else {
@@ -1464,10 +1482,29 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
             refreshEntity.origin = cl->playerEntityOrigin;
             refreshEntity.oldorigin = cl->playerEntityOrigin;
         } else {
-            // Ohterwise, just neatly interpolate the origin.
-            refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
-            // Neatly copy it as the refreshEntity's oldorigin.
-            refreshEntity.oldorigin = refreshEntity.origin;
+			// Extrapolate if needed.
+			PODEntity *podGroundEntity = GetGroundPODEntity();
+
+			// Extrapolate the mover.
+			if ( IsExtrapolating() || podEntity->linearMovement ) {
+				refreshEntity.oldorigin = refreshEntity.origin;		
+				if ( cl->xerpFraction ) {
+					refreshEntity.origin = vec3_mix( previousState->origin, currentState->origin, cl->xerpFraction );
+				} else {
+					refreshEntity.origin = currentState->origin;
+				}
+			}
+			// Extrapolate for ground entity movement.
+			else if ( (podGroundEntity && podGroundEntity->linearMovement) ) {
+				refreshEntity.oldorigin = refreshEntity.origin;
+				refreshEntity.origin = currentState->origin; //vec3_mix( currentState->origin, podEntity->currentState.origin, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.origin; //vec3_mix( cl->frame.playerState.pmove.origin, gePlayer->GetClient()->playerState.pmove.origin, f);
+			// Linear Interpolate for regular packet entity origin changes. ( Client is always a frame behind )
+			} else {
+				// Ohterwise, just neatly interpolate the origin.
+				refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+				// Neatly copy it as the refreshEntity's oldorigin.
+				refreshEntity.oldorigin = refreshEntity.origin;
+			}
         }
     }
 
@@ -1475,8 +1512,8 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 	/**
 	*	Particle Debug BoundingBox:
 	**/
-	if (renderEffects& RenderEffects::DebugBoundingBox) {
-	    CLG_DrawDebugBoundingBox(podEntity->lerpOrigin, podEntity->mins, podEntity->maxs);
+	if ( renderEffects& RenderEffects::DebugBoundingBox ) {
+	    CLG_DrawDebugBoundingBox( podEntity->lerpOrigin, podEntity->mins, podEntity->maxs );
 	}
 
 

@@ -332,7 +332,7 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
         }
         break;
     case PACKED_BSP: {
-		ent->currentState.solid = Solid::BSP;
+		ent->currentState.solid = PACKED_BSP;
         ent->solid = Solid::BSP;
 		//const mmodel_t *model = &cl.cm.cache->models[ent->currentState.modelIndex - 1];
 		//ent->mins = model->mins;
@@ -340,7 +340,7 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
         break;
 	}
 	case Solid::BSP: {
-        ent->currentState.solid = Solid::BSP;
+        ent->currentState.solid = PACKED_BSP;
 		//const mmodel_t *model = &cl.cm.cache->models[ent->currentState.modelIndex - 1];
 		//ent->mins = model->mins;
 		//ent->maxs = model->maxs;

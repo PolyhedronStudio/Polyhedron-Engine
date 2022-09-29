@@ -21,12 +21,12 @@ using PushMoveEndFunction = void(GameEntity*);
 /**
 *	@brief 
 **/
-const int64_t SG_LinearMovement( const EntityState *entityState, const int64_t &time, vec3_t &dest );
+const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest );
 
 /**
 *	@brief 
 **/
-void SG_LinearMovementDelta( const EntityState *entityState, const int64_t &oldTime, const int64_t &curTime, vec3_t dest );
+void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest );
 
 void LinearMove_Calc( CLGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunction *pushMoveEndFunction );
 void LinearMove_Begin( CLGBaseMover *geMover );
@@ -53,6 +53,7 @@ struct PushMoveInfo {
     vec3_t startAngles = vec3_zero();
     vec3_t endOrigin = vec3_zero();
     vec3_t endAngles = vec3_zero();
+	vec3_t destOrigin = vec3_zero();
 
     // Mover sound indices.
     int32_t startSoundIndex = 0;

@@ -872,7 +872,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 **/
 void CLGBaseLocalEntity::Remove()
 {
-	podEntity->clientFlags |= EntityServerFlags::Remove;
+	podEntity->clientFlags |= EntityClientFlags::Remove;
 }
 
 /**

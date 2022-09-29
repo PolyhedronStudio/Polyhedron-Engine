@@ -55,16 +55,17 @@ void CLGBasePlayer::Precache() {
 /**
 *   @brief  Called when it is time to spawn this entity.
 **/
+qhandle_t playerModelAlphaDummy = 0;
 void CLGBasePlayer::Spawn() {
 	Base::Spawn();
 	
 	// When spawned, we aren't on any ground, make sure of that.
-    SetGroundEntity(SGEntityHandle());
+    SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
     // Set up the client entity accordingly.
-    SetTakeDamage(TakeDamage::Aim);
+    SetTakeDamage( TakeDamage::Aim );
     // Fresh movetype and solid.
-    SetMoveType(MoveType::PlayerMove);
-    SetSolid(Solid::OctagonBox);
+    SetMoveType( MoveType::PlayerMove );
+    SetSolid( Solid::OctagonBox );
     // Mass.
     SetMass(200);
     // Undead itself.
@@ -109,7 +110,7 @@ void CLGBasePlayer::Spawn() {
     // Let it be known this client entity is in use again.
     SetInUse(true);
 
-
+	LinkEntity();
 	SetNextThinkTime( level.time + FRAMETIME_S );
 	SetThinkCallback( &CLGBasePlayer::CLGBasePlayerThink );
 }
@@ -134,6 +135,7 @@ void CLGBasePlayer::PostSpawn() {
 }
 
 void CLGBasePlayer::CLGBasePlayerThink() {
+	//CLG_Print( PrintType::Developer, fmt::format( "CLGBasePlayer(#{}): is thinking man!\n", GetNumber() ) );
 	SetNextThinkTime( level.time + FRAMERATE_MS );
 	SetThinkCallback( &CLGBasePlayer::CLGBasePlayerThink );
 }
@@ -142,8 +144,6 @@ void CLGBasePlayer::CLGBasePlayerThink() {
 **/
 void CLGBasePlayer::Think() {
 	Base::Think();
-
-	CLG_Print( PrintType::Developer, fmt::format( "CLGBasePlayer(#{}): is thinking man!\n", GetNumber() ) );
 }
 
 /**

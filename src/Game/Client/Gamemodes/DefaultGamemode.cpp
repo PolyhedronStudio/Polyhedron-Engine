@@ -54,31 +54,40 @@ void DefaultGameMode::OnLevelExit() {
 /**
 *   @brief  
 **/
-void DefaultGameMode::ClientBeginLocalFrame(CLGBasePlayer* player, ServerClient *client) {
+void DefaultGameMode::ClientBeginLocalFrame( CLGBasePlayer* player, ServerClient *client ) {
 	ViewCamera *viewCamera = clge->view->GetViewCamera();
-	//viewCamera->CalculateBobMoveCycle( &cl->oldframe.playerState, &cl->frame.playerState );
+
+	if (player) {
+		// Adjust the actual origin and velocity to that which we are predicting.	
+		//player->GetClient()->playerState.pmove.origin = cl->predictedState.viewOrigin;
+		//player->GetClient()->playerState.pmove.velocity = cl->predictedState.velocity;
+		//player->SetOrigin( cl->predictedState.viewOrigin );
+		//player->SetVelocity( cl->predictedState.velocity );
+		//player->LinkEntity();
+	}
 }
 
 
 /**
 *   @brief  
 **/
-void DefaultGameMode::ClientEndLocalFrame(CLGBasePlayer* player, ServerClient* client) {
+void DefaultGameMode::ClientEndLocalFrame( CLGBasePlayer* player, ServerClient* client ) {
 	ViewCamera *viewCamera = clge->view->GetViewCamera();
+
 	viewCamera->CalculateBobMoveCycle( &cl->oldframe.playerState, &cl->frame.playerState );
 }
 
 /**
 *   @brief  
 **/
-void DefaultGameMode::ClientThink(CLGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand) {
+void DefaultGameMode::ClientThink( CLGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand ) {
 	CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientThink\n" );
 }
 
 /**
 *   @brief  
 **/
-qboolean DefaultGameMode::ClientConnect(PODEntity *svEntity, char *userinfo) {
+qboolean DefaultGameMode::ClientConnect( PODEntity *svEntity, char *userinfo ) {
 	CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientConnect\n" );
 
     return true;
@@ -87,7 +96,7 @@ qboolean DefaultGameMode::ClientConnect(PODEntity *svEntity, char *userinfo) {
 /**
 *   @brief  
 **/
-void DefaultGameMode::ClientBegin(PODEntity *svEntity) {
+void DefaultGameMode::ClientBegin( PODEntity *svEntity ) {
     // Call ClientEndServerFrame to update him through the beginning frame.
     //ClientEndLocalFrame(player, svEntity->client);
 	CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientBegin\n" );
@@ -96,27 +105,27 @@ void DefaultGameMode::ClientBegin(PODEntity *svEntity) {
 /**
 *   @brief  
 **/
-void DefaultGameMode::ClientDisconnect(CLGBasePlayer* player, ServerClient *client) {
+void DefaultGameMode::ClientDisconnect( CLGBasePlayer* player, ServerClient *client ) {
 	CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientDisconnect\n" );
 }
 
 /**
 *   @brief  
 **/
-void DefaultGameMode::InitializePlayerPersistentData(ServerClient* client) {
+void DefaultGameMode::InitializePlayerPersistentData( ServerClient* client ) {
     CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::InitializePlayerPersistentData\n" );
 }
 
 /**
 *   @brief  
 **/
-void DefaultGameMode::InitializePlayerRespawnData(ServerClient* client) {
+void DefaultGameMode::InitializePlayerRespawnData( ServerClient* client ) {
     CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::InitializePlayerRespawnData\n" );   
 }
 
 /**
 *   @brief  
 **/
-void DefaultGameMode::ClientDeath(CLGBasePlayer *player) {
+void DefaultGameMode::ClientDeath( CLGBasePlayer *player ) {
     CLG_Print( PrintType::DeveloperWarning, "DefaultGameMode::ClientDeath\n" );
 }

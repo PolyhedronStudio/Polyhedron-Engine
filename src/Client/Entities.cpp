@@ -46,8 +46,7 @@ extern ClientShared cs;
 /**
 *   @brief  Updates the player's state between previous and current frame inspecting whether to LERP or NOT.
 **/
-static void Player_UpdateLerp(ServerFrame *previousFrame, ServerFrame *currentFrame, int framediv)
-{
+static void Player_UpdateLerp(ServerFrame *previousFrame, ServerFrame *currentFrame, int framediv) {
     // Fetch states to interpolate between.
     PlayerState *currentPlayerState  = &currentFrame->playerState;
     PlayerState *previousPlayerState = &previousFrame->playerState;
@@ -199,32 +198,35 @@ void CL_DeltaFrame(void)
     int64_t frameNumber = cl.frame.number - cl.serverDelta;
     cl.serverTime = frameNumber * CL_FRAMETIME_UI64;
 
+	// Give the client game a chance to set its current 'level time'.
+	CL_GM_SetDeltaFrameLevelTime();
+
     // Rebuild the list of solid entities for this frame
     cl.numSolidEntities = 0;
 
     // Initialize position of the player's own entity from playerstate.
     // this is needed in situations when player entity is invisible, but
     // server sends an effect referencing its origin (such as MuzzleFlashType::Login, etc)
-    PODEntity *playerClientEntity = &cs.entities[cl.frame.clientNumber + 1];
-    Com_PlayerToEntityState(&cl.frame.playerState, &playerClientEntity->currentState);
+    PODEntity *playerClientEntity = &cs.entities[ cl.frame.clientNumber + 1 ];
+    PacketEntity_PlayerToEntityState(&cl.frame.playerState, &playerClientEntity->currentState);
 
 	// Process the entities that are 'in-frame' of the received server game frame packet data.
     for ( int32_t i = 0; i < cl.frame.numEntities; i++ ) {
 		// Calculate the actual state index of this entity.
         const int32_t stateIndex = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
-        EntityState *state = &cl.entityStates[stateIndex];
-
-        // Update the entity state. (Updates current and previous state.)
-        PacketEntity_UpdateState(state);
+        EntityState *state = &cl.entityStates[ stateIndex ];
 		
 		// Get entity pointer.
-		PODEntity *podEntity = &cs.entities[state->number];
+		PODEntity *podEntity = &cs.entities[ state->number ];
 
-		// Run the Client Game entity for a frame.		
-		PacketEntity_SetHashedClassname(podEntity, &podEntity->currentState);
+		// Ensure the hashed classnames are still valid.
+		PacketEntity_SetHashedClassname( podEntity, state );
+
+        // Update the entity state. (Updates current and previous state.)
+        PacketEntity_UpdateState( state );
 
         // Fire entity event.
-        PacketEntity_FireEvent(state->number);
+        PacketEntity_FireEvent( podEntity->clientEntityNumber );
     }
 		
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
@@ -250,8 +252,8 @@ void CL_DeltaFrame(void)
 	// the current data arrives.
 	//CL_GM_ClientPacketEntityDeltaFrame();
 
- //   // Check for prediction errors.
- //   CL_CheckPredictionError();
+	// Check for prediction errors.
+    //CL_CheckPredictionError();
 }
 
 
@@ -288,7 +290,9 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
         VectorCopy(listener_origin, org);
         return org;
     }
-
+	if (!cs.entities) {
+		return vec3_zero();
+	}
     // interpolate origin
     // FIXME: what should be the sound origin point for RenderEffects::Beam entities?
     ent = &cs.entities[entnum];
@@ -320,7 +324,9 @@ vec3_t CL_GetEntitySoundVelocity(int ent)
 	{
 		Com_Error(ErrorType::Drop, "CL_GetEntitySoundVelocity: bad ent");
 	}
-
+	if (!cs.entities) {
+		return vec3_zero();
+	}
 	old = &cs.entities[ent];
     
     vel = old->currentState.origin - old->previousState.origin;

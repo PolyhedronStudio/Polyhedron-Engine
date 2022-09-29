@@ -261,6 +261,8 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
 			//teParameters.velocity = clgi.MSG_ReadVector3(false); // Position for Gib spawning.
 			teParameters.count = clgi.MSG_ReadUint8(); // Would anyone spawn more than 255 gibs in a single TE?? Doubt it lol.
 			teParameters.damage = clgi.MSG_ReadUint8() * 4.f; // Damage 
+			PODEntity *podTE = &clge->entities->GetClientPODEntities()[26];
+			int x = 10;
 			break;
 		}
 		case TempEntityEvent::DebrisGib: {

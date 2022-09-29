@@ -1020,19 +1020,17 @@ void DefaultGameMode::ClientThink( SVGBasePlayer* player, ServerClient* client, 
 
 		// Resolve the perhaps new Ground Entity.
 		ServerGameWorld *gameWorld = GetGameWorld();
+		// Resolve the perhaps new Ground Entity.
 		if ( gameWorld ) {
-			GameEntity *geGround = gameWorld->GetGameEntityByIndex(pm.groundEntityNumber);
+			GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 
-			if (geGround) {
-				player->SetGroundEntity(geGround);
-				player->SetGroundEntityLinkCount(geGround->GetLinkCount());
+			// Is the ground a valid pointer?
+			if ( geGround ) {
+				player->SetGroundEntity( geGround );
+				player->SetGroundEntityLinkCount( geGround->GetLinkCount() );
+			} else {
+				player->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 			}
-			else {
-				player->SetGroundEntity(SGEntityHandle() );
-				player->SetGroundEntityLinkCount(0);
-			}
-		} else {
-			player->SetGroundEntity( SGEntityHandle() );
 		}
 
         // Copy over the user command angles so they are stored for respawns.
@@ -1776,7 +1774,7 @@ void DefaultGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
         player->SetMoveType(MoveType::Spectator);
 
         // No solid.
-        player->SetSolid(Solid::BoundingBox);
+        player->SetSolid(Solid::OctagonBox);
 
         // NoClient flag, aka, do not send this entity to other clients. It is invisible to them.
     	player->SetServerFlags(player->GetServerFlags() | EntityServerFlags::NoClient);

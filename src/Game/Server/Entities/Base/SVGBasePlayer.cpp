@@ -82,7 +82,7 @@ void SVGBasePlayer::Spawn() {
     Base::Spawn();
 
     // When spawned, we aren't on any ground, make sure of that.
-    SetGroundEntity(SGEntityHandle());
+    //SetGroundEntity(SGEntityHandle( nullptr, -1 ));
     // Set up the client entity accordingly.
     SetTakeDamage(TakeDamage::Aim);
     // Fresh movetype and solid.

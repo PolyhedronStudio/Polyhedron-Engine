@@ -927,10 +927,12 @@ static void Con_DrawSolidConsole(void)
         case LOAD_SOUNDS:
             text = "sounds";
             break;
-        default:
+        default: {
+			std::string strText = CL_GM_GetMediaLoadStateName(con.loadstate);
             // PH: Allow for custom load screen states.
-            text = CL_GM_GetMediaLoadStateName(con.loadstate);
+            text = strText.c_str();
             break;
+		}
         }
 
         if (text) {

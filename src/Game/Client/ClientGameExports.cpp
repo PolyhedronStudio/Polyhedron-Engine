@@ -21,6 +21,11 @@
 #include "Game/Client/Effects/LightStyles.h"
 #include "Game/Client/Effects/Particles.h"
 
+// Core entities (Need access to some for view attributes.)
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
+#include "Game/Client/Entities/Func/FuncPlat.h"
+
+// Gamemodes.
 #include "Game/Client/Gamemodes/IGamemode.h"
 
 //! Static 
@@ -113,16 +118,6 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 }
 #endif
 
-
-/////
-/////	When I wake up, I gotz to add in the ClientConnected and perhaps a ClientPrecache function. This is where the entities
-/////	whether local or a packet entity to be, should both precache. Spawning should probably happen though right before clientbegin...
-/////
-/////	If we don't, we got no GameWorld to work with.
-
-/////
-
-
 /**
 *   @brief  Called right after connecting to a (loopback-)server and succesfully 
 *			loaded up the BSP map data. This gives it a chance to initialize game objects.
@@ -198,6 +193,13 @@ void ClientGameExports::ClientFrame() {
 }
 
 /**
+*	@brief	Called each VALID client frame. Sets the proper level.time for the current received delta frame.
+**/
+void ClientGameExports::SetDeltaFrameLevelTime() {
+	entities->SetDeltaFrameLevelTime();
+};
+
+/**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameExports::ClientPacketEntityDeltaFrame() {
@@ -244,6 +246,8 @@ void ClientGameExports::ClientUpdateOrigin() {
         return;
     }
 
+
+
     // Find states to interpolate between
     const PlayerState* currentPlayerState  = &cl->frame.playerState;
     const PlayerState* previousPlayerState = &cl->oldframe.playerState;
@@ -268,12 +272,41 @@ void ClientGameExports::ClientUpdateOrigin() {
         newViewOrigin = predictedState->viewOrigin + predictedState->viewOffset;
 
         // Scale prediction error to frame lerp fraction and add it to the camera view origin.
-        const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
-        newViewOrigin += error;
+		ClientGameWorld *gameWorld = GetGameWorld();
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( cl->predictedState.groundEntityNumber );
+
+		// Is the ground a valid pointer?
+		if ( geGround && geGround->IsExtrapolating() ) {
+			//if ( cl->xerpFraction ) {
+			//	const vec3_t error = vec3_scale( predictedState->error, cl->xerpFraction );
+			//	newViewOrigin += error;
+			//}
+	        oldViewOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
+		    oldViewOrigin.z -= cl->predictedState.stepOffset;
+
+	        //newViewOrigin = cl->predictedState.viewOrigin + cl->predictedState.viewOffset;
+			GameEntity *gePlayer = gameWorld->GetClientGameEntity();
+			PlayerState gePlayerState = gePlayer->GetClient()->playerState;
+			newViewOrigin = gePlayerState.pmove.origin + gePlayerState.pmove.viewOffset;
+		    newViewOrigin.z -= cl->predictedState.stepOffset;
+
+			if ( cl->xerpFraction ) {
+		        // Interpolate new view origin based on the frame's lerpfraction.
+			    newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, cl->xerpFraction );
+			}
+		} else {
+			const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
+			newViewOrigin += error;
+		}
 
         // Last but not least, subtract the stepOffset from the Z axis.
         newViewOrigin.z -= predictedState->stepOffset;
-    } else {
+
+	//if ( pm.groundEntityNumber == 13 ) {
+	//	cl->predictedState.viewOrigin = vec3_mix( cl->frame.playerState.pmove.origin, pm.state.origin, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.origin; //vec3_mix( cl->frame.playerState.pmove.origin, gePlayer->GetClient()->playerState.pmove.origin, f);
+	//	cl->predictedState.velocity = vec3_mix( cl->frame.playerState.pmove.velocity, pm.state.velocity, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.velocity; //vec3_mix( cl->frame.playerState.pmove.velocity, gePlayer->GetClient()->playerState.pmove.velocity, f);
+	//}
+	} else {
         // Use the interpolated values, and substract stepOffset.
         oldViewOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
         oldViewOrigin.z -= cl->predictedState.stepOffset;

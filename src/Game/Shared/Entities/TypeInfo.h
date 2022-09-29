@@ -250,6 +250,7 @@ using Base = superClass;										\
 static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 	classname *baseEntity = new classname( entity );			\
 	baseEntity->SetClassname(mapClassName);						\
+	entity->hashedClassname = baseEntity->GetTypeInfo()->hashedMapClass;	\
 	return baseEntity;											\
 }																\
 __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance );
@@ -264,6 +265,7 @@ using Base = superClass;										\
 static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 	classname *baseEntity = new classname( entity );			\
 	baseEntity->SetClassname(#classname);						\
+	entity->hashedClassname = baseEntity->GetTypeInfo()->hashedMapClass;	\
 	entity->isLocal = true;										\
 	return baseEntity;											\
 }																\
@@ -274,6 +276,7 @@ using Base = superClass;										\
 static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 	classname *baseEntity = new classname( entity );			\
 	baseEntity->SetClassname(#classname);						\
+	entity->hashedClassname = baseEntity->GetTypeInfo()->hashedMapClass;	\
 	entity->isLocal = false;									\
 	return baseEntity;											\
 }																\
@@ -306,6 +309,7 @@ using Base = superClass;                                                        
 static GameEntity* AllocateInstance(PODEntity* entity) {                                                                  \
 	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);                                        \
 	itemEntity->SetClassname(mapClassName);                                                                               \
+	entity->hashedClassname = itemEntity->GetTypeInfo()->hashedMapClass;	\
 	classname *itemInstance = CreateItemInstance<classname>(itemStringName, itemInstanceString, itemIdentifier);          \
 	if (itemInstance != nullptr) {                                                                                        \
 		itemInstance->InstanceSpawn();                                                                                    \
