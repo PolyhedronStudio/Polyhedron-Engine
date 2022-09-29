@@ -86,7 +86,7 @@ void TargetGibSpawn::Callback_Use( IServerGameEntity* other, IServerGameEntity* 
 		//gi.MSG_WriteUint8( TempEntityEvent::BodyGib );
 		//gi.MSG_WriteUint16( targettedEntity->GetNumber() );
 		//gi.MSG_WriteUint8( GetCount() );
-	gi.DPrintf( "%s count: %i damage %i\n", "Spawning dem gibs still fails butz I foundz tzhe entity target", GetCount(), GetDamage() );
+//	gi.DPrintf( "%s count: %i damage %i\n", "Spawning dem gibs still fails butz I foundz tzhe entity target", GetCount(), GetDamage() );
 
 
 		////gi.MSG_WriteVector3( GetOrigin(), false );//WriteVector3( GetOrigin() );

@@ -271,9 +271,6 @@ struct ClientPredictedState {
 
     // Prediction error that is interpolated over the server frame.
     vec3_t error;
-
-	vec3_t testClientOrigin = vec3_zero();
-	vec3_t testClientVelocity = vec3_zero();
 };
 
 //

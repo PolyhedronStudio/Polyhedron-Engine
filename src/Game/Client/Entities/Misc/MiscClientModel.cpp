@@ -242,7 +242,7 @@ void MiscClientModel::MiscServerModelThink(void) {
 
     // Calculate the end origin to use for tracing.
     vec3_t end = GetOrigin() + vec3_t {
-        0, 0, -1.03125f
+        0, 0, -1.3125f
     };
     
     // Exceute the trace.
@@ -259,17 +259,18 @@ void MiscClientModel::MiscServerModelThink(void) {
 		SG_AddGravity( this );
 		const vec3_t oldVelocity = GetVelocity();
 		SetVelocity( { 0, 0, oldVelocity.z } );
-		LinkEntity();
-		return;
+		//LinkEntity();
+	//	return;
 	}
 
 	// Otherwise, assume we hit something, and set our position.
 	if (trace.startSolid || trace.podEntity) {
 		SetOrigin( trace.endPosition );
 		SetVelocity( vec3_zero() );
-		LinkEntity();
-		return;
+		//LinkEntity();
+		//return;
 	}
+	LinkEntity();
 }
 
 //===============

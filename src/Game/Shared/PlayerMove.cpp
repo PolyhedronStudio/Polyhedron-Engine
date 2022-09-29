@@ -863,7 +863,7 @@ static void PM_CheckGround(void) {
 		if ( traceEntityGroundNumber != pm->groundEntityNumber ) {
 			// See if this ground is an extrapolating mover by chance.
 			GameEntity *geGround = SG_GetGameEntityByNumber( pm->groundEntityNumber );
-			if ( geGround && geGround->IsClass<FuncPlat>() ) {//geGround->IsExtrapolating() ) {
+			if ( geGround && geGround->IsClass<FuncPlat>() && geGround->GetPODEntity()->linearMovement ) {//geGround->IsExtrapolating() ) {
 				pm->state.flags |= PMF_EXTRAPOLATING_GROUND_MOVER;
 			} else {
 				pm->state.flags &= ~PMF_EXTRAPOLATING_GROUND_MOVER;

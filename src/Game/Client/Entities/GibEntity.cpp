@@ -288,9 +288,8 @@ void GibEntity::GibEntityThink() {
 	//	SetAngularVelocity( vec3_zero() );
 	//}
 
-	SG_CheckGround(this);
-	SG_AddGravity(this);
-	LinkEntity();
+	SG_AddGravity( this );
+	//LinkEntity();
 	//const vec3_t avel = GetAngularVelocity();
 	//if (!GetGroundEntityHandle() && (avel.x || avel.y || avel.z) ) {
 	//	SetAngularVelocity( vec3_scale( GetAngularVelocity(), 0.98 ) );
@@ -350,6 +349,7 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
 		// Set effects to nothing.
 		SetEffects(0);
 		SetAngularVelocity( vec3_zero() );
+		LinkEntity();
 
         SetThinkCallback(&GibEntity::GibEntityThink);
         SetNextThinkTime(level.time + FRAMETIME_S);

@@ -235,9 +235,6 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
 	cl->predictedState.velocity	  = pm.state.velocity;
 	cl->predictedState.groundEntityNumber = pm.groundEntityNumber;
-
-	cl->predictedState.testClientOrigin = pm.state.origin;
-	cl->predictedState.testClientVelocity = pm.state.velocity;
 }
 
 /**
@@ -277,29 +274,15 @@ void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm, GameEntity 
 	// Get gameworld.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
-
+	// Update the actual local client playerstate.
+	gePlayer->GetClient()->playerState.pmove.origin = pm->state.origin;// + groundMoverOffset;
+	gePlayer->GetClient()->playerState.pmove.velocity = pm->state.velocity;
 
     // If we are on an extrapolating mover, we won't adjust the entity's position to that of our received frame.
 	// EXCEPTION: If the mover is NOT moving, we make sure to adjust to our frame again.
-	if ( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
-		if ( gameWorld ) {
-			GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
+	GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
 
-			// We need a non moving mover, however, if for whichever reason the ground is in valid, adjust to the frame position also.
-			if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-				//gePlayer->SetOrigin( pm->state.origin + groundMoverOffset );
-				//gePlayer->SetVelocity( pm->state.velocity );
-			}
-		}
-		// Update the actual local client playerstate.
-		gePlayer->GetClient()->playerState.pmove.origin = pm->state.origin;
-		gePlayer->GetClient()->playerState.pmove.velocity = pm->state.velocity;//pm->state.velocity;
-		//gePlayer->SetOrigin( pm->state.origin );
-		//gePlayer->SetVelocity( pm->state.velocity );
-	} else {
-		// Update the actual local client playerstate.
-		gePlayer->GetClient()->playerState.pmove.origin = pm->state.origin;// + groundMoverOffset;
-		gePlayer->GetClient()->playerState.pmove.velocity = pm->state.velocity;
+	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || (geGround && !geGround->GetPODEntity()->linearMovement) )  {
 		gePlayer->SetOrigin( pm->state.origin );
 		gePlayer->SetVelocity( pm->state.velocity );
 	}

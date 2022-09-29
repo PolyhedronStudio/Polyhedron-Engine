@@ -410,7 +410,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 				if ( geCheck->GetClient() ) {
 					geCheck->GetClient()->playerState.pmove.origin -= move;
 				}
-				geCheck->SetAngles( geCheck->GetAngles() - move2 );
+				//geCheck->SetAngles( geCheck->GetAngles() - move2 );
 
 				geBlock = SG_TestEntityPosition( geCheck );
 				//GameEntity* geBlock2 = SG_TestEntityRotation( geCheck );
@@ -509,7 +509,7 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 	}
 
 	// First clear out the vector.
-//retry:
+retry:
 	lastPushedEntityState = pushedEntities;
 
     for (part = ent; part ; part = part->GetTeamChainEntity()) {
@@ -606,7 +606,7 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
             part->DispatchBlockedCallback(pushObstacle);
         }
 
-#if 0
+#if 1
         // if the pushed entity went away and the pusher is still there
         if ((pushObstacle && !pushObstacle->IsInUse()) && (part && part->IsInUse())) {
             goto retry;

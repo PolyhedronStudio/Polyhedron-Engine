@@ -276,7 +276,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( cl->predictedState.groundEntityNumber );
 
 		// Is the ground a valid pointer?
-		if ( geGround && geGround->IsExtrapolating() ) {
+		if ( geGround && geGround->GetPODEntity()->linearMovement ) {//geGround->IsExtrapolating() ) {
 			//if ( cl->xerpFraction ) {
 			//	const vec3_t error = vec3_scale( predictedState->error, cl->xerpFraction );
 			//	newViewOrigin += error;
@@ -301,11 +301,6 @@ void ClientGameExports::ClientUpdateOrigin() {
 
         // Last but not least, subtract the stepOffset from the Z axis.
         newViewOrigin.z -= predictedState->stepOffset;
-
-	//if ( pm.groundEntityNumber == 13 ) {
-	//	cl->predictedState.viewOrigin = vec3_mix( cl->frame.playerState.pmove.origin, pm.state.origin, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.origin; //vec3_mix( cl->frame.playerState.pmove.origin, gePlayer->GetClient()->playerState.pmove.origin, f);
-	//	cl->predictedState.velocity = vec3_mix( cl->frame.playerState.pmove.velocity, pm.state.velocity, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.velocity; //vec3_mix( cl->frame.playerState.pmove.velocity, gePlayer->GetClient()->playerState.pmove.velocity, f);
-	//}
 	} else {
         // Use the interpolated values, and substract stepOffset.
         oldViewOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
