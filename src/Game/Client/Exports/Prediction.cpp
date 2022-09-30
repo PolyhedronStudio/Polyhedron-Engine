@@ -165,7 +165,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
 				// Is the ground a valid pointer?
 				if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-					SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.time + FRAMERATE_MS).count(), linearMove );
+					SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.extrapolatedTime).count(), linearMove );
 				}
 			}
 			PlayerMoveToClientEntity( &pm, gePlayer, linearMove );

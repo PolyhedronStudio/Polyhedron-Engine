@@ -34,7 +34,7 @@ CLGBaseMover::CLGBaseMover(PODEntity *svEntity) : Base(svEntity) {
 **/
 const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
 	// Relative move time.
-	int64_t moveTime = time - podEntity->linearMovementTimeStamp;
+	int64_t moveTime = ( time - FRAMERATE_MS.count() )  - podEntity->linearMovementTimeStamp;
 	if( moveTime < 0 ) {
 		moveTime = 0;
 	}
@@ -177,12 +177,15 @@ void LinearMove_Calc( CLGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunc
 	geMover->GetPushMoveInfo()->OnEndFunction = pushMoveEndFunction;
 	LinearMove_UpdateLinearVelocity( geMover, 0, 0 );
 
-	//if( level.currentEntity == ((geMover->GetFlags() & EntityFlags::TeamSlave) ? geMover->GetTeamMasterEntity() : geMover) ) {
+	if( level.currentEntity == ((geMover->GetFlags() & EntityFlags::TeamSlave) ? geMover->GetTeamMasterEntity() : geMover) ) {
 		LinearMove_Begin( geMover );
-	//} else {
-	//	geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveBegin );
-	//	geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
-	//}
+		//geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveBegin );
+		//geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
+	} else {
+		geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveBegin );
+		//geMover->SetNextThinkTime( level.time + FRAMERATE_MS + FRAMERATE_MS );
+		geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
+	}
 }
 
 

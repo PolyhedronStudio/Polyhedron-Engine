@@ -29,7 +29,7 @@ const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time
 /**
 *	@brief 
 **/
-void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t dest );
+void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest );
 
 void LinearMove_Calc( SVGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunction *pushMoveEndFunction );
 void LinearMove_Begin( SVGBaseMover *geMover );

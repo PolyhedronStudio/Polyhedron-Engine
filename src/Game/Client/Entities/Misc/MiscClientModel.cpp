@@ -246,7 +246,9 @@ void MiscClientModel::MiscServerModelThink(void) {
     };
     
     // Exceute the trace.
-    CLGTraceResult trace = CLG_Trace( GetOrigin() + vec3_t { 0, 0, 1.f }, GetMins(), GetMaxs(), end, this, SG_SolidMaskForGameEntity(this));
+	if ( GetGroundEntityHandle().ID() == -1 ) {
+	    CLGTraceResult trace = CLG_Trace( GetOrigin() + vec3_t { 0, 0, 1.f }, GetMins(), GetMaxs(), end, this, SG_SolidMaskForGameEntity(this));
+	
 
     // If all solid, no need to seek ground or add gravity.
     if ( trace.allSolid ) {
@@ -259,18 +261,18 @@ void MiscClientModel::MiscServerModelThink(void) {
 		SG_AddGravity( this );
 		const vec3_t oldVelocity = GetVelocity();
 		SetVelocity( { 0, 0, oldVelocity.z } );
-		//LinkEntity();
-	//	return;
+		LinkEntity();
+		return;
 	}
 
 	// Otherwise, assume we hit something, and set our position.
 	if (trace.startSolid || trace.podEntity) {
 		SetOrigin( trace.endPosition );
 		SetVelocity( vec3_zero() );
-		//LinkEntity();
-		//return;
+		LinkEntity();
+		return;
 	}
-	LinkEntity();
+	}
 }
 
 //===============

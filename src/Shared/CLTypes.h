@@ -257,20 +257,22 @@ struct ClientShared {
 //
 struct ClientPredictedState {
     // These are the actual predicted results that should align with the server's.
-    vec3_t viewOrigin;  // Predicted view origin.
-    vec3_t viewOffset;  // Predicted view offset.
-    vec3_t viewAngles;  // Predicted view angles.
-    float stepOffset;   // Predicted stepping offset. (Up or down)
+    vec3_t viewOrigin	= vec3_zero();	// Predicted view origin.
+    vec3_t viewOffset	= vec3_zero();	// Predicted view offset.
+    vec3_t viewAngles	= vec3_zero();	// Predicted view angles.
+    float stepOffset	= 0.;			// Predicted stepping offset. (Up or down)
 
     // Predicted velocity.
-    vec3_t velocity;
+    vec3_t velocity = vec3_zero();
 
     // Ground entity pointer of the predicted frame.
-    //	struct PODEntity* groundEntityPtr;
-	int32_t groundEntityNumber;
+	int32_t groundEntityNumber = -1;
 
     // Prediction error that is interpolated over the server frame.
-    vec3_t error;
+    vec3_t error = vec3_zero();
+
+	// Flags of the predicted state. (Allows us to check whether we are about to extrapolate for example.)
+	uint16_t flags = 0;
 };
 
 //

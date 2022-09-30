@@ -46,23 +46,24 @@ static GameEntity *pushObstacle = nullptr;
 /**
 *	@brief	Pushes a new Pushed Entity State for the gePusher Game Entity.
 **/
-const PushedEntityState &&SG_PushEntityState(GameEntity* gePusher) {
-	const bool isClientEntity = ( gePusher->GetClient() != nullptr ? true : false );
-	const float deltaYaw = ( isClientEntity ? gePusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] : gePusher->GetAngles()[vec3_t::Yaw] );
+const PushedEntityState &&SG_PushEntityState( GameEntity* gePushMove ) {
+	const bool isClientEntity = ( gePushMove->GetClient() != nullptr ? true : false );
+	const float deltaYaw = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] : gePushMove->GetAngles()[vec3_t::Yaw] );
 	#ifdef SHAREDGAME_CLIENTGAME
-	const vec3_t playerMoveOrigin = ( isClientEntity ? cl->predictedState.viewOrigin : vec3_zero() ); //gePusher->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
+	const vec3_t playerMoveOrigin = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
+	//const vec3_t playerMoveOrigin = ( isClientEntity ? cl->predictedState.viewOrigin : vec3_zero() ); //gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
 	#else
-	const vec3_t playerMoveOrigin = ( isClientEntity ? gePusher->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
+	const vec3_t playerMoveOrigin = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
 	#endif
 	#ifdef SHAREDGAME_CLIENTGAME
-	gePusher->EnableExtrapolation();
+	gePushMove->EnableExtrapolation();
 	#endif
 	// Create state.
 	PushedEntityState returnedState = *lastPushedEntityState;
 	*lastPushedEntityState = {
-		.entityNumber = gePusher->GetNumber(),
-		.origin = gePusher->GetOrigin(),
-		.angles = gePusher->GetAngles(),
+		.entityNumber = gePushMove->GetNumber(),
+		.origin = gePushMove->GetOrigin(),
+		.angles = gePushMove->GetAngles(),
 		.deltaYaw = deltaYaw,
 		.playerMoveOrigin = playerMoveOrigin,
 	};
@@ -70,10 +71,10 @@ const PushedEntityState &&SG_PushEntityState(GameEntity* gePusher) {
 
 	return std::move(returnedState);
 }
-void SG_PopPushedEntityState(GameEntity* gePusher) {
+void SG_PopPushedEntityState(GameEntity* gePushMove) {
 	lastPushedEntityState--;
 	#ifdef SHAREDGAME_CLIENTGAME
-	gePusher->DisableExtrapolation();
+	gePushMove->DisableExtrapolation();
 	#endif
 }
 
@@ -237,7 +238,7 @@ const bool SG_Push_IsSameEntity( GameEntity *geFirst, GameEntity *geSecond ) {
 
 	return false;
 }
-const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
+const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, const vec3_t &deltaMove, const vec3_t &angularMove ) {
     GameEntity* geCheck = nullptr;
     GameEntity* geBlock = nullptr;
     PushedEntityState *p = nullptr;
@@ -255,8 +256,8 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
     }
 
     // Find the bounding box.
-    vec3_t mins = gePusher->GetAbsoluteMin() + move;
-    vec3_t maxs = gePusher->GetAbsoluteMax() + move;
+    vec3_t mins = gePusher->GetAbsoluteMin() + deltaMove;
+    vec3_t maxs = gePusher->GetAbsoluteMax() + deltaMove;
 
     // We need this for pushing things later
     org = vec3_negate(angularMove);
@@ -270,9 +271,22 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 	/**	
 	*	Move the Pusher to its wished final position.
 	**/
-    gePusher->SetOrigin( gePusher->GetOrigin() + move );
+    gePusher->SetOrigin( gePusher->GetOrigin() + deltaMove );//gePusher->SetOrigin( gePusher->GetOrigin() + move );
     gePusher->SetAngles( gePusher->GetAngles() + angularMove );
     gePusher->LinkEntity();
+    
+	//#ifdef SHAREDGAME_CLIENTGAME
+	//int64_t frameNumber = cl->frame.number;
+	//int64_t timeNow = level.time.count();
+	//int64_t timeNext = (level.time + FRAMERATE_MS).count();
+	//SG_Print( PrintType::DeveloperWarning, fmt::format("[[[[CLG]]]]: origin({}, {}, {}), deltaMove({}, {}, {}), frameNumber({}), timeStart({}), timeNext({})\n", partOrigin.x, partOrigin.y, partOrigin.z, deltaMove.x, deltaMove.y, deltaMove.z, frameNumber, timeNow, timeNext ));
+	//#endif
+	//#ifdef SHAREDGAME_SERVERGAME
+	//int64_t frameNumber = level.frameNumber;
+	//int64_t timeNow = level.time.count();
+	//int64_t timeNext = (level.time + FRAMERATE_MS).count();
+	//SG_Print( PrintType::DeveloperWarning, fmt::format("[[[[SVG]]]]: origin({}, {}, {}), deltaMove({}, {}, {}), frameNumber({}), timeStart({}), timeNext({})\n", partOrigin.x, partOrigin.y, partOrigin.z, deltaMove.x, deltaMove.y, deltaMove.z, frameNumber, timeNow, timeNext ));
+	//#endif
 
 	/**	
 	*	See if the position has been taken by other entities, and if so, try and push each other.
@@ -344,7 +358,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 			/**
 			*	Try moving the contacted entity.
 			**/
-            geCheck->SetOrigin( geCheck->GetOrigin() + move );
+            geCheck->SetOrigin( geCheck->GetOrigin() + deltaMove );
             if ( geCheck->GetClient() ) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
@@ -405,10 +419,10 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
 				// Of it is ok to leave in the old position, do it.
 				// This is only relevent for riding entities, not pushed
 				// FIXME: this doesn't acount for rotation
-				geCheck->SetOrigin( geCheck->GetOrigin() - move );//geCheck->state.origin -= move;
+				geCheck->SetOrigin( geCheck->GetOrigin() - deltaMove );//geCheck->state.origin -= move;
 				// Client origin.
 				if ( geCheck->GetClient() ) {
-					geCheck->GetClient()->playerState.pmove.origin -= move;
+					geCheck->GetClient()->playerState.pmove.origin -= deltaMove;
 				}
 				//geCheck->SetAngles( geCheck->GetAngles() - move2 );
 
@@ -444,7 +458,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3
                 pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
 				pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
 				#ifdef SHAREDGAME_CLIENTGAME
-				pusherEntity->SetOrigin( p->playerMoveOrigin );
+				//pusherEntity->SetOrigin( p->playerMoveOrigin );
 				#endif
 			} else {
 				vec3_t newAngles = pusherEntity->GetAngles();
@@ -523,49 +537,61 @@ retry:
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
 			PODEntity *partPODEntity = part->GetPODEntity();
+			vec3_t partOrigin = vec3_zero();
 
 			if ( partPODEntity->linearMovement ) {
 			#ifdef SHAREDGAME_CLIENTGAME
+				// Calculate the actual origin of the mover for the next serverframe moment in time. 
+				SG_LinearMovement( partPODEntity, (level.time + FRAMERATE_MS).count(), partOrigin );
+				// Delta move.
+				SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
+
+				// Calculate angular velocity.
+				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
+
+				// Debug.
 				const vec3_t fromMove = part->GetOrigin();
 				const vec3_t toMove = fromMove + move;
-				SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
-				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
 				SG_Print( PrintType::Developer, 
-						 fmt::format( "[CLG SG_Physics_Pusher(#{}, 'func_plat', level.time({})]: move({}, {}, {}), fromMove({}, {}, {}), toMove({}, {}, {})\n",
+						 fmt::format( "[CLG SG_Physics_Pusher(#{}, 'func_plat', level.time({})]: fromMove({}, {}, {}), toMove({}, {}, {}), move({}, {}, {})\n",
 						 ent->GetNumber(),
 						 level.time.count(),
-						 move.x,
-						 move.y,
-						 move.z,
 						 fromMove.x,
 						 fromMove.y,
 						 fromMove.z,
 						 toMove.x,
 						 toMove.y,
-						 toMove.z
+						 toMove.z,
+						 move.x,
+						 move.y,
+						 move.z
 				));
 			#endif
 			#ifdef SHAREDGAME_SERVERGAME
-				SG_LinearMovement( partPODEntity, level.time.count(), move);
-				move -= part->GetOrigin(); //VectorSubtract( move, part->s.origin, move );
+				// Calculate the actual origin of the mover for the next serverframe moment in time. 
+				SG_LinearMovement( partPODEntity, (level.time).count(), partOrigin );
+				// Delta move.
+				SG_LinearMovementDelta( partPODEntity, (level.time - FRAMERATE_MS).count(), (level.time).count(), move );
+
+				// Calculate angular velocity.
 				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
+
+				// Debug.
 				const vec3_t fromMove = part->GetOrigin();
 				const vec3_t toMove = fromMove + move;
-				//SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
-				//amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
 				SG_Print( PrintType::Developer, 
-						 fmt::format( "[SVG SG_Physics_Pusher(#{}, 'func_plat', level.time({})]: move({}, {}, {}), fromMove({}, {}, {}), toMove({}, {}, {})\n",
+						 fmt::format( "[SVG SG_Physics_Pusher(#{}, 'func_plat', level.time({})]: fromMove({}, {}, {}), toMove({}, {}, {}), move({}, {}, {})\n",
 						 ent->GetNumber(),
 						 level.time.count(),
-						 move.x,
-						 move.y,
-						 move.z,
 						 fromMove.x,
 						 fromMove.y,
 						 fromMove.z,
 						 toMove.x,
 						 toMove.y,
-						 toMove.z
+						 toMove.z,
+						 move.x,
+						 move.y,
+						 move.z
 				));
 			#endif
 			} else {
@@ -575,7 +601,7 @@ retry:
 			}
 
             SGEntityHandle partHandle(part);
-            if ( !SG_Push( partHandle, move, amove ) )
+            if ( !SG_Push( partHandle, partOrigin, move, amove ) )
                 break;  // move was Blocked
         }
     }

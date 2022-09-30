@@ -346,7 +346,13 @@ void FuncPlat::Callback_RaisePlatform() {
     moveInfo.state = MoverState::Up;
 	EnableExtrapolation();
 
+	SGEntityHandle handlePusher;
+	handlePusher = this;
+	level.time += FRAMERATE_MS;
 	LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+	level.time -= FRAMERATE_MS;
+	SG_Physics_Pusher( handlePusher );
+
 	const std::string debugStr = fmt::format( "RaiseMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
 				moveInfo.speed,
 				moveInfo.wait.count(),
@@ -354,17 +360,6 @@ void FuncPlat::Callback_RaisePlatform() {
 				moveInfo.startOrigin.x, moveInfo.startOrigin.y, moveInfo.startOrigin.z,
 				moveInfo.endOrigin.x, moveInfo.endOrigin.y, moveInfo.endOrigin.z);
 	CLG_Print( PrintType::DeveloperWarning, debugStr );
-
-	//SGEntityHandle handlePusher;
-	//handlePusher = this;
-	//level.time -= FRAMERATE_MS;
-	//	SG_Physics_Pusher( handlePusher );
-	//level.time += FRAMERATE_MS;
-
-	//GameTime oldLevelTime = level.time;
-	//level.time = GameTime( cl->serverTime ) - FRAMERATE_MS; //level.time + FRAMERATE_MS;
-	
-	//level.time = oldLevelTime;
 }
 
 /**
@@ -373,8 +368,13 @@ void FuncPlat::Callback_RaisePlatform() {
 void FuncPlat::Callback_LowerPlatform() {
     moveInfo.state = MoverState::Down;
 	EnableExtrapolation();
-	
+
+	SGEntityHandle handlePusher;
+	handlePusher = this;
+	level.time += FRAMERATE_MS;
 	LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+	level.time -= FRAMERATE_MS;
+	SG_Physics_Pusher( handlePusher );
 	const std::string debugStr = fmt::format( "LowerMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
 				moveInfo.speed,
 				moveInfo.wait.count(),
@@ -382,18 +382,7 @@ void FuncPlat::Callback_LowerPlatform() {
 				moveInfo.startOrigin.x, moveInfo.startOrigin.y, moveInfo.startOrigin.z,
 				moveInfo.endOrigin.x, moveInfo.endOrigin.y, moveInfo.endOrigin.z);
 	CLG_Print( PrintType::DeveloperWarning, debugStr );
-	//SGEntityHandle handlePusher;
-	//handlePusher = this;
-	//level.time -= FRAMERATE_MS;
-	//SG_Physics_Pusher( handlePusher );
-	//level.time += FRAMERATE_MS;
 
-	//SGEntityHandle handlePusher;
-	//handlePusher = this;
-	//GameTime oldLevelTime = level.time;
-	//level.time = GameTime( cl->serverTime ) - FRAMERATE_MS;
-	//SG_Physics_Pusher( handlePusher );
-	//level.time = oldLevelTime;
 }
 
 /**

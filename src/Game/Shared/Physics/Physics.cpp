@@ -370,7 +370,10 @@ const bool SG_RunThink( GameEntity *geThinker ) {
 		}
 
 	} else {
-		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime + FRAMERATE_MS ) { //nextThinkTime > level.extrapolatedTime ) {
+		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime + FRAMERATE_MS ) {
+		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime ) {
+		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > GameTime( cl->serverTime ) + FRAMERATE_MS ) {
+		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time + FRAMERATE_MS ) {
 			return true;
 		}
 	}

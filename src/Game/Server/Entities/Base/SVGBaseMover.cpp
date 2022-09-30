@@ -109,7 +109,7 @@ void LinearMove_UpdateLinearVelocity( SVGBaseMover *geMover, float dist, const i
 
 	podEntity->linearMovementEndOrigin = geMover->GetPushMoveInfo()->destOrigin;
 	podEntity->linearMovementBeginOrigin = geMover->GetOrigin();
-	podEntity->linearMovementTimeStamp = ( level.time - FRAMERATE_MS ).count();
+	podEntity->linearMovementTimeStamp = ( level.time /*- FRAMERATE_MS */).count();
 	podEntity->linearMovementDuration = duration;
 }
 
@@ -181,13 +181,14 @@ void LinearMove_Calc( SVGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunc
 	LinearMove_UpdateLinearVelocity( geMover, 0, 0 );
 
 	if( level.currentEntity == ( ( geMover->GetFlags() & EntityFlags::TeamSlave) ? geMover->GetTeamMasterEntity() : geMover ) ) {
-		LinearMove_Begin( geMover );
+	//	LinearMove_Begin( geMover );
+		geMover->SetThinkCallback( &SVGBaseMover::LinearBrushMoveBegin );
+		geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
 	} else {
-		geMover->SetThinkCallback( &SVGBaseMover::LinearBrushMoveBegin ); ////	ent->think = LinearMove_Watch;
-		geMover->SetNextThinkTime( level.time + FRAMERATE_MS ); //	ent->nextThink = level.time + 1;
+		geMover->SetThinkCallback( &SVGBaseMover::LinearBrushMoveBegin );
+		geMover->SetNextThinkTime( level.time + FRAMERATE_MS + FRAMERATE_MS );
 	}
 }
-
 
 void SVGBaseMover::LinearBrushMoveBegin() {
 	LinearMove_Begin( this );

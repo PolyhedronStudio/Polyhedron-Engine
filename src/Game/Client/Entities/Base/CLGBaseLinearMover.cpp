@@ -192,12 +192,12 @@ int32_t SG_LinearMovement( const LinearPushMoveInfo *pmi, const GameTime &time, 
 /*
 * GS_LinearMovementDelta
 */
-void SG_LinearMovementDelta( const LinearPushMoveInfo *pmi, const GameTime &oldTime, const GameTime &curTime, vec3_t &dest ) {
-	vec3_t p1, p2;
-	SG_LinearMovement( pmi, oldTime, p1 );
-	SG_LinearMovement( pmi, curTime, p2 );
-	dest = p2 - p1;
-}
+//void SG_LinearMovementDelta( const LinearPushMoveInfo *pmi, const GameTime &oldTime, const GameTime &curTime, vec3_t &dest ) {
+//	vec3_t p1, p2;
+//	SG_LinearMovement( pmi, oldTime, p1 );
+//	SG_LinearMovement( pmi, curTime, p2 );
+//	dest = p2 - p1;
+//}
 
 
 
