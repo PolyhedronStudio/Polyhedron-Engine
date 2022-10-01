@@ -158,8 +158,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		if (cmd->input.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
-			//cmd->prediction.moverLevelTime = level.time.count();
-			//cmd->prediction.moverNextLevelTime = ( level.time + FRAMERATE_MS ).count();
+			cmd->prediction.moverLevelTime = level.time.count();
+			cmd->prediction.moverNextLevelTime = ( level.time + FRAMERATE_MS ).count();
 
             // Assign the move command.
             pm.moveCommand = *cmd;

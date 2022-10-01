@@ -100,15 +100,15 @@ static GameEntity *SG_GetGameEntityFromPushedState( PushedEntityState *pushedEnt
 	// Get GameWorld.
 	SGGameWorld *gameWorld = GetGameWorld();
 
-	if (pushedEntities->entityNumber < 0) {
+	if ( pushedEntities->entityNumber < 0 ) {
 		return nullptr;
 	}
 
 	// Utilize the EntityHandle class.
-	SGEntityHandle ehPushedStateEntity = gameWorld->GetPODEntityByIndex(pushedEntityState->entityNumber);
+	SGEntityHandle ehPushedStateEntity = gameWorld->GetPODEntityByIndex( pushedEntityState->entityNumber );
 
 	// Validate the actual EntityHandle and get a hopefully non (nullptr) GameEntity. 
-	GameEntity *validEntity = SGGameWorld::ValidateEntity(ehPushedStateEntity);
+	GameEntity *validEntity = SGGameWorld::ValidateEntity( ehPushedStateEntity );
 
 	// Return our pointer.
 	return validEntity;
@@ -130,7 +130,7 @@ SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset 
     vec3_t end = start + pushOffset;
 
 retry:
-    if (ent->GetClipMask())
+    if ( ent->GetClipMask() )
         mask = ent->GetClipMask();
     else
         mask = BrushContentsMask::Solid;
@@ -150,7 +150,7 @@ retry:
         SG_Impact(ent, trace);
 
         // if the pushed entity went away and the pusher is still there
-        if ( (!trace.gameEntity || !trace.gameEntity->IsInUse()) && ent->GetMoveType() == MoveType::Push && ent->IsInUse()) {
+        if ( ( !trace.gameEntity || !trace.gameEntity->IsInUse() ) && ent->GetMoveType() == MoveType::Push && ent->IsInUse() ) {
             // move the pusher back and try again
             ent->SetOrigin( start );
             ent->LinkEntity();
@@ -236,8 +236,8 @@ static GameEntity *SG_TestEntityRotation( GameEntity *geTestSubject ) {
 **/
 const bool SG_Push_IsSameEntity( GameEntity *geFirst, GameEntity *geSecond ) {
 	// The same by pointer.
-	const int32_t numberGeFirst = ( geFirst ? geFirst->GetNumber() : -1 );
-	const int32_t numberGeSecond= ( geSecond ? geSecond->GetNumber() : -1 );
+	const int32_t numberGeFirst		= ( geFirst ? geFirst->GetNumber() : -1 );
+	const int32_t numberGeSecond	= ( geSecond ? geSecond->GetNumber() : -1 );
 
 	// If first or second is -1, it is a false. (We do not return true in case of it being empty space)
 	if ( numberGeFirst == -1 || numberGeSecond == -1 ) {
@@ -487,7 +487,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 				// Negate the delta move and use that to return with instead. Current times might be different than the stored previous time.
 				//const vec3_t negatedDeltaMove = vec3_negate( deltaMove );
 				pusherEntity->GetClient()->playerState.pmove.origin -= reverseDeltaMove; //p->playerMoveOrigin;
-				//pusherEntity->SetOrigin( pusherEntity->GetOrigin() - reverseDeltaMove );
+				pusherEntity->SetOrigin( pusherEntity->GetOrigin() - reverseDeltaMove );
 				//pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
 				//pusherEntity->SetOrigin( cl->predictedState.viewOrigin );
 				#endif
