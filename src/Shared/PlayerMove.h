@@ -86,19 +86,23 @@ struct PlayerMoveInput {
 *   ClientMoveCommand is sent to the server each client frame
 **/
 struct ClientMoveCommand {
-    PlayerMoveInput input;  // the movement command
+    PlayerMoveInput input;	//! The player move user input packed for transferring 'over the wire'.
 
-    uint64_t timeSent = 0;      // Time sent, for calculating pings
-    uint64_t timeReceived = 0;  // Time rcvd, for calculating pings
-    uint64_t commandNumber = 0; // Current commandNumber for this move command frame
+    uint64_t timeSent = 0;      //! Time sent, for calculating pings
+    uint64_t timeReceived = 0;  //! Time rcvd, for calculating pings
+    uint64_t commandNumber = 0; //! Current commandNumber for this move command frame
 
     struct {
-        uint64_t simulationTime = 0;		// The simulation time when prediction was run
-        vec3_t origin = vec3_zero();		// The predicted origin for this command.
-		vec3_t velocity = vec3_zero();		// The predicted velocity for this command.
-        vec3_t error = vec3_zero();			// The prediction error for this command.
-		int32_t groundEntityNumber = -1;	// The predicted ground entity for this command.
-		uint64_t moverTime = 0;				// The actual time of this mover at arrival of our server frame.
-		uint64_t moverTimeExtrapolated = 0;	// The actual extrapolated time of this mover during transition to next frame.
+		//! Simulation Time.
+        uint64_t simulationTime = 0;		//! The local simulation time(relative to time at start of application) when prediction was run
+		//! Ground Mover (Push Entities) Level Frame Time, and Next Frame Time, used to reproduce the delta move offset at the time of processing the move command.
+		uint64_t moverLevelTime = 0;		//! The actual time of this mover at arrival of our server frame.
+		uint64_t moverNextLevelTime = 0;	//! The actual extrapolated time of this mover during transition to next frame.
+
+		//! Predicted move results at the time of after processing the move command..
+		vec3_t origin	= vec3_zero();		//! The predicted origin for this command.
+		vec3_t velocity = vec3_zero();		//! The predicted velocity for this command.
+        vec3_t error	= vec3_zero();		//! The prediction error for this command.
+		int32_t groundEntityNumber = -1;	//! The predicted ground entity that we're standing on.
     } prediction;
 };

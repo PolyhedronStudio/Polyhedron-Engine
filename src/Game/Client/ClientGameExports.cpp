@@ -281,19 +281,26 @@ void ClientGameExports::ClientUpdateOrigin() {
 			//	const vec3_t error = vec3_scale( predictedState->error, cl->xerpFraction );
 			//	newViewOrigin += error;
 			//}
-	        oldViewOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
+	        oldViewOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
 		    oldViewOrigin.z -= cl->predictedState.stepOffset;
 
 	        //newViewOrigin = cl->predictedState.viewOrigin + cl->predictedState.viewOffset;
 			GameEntity *gePlayer = gameWorld->GetClientGameEntity();
 			PlayerState gePlayerState = gePlayer->GetClient()->playerState;
-			newViewOrigin = gePlayerState.pmove.origin + gePlayerState.pmove.viewOffset;
+			newViewOrigin = cl->predictedState.viewOrigin + cl->predictedState.viewOffset; //gePlayerState.pmove.origin + gePlayerState.pmove.viewOffset;
 		    newViewOrigin.z -= cl->predictedState.stepOffset;
 
 			if ( cl->xerpFraction ) {
 		        // Interpolate new view origin based on the frame's lerpfraction.
 			    newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, cl->xerpFraction );
+				const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );//->xerpFraction );
+				newViewOrigin += error;
+			} else {
+				newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, lerpFraction );
+				const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
+				newViewOrigin += error;
 			}
+
 		} else {
 			const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
 			newViewOrigin += error;

@@ -30,6 +30,10 @@ struct PushedEntityState {
 	float deltaYaw = 0.f;
 	// This is used as velocity wtf?
 	vec3_t playerMoveOrigin = vec3_zero();
+
+	// The actual time at which this entity's delta move is at.
+	int64_t moveTime = 0;
+	int64_t moveNextTime = 0;
 };
 
 //! Reserved size std::vector containing all the pushed entity states.
@@ -66,6 +70,14 @@ const PushedEntityState &&SG_PushEntityState( GameEntity* gePushMove ) {
 		.angles = gePushMove->GetAngles(),
 		.deltaYaw = deltaYaw,
 		.playerMoveOrigin = playerMoveOrigin,
+
+		#ifdef SHAREDGAME_CLIENTGAME
+		.moveTime = (level.extrapolatedTime - FRAMERATE_MS).count(),
+		.moveNextTime = level.extrapolatedTime.count(),
+		#else
+		.moveTime = (level.time).count(),
+		.moveNextTime = (level.time + FRAMERATE_MS).count(),
+		#endif
 	};
 	lastPushedEntityState++;
 
@@ -451,16 +463,43 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
                 continue;
             }
 
-            pusherEntity->SetOrigin(p->origin);
-            pusherEntity->SetAngles(p->angles);
+			//pusherEntity->SetOrigin(p->origin);
+   //         pusherEntity->SetAngles(p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (pusherEntity->GetClient()) {
-                pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
-				pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
-				#ifdef SHAREDGAME_CLIENTGAME
+                // Delta angles are calculated for both, cl game and sv game.
+				pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
+				#ifdef SHAREDGAME_SERVERGAME
+				//pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
 				//pusherEntity->SetOrigin( p->playerMoveOrigin );
+				vec3_t reverseDeltaMove = vec3_zero();
+				SG_LinearMovementDelta( pusherEntity->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), (p->moveNextTime - (FRAMERATE_MS).count()), reverseDeltaMove );
+				// Negate the delta move and use that to return with instead. Current times might be different than the stored previous time.
+				//const vec3_t negatedDeltaMove = vec3_negate( deltaMove );
+				pusherEntity->GetClient()->playerState.pmove.origin -= reverseDeltaMove; //p->playerMoveOrigin;
+				pusherEntity->SetOrigin( pusherEntity->GetOrigin() - reverseDeltaMove );
 				#endif
+
+				// Specific client side origin handling in order to support async physics.
+				#ifdef SHAREDGAME_CLIENTGAME
+				vec3_t reverseDeltaMove = vec3_zero();
+				SG_LinearMovementDelta( pusherEntity->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), p->moveTime, reverseDeltaMove );
+				// Negate the delta move and use that to return with instead. Current times might be different than the stored previous time.
+				//const vec3_t negatedDeltaMove = vec3_negate( deltaMove );
+				pusherEntity->GetClient()->playerState.pmove.origin -= reverseDeltaMove; //p->playerMoveOrigin;
+				//pusherEntity->SetOrigin( pusherEntity->GetOrigin() - reverseDeltaMove );
+				//pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
+				//pusherEntity->SetOrigin( cl->predictedState.viewOrigin );
+				#endif
+
+				//pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
+				//#ifdef SHAREDGAME_CLIENTGAME
+				
+				//#endif
 			} else {
+				pusherEntity->SetOrigin(p->origin);
+				pusherEntity->SetAngles(p->angles);
+
 				vec3_t newAngles = pusherEntity->GetAngles();
 				newAngles[vec3_t::Yaw] = p->deltaYaw;
 				pusherEntity->SetAngles(newAngles);
@@ -542,9 +581,11 @@ retry:
 			if ( partPODEntity->linearMovement ) {
 			#ifdef SHAREDGAME_CLIENTGAME
 				// Calculate the actual origin of the mover for the next serverframe moment in time. 
-				SG_LinearMovement( partPODEntity, (level.time + FRAMERATE_MS).count(), partOrigin );
+				//SG_LinearMovement( partPODEntity, (level.time + FRAMERATE_MS).count(), partOrigin );
+				SG_LinearMovement( partPODEntity, (level.extrapolatedTime ).count(), partOrigin );
 				// Delta move.
-				SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
+				//SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
+				SG_LinearMovementDelta( partPODEntity, (level.extrapolatedTime - FRAMERATE_MS).count(), ( level.extrapolatedTime ).count(), move );
 
 				// Calculate angular velocity.
 				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );
@@ -644,98 +685,4 @@ retry:
             SG_RunThink(part);
         }
     }
-	//	if (!gePusherHandle.Get() || !*gePusherHandle) {
-//		return;
-//	}
-//	// Get GameEntity from Handle.
-//	GameEntity *gePusher = *gePusherHandle;
-//
-//    // Ensure it is a valid entity.
-//    if ( !gePusher ) {
-//    	SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
-//        return;
-//    }
-//
-//    // if not a team captain, so movement will be handled elsewhere
-//	if ( gePusher->GetFlags() & EntityFlags::TeamSlave ) {
-//        return;
-//	}
-//
-//	// Make sure all team followers can move before commiting
-//	// any moves or calling any think functions
-//	// If the move is blocked, all moved objects will be backed out
-//	lastPushedEntityState = pushedEntities;
-//
-//	GameEntity *gePushPart = nullptr;
-//    GameEntity *gePart = nullptr, *geMove = nullptr;
-//retry:
-//	lastPushedEntityState = pushedEntities;
-//
-//	gePushPart = nullptr;
-//    gePart = nullptr;
-//	geMove = nullptr;
-//
-//	for( gePushPart = gePusher; gePushPart; gePushPart = gePushPart->GetTeamChainEntity() ) {
-//		// Get pusher part velocity.
-//		const vec3_t partVelocity = gePushPart->GetVelocity( );
-//
-//		// Get pusher part Angular Velocity.
-//		const vec3_t partAngularVelocity = gePushPart->GetAngularVelocity();
-//
-//		if (partVelocity.x || partVelocity.y || partVelocity.z ||
-//			partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
-//		{
-//			// object is moving
-//		//if( part->s.linearMovement ) {
-//		//	GS_LinearMovement( &part->s, game.serverTime, move );
-//		//	VectorSubtract( move, part->s.origin, move );
-//		//	VectorScale( part->avelocity, FRAMETIME_S, amove );
-//		//} else {
-//			const vec3_t velocity = vec3_scale(partVelocity, FRAMETIME_S.count()); //VectorScale( part->velocity, FRAMETIME_S, move );
-//			const vec3_t angularVelocity = vec3_scale(partAngularVelocity, FRAMETIME_S.count()); //VectorScale( part->avelocity, FRAMETIME_S, amove );
-//
-//			SGEntityHandle partHandle(gePushPart);
-//			if ( !SG_Push(partHandle, velocity, angularVelocity) ) {
-//				break;  // Move was Blocked.
-//			}
-//	   //}
-//		}
-//	}
-//
-//	if( lastPushedEntityState > &pushedEntities[4096] ) {
-//		//G_Error( "pushed_p > &pushed[MAX_EDICTS], memory corrupted" );
-//	}
-//
-//	if( gePushPart ) {
-//		// the move failed, bump all nextthink times and back out moves
-//		for( GameEntity *mover = gePusher; mover; mover = mover->GetTeamChainEntity() ) {
-//			auto nextThinkTime = mover->GetNextThinkTime();
-//			if( nextThinkTime > GameTime::zero()) {
-//				mover->SetNextThinkTime(nextThinkTime + FRAMERATE_MS);
-////				mover->nextThink += game.frametime;
-//			}
-//		}
-//
-//		// if the pusher has a "blocked" function, call it
-//		// otherwise, just stay in place until the obstacle is gone
-//        if (gePushPart && pushObstacle) {
-//            gePushPart->DispatchBlockedCallback(pushObstacle);
-//        }
-////#if 0
-//
-//		// if the obstacle went away and the pusher is still there
-//		//if( !obstacle->r.inuse && part->r.inuse ) {
-//		//	goto retry;
-//		//}
-//        // if the pushed entity went away and the pusher is still there
-//        if ( (pushObstacle && !pushObstacle->IsInUse()) && (gePushPart && gePushPart->IsInUse()) ) {
-//            goto retry;
-//		}
-////#endif
-//	} else {
-//        // the move succeeded, so call all Think functions
-//        for (gePart = gePusher ; gePart ; gePart = gePart->GetTeamChainEntity()) {
-//            SG_RunThink(gePart);
-//        }
-//    }
 }

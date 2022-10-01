@@ -348,6 +348,17 @@ void FuncPlat::Callback_RaisePlatform() {
 
 	SGEntityHandle handlePusher;
 	handlePusher = this;
+	//level.time += FRAMERATE_MS;
+	//LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);
+	//level.time -= FRAMERATE_MS;
+	//SG_Physics_Pusher( handlePusher );
+	
+	
+	//level.time -= FRAMERATE_MS;
+	//LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);
+
+	////SG_Physics_Pusher( handlePusher );
+	//level.time += FRAMERATE_MS;
 	level.time += FRAMERATE_MS;
 	LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 	level.time -= FRAMERATE_MS;
@@ -371,10 +382,22 @@ void FuncPlat::Callback_LowerPlatform() {
 
 	SGEntityHandle handlePusher;
 	handlePusher = this;
+	//level.time += FRAMERATE_MS;
+	//LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);
+	//level.time -= FRAMERATE_MS;
+	//SG_Physics_Pusher( handlePusher );
+	
+	//level.time -= FRAMERATE_MS;
+	
+	//level.time -= FRAMERATE_MS;
+	//LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);
+	////SG_Physics_Pusher( handlePusher );
+	//level.time += FRAMERATE_MS;
 	level.time += FRAMERATE_MS;
 	LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 	level.time -= FRAMERATE_MS;
 	SG_Physics_Pusher( handlePusher );
+
 	const std::string debugStr = fmt::format( "LowerMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
 				moveInfo.speed,
 				moveInfo.wait.count(),

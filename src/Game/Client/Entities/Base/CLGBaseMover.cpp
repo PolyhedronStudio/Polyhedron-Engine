@@ -34,7 +34,7 @@ CLGBaseMover::CLGBaseMover(PODEntity *svEntity) : Base(svEntity) {
 **/
 const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
 	// Relative move time.
-	int64_t moveTime = ( time - FRAMERATE_MS.count() )  - podEntity->linearMovementTimeStamp;
+	int64_t moveTime = ( time /*- FRAMERATE_MS.count()*/ )  - podEntity->linearMovementTimeStamp;
 	if( moveTime < 0 ) {
 		moveTime = 0;
 	}
@@ -107,7 +107,7 @@ void LinearMove_UpdateLinearVelocity( CLGBaseMover *geMover, float dist, const i
 
 	podEntity->linearMovementEndOrigin = geMover->GetPushMoveInfo()->destOrigin;
 	podEntity->linearMovementBeginOrigin = geMover->GetOrigin();
-	podEntity->linearMovementTimeStamp = ( level.time ).count();
+	podEntity->linearMovementTimeStamp = ( level.time - FRAMERATE_MS ).count();
 	podEntity->linearMovementDuration = duration;
 }
 
@@ -134,16 +134,19 @@ void LinearMove_Watch( CLGBaseMover *geMover ) {
 	// Get POD Entity.
 	PODEntity *podEntity = geMover->GetPODEntity();
 
-	int32_t moveTime = level.time.count() - podEntity->linearMovementTimeStamp;
+	int32_t moveTime = ( level.extrapolatedTime  ).count() - podEntity->linearMovementTimeStamp;
 	
-	if( moveTime >= static_cast<int32_t>(podEntity->linearMovementDuration) ) {
-		geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveDone );
-		geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
+	if( ( moveTime )>= static_cast<int32_t>( podEntity->linearMovementDuration ) ) {
+		//geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveDone );
+		//geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
+		//geMover->SetNextThinkTime( level.extrapolatedTime );
+		geMover->LinearBrushMoveDone();
 		return;
 	}
 
 	geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveWatch );
-	geMover->SetNextThinkTime( level.time + FRAMERATE_MS );
+	geMover->SetNextThinkTime( level.extrapolatedTime );
+	//geMover->SetNextThinkTime( level.extrapolatedTime );
 }
 
 void LinearMove_Begin( CLGBaseMover *geMover ) {

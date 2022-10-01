@@ -859,7 +859,7 @@ static void PM_CheckGround(void) {
 		// See if the old ground entity number matches the traced ent number.
 		const int32_t traceEntityGroundNumber = SG_GetEntityNumber( trace.ent );
 
-		// See if we should keep our 'extrapolating ground mover' flag set.
+		// See if we should have a: 'extrapolating ground mover', flag set in order to prevent the prediction code of correcting our player's position.
 		if ( traceEntityGroundNumber != pm->groundEntityNumber ) {
 			// See if this ground is an extrapolating mover by chance.
 			GameEntity *geGround = SG_GetGameEntityByNumber( pm->groundEntityNumber );
@@ -884,7 +884,8 @@ static void PM_CheckGround(void) {
         pm->state.flags &= ~PMF_ON_GROUND;
 		pm->groundEntityNumber = -1;
 
-		// Without ground, we can't be on any extrapolating movers.
+		// Without ground, make sure we unset the 'extrapolating ground mover' flag, so the prediction code resorts
+		// to its good old self. Correcting mispredictions.
         pm->state.flags &= ~PMF_EXTRAPOLATING_GROUND_MOVER;       
     }
 

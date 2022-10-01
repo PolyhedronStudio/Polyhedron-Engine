@@ -65,7 +65,13 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
 
 		// Is the ground a valid pointer?
 		if ( geGround && geGround->IsSubclassOf<CLGBaseMover>() ) {// geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-			SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.time + FRAMERATE_MS).count(), linearMove );
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.extrapolatedTime - FRAMERATE_MS ).count(), (level.extrapolatedTime).count(), linearMove);
+			
+			
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time ).count(), (level.time + FRAMERATE_MS).count(), linearMove);
+			SG_LinearMovementDelta( geGround->GetPODEntity(), moveCommand->prediction.moverLevelTime, moveCommand->prediction.moverNextLevelTime, linearMove );
+			
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 		}
 	}
 
@@ -152,6 +158,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		if (cmd->input.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
+			//cmd->prediction.moverLevelTime = level.time.count();
+			//cmd->prediction.moverNextLevelTime = ( level.time + FRAMERATE_MS ).count();
 
             // Assign the move command.
             pm.moveCommand = *cmd;
@@ -165,7 +173,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
 				// Is the ground a valid pointer?
 				if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-					SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.extrapolatedTime).count(), linearMove );
+					SG_LinearMovementDelta( geGround->GetPODEntity(), cmd->prediction.moverLevelTime, cmd->prediction.moverNextLevelTime, linearMove );
+					//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 				}
 			}
 			PlayerMoveToClientEntity( &pm, gePlayer, linearMove );
@@ -185,6 +194,12 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 	// Run the player move prediction process using the current pending frame user input.
 	//vec3_t groundPredictionOffset = vec3_zero();
 	vec3_t linearMove = vec3_zero();
+	
+	// Setup time for current move command.
+	cl->moveCommand.prediction.moverLevelTime = level.time.count();
+	cl->moveCommand.prediction.moverNextLevelTime = ( level.time + FRAMERATE_MS ).count();
+
+	// Process it if it had any input.
 	if (cl->moveCommand.input.msec) {
         // Saved for prediction error checking.
         cl->moveCommand.prediction.simulationTime = clgi.GetRealTime();
@@ -198,15 +213,6 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		// Simulate the move command.
         PMove(&pm);
 
-		// Update player entity.
-		if ( gameWorld ) {
-			GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
-
-			// Is the ground a valid pointer?
-			if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-				SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.time + FRAMERATE_MS).count(), linearMove );
-			}
-		}
 		PlayerMoveToClientEntity( &pm, gePlayer, linearMove );
 
         // Update player move client side audio effects.
@@ -217,6 +223,21 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		// Save for error detection
 		cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
 		cl->moveCommand.prediction.origin = pm.state.origin;// + linearMove;
+	}
+
+	// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
+	if ( gameWorld ) {
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
+
+		// Is the ground a valid pointer?
+		if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.time + FRAMERATE_MS).count(), linearMove );
+			SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
+			 
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.extrapolatedTime - FRAMERATE_MS ).count(), (level.extrapolatedTime).count(), linearMove );
+
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
+		}
 	}
 
     // Copy results out for rendering
