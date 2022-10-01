@@ -69,14 +69,14 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
 			
 			
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time ).count(), (level.time + FRAMERATE_MS).count(), linearMove);
-			SG_LinearMovementDelta( geGround->GetPODEntity(), moveCommand->prediction.moverLevelTime, moveCommand->prediction.moverNextLevelTime, linearMove );
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), moveCommand->prediction.moverLevelTime, moveCommand->prediction.moverNextLevelTime, linearMove );
 			
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 		}
 	}
 
     // Subtract what the server returned from our predicted origin for that frame
-    out->error = moveCommand->prediction.error = ((moveCommand->prediction.origin + linearMove) - in->origin);
+    out->error = moveCommand->prediction.error = ((moveCommand->prediction.origin) - in->origin);
 
     // If the error is too large, it was likely a teleport or respawn, so ignore it
     const float len = vec3_length(out->error);
@@ -133,14 +133,6 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 	// Adjust to movers if necessary.
 	ClientGameWorld *gameWorld = GetGameWorld();
 	GameEntity *gePlayer = gameWorld->GetClientGameEntity();
-	//if ( gameWorld ) {
-	//	GameEntity *geGround = gameWorld->GetGameEntityByIndex( cl->predictedState.groundEntityNumber );
-	//	if ( geGround && geGround->IsSubclassOf<CLGBaseMover>() ) {
-	//		pm.state.origin		= vec3_mix( cl->frame.playerState.pmove.origin, gePlayer->GetClient()->playerState.pmove.origin, 1.0f - cl->lerpFraction );
-	//		//pm.state.origin		= vec3_mix( pm.state.origin, cl->predictedState.viewOrigin, cl->xerpFraction );
-	//		//pm.state.velocity	= vec3_mix( pm.state.velocity, cl->predictedState.velocity, cl->xerpFraction );
-	//	}
-	//}
 #if USE_SMOOTH_DELTA_ANGLES
     pm.state.deltaAngles = clge->view->GetViewCamera()->GetViewDeltaAngles(); //cl->deltaAngles;
 #endif
@@ -158,8 +150,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		if (cmd->input.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
-			cmd->prediction.moverLevelTime = level.time.count();
-			cmd->prediction.moverNextLevelTime = ( level.time + FRAMERATE_MS ).count();
+			cmd->prediction.moverLevelTime = level.extrapolatedTime.count();//level.time.count();
+			cmd->prediction.moverNextLevelTime = ( level.extrapolatedTime + FRAMERATE_MS ).count();//( level.time + FRAMERATE_MS ).count();
 
             // Assign the move command.
             pm.moveCommand = *cmd;
@@ -172,9 +164,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 				GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 
 				// Is the ground a valid pointer?
-				if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
+				if ( geGround && geGround->GetPODEntity()->linearMovement ) {
 					SG_LinearMovementDelta( geGround->GetPODEntity(), cmd->prediction.moverLevelTime, cmd->prediction.moverNextLevelTime, linearMove );
-					//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 				}
 			}
 			PlayerMoveToClientEntity( &pm, gePlayer, linearMove );
@@ -188,7 +179,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
         // Save for error detection
         cmd->prediction.groundEntityNumber = pm.groundEntityNumber;
-		cmd->prediction.origin = pm.state.origin;// + linearMove;
+		cmd->prediction.origin = pm.state.origin + linearMove;
 	}
 
 	// Run the player move prediction process using the current pending frame user input.
@@ -196,8 +187,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 	vec3_t linearMove = vec3_zero();
 	
 	// Setup time for current move command.
-	cl->moveCommand.prediction.moverLevelTime = level.time.count();
-	cl->moveCommand.prediction.moverNextLevelTime = ( level.time + FRAMERATE_MS ).count();
+	cl->moveCommand.prediction.moverLevelTime = level.extrapolatedTime.count();
+	cl->moveCommand.prediction.moverNextLevelTime = ( level.extrapolatedTime + FRAMERATE_MS ).count();
 
 	// Process it if it had any input.
 	if (cl->moveCommand.input.msec) {
@@ -222,7 +213,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		
 		// Save for error detection
 		cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
-		cl->moveCommand.prediction.origin = pm.state.origin;// + linearMove;
+		cl->moveCommand.prediction.origin = pm.state.origin + linearMove;
 	}
 
 	// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
@@ -231,12 +222,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
 		// Is the ground a valid pointer?
 		if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-			//SG_LinearMovementDelta( geGround->GetPODEntity(), level.time.count(), (level.time + FRAMERATE_MS).count(), linearMove );
 			SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
-			 
-			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.extrapolatedTime - FRAMERATE_MS ).count(), (level.extrapolatedTime).count(), linearMove );
-
-			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 		}
 	}
 
@@ -419,27 +405,27 @@ TraceResult ClientGamePrediction::PM_Trace( const vec3_t& start, const vec3_t& m
 **/
 int32_t ClientGamePrediction::PM_PointContents( const vec3_t &point ) {
 	return clgi.PointContents( point );
-	//// Get world brush contents at 'point' coordinate.
- //   PODEntity* ent = nullptr;
+//// Get world brush contents at 'point' coordinate.
+//   PODEntity* ent = nullptr;
 
- //   int32_t contents = clgi.CM_PointContents(point, cl->bsp->nodes);
+//   int32_t contents = clgi.CM_PointContents(point, cl->bsp->nodes);
 
- //   for (int32_t i = 0; i < cl->numSolidEntities; i++) {
- //       ent = cl->solidEntities[i];
+//   for (int32_t i = 0; i < cl->numSolidEntities; i++) {
+//       ent = cl->solidEntities[i];
 
- //       if (ent->currentState.solid != PACKED_BSP) // special value for bmodel
- //           continue;
+//       if (ent->currentState.solid != PACKED_BSP) // special value for bmodel
+//           continue;
 
- //       mmodel_t *cmodel = cl->clipModels[ent->currentState.modelIndex - 1];
- //       if (!cmodel)
- //           continue;
+//       mmodel_t *cmodel = cl->clipModels[ent->currentState.modelIndex - 1];
+//       if (!cmodel)
+//           continue;
 
- //       contents |= clgi.CM_TransformedPointContents(
- //           point, cmodel->headNode,
- //           ent->currentState.origin,
- //           ent->currentState.angles);
- //   }
+//       contents |= clgi.CM_TransformedPointContents(
+//           point, cmodel->headNode,
+//           ent->currentState.origin,
+//           ent->currentState.angles);
+//   }
 
-	//// Return.
- //   return contents;
+//// Return.
+//   return contents;
 }

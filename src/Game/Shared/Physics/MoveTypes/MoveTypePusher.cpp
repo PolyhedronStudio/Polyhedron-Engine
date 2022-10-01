@@ -16,7 +16,9 @@
 #include "../Physics.h"
 #include "../RootMotionMove.h"
 
-
+#ifdef SHAREDGAME_CLIENTGAME
+#include "Game/Client/Entities/GibEntity.h"
+#endif
 
 /**
 *	@brief	Contains data of entities that are pushed by MoveType::Push objects. (BrushModels usually.)
@@ -306,7 +308,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 	// Get a range of all pushable entities in our world. (A valid GameEntity and Inuse.)
 	SGGameWorld *gameWorld = GetGameWorld();
 	//auto gePushables = SG_BoxEntities( mins, maxs, MAX_POD_ENTITIES, AreaEntities::Solid );
-	auto gePushables = gameWorld->GetGameEntityRange(0, MAX_POD_ENTITIES) | cef::IsValidPointer | cef::InUse;
+	auto gePushables = gameWorld->GetGameEntityRange(0, MAX_POD_ENTITIES) | cef::IsValidPointer;// | cef::InUse;
 
 	// Iterate over the pushable entities.
 	for ( auto geCheck : gePushables ) {
@@ -315,6 +317,19 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
         const int32_t moveType = geCheck->GetMoveType();
         const vec3_t absMin = geCheck->GetAbsoluteMin();
         const vec3_t absMax = geCheck->GetAbsoluteMax();
+
+		if ( !geCheck->GetPODEntity()->isLocal ) {
+			if ( !geCheck->IsInUse() ) {
+				continue;
+			}
+		}
+		#ifdef SHAREDGAME_CLIENTGAME
+		else {
+			if ( !geCheck->IsClass<GibEntity>() ) {
+				continue;
+			}
+		}
+		#endif
 
 		// Skip moveTypes that aren't pushed around at all.
         if ( moveType == MoveType::Push   || moveType == MoveType::Stop   ||
@@ -660,7 +675,10 @@ retry:
 				mv->EnableExtrapolation();
 				//mv->SetNextThinkTime(level.extrapolatedTime);//mv->GetNextThinkTime() + FRAMERATE_MS);//);//FRAMETIME_S);// 1_hz);
 				//mv->EnableExtrapolation();
-				mv->SetNextThinkTime( mv->GetNextThinkTime() + FRAMERATE_MS );
+				GameTime timeAddition = mv->GetNextThinkTime() - level.time;
+
+				//mv->SetNextThinkTime( mv->GetNextThinkTime() + FRAMERATE_MS );
+				mv->SetNextThinkTime( level.extrapolatedTime + timeAddition );
 				#else
 				mv->SetNextThinkTime( mv->GetNextThinkTime() + FRAMERATE_MS );//);//FRAMETIME_S);// 1_hz);
 				#endif
