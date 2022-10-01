@@ -187,8 +187,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 	vec3_t linearMove = vec3_zero();
 	
 	// Setup time for current move command.
-	cl->moveCommand.prediction.moverLevelTime = level.extrapolatedTime.count();
-	cl->moveCommand.prediction.moverNextLevelTime = ( level.extrapolatedTime + FRAMERATE_MS ).count();
+	cl->moveCommand.prediction.moverLevelTime = level.time.count();
+	cl->moveCommand.prediction.moverNextLevelTime = ( level.extrapolatedTime ).count();
 
 	// Process it if it had any input.
 	if (cl->moveCommand.input.msec) {
@@ -204,6 +204,16 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		// Simulate the move command.
         PMove(&pm);
 
+		// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
+		if ( gameWorld ) {
+			GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
+
+			// Is the ground a valid pointer?
+			if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
+				SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
+			}
+		}
+
 		PlayerMoveToClientEntity( &pm, gePlayer, linearMove );
 
         // Update player move client side audio effects.
@@ -216,26 +226,14 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		cl->moveCommand.prediction.origin = pm.state.origin + linearMove;
 	}
 
-	// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
-	if ( gameWorld ) {
-		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 
-		// Is the ground a valid pointer?
-		if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-			SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
-		}
-	}
 
     // Copy results out for rendering
-    // TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
-    // Perhaps take another look at pmove to correct this in the future.
-
-	//if ( vec3_distance( cl->predictedState.viewOrigin, pm.state.origin ) > 0.03125f ) {
+    //if ( vec3_distance( cl->predictedState.viewOrigin, pm.state.origin ) > 0.03125f ) {
+	//	// TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
 	//	cl->predictedState.viewOrigin = pm.state.origin;
 	//}
-	// Get any possible ground entity and inspect if it's a func_plat, in which case we'll extrapolate the origin up to the player state.
-	// In case of on a plat, extrapolate.
-	cl->predictedState.viewOrigin = pm.state.origin + linearMove;
+	cl->predictedState.viewOrigin = pm.state.origin;
 	cl->predictedState.viewAngles = pm.viewAngles;
     cl->predictedState.viewOffset = pm.state.viewOffset;
     cl->predictedState.stepOffset = pm.state.stepOffset;
@@ -289,7 +287,7 @@ void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm, GameEntity 
 	// EXCEPTION: If the mover is NOT moving, we make sure to adjust to our frame again.
 	GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
 
-	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || (geGround && !geGround->GetPODEntity()->linearMovement) )  {
+	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || ( geGround && !geGround->GetPODEntity()->linearMovement ) )  {
 		gePlayer->SetOrigin( pm->state.origin );
 		gePlayer->SetVelocity( pm->state.velocity );
 	}

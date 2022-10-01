@@ -246,63 +246,70 @@ void ClientGameExports::ClientUpdateOrigin() {
         return;
     }
 
+	// Get game world.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	if ( !gameWorld ) {
+		return;
+	}
 
-
-    // Find states to interpolate between
+    // Acquire a pointer to the current player state(that of our latest received valid frame.)
     const PlayerState* currentPlayerState  = &cl->frame.playerState;
-    const PlayerState* previousPlayerState = &cl->oldframe.playerState;
+	// Acquire a pointer to the previous valid 'old frame' player state.
+	const PlayerState* previousPlayerState = &cl->oldframe.playerState;
+    // Acquire pointer to our predicted player state.
+	ClientPredictedState* predictedState = &cl->predictedState;
 
-    // These are applied to the view camera at the very end.
+
+    // Get Xerp and Lerp fractions.
+    const double lerpFraction = cl->lerpFraction;
+	const double xerpFraction = cl->xerpFraction;
+
+    // These are first calculated and then applied to the view camera at the very end of this function.
     vec3_t newViewOrigin = vec3_zero();
     vec3_t oldViewOrigin = vec3_zero();
-
     vec3_t newViewAngles = vec3_zero();
     vec3_t oldViewAngles = vec3_zero();
 
-    // Get Lerp Fraction.
-    const double lerpFraction = cl->lerpFraction;
-
-
-    /*
+    /**
     *	View Origin.
     **/
     if ( !clgi.IsDemoPlayback() && cl_predict->integer && !( currentPlayerState->pmove.flags & PMF_NO_PREDICTION ) ) {
         // Set the view camera's origin to that of the predicted state's view origin + view offset.
-        ClientPredictedState* predictedState = &cl->predictedState;
         newViewOrigin = predictedState->viewOrigin + predictedState->viewOffset;
+       
+		// We need the player state and ground entity in order to fetch needed information for extrapolation.
+		GameEntity *gePlayer = gameWorld->GetClientGameEntity();
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( predictedState->groundEntityNumber );
 
-        // Scale prediction error to frame lerp fraction and add it to the camera view origin.
-		ClientGameWorld *gameWorld = GetGameWorld();
-		GameEntity *geGround = gameWorld->GetGameEntityByIndex( cl->predictedState.groundEntityNumber );
+		// TODO: See if this works better.
+		PlayerState gePlayerState = gePlayer->GetClient()->playerState;
 
-		// Is the ground a valid pointer?
-		if ( geGround && geGround->GetPODEntity()->linearMovement ) {//geGround->IsExtrapolating() ) {
-			//if ( cl->xerpFraction ) {
-			//	const vec3_t error = vec3_scale( predictedState->error, cl->xerpFraction );
-			//	newViewOrigin += error;
-			//}
+		// Extrapolate view origin in case the 'ground mover' is performing linear extrapolating movement.
+		if ( geGround && geGround->GetPODEntity()->linearMovement ) {
+			// Construct the old view origin based on the latest valid frame received player state.
 	        oldViewOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
-		    oldViewOrigin.z -= cl->predictedState.stepOffset;
 
-	        //newViewOrigin = cl->predictedState.viewOrigin + cl->predictedState.viewOffset;
-			GameEntity *gePlayer = gameWorld->GetClientGameEntity();
-			PlayerState gePlayerState = gePlayer->GetClient()->playerState;
-			newViewOrigin = cl->predictedState.viewOrigin + cl->predictedState.viewOffset; //gePlayerState.pmove.origin + gePlayerState.pmove.viewOffset;
-		    newViewOrigin.z -= cl->predictedState.stepOffset;
+			// Construct the current view origin based on the predicted player state.
+			newViewOrigin = predictedState->viewOrigin + predictedState->viewOffset; //gePlayerState.pmove.origin + gePlayerState.pmove.viewOffset;
 
+			// Don't lerp with xerpFraction if it is 0.
 			if ( cl->xerpFraction ) {
 		        // Interpolate new view origin based on the frame's lerpfraction.
-			    newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, cl->xerpFraction );
-				const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );//->xerpFraction );
-				newViewOrigin += error;
+			    newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, xerpFraction );
 			} else {
-				newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, lerpFraction );
-				const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
-				newViewOrigin += error;
+				//newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, lerpFraction );
 			}
 
+			// Scale prediction error to frame xerp fraction and add it to the camera view origin.
+			const double correctionFraction = 1. - xerpFraction; //(xerpFraction ? xerpFraction : 1.f - lerpFraction);
+			const vec3_t error = vec3_scale( predictedState->error, correctionFraction );
+			newViewOrigin += error;
 		} else {
-			const vec3_t error = vec3_scale( predictedState->error, 1.f - lerpFraction );
+			// This scenario can occure when a mover has stopped moving but due to asynchronisity, the player's
+			// state may still expect extrapolation.
+
+			// Scale prediction error to frame lerp fraction and add it to the camera view origin.
+			const vec3_t error = vec3_scale( predictedState->error, 1. - lerpFraction );
 			newViewOrigin += error;
 		}
 
@@ -311,9 +318,9 @@ void ClientGameExports::ClientUpdateOrigin() {
 	} else {
         // Use the interpolated values, and substract stepOffset.
         oldViewOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
-        oldViewOrigin.z -= cl->predictedState.stepOffset;
+        oldViewOrigin.z -= predictedState->stepOffset;
         newViewOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
-        newViewOrigin.z -= cl->predictedState.stepOffset;
+        newViewOrigin.z -= predictedState->stepOffset;
 
         // Interpolate new view origin based on the frame's lerpfraction.
         newViewOrigin = vec3_mix( oldViewOrigin, newViewOrigin, lerpFraction );
