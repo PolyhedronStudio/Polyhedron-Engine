@@ -148,12 +148,16 @@ struct PODEntity {
 	/**
 	*	Client/ClientGame only fields.
 	**/
-	//! The frame number that this entity was received at.
-	//! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
+	//! The last 'valid frame' number that this entity was received at.
+	//! When not matching cl.frame.number it means that this entity is 'out of date'.
 	int32_t serverFrame = 0;
 
 	//! An entity's client state flags.
     int32_t clientFlags = 0;
+
+	//! The current local client frame number. Used to keep score of whether an entity is 'in use' for the local
+	//!	client simulation.
+	int64_t clientFrame = 0;
 
     //! For diminishing grenade trails
     int32_t trailCount = 0;

@@ -182,24 +182,36 @@ struct cparticle_t {
 // Client DLight structure.
 //
 struct cdlight_t {
-    int32_t     key;        // so entities can reuse same entry
-    vec3_t  color;
-    vec3_t  origin;
-    float   radius;
-    double   die;	      // stop lighting after this time
-    double	decay;	      // drop this each second
-	vec3_t  velocity;     // move this far each second
-    //float   minlight;   // don't add when contributing less
+	//! So entities can reuse same entry
+    int32_t key;
+
+	//! Color of this dynamic light.
+    vec3_t color;
+	//! Origin.
+    vec3_t origin;
+
+	//! Light radius.
+    float radius;
+
+	//! Kills/Stops the light after 'die' amount of time has passed.
+    double die;
+	//! The value at which to decay this light with over each second that passes. (A game frame.)
+    double decay;
+	//! Move velocity(distance) for each second that passes. (A game frame.)
+	vec3_t velocity;
+	//! Don't add when contributing less
+    //float   minlight;
 };
 
-//
-// Maximum amount of weapon models allowed.
-//
+/**
+*	TODO: Currently not really used... ?
+*	Maximum amount of weapon models allowed.
+**/
 static constexpr int32_t MAX_CLIENTWEAPONMODELS = 20;        // PGM -- upped from 16 to fit the chainfist vwep
 
-//
-// Contains all the info about a client we need to know.
-//
+/**
+*	Contains all the info about a client we need to know.
+**/
 struct ClientInfo {
     char name[MAX_QPATH];           // The client name.
     char model_name[MAX_QPATH];     // The model name.
@@ -212,34 +224,57 @@ struct ClientInfo {
     qhandle_t weaponmodel[MAX_CLIENTWEAPONMODELS];  // The weapon model handles.
 };
 
-//
-// Used for storing client input commands.
-//
+/**
+*	Data needed for storing a 'client user input' command history. Store its time at which
+*	it was sent as well as when it was received. Used for calculating pings.
+**/
 struct ClientUserCommandHistory {
-    uint64_t timeSent;      // Time sent, for calculating pings.
-    uint64_t timeReceived;  // Time received, for calculating pings.
-    uint64_t commandNumber; // Current commandNumber for this frame,
+	//! Current commandNumber for this frame,
+    uint64_t commandNumber = 0;
+
+	//! Time sent, for calculating pings.
+	uint64_t timeSent = 0;
+	//! Time received, for calculating pings.
+    uint64_t timeReceived = 0;    
 };
 
-//
-// The server frame structure contains information about the frame
-// being sent from the server.
-//
+/**
+*	@brief Stores the received from server's frame data.
+**/
 struct ServerFrame {
-    qboolean valid = false; // False if delta parsing failed.
+    qboolean valid = false; //! False if delta parsing failed.
 
-    int64_t number = 0; // Sequential identifier, used for delta.
-    int64_t delta = 0;  // Delta between frames.
+	//! Sequential unique identifier.
+    int64_t number = 0;
+	//! Amount of delta between frames between previous and most recent received 'valid frames'.
+    int64_t delta = 0;
 
-    byte    areaBits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
-    int32_t areaBytes;                      // Area bytes.
+	//! Area bits of this frame.
+    byte    areaBits[MAX_MAP_AREA_BYTES];
+	//! Area bytes.
+    int32_t areaBytes = 0;
 
-    PlayerState playerState;		// The player state.
-    int32_t     clientNumber = 0;	// The client number.
+	//! The player state data received for this server frame.
+	PlayerState playerState = {};
+	//! The client number. (May differ if lets say, spectating an other client.)
+    int32_t     clientNumber = 0;
 
-    int32_t numEntities = 0;    // firstEntity + numEntities = first index up to last index of entities in received frame.
-    int32_t firstEntity = 0;    // The first entity number in the received frame.
+	//! Amount of entity states received in this frame:
+	//! firstEntity + numEntities = first index up to last index of entities in received frame.
+    int32_t numEntities = 0;
+	//! The first entity number index in the received frame.
+    int32_t firstEntity = 0;
 };
+
+/**
+*	@brief	Stores the actual current client frame data.
+*			NOTE: May in the future also be similar to ServerFrame in that it gets a history log.
+**/
+struct ClientLocalFrame {
+	//! Local client side game frame number. Does NOT need to match that of the server.
+	uint64_t number = 0;
+};
+
 
 //
 // This structure contains all (persistent)shared data with the client.
@@ -252,20 +287,30 @@ struct ClientShared {
     int num_entities;
 };
 
-//
-// Contains the predicted state (view origin, offset, angles, etc) of the client.
-//
+/**
+*	Stores the final move results after processing all our game frame's client user movement
+*	commands. This in return is later on compared to that of the newly received frame in order
+*	to determine if we need to correct our prediction in case the mismatch is too large.
+**/
 struct ClientPredictedState {
-    // These are the actual predicted results that should align with the server's.
-    vec3_t viewOrigin	= vec3_zero();	// Predicted view origin.
-    vec3_t viewOffset	= vec3_zero();	// Predicted view offset.
-    vec3_t viewAngles	= vec3_zero();	// Predicted view angles.
-    float stepOffset	= 0.;			// Predicted stepping offset. (Up or down)
+    //! These are the actual predicted results that should align with the server's.
+    //! Predicted view origin.
+	vec3_t viewOrigin	= vec3_zero();
+	//! Predicted view offset.
+    vec3_t viewOffset	= vec3_zero();
+	//! Predicted view angles.
+    vec3_t viewAngles	= vec3_zero();
+	//! Predicted stepping offset. (Up or down)
+    float stepOffset	= 0.;
 
-    // Predicted velocity.
+	//! Predicted velocity.
     vec3_t velocity = vec3_zero();
 
-    // Ground entity pointer of the predicted frame.
+	//! The current player move mins/maxs.
+	vec3_t mins = vec3_zero();
+	vec3_t maxs = vec3_zero();
+
+    //! Ground entity pointer of the predicted frame.
 	int32_t groundEntityNumber = -1;
 
     // Prediction error that is interpolated over the server frame.
@@ -275,41 +320,58 @@ struct ClientPredictedState {
 	uint16_t flags = 0;
 };
 
-//
-// The client structure is cleared at each level load, and is exposed to
-// * the client game module to provide access to media and other client state.
-//
+/**
+*	@brief	Stores all 'current game' client state data that is true to its heart. Not to be confused with 
+*			client static, which stores state data that is persistent and incremental in that it never 
+*			gets reset during each 'game change'.
+**/
 struct ClientState {
-    /**
+	//! Chat time out counter.
+    int32_t timeoutCount = 0;
+
+	//! TODO: Stores the icon but do we need it here?!
+    byte            dcs[CS_BITMAP_BYTES] = {};
+
+	/**
     *
     *   Client User Command Related.
     *
     **/
-    int32_t     timeoutCount = 0;
-
-    //! The time we last transmitted a user command.
-    uint64_t    lastTransmitTime = 0;
-    //! The last transmitted command number. This may differ from the one below.
-    uint64_t    lastTransmitCmdNumber = 0;
-    //! The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
-    uint64_t    lastTransmitCmdNumberReal = 0;
-    //! Determines whether to send the user command packet asap, and preferably, NOW.
-    bool    sendPacketNow = 0;
-
-    //! Actual current client move command.
-    ClientMoveCommand    moveCommand = {};
-    //! Actual current client move command list.
-    ClientMoveCommand    clientUserCommands[CMD_BACKUP] = {};    // each mesage will send several old clientUserCommands
-    //! Current client move command number.
-    uint64_t     currentClientCommandNumber = 0;
-    //! History book of time sent, received, and command number.
-    ClientUserCommandHistory clientCommandHistory[CMD_BACKUP] = {};
-
-    //! Initial outgoing sequence number.
+    //! Initial outgoing command sequence number.
     int32_t initialSequence = 0;
+
+	//! Determines whether to send the user command packet asap, and preferably, NOW.
+    bool sendPacketNow = false;
+    //! The exact 'simulation time' we last transmitted a user command.
+    uint64_t lastTransmitTime = 0;
+    //! The last transmitted command number. This may differ from the one below.
+    uint64_t lastTransmitCmdNumber = 0;
+    //! The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
+    uint64_t lastTransmitCmdNumberReal = 0;
 
     //! Predicted Client State. (Used for movement.)
     ClientPredictedState predictedState = {};
+	//! The client maintains its own idea of view angles, which are
+    //! sent to the server each frame.  It is cleared to 0 upon entering each level.
+    //! the server sends a delta each frame which is added to the locally
+    //! tracked view angles to account for standing on rotating objects,
+    //! and teleport direction changes
+    vec3_t viewAngles = vec3_zero();
+    //! Interpolated movement vector used for local prediction, never sent to server, rebuilt each client frame
+    vec3_t localMove = vec3_zero();
+    //! Accumulated mouse forward/side movement, added to both localMove and pending cmd, cleared each time cmd is finalized.
+    vec2_t mouseMove = vec2_zero();
+
+    //! Current client move command number.
+    uint64_t currentClientCommandNumber = 0;
+	//! The current local client's frame move command that is to be processed.
+    ClientMoveCommand moveCommand = {};
+	    
+	//! History of processed client move commands for during an entire game frame (1 second).
+	//! Each client to server packet mesage will send several old clientUserCommands(3) along with it.
+    ClientMoveCommand clientUserCommands[CMD_BACKUP] = {};
+    //! A history log indexing in clientUserCommands that keeps track of their 'timeSent' and 'timeReceived'.
+    ClientUserCommandHistory clientCommandHistory[CMD_BACKUP] = {};
 
 
     /**
@@ -320,7 +382,6 @@ struct ClientState {
     //! Solid Entities, these are REBUILT during EACH FRAME.
     PODEntity *solidEntities[MAX_PACKET_ENTITIES];// = {};
     int32_t numSolidEntities = 0;
-
     //! Solid Local Entities, these are REBUILT during EACH FRAME.
     PODEntity *solidLocalEntities[MAX_NON_WIRED_POD_ENTITIES];// = {};
     int32_t numSolidLocalEntities = 0;
@@ -332,7 +393,6 @@ struct ClientState {
 	//! These frames are used to 
     EntityState entityStates[MAX_PARSE_ENTITIES]; // DO NOT initialize this using {} or VS2022 will stall your machine and give a nasty stack error.
     int32_t numEntityStates  = 0;
-
 	//! Stores all local entity states also from previous and current frame. (Client frames).
 	EntityState localEntityStates[MAX_PARSE_ENTITIES];
 
@@ -345,44 +405,41 @@ struct ClientState {
     *   Server Frames.
     *
     **/
+	//! The actual time on the server at the time of receiving the most recent 'valid frame'.
+    int64_t serverTime = 0;
+	//! Amount of possibly missed frames between the previous and most recent received 'valid frames'.
+    int64_t serverDelta = 0;
+
     //! A list of server frames received.
     ServerFrame  frames[UPDATE_BACKUP];
     uint32_t     frameFlags = 0;
 
-    //! The current(last received frame from the server)
+    //! The current(most recent) received frame.
     ServerFrame frame = {}; 
-    //! The previous frame received, right before the current frame.
+    //! The previous (last/most recent) received frame.
     ServerFrame oldframe = {};
-    int64_t serverTime = 0;
-    int64_t serverDelta = 0;
 
-    byte            dcs[CS_BITMAP_BYTES] = {};
 
-    //! The client maintains its own idea of view angles, which are
-    //! sent to the server each frame.  It is cleared to 0 upon entering each level.
-    //! the server sends a delta each frame which is added to the locally
-    //! tracked view angles to account for standing on rotating objects,
-    //! and teleport direction changes
-    vec3_t      viewAngles = vec3_zero();
+    /**
+    *
+    *   Client Frames.
+    *
+    **/
+	//! Current client frame data.
+	ClientLocalFrame clientFrame = {};
 
-    //! Interpolated movement vector used for local prediction, never sent to server, rebuilt each client frame
-    vec3_t      localMove = vec3_zero();
-
-    //! Accumulated mouse forward/side movement, added to both localMove and pending cmd, cleared each time cmd is finalized.
-    vec2_t      mouseMove = vec2_zero();
     //! This is the 'current moment in time' value of the client's game state at.  
     //! Always <= cl.serverTime
     int64_t	time = 0;
 	//! This is the 'extrapolated moment in time' value of the client's game state.
-	//! Always >= cl.serverTime
+	//! Always >= cl.serverTime and <= cl.serverTime + FRAMERATE_MS
 	int64_t extrapolatedTime = 0;
 
     //! Linear interpolation fraction between cl.oldframe and cl.frame.
     double		lerpFraction = 0.f;
-    //! Linear extrapolation fraction between cl.oldframe and cl.frame.
+    //! We always extrapolate only a single frame ahead. Linear extrapolation fraction between cl.oldframe and cl.frame.
     double		xerpFraction = 0.f;
 
-	//! 
 
     /**
     *
@@ -408,7 +465,7 @@ struct ClientState {
 
     /**
     *
-    *   Client Rendering Variables.
+    *   Refresh Related.
     *
     **/
     //! Refresh Definitions of current frame for the renderer.

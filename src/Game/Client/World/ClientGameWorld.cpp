@@ -141,6 +141,7 @@ void ClientGameWorld::PrepareEntities() {
 			},
 			.isLocal = isLocal,
 			.inUse = false,
+			.freeTime = GameTime::zero(),
 			.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
 		};
     }
@@ -431,7 +432,9 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
 	    //if (!podEntity->inUse && (podEntity->freeTime == GameTime::zero() || podEntity->freeTime < (std::chrono::duration_cast<GameTime>(FRAMETIME_S) * 2) || level.time - podEntity->freeTime > 500ms)) {
-		if (!podEntity->inUse && (podEntity->freeTime == GameTime::zero() || podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
+		if ( !podEntity->inUse && 
+			( podEntity->freeTime == GameTime::zero() || podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms ) ) 
+		{
             // Set entity to "inUse".
 			podEntity->inUse = true;
 			
@@ -1056,7 +1059,7 @@ IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityH
 				// Check for non nullptr client pointer.
 				( requireClient == true ? ( entityHandle.Get()->client != nullptr ? true : false ) : true ) &&
 				// Check for inUse.
-				( requireInUse == true ? entityHandle->IsInUse() : true)
+				( requireInUse == true ? entityHandle->IsInUse() : true )
 			)
 		)
 	{
@@ -1140,6 +1143,7 @@ PODEntity* ClientGameWorld::GetWorldspawnPODEntity() {
 /**
 *   @return A pointer to the worldspawn game entity.
 **/
+#include "Game/Client/Entities/Worldspawn.h"
 Worldspawn* ClientGameWorld::GetWorldspawnGameEntity() { 
-    return nullptr;//dynamic_cast<Worldspawn*>(gameEntities[0]); 
+    return dynamic_cast<Worldspawn*>(gameEntities[0]); 
 }

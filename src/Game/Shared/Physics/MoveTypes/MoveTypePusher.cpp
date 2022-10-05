@@ -56,8 +56,8 @@ const PushedEntityState &&SG_PushEntityState( GameEntity* gePushMove ) {
 	const bool isClientEntity = ( gePushMove->GetClient() != nullptr ? true : false );
 	const float deltaYaw = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] : gePushMove->GetAngles()[vec3_t::Yaw] );
 	#ifdef SHAREDGAME_CLIENTGAME
-	const vec3_t playerMoveOrigin = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
-	//const vec3_t playerMoveOrigin = ( isClientEntity ? cl->predictedState.viewOrigin : vec3_zero() ); //gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
+	//const vec3_t playerMoveOrigin = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
+	const vec3_t playerMoveOrigin = ( isClientEntity ? cl->predictedState.viewOrigin : vec3_zero() ); //gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
 	#else
 	const vec3_t playerMoveOrigin = ( isClientEntity ? gePushMove->GetClient()->playerState.pmove.origin : vec3_zero() );// = p->playerMoveOrigin;
 	#endif
@@ -74,8 +74,8 @@ const PushedEntityState &&SG_PushEntityState( GameEntity* gePushMove ) {
 		.playerMoveOrigin = playerMoveOrigin,
 
 		#ifdef SHAREDGAME_CLIENTGAME
-		.moveTime = (level.extrapolatedTime - FRAMERATE_MS).count(),
-		.moveNextTime = level.extrapolatedTime.count(),
+		.moveTime = ( level.extrapolatedTime ).count(),
+		.moveNextTime = ( level.extrapolatedTime + FRAMERATE_MS ).count(),
 		#else
 		.moveTime = (level.time).count(),
 		.moveNextTime = (level.time + FRAMERATE_MS).count(),
@@ -132,16 +132,16 @@ SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset 
     vec3_t end = start + pushOffset;
 
 retry:
-    if ( ent->GetClipMask() )
+    if (ent->GetClipMask())
         mask = ent->GetClipMask();
     else
         mask = BrushContentsMask::Solid;
 
-    trace = SG_Trace( start, ent->GetMins(), ent->GetMaxs(), end, ent, mask );
+    trace = SG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
-	if ( ent->GetMoveType() == MoveType::Push || !trace.startSolid ) {
-	//if (!trace.startSolid) {//if (!trace.startSolid) {
-		ent->SetOrigin( trace.endPosition);
+	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
+	if (!trace.startSolid) {//if (!trace.startSolid) {
+		ent->SetOrigin(trace.endPosition);
 	}
 	//}
     //ent->SetOrigin(trace.endPosition);
@@ -152,7 +152,7 @@ retry:
         SG_Impact(ent, trace);
 
         // if the pushed entity went away and the pusher is still there
-        if ( ( !trace.gameEntity || !trace.gameEntity->IsInUse() ) && ent->GetMoveType() == MoveType::Push && ent->IsInUse() ) {
+        if ( (!trace.gameEntity || !trace.gameEntity->IsInUse()) && ent->GetMoveType() == MoveType::Push && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin( start );
             ent->LinkEntity();
@@ -181,6 +181,10 @@ static GameEntity *SG_TestEntityPosition( GameEntity *geTestSubject ) {
     }
 
     SGTraceResult trace = SG_Trace( geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask );
+
+	//if (trace.startSolid == false && trace.allSolid == false ) {
+	//	return nullptr;
+	//}
 
     if ( trace.startSolid ) {
 		SGGameWorld *gameWorld = GetGameWorld();
@@ -269,9 +273,9 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 	    return false;
     }
 
-    // Find the bounding box.
-    vec3_t mins = gePusher->GetAbsoluteMin() + deltaMove;
-    vec3_t maxs = gePusher->GetAbsoluteMax() + deltaMove;
+	// Find the bounding box.
+	const vec3_t mins = gePusher->GetAbsoluteMin() - deltaMove;
+	const vec3_t maxs = gePusher->GetAbsoluteMax() + deltaMove;
 
     // We need this for pushing things later
     org = vec3_negate(angularMove);
@@ -288,27 +292,31 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
     gePusher->SetOrigin( gePusher->GetOrigin() + deltaMove );//gePusher->SetOrigin( gePusher->GetOrigin() + move );
     gePusher->SetAngles( gePusher->GetAngles() + angularMove );
     gePusher->LinkEntity();
-    
-	//#ifdef SHAREDGAME_CLIENTGAME
-	//int64_t frameNumber = cl->frame.number;
-	//int64_t timeNow = level.time.count();
-	//int64_t timeNext = (level.time + FRAMERATE_MS).count();
-	//SG_Print( PrintType::DeveloperWarning, fmt::format("[[[[CLG]]]]: origin({}, {}, {}), deltaMove({}, {}, {}), frameNumber({}), timeStart({}), timeNext({})\n", partOrigin.x, partOrigin.y, partOrigin.z, deltaMove.x, deltaMove.y, deltaMove.z, frameNumber, timeNow, timeNext ));
-	//#endif
-	//#ifdef SHAREDGAME_SERVERGAME
-	//int64_t frameNumber = level.frameNumber;
-	//int64_t timeNow = level.time.count();
-	//int64_t timeNext = (level.time + FRAMERATE_MS).count();
-	//SG_Print( PrintType::DeveloperWarning, fmt::format("[[[[SVG]]]]: origin({}, {}, {}), deltaMove({}, {}, {}), frameNumber({}), timeStart({}), timeNext({})\n", partOrigin.x, partOrigin.y, partOrigin.z, deltaMove.x, deltaMove.y, deltaMove.z, frameNumber, timeNow, timeNext ));
-	//#endif
 
 	/**	
 	*	See if the position has been taken by other entities, and if so, try and push each other.
 	**/
 	// Get a range of all pushable entities in our world. (A valid GameEntity and Inuse.)
 	SGGameWorld *gameWorld = GetGameWorld();
-	//auto gePushables = SG_BoxEntities( mins, maxs, MAX_POD_ENTITIES, AreaEntities::Solid );
-	auto gePushables = gameWorld->GetGameEntityRange(0, MAX_POD_ENTITIES) | cef::IsValidPointer;// | cef::InUse;
+	auto gePushables = SG_BoxEntities( mins, maxs, MAX_POD_ENTITIES, AreaEntities::Solid );
+	//auto gePushables = gameWorld->GetGameEntityRange(0, MAX_POD_ENTITIES) | cef::IsValidPointer | cef::InUse;
+
+	// Link backmk in our pusher.
+
+	#ifdef SHAREDGAME_CLIENTGAME
+	const std::string pushablesStr = fmt::format(
+		"CLG_BoxEntities(count: {}) {{\n",
+		gePushables.size()
+	);
+	SG_Print( PrintType::DeveloperWarning, pushablesStr );
+	#endif
+	#ifdef SHAREDGAME_SERVERGAME
+	const std::string pushablesStr = fmt::format(
+		"SVG_BoxEntities(count: {}) {{\n",
+		gePushables.size()
+	);
+	SG_Print( PrintType::DeveloperWarning, pushablesStr );
+	#endif
 
 	// Iterate over the pushable entities.
 	for ( auto geCheck : gePushables ) {
@@ -318,25 +326,50 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
         const vec3_t absMin = geCheck->GetAbsoluteMin();
         const vec3_t absMax = geCheck->GetAbsoluteMax();
 
-		if ( !geCheck->GetPODEntity()->isLocal ) {
-			if ( !geCheck->IsInUse() ) {
-				continue;
-			}
-		}
 		#ifdef SHAREDGAME_CLIENTGAME
-		else {
-			if ( !geCheck->IsClass<GibEntity>() ) {
-				continue;
-			}
-		}
+		const std::string pushablesStr2 = fmt::format(
+			"CLG!!: Entity({}), inUse({}), moveType({}, linkCount({}), groundLinkEntityCount({}), origin({},{},{})\n",
+			geCheck->GetNumber(),
+			isInUse,
+			moveType,
+			geCheck->GetLinkCount(),
+			geCheck->GetGroundEntityLinkCount(),
+			geCheck->GetOrigin().x,
+			geCheck->GetOrigin().y,
+			geCheck->GetOrigin().z
+		);
+		SG_Print( PrintType::DeveloperWarning, pushablesStr2 );
+		#endif
+		#ifdef SHAREDGAME_SERVERGAME
+		const std::string pushablesStr2 = fmt::format(
+			"SVG!!: Entity({}), inUse({}), moveType({}, linkCount({}), groundLinkEntityCount({}), origin({},{},{})\n",
+			geCheck->GetNumber(),
+			isInUse,
+			moveType,
+			geCheck->GetLinkCount(),
+			geCheck->GetGroundEntityLinkCount(),
+			geCheck->GetOrigin().x,
+			geCheck->GetOrigin().y,
+			geCheck->GetOrigin().z
+		);
+		SG_Print( PrintType::DeveloperWarning, pushablesStr2 );
 		#endif
 
 		// Skip moveTypes that aren't pushed around at all.
+		#ifdef SHAREDGAME_CLIENTGAME
+        if ( moveType == MoveType::Push   || moveType == MoveType::Stop   ||
+			 /*moveType == MoveType::None   ||*/ moveType == MoveType::NoClip ||
+			 moveType == MoveType::Spectator ) {
+            continue;
+		}
+		#endif
+		#ifdef SHAREDGAME_SERVERGAME
         if ( moveType == MoveType::Push   || moveType == MoveType::Stop   ||
 			 moveType == MoveType::None   || moveType == MoveType::NoClip ||
 			 moveType == MoveType::Spectator ) {
             continue;
 		}
+		#endif
 
 		// Entity has to be linked in.
 		//#if SHAREDGAME_CLIENTGAME
@@ -459,7 +492,9 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 					SG_PopPushedEntityState( geCheck );
 
 					continue;
-				}
+				} /*else {
+					geBlock->LinkEntity();
+				}*/
 			//}
         }
 
@@ -488,7 +523,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 				//pusherEntity->GetClient()->playerState.pmove.origin = p->playerMoveOrigin;
 				//pusherEntity->SetOrigin( p->playerMoveOrigin );
 				vec3_t reverseDeltaMove = vec3_zero();
-				SG_LinearMovementDelta( pusherEntity->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), (p->moveNextTime - (FRAMERATE_MS).count()), reverseDeltaMove );
+				SG_LinearMovementDelta( gePusher->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), (p->moveNextTime - (FRAMERATE_MS).count()), reverseDeltaMove );
 				// Negate the delta move and use that to return with instead. Current times might be different than the stored previous time.
 				//const vec3_t negatedDeltaMove = vec3_negate( deltaMove );
 				pusherEntity->GetClient()->playerState.pmove.origin -= reverseDeltaMove; //p->playerMoveOrigin;
@@ -498,7 +533,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 				// Specific client side origin handling in order to support async physics.
 				#ifdef SHAREDGAME_CLIENTGAME
 				vec3_t reverseDeltaMove = vec3_zero();
-				SG_LinearMovementDelta( pusherEntity->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), p->moveTime, reverseDeltaMove );
+				SG_LinearMovementDelta( gePusher->GetPODEntity(), (p->moveTime/* - (FRAMERATE_MS).count()*/), (p->moveNextTime /*- (FRAMERATE_MS).count()*/), reverseDeltaMove);
 				// Negate the delta move and use that to return with instead. Current times might be different than the stored previous time.
 				//const vec3_t negatedDeltaMove = vec3_negate( deltaMove );
 				pusherEntity->GetClient()->playerState.pmove.origin -= reverseDeltaMove; //p->playerMoveOrigin;
@@ -512,23 +547,32 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 				
 				//#endif
 			} else {
-				pusherEntity->SetOrigin(p->origin);
+				vec3_t reverseDeltaMove = vec3_zero();
+				#ifdef SHAREDGAME_CLIENTGAME
+				SG_LinearMovementDelta( gePusher->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), (p->moveNextTime - (FRAMERATE_MS).count()), reverseDeltaMove);
+				#endif
+				#ifdef SHAREDGAME_SERVERGAME
+				SG_LinearMovementDelta( gePusher->GetPODEntity(), (p->moveTime - (FRAMERATE_MS).count()), (p->moveNextTime - (FRAMERATE_MS).count()), reverseDeltaMove );
+				#endif
+				pusherEntity->SetOrigin(pusherEntity->GetOrigin() - reverseDeltaMove );
 				pusherEntity->SetAngles(p->angles);
 
 				vec3_t newAngles = pusherEntity->GetAngles();
 				newAngles[vec3_t::Yaw] = p->deltaYaw;
 				pusherEntity->SetAngles(newAngles);
+
+				SG_Monster_CheckGround( pusherEntity );
 			}
 #endif
+
 			// Link Entity back in.
             pusherEntity->LinkEntity();
 		
 			// Be sure to check for ground.
-			#ifdef SHAREDGAME_CLIENTGAME
-			if ( !pusherEntity->GetClient() ) {
-				SG_CheckGround( pusherEntity );
-			}
-			#endif
+			//#ifdef SHAREDGAME_CLIENTGAME
+			//if ( !pusherEntity->GetClient() ) {
+			//}
+			//#endif
 
         }
 
@@ -600,7 +644,7 @@ retry:
 				SG_LinearMovement( partPODEntity, (level.extrapolatedTime ).count(), partOrigin );
 				// Delta move.
 				//SG_LinearMovementDelta( partPODEntity, level.time.count(), ( level.time + FRAMERATE_MS ).count(), move );
-				SG_LinearMovementDelta( partPODEntity, (level.extrapolatedTime - FRAMERATE_MS).count(), ( level.extrapolatedTime ).count(), move );
+				SG_LinearMovementDelta( partPODEntity, ( level.extrapolatedTime - FRAMERATE_MS ).count(), ( level.extrapolatedTime ).count(), move );
 
 				// Calculate angular velocity.
 				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() ); //VectorScale( part->avelocity, FRAMETIME, amove );

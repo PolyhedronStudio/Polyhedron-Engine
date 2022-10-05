@@ -77,6 +77,9 @@ int32_t _wrp_GetDeveloperLevel(void) {
 uint64_t _wrp_GetRealTime(void) {
     return cls.realtime;
 }
+int64_t _wrp_GetFrameCount(void) {
+	return cls.framecount;
+}
 double _wrp_GetFrameTime(void) {
     return cls.frameTime;
 }
@@ -486,6 +489,7 @@ void CL_InitGameProgs(void)
     importAPI.cs = &cs;
 
     // Client.
+	importAPI.GetFrameCount = _wrp_GetFrameCount;
     importAPI.GetFrameTime = _wrp_GetFrameTime;
     importAPI.GetRealTime = _wrp_GetRealTime;
 

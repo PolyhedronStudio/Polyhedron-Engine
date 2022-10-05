@@ -23,6 +23,7 @@ class TriggerAutoPlatform;
 **/
 class FuncPlat : public CLGBaseMover {
 public:
+	virtual void Think() override;
 	/**
 	*	Friend Class(-es).
 	**/

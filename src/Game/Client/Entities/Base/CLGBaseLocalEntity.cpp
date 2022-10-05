@@ -49,6 +49,8 @@ std::string CLGBaseLocalEntity::EmptyString = "";
 //! Constructor/Destructor.
 CLGBaseLocalEntity::CLGBaseLocalEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
 	this->podEntity = podEntity;
+	// All triggers start in use.
+	SetInUse( true );
 	//podEntity->inUse = true;
 	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::CLGBaseLocalEntity({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }

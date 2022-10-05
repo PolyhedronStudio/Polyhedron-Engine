@@ -111,13 +111,14 @@ static void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityState *s
 static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 {
 	// Always new on the first frame.
-    if ( cl.frame.number == 0 ) {
+    if ( cl.clientFrame.number == 0 ) {
         return true;
     }
 
 	// Wasn't in last local frame.
-    if ( clEntity->serverFrame != cl.frame.number ) {
-        //return true;
+    //if ( clEntity->serverFrame != cl.frame.number ) {
+	if ( clEntity->clientFrame != cl.clientFrame.number - 1 ) {
+        return true;
     }
 
 	// Hashname changed.
@@ -168,29 +169,36 @@ void LocalEntity_Update(const EntityState *state)
 	}
 
 	//  // Add entity to the solids list if it has a solid.
-	//	if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < 3072) {
-	//	// Increment num solid local entities.
-	//	//cl.numSolidLocalEntities++;
 
-	//// Remember to subtract MAX_WIRED_POD_ENTITIES to get the actual array index.
-	//const int32_t solidLocalEntityIndex = (cl.numSolidLocalEntities < 3072 ? cl.numSolidLocalEntities : 3071);
-	//cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
+	// Make sure to fetch and adjust solids here.
+ //   if ( state->solid && state->number != cl.frame.clientNumber + 1 ) {
+	//	if ( state->solid == PACKED_BSP ) {
+	//		clEntity->solid = Solid::BSP;
+	//		const mmodel_t *model = &cl.cm.cache->models[ clEntity->currentState.modelIndex - 1 ];
+	//		clEntity->mins = model->mins;
+	//		clEntity->maxs = model->maxs;
+	//	} else {
+	//		clEntity->solid = state->solid;
 
-	//// For non BRUSH models...
-	//      if (state.solid != PACKED_BSP) {
-	//          // Update the actual bounding box.
-	//          clEntity->mins = state.mins;
-	//			clEntity->maxs = state.maxs;
-	//      }
-	//  }
+	//		// These get set when linking in the entity to our client areagrid world.
+	//		//clEntity->mins = state->mins;
+	//		//clEntity->maxs = state->maxs;
+	//	}
+	//} else {
+	//	if ( state->number != cl.frame.clientNumber + 1 ) {
+	//		//clEntity->mins = vec3_zero();
+	//		//clEntity->mins = vec3_zero();
+	//		clEntity->solid = Solid::Not;
+	//	}
+	//}
 
     // Was this entity in our previous frame, or not?
-    if (LocalEntity_IsNew(clEntity)) {
+    if ( LocalEntity_IsNew( clEntity ) ) {
         // Wasn't in last update, so initialize some things.
-        LocalEntity_UpdateNew(clEntity, state, state->origin);
+        LocalEntity_UpdateNew( clEntity, state, state->origin );
     } else {
         // Updates the current and previous state so lerping won't hurt.
-        LocalEntity_UpdateExisting(clEntity, state, state->origin);
+        LocalEntity_UpdateExisting( clEntity, state, state->origin );
     }
 	
 	//// Update the local entities for possible hashed name changes.	
@@ -199,12 +207,15 @@ void LocalEntity_Update(const EntityState *state)
 	//// Ensure it gets done properly.
 	//CL_GM_PacketNewHashedClassname( clEntity, state );
 
-
-    // Assign the fresh new received server frame number that belongs to this frame.
+    // Update the serverFrame score to keep track of.
     clEntity->serverFrame = cl.frame.number;
-	
+	clEntity->clientFrame = cl.clientFrame.number;
+
     // Assign the fresh new received state as the entity's current.
 	clEntity->currentState = *state;
+
+	// Link entity.
+	CL_PF_World_LinkEntity( clEntity );
 }
 
 /**
@@ -219,7 +230,7 @@ void LocalEntity_SetHashedClassname(PODEntity* podEntity, const EntityState* sta
 	// No matter what, ensure that the previous frame hashed classname is set to our current.
 	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
 
-	//Retreive and update its current/(possibly, new) hashedClassname after this frame.
+	// Retreive and update its current/(possibly, new) hashedClassname after this frame.
 	podEntity->currentState.hashedClassname = podEntity->hashedClassname;
 }
 

@@ -111,7 +111,9 @@ public:
     /**
     *   @returen True if the entity is still in the current frame.
     **/
-    //virtual const qboolean  IsInUse() final;
+	virtual const qboolean  IsInUse() final {
+		return ( GetClient() != nullptr );
+	}
 
 	/**
 	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.

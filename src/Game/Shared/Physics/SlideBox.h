@@ -26,7 +26,7 @@ static constexpr int32_t MAX_SLIDEBOX_TOUCH_ENTITIES	= 32;
 //! Bounce Velocity Clipping value.
 static constexpr float SLIDEBOX_CLIP_BOUNCE		= 1.01f;
 //! SlideMove 'Stop Epsilon' for velocities that are nearing 0.
-static constexpr float SLIDEBOX_STOP_EPSILON		= 0.1f;
+static constexpr double SLIDEBOX_STOP_EPSILON		= 0.015625;
 
 //! The actual maximum step height a slidemove is allowed to step.
 static constexpr float SLIDEBOX_STEP_HEIGHT = 18.0f;
@@ -35,7 +35,7 @@ static constexpr float SLIDEBOX_STEP_HEIGHT = 18.0f;
 static constexpr float SLIDEBOX_STEP_HEIGHT_MIN	= 4.0f;
 
 //! The distance between a root motion move's bounding box and the ground. (An offset we stick to, preventing getting stuck.)
-static constexpr float SLIDEBOX_GROUND_DISTANCE = 0.25f;
+static constexpr float SLIDEBOX_GROUND_DISTANCE = 0.03125f;
 
 //! Friction for ground movement.
 static constexpr float SLIDEBOX_GROUND_FRICTION = 6.f;
@@ -43,7 +43,7 @@ static constexpr float SLIDEBOX_GROUND_FRICTION = 6.f;
 static constexpr float SLIDEBOX_WATER_FRICTION = 1.f;
 
 //! The Stop speed, at which it decreases to a halt.
-static constexpr float SLIDEBOX_STOP_SPEED = 100.f;
+static constexpr float SLIDEBOX_STOP_SPEED = 75.f;
 //! Determins the minimum speed value for Z velocity before determinging a slidemove should bother with floor logic.
 static constexpr float SLIDEBOX_SPEED_UP = 0.1f;
 

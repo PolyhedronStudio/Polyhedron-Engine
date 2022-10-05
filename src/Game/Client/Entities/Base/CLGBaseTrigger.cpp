@@ -31,7 +31,10 @@
 //#include "../Trigger/TriggerDelayedUse.h"
 
 // Constructor/Deconstructor.
-CLGBaseTrigger::CLGBaseTrigger(PODEntity *clEntity) : Base(clEntity) {}
+CLGBaseTrigger::CLGBaseTrigger(PODEntity *clEntity) : Base(clEntity) {
+	// All triggers start in use.
+	SetInUse( true );
+}
 
 // Interface functions. 
 //
@@ -48,6 +51,12 @@ void CLGBaseTrigger::InitBrushTrigger() {
 	SetServerFlags(EntityServerFlags::NoClient);
 }
 
+/**
+*	
+**/
+void CLGBaseTrigger::Spawn() {
+
+}
 /**
 *	
 **/

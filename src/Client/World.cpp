@@ -100,11 +100,11 @@ void CL_ClearWorld() {
     cl_numareanodes = 0;
 
 	if ( cl.cm.cache && cl.cm.cache->nodes ) {
-		mmodel_t *worldCollisionModel = &cl.cm.cache->models[0]; //cl.clipModels[ 0 ];//cl.cm.cache->models[i].headNode;;
-		CL_CreateAreaNode(0, worldCollisionModel->mins, worldCollisionModel->maxs);
+		mmodel_t *worldCollisionModel = &cl.cm.cache->models[0];
+		CL_CreateAreaNode( 0, worldCollisionModel->mins, worldCollisionModel->maxs );
 	}
 
-    // make sure all entities are unlinked
+    // Make sure all entities are unlinked
     for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
         PODEntity *ent = &cs.entities[i];
 		if (ent) {
@@ -189,13 +189,13 @@ void CL_World_LinkEntity( cm_t *cm, Entity *ent ) {
 		ent->absMax[0] += 1;
 		ent->absMax[1] += 1;
 		ent->absMax[2] += 1;
-    }
-
+	}
 
 	// Link to PVS leafs.
     ent->numClusters = 0;
     ent->areaNumber = 0;
     ent->areaNumber2 = 0;
+
 	//Com_LPrintf( PrintType::Developer, "%s: %s\n", __func__, fmt::format("ent({}), absmin({},{},{}), absmaxs({},{},{})\n", ent->clientEntityNumber, ent->absMin.x,ent->absMin.y,ent->absMin.z,ent->absMax.x,ent->absMax.y,ent->absMax.z).c_str());
     // Get all leafs, including solids.
     const int32_t numberOfLeafs = CM_BoxLeafs( cm, ent->absMin, ent->absMax, leafs, MAX_TOTAL_ENT_LEAFS, &topnode );
@@ -278,7 +278,14 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
 	// Entity number.
 	const int32_t entityNumber = ent->clientEntityNumber;
 
-	if (entityNumber == cl.frame.clientNumber + 1) {
+	// Do NOT link world.
+	if ( entityNumber == 0 ) {
+		return;
+	}
+
+	if ( entityNumber == cl.frame.clientNumber + 1 ) {
+		//ent->currentState.mins = cl.predictedState.mins;
+		//ent->currentState.maxs = cl.predictedState.maxs;
 	//	return;
 	}
 
@@ -305,7 +312,7 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
 		//	return;
 		}
 	} else {
-		if ( ent->serverFrame != cl.frame.number ) {
+		if ( !ent->inUse ) {
 			Com_DPrintf("%s: packet entity %d is not in use\n", __func__, ent->clientEntityNumber);
 			return;
 		}
@@ -348,8 +355,8 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
 	}
     default:
         ent->currentState.solid = Solid::Not;
-		ent->mins = vec3_zero();
-		ent->maxs = vec3_zero();
+		//ent->mins = vec3_zero();
+		//ent->maxs = vec3_zero();
         break;
     }
 
@@ -377,7 +384,7 @@ void CL_PF_World_LinkEntity( Entity *ent ) {
     }
     ent->linkCount++;
 
-	// 
+	// Only local entities are truly Solid::Not tested.
     if ( ent->solid == Solid::Not ) {
 		if ( ent->inUse == true ) {
 		//	Com_LPrintf( PrintType::DeveloperWarning, "%s\n", fmt::format( "ent(#{}): solid(Solid::Not), linkCount({})", ent->clientEntityNumber, ent->linkCount).c_str());
@@ -438,8 +445,10 @@ static void CL_World_AreaEntities_r( areanode_t *node ) {
 	}
 
     LIST_FOR_EACH(PODEntity, check, start, area) {
-        if (check->solid == Solid::Not) {
-            continue;        // deactivated
+		if ( check->isLocal && check->clientFrame != cl.clientFrame.number - 1 ) {
+			continue;        // deactivated
+		} else if ( check->isLocal == false && check->solid == Solid::Not ) {
+			continue;
 		}
         if (check->absMin[0] > areaMaxs[0]
             || check->absMin[1] > areaMaxs[1]

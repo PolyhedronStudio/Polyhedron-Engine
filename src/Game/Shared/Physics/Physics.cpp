@@ -155,7 +155,7 @@ void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction, c
 		float newSpeed = speed - FRAMETIME_S.count() * control * friction;
 		if (newSpeed < 0) {
 			newSpeed = 0;
-	}
+		}
 		newSpeed /= speed;
 		newVelocity[0] *= newSpeed;
 		newVelocity[1] *= newSpeed;
@@ -205,10 +205,10 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
 **/
 void SG_CheckGround( GameEntity *geCheck ) {
 	// Actual offset to determine for when a Hull is on-ground.
-	static constexpr float groundOffset = 0.3125;
+	static constexpr float groundOffset = 0.25;
 
 	// Sanity Check.
-	if (!geCheck) {
+	if ( !geCheck ) {
 		return;
 	}
 	
@@ -218,15 +218,16 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	// Check For: (EntityFlags::Swim | EntityFlags::Fly)
 	// If an entity suddenly has the Swim, or Fly flag set, unset its ground entity
 	// and return. It does not need GroundEntity behavior.
-	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
+	if( geCheck->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) {
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	// Check For: Client Entity.
-	if( geCheck->GetClient() && geCheck->GetVelocity().z > 180) { // > 100
+	if( geCheck->GetClient() && geCheck->GetVelocity().z > 180 ) { // > 100
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		//geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
@@ -243,19 +244,93 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		//geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	// Unset Ground Entity For Non Clients: When the trace result was not in a solid, and the velocity is > 1.
 	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		//geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	// If it did not start in a solid, and it's not stopping inside of a solid...
 	if( !traceResult.startSolid && !traceResult.allSolid ) {
+		// TODO: We don't always WANT to do this, so instead have a specific CheckGround that can be utilized
+		// for monster use.
+		//geCheck->SetOrigin( traceResult.endPosition );
+		// Link entity.
+		//geCheck->LinkEntity();
+		
+		// We must've hit some entity, so set it.
+		geCheck->SetGroundEntity(traceResult.gameEntity);
+		if ( traceResult.gameEntity ) {
+			geCheck->SetGroundEntityLinkCount( traceResult.gameEntity->GetLinkCount() ); //ent->groundentity_linkcount = ent->groundentity->linkcount;
+		} else {
+			//geCheck->SetGroundEntityLinkCount( 0 );
+		}
+
+		// Since we hit ground, zero out the Z velocity in case it is lower than 0.
+		if ( geCheck->GetVelocity().z < 0 ) {
+			geCheck->SetVelocity( vec3_t { geCheckVelocity.x, geCheckVelocity.y, 0.f } );
+		}
+
+		// Impact.
+		SG_Impact( geCheck, traceResult );
+	}
+}
+
+/**
+*	@brief	Checks whether the monster entity has ground, if so, snaps it to it and stops Z velocity.
+**/
+void SG_Monster_CheckGround( GameEntity *geCheck ) {
+	// Actual offset to determine for when a Hull is on-ground.
+	static constexpr float groundOffset = 0.25;
+
+	// Sanity Check.
+	if ( !geCheck ) {
+		return;
+	}
+	
+	// Get velocity.
+	const vec3_t geCheckVelocity = geCheck->GetVelocity();
+
+	// Check For: (EntityFlags::Swim | EntityFlags::Fly)
+	// If an entity suddenly has the Swim, or Fly flag set, unset its ground entity
+	// and return. It does not need GroundEntity behavior.
+	if( geCheck->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) {
+		return;
+	}
+
+	// Check For: Client Entity.
+	if( geCheck->GetVelocity().z > 180 ) { // > 100
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		return;
+	}
+
+	// If the hull point one-quarter unit down is solid the entity is on ground.
+	const vec3_t geOrigin = geCheck->GetOrigin();
+	vec3_t traceEndPoint = {
+		geOrigin.x,
+		geOrigin.y,
+		geOrigin.z - groundOffset 
+	};
+
+	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck) );
+
+	// Check steepness.
+	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
+		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		return;
+	}
+
+	// If it did not start in a solid, and it's not stopping inside of a solid...
+	if( !traceResult.startSolid && !traceResult.allSolid ) {
+		// TODO: We don't always WANT to do this, so instead have a specific CheckGround that can be utilized
+		// for monster use.
+		geCheck->SetOrigin( traceResult.endPosition );
+		
 		// We must've hit some entity, so set it.
 		geCheck->SetGroundEntity(traceResult.gameEntity);
 		if ( traceResult.gameEntity ) {
@@ -266,10 +341,9 @@ void SG_CheckGround( GameEntity *geCheck ) {
 		geCheck->SetVelocity( vec3_t { geCheckVelocity.x, geCheckVelocity.y, 0.f } );
 
 		// Impact.
-		SG_Impact( geCheck, traceResult );
+		//SG_Impact( geCheck, traceResult );
 	}
 }
-
 
 //================================================================================
 
@@ -371,9 +445,9 @@ const bool SG_RunThink( GameEntity *geThinker ) {
 
 	} else {
 		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime + FRAMERATE_MS ) {
-		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime ) {
+		if (nextThinkTime <= GameTime::zero() || nextThinkTime >= level.extrapolatedTime + FRAMERATE_MS ) {
 		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > GameTime( cl->serverTime ) + FRAMERATE_MS ) {
-		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time + FRAMERATE_MS ) {
+		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time + FRAMERATE_MS ) {
 			return true;
 		}
 	}
@@ -449,8 +523,8 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 			GameEntity *geSlide = *entityHandle;
 			SlideBoxMove slideBoxMove;
 			int32_t geSlideContentMask = (geSlide && geSlide->GetClipMask() ? geSlide->GetClipMask() : BrushContentsMask::PlayerSolid);
-			const float slideBounce = 1.02f;
-			const float slideFriction = 6.f;
+			const float slideBounce = 1.01f;
+			const float slideFriction = 10.f;
 
 			SG_Physics_TossSlideBox( geSlide, geSlideContentMask, slideBounce, slideFriction, &slideBoxMove );
 			break;

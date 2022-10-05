@@ -175,19 +175,23 @@ void MiscExplosionBox::ExplosionBoxUse( IServerGameEntity* caller, IServerGameEn
 }
 
 void MiscExplosionBox::ExplosionBoxThink(void) {
-   // Store whether we had a ground entity at all.
-    const qboolean wasOnGround = ( ServerGameWorld::ValidateEntity(GetGroundEntityHandle()) ? true : false );
+	// Store whether we had a ground entity at all.
+    const qboolean wasOnGround = ( GetGroundEntityHandle() ? true : false );
 
 	// Stores whether to play a "surface hit" sound.
     qboolean    hitSound = false;
 	// Entity flags that were set at start of the think move.
 	const int32_t entityFlags = GetFlags();
 	// Get velocity length.
-	const float oldVelocityLength = vec3_length( GetVelocity() );
+	const vec3_t oldVelocity = GetVelocity();
+	const float oldVelocityLength = vec3_length( oldVelocity );
 
 	// Bound our velocity within sv_maxvelocity limits.
 	//SG_BoundVelocity( this );
-	SG_AddGravity( this );
+	if ( !wasOnGround ) {
+		SG_AddGravity( this );
+	}
+	SG_CheckGround( this );
 
     // Get angular velocity for applying rotational friction.
     vec3_t angularVelocity = GetAngularVelocity();
@@ -214,37 +218,44 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
 		/**
 		*	Apply friction: Let it slide.
 		**/
-	}// else {
-		//const vec3_t currentVelocity = GetVelocity();
-		//if ( currentVelocity.z || currentVelocity.y || currentVelocity.x ) {
-		//	// Apply friction: Let dead NPCs who aren't completely onground slide.
-		//	if ( ( wasOnGround ) || ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) ) {
-		//	//if ( geBoxSlide->GetDeadFlag() == DeadFlags::Dead) {//!( geBoxSlide->GetHealth() <= 0.0 ) ) {
-		//		vec3_t newVelocity = currentVelocity;
-		//		const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
-		//		if (speed) {
-		//			// TODO: Defines?
-		//			constexpr float GROUNDFRICTION = 6.f; // Ground friction.
-		//			constexpr float STOPSPEED = 100.f / GROUNDFRICTION; // Divided by mass.
+	} else {
+		const vec3_t currentVelocity = GetVelocity();
+		if ( currentVelocity.z || currentVelocity.y || currentVelocity.x ) {
+			// Apply friction: Let dead NPCs who aren't completely onground slide.
+			if ( ( wasOnGround ) || ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) ) {
+			//if ( geBoxSlide->GetDeadFlag() == DeadFlags::Dead) {//!( geBoxSlide->GetHealth() <= 0.0 ) ) {
+				vec3_t newVelocity = currentVelocity;
+				const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
+				if (speed) {
+					// TODO: Defines?
+					constexpr float GROUNDFRICTION = 6.f; // Ground friction.
+					constexpr float STOPSPEED = 100.f / GROUNDFRICTION; // Divided by mass.
 
-		//			// Calculate friction, and ground control.
-		//			const float friction = GROUNDFRICTION;
-		//			const float control = speed < STOPSPEED ? STOPSPEED : speed;
-		//			float newSpeed = speed - FRAMETIME_S.count() * control * friction;
-		//			if (newSpeed < 0) {
-		//				newSpeed = 0;
-		//		}
-		//			newSpeed /= speed;
-		//			newVelocity[0] *= newSpeed;
-		//			newVelocity[1] *= newSpeed;
-		//			newVelocity[2] *= newSpeed;
-		//			// Set the velocity.
-		//			SetVelocity( newVelocity );
-		//		}
-		//	//}
-		//	}    
-		//}
-	//}
+					// Calculate friction, and ground control.
+					const float friction = GROUNDFRICTION;
+					const float control = speed < STOPSPEED ? STOPSPEED : speed;
+					float newSpeed = speed - FRAMETIME_S.count() * control * friction;
+					if (newSpeed < 0) {
+						newSpeed = 0;
+				}
+					newSpeed /= speed;
+					newVelocity[0] *= newSpeed;
+					newVelocity[1] *= newSpeed;
+					newVelocity[2] *= newSpeed;
+					// Set the velocity.
+					SetVelocity( newVelocity );
+				}
+			//}
+			}    
+		}
+	}
+
+	//SVG_DPrint( fmt::format( "sv_gravity={}, wasOnGround={}, velocity({},{},{}), oldvelocity({},{},{})\n",
+	//sv_gravity->value,
+	//		   wasOnGround,
+	//		   velocity.x,velocity.y,velocity.z,
+	//		   oldVelocity.x, oldVelocity.y, oldVelocity.z
+	//));
 
 	LinkEntity();
 
@@ -278,15 +289,14 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     SVGTraceResult trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
     
     // Return in case we hit anything.
-    if (trace.fraction == 1.f || trace.allSolid) {
+    if (trace.fraction != 1.f || trace.allSolid) {
 	    return;
     }
     
     // Set new entity origin.
     SetOrigin(trace.endPosition);
 
-    // Do a check ground for the step move of this pusher.
-    //SG_CheckGround(this);
+    SG_CheckGround(this);
 
     // Link entity back in.
     LinkEntity();

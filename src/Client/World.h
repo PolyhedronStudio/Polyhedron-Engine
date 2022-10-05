@@ -41,7 +41,7 @@ void CL_World_UnlinkEntity(Entity *ent);
 /**
 *	@brief	Links entity to PVS leafs.
 **/
-void CL_World_LinkEntity(Entity *ent);
+void CL_World_LinkEntity( cm_t *cm, Entity *ent );
 void CL_PF_World_LinkEntity(Entity *ent);
 
 /**

@@ -2994,6 +2994,9 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 	PODEntity *podEntities = CL_GM_GetClientPODEntities();
 
 	if ( podEntities ) {
+		// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
+		// Run the received packet entities for a frame so we can "predict".
+		CL_GM_ClientPacketEntityDeltaFrame();
 		// Give the client game module a chance to run its local entities for a frame.
 		CL_GM_ClientLocalEntitiesFrame();
 
@@ -3002,7 +3005,7 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 			// Get entity pointer.
 			PODEntity *podEntity = &podEntities[i];
 
-			if (!podEntity->inUse) {
+			if ( !podEntity->inUse ) {
 			//if (podEntity->currentState.number > 1124) {
 				continue;
 			}
@@ -3010,16 +3013,15 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 			// Update local entity.
 			LocalEntity_Update(&podEntity->currentState);
 
-
 			// Fire local entity events.
 			LocalEntity_FireEvent(&podEntity->currentState);
 		}
 
-		// Run the received packet entities for a frame so we can "predict".
-		CL_GM_ClientPacketEntityDeltaFrame();
-
 		// Check for prediction errors.
 		CL_CheckPredictionError();
+
+		// Increment client local frame number.
+		cl.clientFrame.number++;
 	}
 
 	#if USE_CLIENT
@@ -3027,6 +3029,7 @@ int64_t CL_RunGameFrame(uint64_t msec) {
         timeAfterClientGame = Sys_Milliseconds();
 	}
 	#endif
+
 	// Decide how long to sleep next frame
     clFrameResidual -= CL_FRAMETIME_UI64;
     if (clFrameResidual < CL_FRAMETIME_UI64) {

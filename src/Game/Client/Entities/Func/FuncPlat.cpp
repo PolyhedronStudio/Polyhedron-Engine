@@ -41,12 +41,17 @@ void FuncPlat::Precache() {
     //}
 }
 
+void FuncPlat::Think() {
+	// Think.
+	Base::Think();
+}
+
 /**
 *   @brief  Called when it is time to spawn this entity.
 **/
 void FuncPlat::Spawn() {
     // Zero out angles here for SetMoveDirection in Base::Spawn.
-    SetAngles(vec3_zero());
+    SetAngles( vec3_zero() );
 
     // Spawn base class.
     Base::Spawn();
@@ -58,8 +63,8 @@ void FuncPlat::Spawn() {
     SetModel( GetModel() );
 
     //SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
-    SetBlockedCallback(&FuncPlat::Callback_Blocked);
-    SetUseCallback(&FuncPlat::Callback_Use);
+    SetBlockedCallback( &FuncPlat::Callback_Blocked );
+    SetUseCallback( &FuncPlat::Callback_Use );
 
     // Make sure to have default KeyValues set in case they were not set
 	// by the mapper.
@@ -68,7 +73,7 @@ void FuncPlat::Spawn() {
     } else {
         //SetSpeed( GetSpeed() * 0.1f );
     }
-	if ( GetWaitTime() == Frametime::zero()) {
+	if ( GetWaitTime() == Frametime::zero() ) {
 		SetWaitTime( 3s );
 	}
     if ( !GetAcceleration() ) {
@@ -76,7 +81,7 @@ void FuncPlat::Spawn() {
     } else {
         SetAcceleration( GetAcceleration() * 0.5f );
     }
-    if ( !GetDeceleration()) {
+    if ( !GetDeceleration() ) {
         SetDeceleration( 5.f );
     } else {
         SetDeceleration( GetDeceleration() * 0.5f );
@@ -344,7 +349,9 @@ void FuncPlat::Callback_RaisePlatform() {
 	   // SetSound(moveInfo.middleSoundIndex);
     //}
     moveInfo.state = MoverState::Up;
-	EnableExtrapolation();
+	//EnableExtrapolation();
+
+	//EnableExtrapolation();
 
 	SGEntityHandle handlePusher;
 	handlePusher = this;
@@ -359,11 +366,14 @@ void FuncPlat::Callback_RaisePlatform() {
 
 	////SG_Physics_Pusher( handlePusher );
 	//level.time += FRAMERATE_MS;
-	level.time += FRAMERATE_MS;
+	//level.time += FRAMERATE_MS;
 	LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
-	level.time -= FRAMERATE_MS;
+	//level.time -= FRAMERATE_MS;
+	//EnableExtrapolation();
+	level.time += FRAMERATE_MS;
 	SG_Physics_Pusher( handlePusher );
-
+	level.time -= FRAMERATE_MS;
+	EnableExtrapolation();
 	const std::string debugStr = fmt::format( "RaiseMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
 				moveInfo.speed,
 				moveInfo.wait.count(),
@@ -378,26 +388,28 @@ void FuncPlat::Callback_RaisePlatform() {
 **/
 void FuncPlat::Callback_LowerPlatform() {
     moveInfo.state = MoverState::Down;
-	EnableExtrapolation();
+	//EnableExtrapolation();
 
 	SGEntityHandle handlePusher;
 	handlePusher = this;
 	//level.time += FRAMERATE_MS;
-	//LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);
+	//LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);
 	//level.time -= FRAMERATE_MS;
 	//SG_Physics_Pusher( handlePusher );
 	
-	//level.time -= FRAMERATE_MS;
 	
 	//level.time -= FRAMERATE_MS;
-	//LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);
+	//LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);
+
 	////SG_Physics_Pusher( handlePusher );
 	//level.time += FRAMERATE_MS;
-	level.time += FRAMERATE_MS;
+	//level.time += FRAMERATE_MS;
 	LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
-	level.time -= FRAMERATE_MS;
+	//level.time -= FRAMERATE_MS;
+	//EnableExtrapolation();
+	level.time += FRAMERATE_MS;
 	SG_Physics_Pusher( handlePusher );
-
+	level.time -= FRAMERATE_MS;
 	const std::string debugStr = fmt::format( "LowerMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
 				moveInfo.speed,
 				moveInfo.wait.count(),
@@ -424,7 +436,7 @@ void FuncPlat::Callback_ReachedRaisedPosition() {
 	// We set the origin here so it won't be slightly off (timing.)
 	SetOrigin( GetStartPosition() );
 	LinkEntity();
-	//DisableExtrapolation();
+//	DisableExtrapolation();
 
 
 	//// When SF_PlatformToggle is set we..
@@ -453,10 +465,11 @@ void FuncPlat::Callback_ReachedLoweredPosition() {
     //    }
     //    SetSound( 0 );
     //}
-	
     moveInfo.state = MoverState::Bottom;
 	SetOrigin( GetEndPosition() );
 	LinkEntity();
+//	DisableExtrapolation();
+	
 	//DisableExtrapolation();
 
 	

@@ -23,7 +23,8 @@ static constexpr float BASEMOVER_EPSILON = 0.03125;
 
 // Constructor/Deconstructor.
 CLGBaseLinearMover::CLGBaseLinearMover( PODEntity *podEntity ) : Base( podEntity ) {
-
+	// All triggers start in use.
+	SetInUse( true );
 }
 
 /**

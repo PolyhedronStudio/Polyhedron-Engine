@@ -99,6 +99,10 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity );
 **/
 void SG_CheckGround( GameEntity *geCheck );
 /**
+*	@brief	Checks whether the monster entity has ground, if so, snaps it to it and stops Z velocity.
+**/
+void SG_Monster_CheckGround( GameEntity *geCheck );
+/**
 *	@brief	Utility function that determines whether a plane is too steep to walk on or not.
 **/
 static inline bool IsWalkablePlane(const CollisionPlane& plane) {
@@ -162,4 +166,4 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle );
 *			stop rotating.
 **/
 struct SlideBoxMove;
-const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove );
+const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const double friction, SlideBoxMove *slideBoxMove );

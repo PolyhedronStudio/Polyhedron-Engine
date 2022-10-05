@@ -63,7 +63,7 @@ void DefaultGameMode::ClientBeginLocalFrame( CLGBasePlayer* player, ServerClient
 		//player->GetClient()->playerState.pmove.velocity = cl->predictedState.velocity;
 		//player->SetOrigin( cl->predictedState.viewOrigin );
 		//player->SetVelocity( cl->predictedState.velocity );
-		//player->LinkEntity();
+		player->LinkEntity();
 	}
 }
 

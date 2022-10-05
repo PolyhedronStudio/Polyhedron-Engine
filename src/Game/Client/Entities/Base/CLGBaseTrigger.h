@@ -26,6 +26,7 @@ public:
     //
     // Interface functions. 
     //
+	virtual void Spawn() override;
     virtual void SpawnKey(const std::string& key, const std::string& value)  override;
 
 protected:

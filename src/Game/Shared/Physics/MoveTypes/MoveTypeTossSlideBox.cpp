@@ -16,7 +16,12 @@
 #include "../Physics.h"
 #include "../SlideBox.h"
 
+/**
+*	@brief	Calculates specific ground friction for TossSlideBox movement entities.
+**/
+static void TossSlideBox_AddGroundFriction() {
 
+}
 
 
 /**
@@ -25,24 +30,23 @@
 *			stairs. When touching a 'walkable' surface it'll gradually slow down by friction and
 *			stop rotating.
 **/
-const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideBoxMove *slideBoxMove ) {
+const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const double friction, SlideBoxMove *slideBoxMove ) {
 	/**
 	*	Ensure our SlideMove Game Entity is non (nullptr).
 	**/
-	if (!geSlider) {
+	if ( !geSlider ) {
 	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): Can't perform RootMotion move because *geSlider == (nullptr)!\n", __func__, sharedModuleName ) );
 		return 0;
 	}
 	
 	// Bound our velocity within sv_maxvelocity limits.
-	SG_BoundVelocity( geSlider );
+	//SG_BoundVelocity( geSlider );
 
     // Get angular velocity for applying rotational friction.
     const vec3_t angularVelocity = geSlider->GetAngularVelocity();
 
 	// If we got any angular velocity, apply friction.
     if ( angularVelocity.x || angularVelocity.y || angularVelocity.z ) {
-
 		geSlider->SetAngularVelocity( SG_CalculateRotationalFriction( geSlider ) );
 	}
 
@@ -50,20 +54,41 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	/**
 	*	Store old origin and velocity. We'll need them to perhaps reset in case of any invalid movement.
 	**/
-	const vec3_t	oldOrigin			= geSlider->GetOrigin();
-	const vec3_t	oldVelocity			= geSlider->GetVelocity();
-	float			oldVelocityLength	= vec3_length( oldVelocity );
+	const vec3_t oldOrigin			= geSlider->GetOrigin();
+	const vec3_t oldVelocity		= geSlider->GetVelocity();
+	const double oldVelocityLength	= vec3_dlength( oldVelocity );
 
 	/**
-	*	Get Ground Game Entity Number, if any, store -1 (none) otherwise.
+	*	Detect whether we were on ground already, and if not, check for new ground, and see if we found any.
 	**/
 	// Validate the ground entity.
 	GameEntity *geGroundEntity = SGGameWorld::ValidateEntity( geSlider->GetGroundEntityHandle() );
+	//// Get groundEntity number.
+	//int32_t groundEntityNumber = ( geGroundEntity ? geGroundEntity->GetNumber() : -1 );
+	//// Store whether we were on ground after our last move.
+	//const bool wasOnGround = ( geGroundEntity != nullptr );
+	//// If we had no valid ground, check for new ground in the current frame.
+	//if ( !geGroundEntity ) {
+	//	SG_CheckGround( geSlider );
+	//}
+	//// Revalidate the ground for possible new ground.
+	//geGroundEntity = SGGameWorld::ValidateEntity( geSlider->GetGroundEntityHandle() );
+	//// Store it if we found it.
+	//const bool isOnGround = ( geGroundEntity != nullptr );
 	// Get groundEntity number.
-	int32_t groundEntityNumber = (geGroundEntity ? geGroundEntity->GetNumber() : -1);
+	const int32_t groundEntityNumber = ( geGroundEntity ? geGroundEntity->GetNumber() : -1 );
 
 	/**
-	*	
+	*	Add gravity if we aren't on-ground, otherwise add ground friction.
+	**/
+	if ( !geGroundEntity ) {
+		SG_AddGravity( geSlider );
+	} else {
+		SG_AddGroundFriction( geSlider, SLIDEBOX_GROUND_FRICTION, SLIDEBOX_STOP_SPEED );
+	}
+
+	/**
+	*	Perform move in case we have any velocity (meaning we are in motion, doh!).
 	**/
 	int32_t blockedMask = 0;
 
@@ -105,12 +130,10 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 		geSlider->SetVelocity( slideBoxMove->velocity );
 		
 		// Copy back ground entity results.
-		if ( slideBoxMove->groundEntity >= 0 ) {
-			GameEntity *geGroundEntity = SG_GetGameEntityByNumber( slideBoxMove->groundEntity );
-			if ( geGroundEntity ) {
-				geSlider->SetGroundEntity( geGroundEntity );
-				geSlider->SetGroundEntityLinkCount( geGroundEntity->GetLinkCount() );
-			}
+		GameEntity *geNewGroundEntity = SG_GetGameEntityByNumber( slideBoxMove->groundEntity );
+		if ( geNewGroundEntity ) {
+			geSlider->SetGroundEntity( geNewGroundEntity );
+			geSlider->SetGroundEntityLinkCount( geNewGroundEntity->GetLinkCount() );
 		} else {
 			geSlider->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 		}
@@ -157,19 +180,17 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	**/
 	// Assuming we're still in use, set ourselves to a halt if 
 	if ( geSlider->IsInUse() ) {
-		// Check for ground entity.
-		int32_t groundEntityNumber = slideBoxMove->groundEntity;
-
 		// Revalidate it
-		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( SG_GetGameEntityByNumber( groundEntityNumber ) );
+		SG_Monster_CheckGround( geSlider );
+		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( geSlider->GetGroundEntityHandle() );
 
 		// Apply ground friction now since we're officially on-ground.
 		if (geNewGroundEntity) {
-			SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION), SLIDEBOX_STOP_SPEED );
+			SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION ), SLIDEBOX_STOP_SPEED );
 		}
 
 		// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.
-		if( geNewGroundEntity && vec3_length( geSlider->GetVelocity() ) <= 1.f && oldVelocityLength > 1.f ) {
+		if( geNewGroundEntity && vec3_dlength( geSlider->GetVelocity() ) <= 1 && oldVelocityLength > 1 ) {
 			// Zero out velocities.
 			geSlider->SetVelocity( vec3_zero() );
 			geSlider->SetAngularVelocity( vec3_zero() );
@@ -177,14 +198,16 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 			// Stop.
 			geSlider->DispatchStopCallback( );
 		}
+
+		geSlider->LinkEntity();
 	}
 
 	// Execute touch triggers (Since entities might move during touch callbacks, we might've
 	// hit new entities.)
     SG_TouchTriggers( geSlider );
 	
-    // Run think method.
-    SG_RunThink(geSlider);
+	// Let the entity 'think'.
+	SG_RunThink( geSlider );
 
 	return blockedMask;
 }

@@ -86,10 +86,11 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     gibEntity->SetModel( gibModel );
 
     // Set solid and other properties.
-    gibEntity->SetSolid( Solid::OctagonBox );
+    gibEntity->SetSolid( Solid::BoundingBox );
     gibEntity->SetEffects( gibEntity->GetEffects() | EntityEffectType::Gib );
-    gibEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );
-
+    //gibEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );
+	gibEntity->SetClipMask( BrushContentsMask::PlayerSolid | BrushContentsMask::MonsterSolid );
+	gibEntity->SetClientFlags( EntityClientFlags::Monster );
 	//gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
     //gibEntity->SetTakeDamage( 1 );
     //gibEntity->SetDieCallback( &GibEntity::GibEntityDie );
@@ -288,7 +289,7 @@ void GibEntity::GibEntityThink() {
 	//	SetAngularVelocity( vec3_zero() );
 	//}
 
-	SG_AddGravity( this );
+
 	//LinkEntity();
 	//const vec3_t avel = GetAngularVelocity();
 	//if (!GetGroundEntityHandle() && (avel.x || avel.y || avel.z) ) {
@@ -299,7 +300,7 @@ void GibEntity::GibEntityThink() {
 
 	// Next Think.
 	SetThinkCallback(&GibEntity::GibEntityThink);
-    SetNextThinkTime(level.time + FRAMERATE_MS);
+    SetNextThinkTime(level.time + FRAMERATE_MS );
 }
 
 //===============
@@ -318,7 +319,9 @@ void GibEntity::GibEntityStopBleeding() {
 	GibEntityThink();
 }
 void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
-    vec3_t  right;
+    vec3_t  forward = vec3_zero();
+	vec3_t  right = vec3_zero();
+	vec3_t  up = vec3_zero();
 
 	//// If we don't have ground we keep bleeding.
  //   if (!ClientGameWorld::ValidateEntity(other))
@@ -326,20 +329,23 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
 
     // Did we get a plane passed?
     if ( plane ) {
-        //CLG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("misc/fhit3.wav"), 1, Attenuation::Normal, 0);
-		
-
-    // Reset touch callback to nullptr.
-    SetTouchCallback(nullptr);
+		// Reset touch callback to nullptr.
+		SetTouchCallback(nullptr);
 
 		// Calculate new angles to 'stop' at when hitting the plane.
         vec3_t normalAngles = vec3_euler( plane->normal );
-        vec3_vectors( normalAngles, NULL, &right, NULL );
+        vec3_vectors( normalAngles, &forward, &right, &up );
 		
 		//SetAngles( vec3_euler( right ) );
 
 		// New direction.
-        vec3_t newDirection = vec3_cross( normalAngles, right );//vec3_dot( vec3_normalize( GetAngles() ), right );
+        //vec3_t newDirection = vec3_cross( normalAngles, right );//vec3_dot( vec3_normalize( GetAngles() ), right );
+
+		vec3_t newDirection = {
+			vec3_dot( normalAngles, forward ),
+			-vec3_dot( normalAngles, right ),
+			vec3_dot( normalAngles, up ),
+		};
 
 		const vec3_t oldAngles = GetAngles();
 		SetAngles( vec3_euler( vec3_fmaf( oldAngles, FRAMETIME_S.count(), newDirection ) ) );
@@ -350,11 +356,11 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
 		SetEffects(0);
 		SetAngularVelocity( vec3_zero() );
 		LinkEntity();
-
-        SetThinkCallback(&GibEntity::GibEntityThink);
-        SetNextThinkTime(level.time + FRAMETIME_S);
         //}
     }
+
+    SetThinkCallback(&GibEntity::GibEntityThink);
+    SetNextThinkTime( level.time + FRAMERATE_MS );
 }
 
 //===============

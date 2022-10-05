@@ -328,8 +328,8 @@ public:
     **/
     virtual inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) override {
 		if (podEntity) {
-			podEntity->mins = mins;
-			podEntity->maxs = maxs;
+			podEntity->currentState.mins = mins;
+			podEntity->currentState.maxs = maxs;
 		}
     }
 
@@ -476,7 +476,20 @@ public:
     **/
     virtual const qboolean        IsInUse() override { //return 0; };
         if (podEntity) {
-            return podEntity->inUse || ( IsExtrapolating() ) || ( cl->frame.number == podEntity->serverFrame );
+			// A PacketEntity is in use either if:
+			// - It has been set to inUse by the game world when being created.
+			// - Its serverFrame matches that of the one which we have received.
+			// - Its clientFrame matches that of the one which we reside in.
+			// - Or it has either of the following: modelindex, effects, sound, eventID.
+			if ( podEntity->inUse || podEntity->serverFrame == cl->frame.number || podEntity->clientFrame == cl->clientFrame.number ) {
+				return true;
+			} else {
+				// In case we had set its inUse to false, however we did receive it in our frame packet,
+				// do a more specific check for its 'inUse'.
+				return ( 
+						podEntity->isExtrapolating 
+						|| ( GetModelIndex() || GetEffects() || GetSound() || GetEventID() ) );
+			}
         } 
 
         return false;
@@ -526,13 +539,13 @@ public:
     **/
     virtual const vec3_t&   GetMaxs() override { 
 		if (podEntity) {
-			return podEntity->maxs;
+			return podEntity->currentState.maxs;
 		}
 		return ZeroVec3;
 	};
     virtual void            SetMaxs(const vec3_t& maxs) override {
 		if (podEntity) {
-			podEntity->maxs = maxs;
+			podEntity->currentState.maxs = maxs;
 		}
 	};
     /**
@@ -546,13 +559,13 @@ public:
     **/
     virtual const vec3_t&   GetMins() override { 
 		if (podEntity) {
-			return podEntity->mins;
+			return podEntity->currentState.mins;
 		}
 		return ZeroVec3;
 	};
     virtual void            SetMins(const vec3_t& mins) override {
 		if (podEntity) {
-			podEntity->mins = mins;
+			podEntity->currentState.mins = mins;
 		}
 	};
    
@@ -577,8 +590,8 @@ public:
 					mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
 
 					if (inlineModel) {
-						podEntity->mins = inlineModel->mins;
-						podEntity->maxs = inlineModel->maxs;
+						podEntity->currentState.mins = inlineModel->mins;
+						podEntity->currentState.maxs = inlineModel->maxs;
 					
 						// Link it for collision testing.
 						LinkEntity();

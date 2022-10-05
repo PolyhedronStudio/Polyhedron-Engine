@@ -114,10 +114,11 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
 	    byteMask |= EntityMessageBits::Solid;
     }
     
-//	if ( (to->solid != PACKED_BSP && to->solid != Solid::BSP ) && (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
-	if ( to->solid != from->solid ) {
+	if ( (to->solid != PACKED_BSP && to->solid != Solid::BSP ) || (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
         byteMask |= EntityMessageBits::Bounds;
-    }
+    } else if ( to->solid != from->solid ) {
+        byteMask |= EntityMessageBits::Bounds;
+	}
 
     // Event is not delta compressed, it's bit is set when eventID is non 0.
     if (to->eventID) {

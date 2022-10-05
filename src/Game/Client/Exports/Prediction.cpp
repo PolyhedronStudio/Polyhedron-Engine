@@ -147,27 +147,22 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
         // If the command has an msec value it means movement has taken place and we prepare for 
         // processing another simulation.
 		vec3_t linearMove = vec3_zero();
+
+		// Store level times in case we got to predict ground movers' movement.
+		cmd->prediction.moverLevelTime = level.extrapolatedTime.count();//level.time.count();
+		cmd->prediction.moverNextLevelTime = ( level.extrapolatedTime + FRAMERATE_MS ).count();//( level.time + FRAMERATE_MS ).count();
+
 		if (cmd->input.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
-			cmd->prediction.moverLevelTime = level.extrapolatedTime.count();//level.time.count();
-			cmd->prediction.moverNextLevelTime = ( level.extrapolatedTime + FRAMERATE_MS ).count();//( level.time + FRAMERATE_MS ).count();
+
 
             // Assign the move command.
             pm.moveCommand = *cmd;
 						
             // Simulate the move command.
             PMove( &pm );
-
-			// Update player entity.
-			if ( gameWorld ) {
-				GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
-
-				// Is the ground a valid pointer?
-				if ( geGround && geGround->GetPODEntity()->linearMovement ) {
-					SG_LinearMovementDelta( geGround->GetPODEntity(), cmd->prediction.moverLevelTime, cmd->prediction.moverNextLevelTime, linearMove );
-				}
-			}
+			// Transfer needed move info into our local player entity.
 			PlayerMoveToClientEntity( &pm, gePlayer, linearMove );
 
 			// Update player move client side audio effects.
@@ -175,6 +170,13 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 			// Execute touch callbacks and "predict" against other entities.
 			DispatchPredictedTouchCallbacks( &pm, gePlayer );
 
+		}
+
+		// Update player entity.
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
+		// Is the ground a valid pointer?
+		if ( geGround && geGround->GetPODEntity()->linearMovement ) {
+			SG_LinearMovementDelta( geGround->GetPODEntity(), cmd->prediction.moverLevelTime, cmd->prediction.moverNextLevelTime, linearMove );
 		}
 
         // Save for error detection
@@ -186,9 +188,19 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 	//vec3_t groundPredictionOffset = vec3_zero();
 	vec3_t linearMove = vec3_zero();
 	
-	// Setup time for current move command.
+	// Store level times in case we got to predict ground movers' movement.
 	cl->moveCommand.prediction.moverLevelTime = level.time.count();
 	cl->moveCommand.prediction.moverNextLevelTime = ( level.extrapolatedTime ).count();
+
+	// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
+	if ( gameWorld ) {
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
+
+		// Is the ground a valid pointer?
+		if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
+			SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
+		}
+	}
 
 	// Process it if it had any input.
 	if (cl->moveCommand.input.msec) {
@@ -203,19 +215,8 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
 		// Simulate the move command.
         PMove(&pm);
-
-		// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
-		if ( gameWorld ) {
-			GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
-
-			// Is the ground a valid pointer?
-			if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-				SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
-			}
-		}
-
+		// Transfer needed move info into our local player entity.
 		PlayerMoveToClientEntity( &pm, gePlayer, linearMove );
-
         // Update player move client side audio effects.
         UpdateClientSoundSpecialEffects( &pm );
 		// Execute touch callbacks and "predict" against other entities.		
@@ -225,8 +226,6 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
 		cl->moveCommand.prediction.origin = pm.state.origin + linearMove;
 	}
-
-
 
     // Copy results out for rendering
     //if ( vec3_distance( cl->predictedState.viewOrigin, pm.state.origin ) > 0.03125f ) {
@@ -239,6 +238,10 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
     cl->predictedState.stepOffset = pm.state.stepOffset;
 
 	cl->predictedState.velocity	  = pm.state.velocity;
+
+	cl->predictedState.mins = pm.mins;
+	cl->predictedState.maxs = pm.maxs;
+
 	cl->predictedState.groundEntityNumber = pm.groundEntityNumber;
 }
 
@@ -280,7 +283,7 @@ void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm, GameEntity 
 	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// Update the actual local client playerstate.
-	gePlayer->GetClient()->playerState.pmove.origin = pm->state.origin;// + groundMoverOffset;
+	gePlayer->GetClient()->playerState.pmove.origin = pm->state.origin;
 	gePlayer->GetClient()->playerState.pmove.velocity = pm->state.velocity;
 
     // If we are on an extrapolating mover, we won't adjust the entity's position to that of our received frame.

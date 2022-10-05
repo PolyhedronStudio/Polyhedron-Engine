@@ -50,7 +50,8 @@ void PacketEntity_PlayerToEntityState(const PlayerState *ps, EntityState *es) {
     vec_t pitch;
 
     // Take the predicted state origin in case we are extrapolating ground movers.
-	if ( cl.frame.playerState.pmove.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
+	/*if ( cl.frame.playerState.pmove.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {*/
+	if ( cl.predictedState.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
 		es->origin = cl.predictedState.viewOrigin;
 	} else {
 	    es->origin = ps->pmove.origin;
@@ -71,16 +72,24 @@ void PacketEntity_PlayerToEntityState(const PlayerState *ps, EntityState *es) {
 static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState *state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
+	// Set its inUse.
+	clEntity->inUse = true;
 	// Ensure it is not local anymore.
 	clEntity->isLocal = false;
 	// Update the client entity number to match the state's number.
     //clEntity->clientEntityNumber = state->number; // used to be: clEntity->id = ++entity_ctr;
-	// 
-    clEntity->trailCount = 1024;
 
+	// Reset trail count for particles.
+    clEntity->trailCount = 1024;
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->previousState = *state;
+
+	// Link it in.
+    const bool isPlayerEntity = PacketEntity_IsPlayer( state );
+	if ( !isPlayerEntity ) {
+		CL_PF_World_LinkEntity( clEntity );
+	}
 
     // Ensure that when the entity has been teleported we adjust its lerp origin.
     if ( state->eventID == EntityEvent::PlayerTeleport || state->eventID == EntityEvent::OtherTeleport
@@ -102,6 +111,12 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
 static inline void PacketEntity_UpdateExisting( PODEntity *clEntity, const EntityState *state, const vec_t *origin ) {
     // Get event ID.
     const int32_t eventID = state->eventID;
+
+	// Link it in.
+    const bool isPlayerEntity = PacketEntity_IsPlayer( state );
+	if ( !isPlayerEntity ) {
+		CL_PF_World_LinkEntity( clEntity );
+	}
 
     if (state->modelIndex != clEntity->currentState.modelIndex
         || state->modelIndex2 != clEntity->currentState.modelIndex2
@@ -188,13 +203,15 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 			clEntity->maxs = model->maxs;
 		} else {
 			clEntity->solid = state->solid;
-			clEntity->mins = state->mins;
-			clEntity->maxs = state->maxs;
+
+			// These get set when linking in the entity to our client areagrid world.
+			//clEntity->mins = state->mins;
+			//clEntity->maxs = state->maxs;
 		}
 	} else {
 		if ( state->number != cl.frame.clientNumber + 1 ) {
-			clEntity->mins = vec3_zero();
-			clEntity->mins = vec3_zero();
+			//clEntity->mins = vec3_zero();
+			//clEntity->mins = vec3_zero();
 			clEntity->solid = Solid::Not;
 		}
 	}
@@ -205,7 +222,8 @@ void PacketEntity_UpdateState( const EntityState *state ) {
     // Fetch the entity's origin.
     vec3_t entityOrigin = state->origin;
     if ( isPlayerEntity ) {
-		if ( cl.frame.playerState.pmove.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
+		/*if ( cl.frame.playerState.pmove.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {*/
+		if ( cl.predictedState.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) {
 			entityOrigin = cl.predictedState.viewOrigin;
 		} else {
 			entityOrigin = cl.frame.playerState.pmove.origin;
@@ -233,15 +251,18 @@ void PacketEntity_UpdateState( const EntityState *state ) {
     // Assign the fresh new received server frame number that belongs to this frame.
     clEntity->serverFrame = cl.frame.number;
 
+	// Do the same for the local client frame.
+	clEntity->clientFrame = cl.clientFrame.number;
+
 	// Assign the fresh new received state as the entity's current.
     clEntity->currentState = *state;
 
     // work around Q2PRO server bandwidth optimization
     if ( isPlayerEntity ) {
         PacketEntity_PlayerToEntityState( &cl.frame.playerState, &clEntity->currentState );
-    }
-	
 
+		//CL_PF_World_LinkEntity( clEntity );
+	}
 }
 
 /**

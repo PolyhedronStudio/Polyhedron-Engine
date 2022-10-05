@@ -74,8 +74,8 @@ void CLGBasePacketEntity::Precache() {
 **/
 void CLGBasePacketEntity::Spawn() {
 	// Setup the standard default NextThink method.
-	SetNextThinkTime(level.time + 16ms);
-	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &CLGBasePacketEntity::CLGBasePacketEntityThinkStandard );
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
@@ -90,8 +90,8 @@ void CLGBasePacketEntity::Respawn() {
 void CLGBasePacketEntity::PostSpawn() {
 	
 	// Setup the standard default NextThink method.
-	SetNextThinkTime(GameTime( cl->serverTime ) + 16ms);
-	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+	SetNextThinkTime( level.time + FRAMERATE_MS );
+	SetThinkCallback( &CLGBasePacketEntity::CLGBasePacketEntityThinkStandard );
 }
 
 /**
@@ -584,8 +584,12 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
-	// Setup same think for the next frame.
-	SetNextThinkTime( level.time + FRAMERATE_MS );
+	if ( IsExtrapolating() || podEntity->linearMovement ) {
+		SetNextThinkTime( level.extrapolatedTime );
+	} else {
+		// Setup same think for the next frame.
+		SetNextThinkTime( level.time + FRAMERATE_MS );
+	}
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
@@ -1487,17 +1491,38 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 
 			// Extrapolate the mover.
 			if ( IsExtrapolating() || podEntity->linearMovement ) {
-				refreshEntity.oldorigin = refreshEntity.origin;		
+				//refreshEntity.oldorigin = refreshEntity.origin;		
+				//if ( cl->xerpFraction ) {
+				//	refreshEntity.oldorigin = vec3_mix( previousState->oldOrigin, currentState->oldOrigin, 1.0 - cl->xerpFraction );
+				//	refreshEntity.origin = vec3_mix( previousState->origin, currentState->origin, 1.0 - cl->xerpFraction );
+				//} else {
+				//	refreshEntity.origin = currentState->origin;
+				//	refreshEntity.oldorigin = refreshEntity.origin;
+				//}
 				if ( cl->xerpFraction ) {
+					refreshEntity.oldorigin = vec3_mix( previousState->oldOrigin, currentState->oldOrigin, cl->xerpFraction );
 					refreshEntity.origin = vec3_mix( previousState->origin, currentState->origin, cl->xerpFraction );
 				} else {
+					refreshEntity.oldorigin = currentState->origin;
 					refreshEntity.origin = currentState->origin;
 				}
+//				refreshEntity.oldorigin = refreshEntity.origin;
 			}
 			// Extrapolate for ground entity movement.
 			else if ( (podGroundEntity && podGroundEntity->linearMovement) ) {
-				refreshEntity.oldorigin = refreshEntity.origin;
-				refreshEntity.origin = currentState->origin; //vec3_mix( currentState->origin, podEntity->currentState.origin, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.origin; //vec3_mix( cl->frame.playerState.pmove.origin, gePlayer->GetClient()->playerState.pmove.origin, f);
+					//refreshEntity.oldorigin = vec3_mix( previousState->oldOrigin, currentState->oldOrigin, 1.0 - cl->xerpFraction );
+					//refreshEntity.origin = vec3_mix( previousState->origin, currentState->origin, 1.0 - cl->xerpFraction );
+				if ( cl->xerpFraction ) {
+					refreshEntity.oldorigin = vec3_mix( previousState->oldOrigin, currentState->oldOrigin, cl->lerpFraction  );
+					refreshEntity.origin = vec3_mix( previousState->origin, currentState->origin, cl->lerpFraction  );
+				} else {
+					//refreshEntity.oldorigin = currentState->oldOrigin;
+					refreshEntity.oldorigin = currentState->origin;
+					refreshEntity.origin = currentState->origin;
+				}
+//				refreshEntity.oldorigin = refreshEntity.origin;
+//				refreshEntity.oldorigin = refreshEntity.origin;
+//				refreshEntity.origin = currentState->origin; //vec3_mix( currentState->origin, podEntity->currentState.origin, cl->xerpFraction );//gePlayer->GetClient()->playerState.pmove.origin; //vec3_mix( cl->frame.playerState.pmove.origin, gePlayer->GetClient()->playerState.pmove.origin, f);
 			// Linear Interpolate for regular packet entity origin changes. ( Client is always a frame behind )
 			} else {
 				// Ohterwise, just neatly interpolate the origin.

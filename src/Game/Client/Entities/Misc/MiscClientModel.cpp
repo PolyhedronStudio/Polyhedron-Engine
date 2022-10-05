@@ -74,13 +74,13 @@ void MiscClientModel::Spawn() {
     Base::Spawn();
 
     // Set solid.
-    SetSolid(Solid::OctagonBox);
+    SetSolid(Solid::BoundingBox);
 
     // Set move type.
     SetMoveType(MoveType::TossSlideBox);
 
     // Since this is a "monster", after all...
-    SetClientFlags(EntityServerFlags::Monster);
+    SetClientFlags(EntityClientFlags::Monster);
     
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -100,9 +100,6 @@ void MiscClientModel::Spawn() {
     if (model.find_last_of(".sp2") != std::string::npos) {
         SetRenderEffects(RenderEffects::Translucent);
     }
-
-    // Set the bounding box.
-    SetBoundingBox(GetMins(), GetMaxs());
 
     // Set default values in case we have none.
     if ( !GetMass() ) {
@@ -132,10 +129,15 @@ void MiscClientModel::Spawn() {
     SetDieCallback( &MiscClientModel::MiscServerModelDie );
 
     // Setup the next think time.
-    SetNextThinkTime( level.time + 2.f * FRAMETIME_S );
+    SetNextThinkTime( level.time + FRAMERATE_MS );
 
     // Link the entity to world, for collision testing.
     LinkEntity();
+
+    // Set the bounding box.
+    SetBoundingBox(GetMins(), GetMaxs());
+	LinkEntity();
+
 }
 
 //
@@ -236,43 +238,64 @@ void MiscClientModel::SpawnKey(const std::string& key, const std::string& value)
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MiscClientModel::MiscServerModelThink(void) {
-    // Setup its next think time, for a frame ahead.
+
+    const qboolean wasOnGround = ( GetGroundEntityHandle() ? true : false );
+
+	// Stores whether to play a "surface hit" sound.
+    qboolean    hitSound = false;
+	// Entity flags that were set at start of the think move.
+	const int32_t entityFlags = GetFlags();
+	// Get velocity length.
+	const vec3_t oldVelocity = GetVelocity();
+	const float oldVelocityLength = vec3_length( oldVelocity );
+
+	// Bound our velocity within sv_maxvelocity limits.
+	//SG_BoundVelocity( this );
+	if ( !wasOnGround ) {
+		SG_AddGravity( this );
+	}
+	SG_CheckGround( this );
+	
+	// Link entity back in.
+	//LinkEntity();
+
+	// Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + FRAMERATE_MS );
 	SetThinkCallback( &MiscClientModel::MiscServerModelThink );
 
     // Calculate the end origin to use for tracing.
-    vec3_t end = GetOrigin() + vec3_t {
-        0, 0, -1.3125f
-    };
-    
-    // Exceute the trace.
-	if ( GetGroundEntityHandle().ID() == -1 ) {
-	    CLGTraceResult trace = CLG_Trace( GetOrigin() + vec3_t { 0, 0, 1.f }, GetMins(), GetMaxs(), end, this, SG_SolidMaskForGameEntity(this));
-	
+ //   vec3_t end = GetOrigin() + vec3_t {
+ //       0, 0, -1.3125f
+ //   };
+ //   
+ //   // Exceute the trace.
+	//if ( GetGroundEntityHandle().ID() == -1 ) {
+	//    CLGTraceResult trace = CLG_Trace( GetOrigin() + vec3_t { 0, 0, 1.f }, GetMins(), GetMaxs(), end, this, SG_SolidMaskForGameEntity(this));
+	//
 
-    // If all solid, no need to seek ground or add gravity.
-    if ( trace.allSolid ) {
-		LinkEntity();
-        return;
-	}
+ //   // If all solid, no need to seek ground or add gravity.
+ //   if ( trace.allSolid ) {
+	//	LinkEntity();
+ //       return;
+	//}
 
-	// If nothing was hit, add gravity.
-	if ( trace.fraction == 1 ) {
-		SG_AddGravity( this );
-		const vec3_t oldVelocity = GetVelocity();
-		SetVelocity( { 0, 0, oldVelocity.z } );
-		LinkEntity();
-		return;
-	}
+	//// If nothing was hit, add gravity.
+	//if ( trace.fraction == 1 ) {
+	//	SG_AddGravity( this );
+	//	const vec3_t oldVelocity = GetVelocity();
+	//	SetVelocity( { 0, 0, oldVelocity.z } );
+	//	LinkEntity();
+	//	return;
+	//}
 
-	// Otherwise, assume we hit something, and set our position.
-	if (trace.startSolid || trace.podEntity) {
-		SetOrigin( trace.endPosition );
-		SetVelocity( vec3_zero() );
-		LinkEntity();
-		return;
-	}
-	}
+	//// Otherwise, assume we hit something, and set our position.
+	//if (trace.startSolid || trace.podEntity) {
+	//	SetOrigin( trace.endPosition );
+	//	SetVelocity( vec3_zero() );
+	//	LinkEntity();
+	//	return;
+	//}
+	//}
 }
 
 //===============

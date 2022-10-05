@@ -199,7 +199,9 @@ extern "C" {
         //---------------------------------------------------------------------
         // Client.
         //---------------------------------------------------------------------
-        // Returns the current amount of seconds since the last frame.
+        // Returns the current local frame count that our client resides in.
+        int64_t			(*GetFrameCount) (void);
+		// Returns the current time in our frame (0 to 1)
         double          (*GetFrameTime) (void);
         // Returns the amount of miliseconds since the start of client.
         uint64_t        (*GetRealTime) (void);

@@ -124,7 +124,7 @@ void LinearMove_Done( SVGBaseMover *geMover ) {
 	geMover->GetPushMoveInfo()->OnEndFunction( geMover );
 	geMover->DispatchStopCallback(); //G_CallStop( ent );
 
-	//LinearMove_UpdateLinearVelocity( geMover, 0, 0 );
+	LinearMove_UpdateLinearVelocity( geMover, 0, 0 );
 }
 
 void LinearMove_Watch( SVGBaseMover *geMover ) {

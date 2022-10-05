@@ -444,9 +444,17 @@ void ClientGameEntities::SetDeltaFrameLevelTime() {
 	//
 	ClientGameWorld *gameWorld = GetGameWorld();
 	GameEntity *gePlayer = gameWorld->GetClientGameEntity();
-	gePlayer->GetClient()->playerState.pmove = cl->frame.playerState.pmove;
-};
 
+	// Store origin and velocity, restore it to their value if we are extrapolating on a ground mover.
+	const vec3_t geOrigin = gePlayer->GetClient()->playerState.pmove.origin;
+	const vec3_t geVelocity = gePlayer->GetClient()->playerState.pmove.velocity;
+
+	gePlayer->GetClient()->playerState.pmove = cl->frame.playerState.pmove;
+	if ( (cl->predictedState.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) ) {
+		gePlayer->GetClient()->playerState.pmove.origin = geOrigin;
+		gePlayer->GetClient()->playerState.pmove.velocity = geVelocity;
+	}
+};
 /**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
@@ -459,6 +467,7 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 		return;
 	}
 
+	// We set the extrapolated time after each delta 
 	level.extrapolatedTime = GameTime( cl->extrapolatedTime );
 
 	/**
@@ -487,7 +496,7 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 		//const int32_t entityIndex = (cl->frame.firstEntity + entityNumber) & PARSE_ENTITIES_MASK;
 
 		// Get POD Entity, and validate it to get our Game Entity.
-		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityNumber);
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityNumber );
 		GameEntity *gameEntity = gameWorld->GetGameEntityByIndex( podEntity->clientEntityNumber );//ClientGameWorld::ValidateEntity(podEntity);
 
         // If invalid for whichever reason, warn and continue to next iteration.
@@ -512,10 +521,15 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				//if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
+				if ( !( gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) ) {
 					// Check for a new ground entity that resides below this entity.
-					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
-				//}
+					//if ( gameEntity->GetServerFlags() & EntityServerFlags::Monster ) {
+					//	SG_Monster_CheckGround( gameEntity );
+					//} else {
+					//	SG_CheckGround( gameEntity );
+					//}
+					SG_Monster_CheckGround( gameEntity );
+				}
 			}
 		}
 
@@ -577,7 +591,7 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		GameEntity *gameEntity = ClientGameWorld::ValidateEntity( podEntity );
 
 		// If invalid for whichever reason, warn and continue to next iteration.
-        if ( !podEntity || !gameEntity || !podEntity->inUse ) {
+        if ( !podEntity || !gameEntity || !gameEntity->IsInUse() ) {
             continue;
         }
 
@@ -612,10 +626,10 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				//if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
+				if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
 					// Check for a new ground entity that resides below this entity.
 					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
-				//}
+				}
 			}
 		}
 

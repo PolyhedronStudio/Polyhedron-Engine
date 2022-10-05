@@ -120,11 +120,6 @@ public:
 	**/
 	virtual void SpawnFromState(const EntityState *state) override;
 
-    /**
-    *   @returen True if the entity is still in the current frame.
-    **/
-    //virtual const qboolean  IsInUse() final;
-
 	/**
 	*   @return	Human-readable string classname.
 	**/
@@ -485,15 +480,28 @@ public:
     **/
     virtual const qboolean        IsInUse() override { //return 0; };
         if (podEntity) {
-            return podEntity->inUse;
+			// A PacketEntity is in use either if:
+			// - It has been set to inUse by the game world when being created.
+			// - Its serverFrame matches that of the one which we have received.
+			// - Its clientFrame matches that of the one which we reside in.
+			// - Or it has either of the following: modelindex, effects, sound, eventID.
+			if ( podEntity->inUse || podEntity->serverFrame == cl->frame.number || podEntity->clientFrame == cl->clientFrame.number ) {
+				return true;
+			} else {
+				// In case we had set its inUse to false, however we did receive it in our frame packet,
+				// do a more specific check for its 'inUse'.
+				return ( 
+						podEntity->isExtrapolating 
+						|| ( GetModelIndex() || GetEffects() || GetSound() || GetEventID() ) );
+			}
         } 
 
         return false;
     }
     virtual void            SetInUse(const qboolean inUse) override {
-        if (podEntity) {
-            podEntity->inUse = inUse;
-        }
+		if (podEntity) {
+			podEntity->inUse = inUse;
+		}
 	};
 
     /**
@@ -536,6 +544,7 @@ public:
     virtual const vec3_t&   GetMaxs() override { 
 		if (podEntity) {
 			return podEntity->currentState.maxs;
+			//return podEntity->maxs;
 		}
 		return ZeroVec3;
 	};
@@ -557,6 +566,7 @@ public:
     virtual const vec3_t&   GetMins() override { 
 		if (podEntity) {
 			return podEntity->currentState.mins;
+			//return podEntity->mins;
 		}
 		return ZeroVec3;
 	};
@@ -572,32 +582,56 @@ public:
     **/
     virtual const std::string&  GetModel() override { return model; };
     virtual void                SetModel(const std::string &model) override {
-		// Set the actual entity model.
+		// Set modelstr.
+		this->model = model;
+
+		// Register model.
+		qhandle_t modelHandle = clgi.R_RegisterModel( model.c_str() );
+
+		// Model index.
 		if (podEntity) {
-			// Set modelstr.
-			this->model = model;
+			// Set model handle.
+			SetModelIndex( modelHandle );
 
 			// If it is an inline model, get the size information for it.
 			if (model[0] == '*') {
 				mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
 
 				if (inlineModel) {
-					podEntity->mins = inlineModel->mins;
-					podEntity->maxs = inlineModel->maxs;
+					podEntity->currentState.mins = inlineModel->mins;
+					podEntity->currentState.maxs = inlineModel->maxs;
 					
 					// Link it for collision testing.
 					LinkEntity();
 				}
 			}
-
-			// Update model index.
-			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
-
-			// Link it for collision testing.
-			//LinkEntity();
-			//Com_DPrint("DEBUG MODEL: %i for %s\n", clgi.R_RegisterModel(model.c_str()), model.c_str());
-			//SetModelIndex(cl->drawModels[ clgi.R_RegisterModel(model.c_str()) ]);
 		}
+		//// Set the actual entity model.
+		//if (podEntity) {
+		//	// Set modelstr.
+		//	this->model = model;
+
+		//	// If it is an inline model, get the size information for it.
+		//	if (model[0] == '*') {
+		//		mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
+
+		//		if (inlineModel) {
+		//			podEntity->mins = inlineModel->mins;
+		//			podEntity->maxs = inlineModel->maxs;
+		//			
+		//			// Link it for collision testing.
+		//			LinkEntity();
+		//		}
+		//	}
+
+		//	// Update model index.
+		//	SetModelIndex(clgi.R_RegisterModel(model.c_str()));
+
+		//	// Link it for collision testing.
+		//	//LinkEntity();
+		//	//Com_DPrint("DEBUG MODEL: %i for %s\n", clgi.R_RegisterModel(model.c_str()), model.c_str());
+		//	//SetModelIndex(cl->drawModels[ clgi.R_RegisterModel(model.c_str()) ]);
+		//}
 	};
 
     /**

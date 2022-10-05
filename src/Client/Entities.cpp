@@ -130,10 +130,13 @@ static void CL_SetActiveState(void) {
     cl.serverDelta = Q_align(cl.frame.number, CL_FRAMEDIV);
     cl.time = cl.serverTime = 0; // set time, needed for demos
 
-    // Initialize oldframe so lerping doesn't hurt anything.
+    // Initialize oldframe so  we don't get a LERP to disrupt anything.
     cl.oldframe.valid = false;
     cl.oldframe.playerState = cl.frame.playerState;
     cl.frameFlags = 0;
+
+	// Reset our local client frame.
+	cl.clientFrame = {};
     
     // Update sequences.
     if (cls.netChannel) {
