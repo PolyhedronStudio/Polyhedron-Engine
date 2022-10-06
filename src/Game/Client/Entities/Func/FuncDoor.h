@@ -10,7 +10,7 @@ public:
     FuncDoor( Entity* entity );
     virtual ~FuncDoor() = default;
 
-    DefineMapClass( "_func_door", FuncDoor, CLGBaseMover );
+    DefineMapClass( "xfunc_door", FuncDoor, CLGBaseMover );
 
     // Spawn flags
     static constexpr int32_t SF_StartOpen   = 1 << 0;

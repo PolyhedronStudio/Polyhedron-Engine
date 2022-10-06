@@ -61,9 +61,11 @@ using SGGameWorld	= ServerGameWorld;
 //using SGBaseLocalEntity = CLGBaseLocalEntity;
 //! Set SGBaseEntity to SVGBasePacketEntity.
 using SGBaseEntity = SVGBaseEntity;
-//! Set SGBasePlayer to SVGMover
+//! Set SGBaseMover to SVGBaseMover
 using SGBaseMover = SVGBaseMover;
-//! Set SGBasePlayer to SVGTrigger;
+//! Set SGBaseMover to SVGBaseLinearMover
+using SGBaseLinearMover = SVGBaseLinearMover;
+//! Set SGBaseTrigger to SVGBaseTrigger;
 using SGBaseTrigger = SVGBaseTrigger;
 //! Set SGBasePlayer to CLGBasePlayer.
 using SGBasePlayer = SVGBasePlayer;

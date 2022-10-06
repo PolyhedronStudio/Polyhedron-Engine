@@ -68,9 +68,11 @@ using SGGameWorld	= ClientGameWorld;
 //using SGBaseLocalEntity = CLGBaseLocalEntity;
 //! Set SGBaseEntity to CLGBasePacketEntity.
 using SGBaseEntity = CLGBasePacketEntity;
-//! Set SGBasePlayer to CLGBaseMover.
+//! Set SGBaseMover to CLGBaseMover.
 using SGBaseMover = CLGBaseMover;
-//! Set SGBasePlayer to CLGBaseTrigger.
+//! Set SGBaseLinearMover to CLGBaseLinearMover.
+using SGBaseLinearMover = CLGBaseLinearMover;
+//! Set SGBaseTrigger to CLGBaseTrigger.
 using SGBaseTrigger = CLGBaseTrigger;
 //! Set SGBasePlayer to CLGBasePlayer.
 using SGBasePlayer = CLGBasePlayer;

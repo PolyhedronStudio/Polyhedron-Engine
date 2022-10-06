@@ -68,6 +68,9 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
 		entityState->oldOrigin = previousState->origin;
 		entityState->origin = currentState->origin;
 		cs.entities[ newEntityNumber ].lerpOrigin = previousState->origin;
+
+		// Same for angles?
+		entityState->angles = currentState->angles;
 	}
 }
 

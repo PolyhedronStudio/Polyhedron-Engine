@@ -65,18 +65,18 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
 
 		// Is the ground a valid pointer?
 		if ( geGround && geGround->IsSubclassOf<CLGBaseMover>() ) {// geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
-			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.extrapolatedTime - FRAMERATE_MS ).count(), (level.extrapolatedTime).count(), linearMove);
+			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time ).count(), ( level.time ).count(), linearMove );
 			
 			
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time ).count(), (level.time + FRAMERATE_MS).count(), linearMove);
-			//SG_LinearMovementDelta( geGround->GetPODEntity(), moveCommand->prediction.moverLevelTime, moveCommand->prediction.moverNextLevelTime, linearMove );
+			SG_LinearMovementDelta( geGround->GetPODEntity(), moveCommand->prediction.moverLevelTime, moveCommand->prediction.moverNextLevelTime, linearMove );
 			
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 		}
 	}
 
     // Subtract what the server returned from our predicted origin for that frame
-    out->error = moveCommand->prediction.error = ((moveCommand->prediction.origin) - in->origin);
+    out->error = moveCommand->prediction.error = ( (moveCommand->prediction.origin + linearMove ) - in->origin);
 
     // If the error is too large, it was likely a teleport or respawn, so ignore it
     const float len = vec3_length(out->error);
@@ -181,7 +181,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
         // Save for error detection
         cmd->prediction.groundEntityNumber = pm.groundEntityNumber;
-		cmd->prediction.origin = pm.state.origin + linearMove;
+		cmd->prediction.origin = pm.state.origin;// + linearMove;
 	}
 
 	// Run the player move prediction process using the current pending frame user input.
@@ -224,7 +224,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		
 		// Save for error detection
 		cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
-		cl->moveCommand.prediction.origin = pm.state.origin + linearMove;
+		cl->moveCommand.prediction.origin = pm.state.origin;// + linearMove;
 	}
 
     // Copy results out for rendering
@@ -232,7 +232,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 	//	// TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
 	//	cl->predictedState.viewOrigin = pm.state.origin;
 	//}
-	cl->predictedState.viewOrigin = pm.state.origin;
+	cl->predictedState.viewOrigin = pm.state.origin;// + linearMove;
 	cl->predictedState.viewAngles = pm.viewAngles;
     cl->predictedState.viewOffset = pm.state.viewOffset;
     cl->predictedState.stepOffset = pm.state.stepOffset;

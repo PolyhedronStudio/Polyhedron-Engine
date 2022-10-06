@@ -215,7 +215,7 @@ void LocalEntity_Update(const EntityState *state)
 	clEntity->currentState = *state;
 
 	// Link entity.
-	CL_PF_World_LinkEntity( clEntity );
+	//CL_PF_World_LinkEntity( clEntity );
 }
 
 /**

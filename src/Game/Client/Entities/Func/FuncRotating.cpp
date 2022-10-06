@@ -35,7 +35,7 @@ void FuncRotating::Spawn() {
 	//SetMoveDirection(vec3_normalize(GetAngles()));
 
 	//// Reset Angles.
-	//SetAngles(vec3_zero());
+	SetAngles(vec3_zero());
 
 	// TODO: Implement properly. Someone, feel free to submit a PR :)
 	// Set the axis of rotation, support custom axes as well
@@ -47,9 +47,9 @@ void FuncRotating::Spawn() {
 		moveDirection = vec3_t { 0.0f, 1.0f, 0.0f };
 	}
 
-	SetSolid(Solid::BSP);
-	SetModel(GetModel());
-	SetMoveType((GetSpawnFlags() & SF_StopOnBlock) ? MoveType::Stop : MoveType::Push);
+	SetSolid( Solid::BSP );
+	SetModel( GetModel() );
+	SetMoveType( ( GetSpawnFlags() & SF_StopOnBlock ) ? MoveType::Stop : MoveType::Push );
 
 	if ( GetSpawnFlags() & SF_Reverse ) {
 	    moveDirection = vec3_negate(moveDirection);
@@ -71,13 +71,12 @@ void FuncRotating::Spawn() {
 		SetEffects( GetEffects() | EntityEffectType::AnimCycleAll30hz );
 	}
 
-	SetNextThinkTime( level.extrapolatedTime );
-	SetThinkCallback( &FuncRotating::RotatorThink );
-	EnableExtrapolation();
 	LinkEntity();
 }
 
 void FuncRotating::PostSpawn() {
+	//SetAngularVelocity( vec3_scale( moveDirection, FRAMETIME_S.count() ) );
+
 	if ( GetSpawnFlags() & SF_StartOn ) {
 		DispatchUseCallback( nullptr, nullptr );
 	}
@@ -107,8 +106,9 @@ void FuncRotating::RotatorUse( IClientGameEntity* other, IClientGameEntity* acti
 		SetAngularVelocity( vec3_zero() );
 		SetTouchCallback( nullptr );
 	} else {
-		//SetSound( moveInfo.middleSoundIndex );
 		SetAngularVelocity( vec3_scale( moveDirection, speed ) );
+		SetNextThinkTime( level.time + FRAMERATE_MS );
+		SetThinkCallback( &FuncRotating::RotatorThink );
 		if ( GetSpawnFlags() & SF_HurtTouch ) {
 			SetTouchCallback( &FuncRotating::RotatorHurtTouch );
 		}
@@ -116,8 +116,11 @@ void FuncRotating::RotatorUse( IClientGameEntity* other, IClientGameEntity* acti
 }
 
 void FuncRotating::RotatorThink() {
-			SetAngularVelocity( vec3_scale( moveDirection, speed ) );
-	SetNextThinkTime( level.extrapolatedTime );
+	EnableExtrapolation();
+	
+//	SetAngularVelocity( vec3_scale( moveDirection, speed * FRAMETIME_S.count() ) );
+
+	SetNextThinkTime( level.extrapolatedTime + FRAMERATE_MS );
 	SetThinkCallback( &FuncRotating::RotatorThink );
 }
 void FuncRotating::SpawnKey(const std::string& key, const std::string& value) { 

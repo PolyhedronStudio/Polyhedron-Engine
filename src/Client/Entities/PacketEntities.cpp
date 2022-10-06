@@ -261,7 +261,8 @@ void PacketEntity_UpdateState( const EntityState *state ) {
     if ( isPlayerEntity ) {
         PacketEntity_PlayerToEntityState( &cl.frame.playerState, &clEntity->currentState );
 
-		//CL_PF_World_LinkEntity( clEntity );
+		// We need to link it in here in order for each packet entity delta frame.
+		CL_PF_World_LinkEntity( clEntity );
 	}
 }
 

@@ -41,6 +41,9 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	
 	// Bound our velocity within sv_maxvelocity limits.
 	//SG_BoundVelocity( geSlider );
+	
+	// Let the entity 'think'.
+	SG_RunThink( geSlider );
 
     // Get angular velocity for applying rotational friction.
     const vec3_t angularVelocity = geSlider->GetAngularVelocity();
@@ -49,7 +52,6 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
     if ( angularVelocity.x || angularVelocity.y || angularVelocity.z ) {
 		geSlider->SetAngularVelocity( SG_CalculateRotationalFriction( geSlider ) );
 	}
-
 
 	/**
 	*	Store old origin and velocity. We'll need them to perhaps reset in case of any invalid movement.
@@ -186,7 +188,7 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 
 		// Apply ground friction now since we're officially on-ground.
 		if (geNewGroundEntity) {
-			SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION ), SLIDEBOX_STOP_SPEED );
+		//	SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION ), SLIDEBOX_STOP_SPEED );
 		}
 
 		// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.
@@ -206,8 +208,6 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	// hit new entities.)
     SG_TouchTriggers( geSlider );
 	
-	// Let the entity 'think'.
-	SG_RunThink( geSlider );
 
 	return blockedMask;
 }

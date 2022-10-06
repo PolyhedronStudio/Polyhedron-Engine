@@ -36,43 +36,43 @@ SVGBaseMover::SVGBaseMover(PODEntity *svEntity) : Base(svEntity) {
 *
 *
 ***/
-/**
-*	@brief 
-**/
-const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
-	// Relative move time.
-	int64_t moveTime = time - podEntity->linearMovementTimeStamp;
-	if( moveTime < 0 ) {
-		moveTime = 0;
-	}
-
-	if( podEntity->linearMovementDuration ) {
-		if( moveTime > (int)podEntity->linearMovementDuration ) {
-			moveTime = podEntity->linearMovementDuration;
-		}
-
-		const vec3_t dist = podEntity->linearMovementEndOrigin - podEntity->linearMovementBeginOrigin;
-		double moveFrac = (double)moveTime / (double)podEntity->linearMovementDuration;
-		moveFrac = Clampf( moveFrac, 0., 1. );
-		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, dist );
-	} else {
-		double moveFrac = moveTime * 0.001;
-		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, podEntity->linearMovementVelocity );
-	}
-
-	return moveTime;
-}
-
-/**
-*	@brief 
-**/
-void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest ) {
-	vec3_t oldTimeOrigin		= vec3_zero();
-	vec3_t currentTimeOrigin	= vec3_zero();
-	SG_LinearMovement( podEntity, oldTime, oldTimeOrigin );
-	SG_LinearMovement( podEntity, curTime, currentTimeOrigin );
-	dest = currentTimeOrigin - oldTimeOrigin;
-}
+///**
+//*	@brief 
+//**/
+//const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
+//	// Relative move time.
+//	int64_t moveTime = time - podEntity->linearMovementTimeStamp;
+//	if( moveTime < 0 ) {
+//		moveTime = 0;
+//	}
+//
+//	if( podEntity->linearMovementDuration ) {
+//		if( moveTime > (int)podEntity->linearMovementDuration ) {
+//			moveTime = podEntity->linearMovementDuration;
+//		}
+//
+//		const vec3_t dist = podEntity->linearMovementEndOrigin - podEntity->linearMovementBeginOrigin;
+//		double moveFrac = (double)moveTime / (double)podEntity->linearMovementDuration;
+//		moveFrac = Clampf( moveFrac, 0., 1. );
+//		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, dist );
+//	} else {
+//		double moveFrac = moveTime * 0.001;
+//		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, podEntity->linearMovementVelocity );
+//	}
+//
+//	return moveTime;
+//}
+//
+///**
+//*	@brief 
+//**/
+//void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest ) {
+//	vec3_t oldTimeOrigin		= vec3_zero();
+//	vec3_t currentTimeOrigin	= vec3_zero();
+//	SG_LinearMovement( podEntity, oldTime, oldTimeOrigin );
+//	SG_LinearMovement( podEntity, curTime, currentTimeOrigin );
+//	dest = currentTimeOrigin - oldTimeOrigin;
+//}
 
 
 
@@ -124,7 +124,7 @@ void LinearMove_Done( SVGBaseMover *geMover ) {
 	geMover->GetPushMoveInfo()->OnEndFunction( geMover );
 	geMover->DispatchStopCallback(); //G_CallStop( ent );
 
-	LinearMove_UpdateLinearVelocity( geMover, 0, 0 );
+	//LinearMove_UpdateLinearVelocity( geMover, 0, 0 );
 }
 
 void LinearMove_Watch( SVGBaseMover *geMover ) {
@@ -279,7 +279,6 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles, const bool resetAngles
 		moveDirection = MOVEDIR_DOWN;
 	} else {
 		AngleVectors(angles, &moveDirection, NULL, NULL);
-		//SetAngles(angles);
 	}
 
 	// Admer: is this really intended? Some entities may control their angle

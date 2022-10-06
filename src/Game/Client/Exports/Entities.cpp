@@ -626,7 +626,7 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
+				if ( !( gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) && ( gameEntity->GetClientFlags() & EntityClientFlags::Monster ) ) {
 					// Check for a new ground entity that resides below this entity.
 					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
 				}

@@ -732,7 +732,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionAnimator.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.cpp"
-		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseLinearMover.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseLinearMover.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseSkeletalAnimator.cpp"

@@ -12,21 +12,113 @@
 //! Server Game Local headers.
 #include "Game/Server/ServerGameLocals.h"
 
-#include "../../Effects.h"
-#include "../../Entities.h"
-#include "../../Utilities.h"
+#include "Game/Server/Effects.h"
+#include "Game/Server/Entities.h"
+#include "Game/Server/Utilities.h"
 
-#include "SVGBaseTrigger.h"
-#include "SVGBaseLinearMover.h"
+#include "Game/Server/Entities/Base/SVGBaseTrigger.h"
+#include "Game/Server/Entities/Base/SVGBaseLinearMover.h"
 
 
 
 // Epsilon used for comparing floats.
 static constexpr float BASEMOVER_EPSILON = 0.03125;
 
+
+/***
+*
+*
+*	Linear Movement Mechanics.
+*
+*
+***/
+/**
+*	@brief 
+**/
+const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
+	// Relative move time.
+	int64_t moveTime = time - podEntity->linearMovementTimeStamp;
+	if( moveTime < 0 ) {
+		moveTime = 0;
+	}
+
+	if( podEntity->linearMovementDuration ) {
+		if( moveTime > (int)podEntity->linearMovementDuration ) {
+			moveTime = podEntity->linearMovementDuration;
+		}
+
+		const vec3_t dist = podEntity->linearMovementEndOrigin - podEntity->linearMovementBeginOrigin;
+		double moveFrac = (double)moveTime / (double)podEntity->linearMovementDuration;
+		moveFrac = Clampf( moveFrac, 0., 1. );
+		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, dist );
+	} else {
+		double moveFrac = moveTime * 0.001;
+		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, podEntity->linearMovementVelocity );
+	}
+
+	return moveTime;
+}
+
+/**
+*	@brief 
+**/
+void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest ) {
+	vec3_t oldTimeOrigin		= vec3_zero();
+	vec3_t currentTimeOrigin	= vec3_zero();
+	SG_LinearMovement( podEntity, oldTime, oldTimeOrigin );
+	SG_LinearMovement( podEntity, curTime, currentTimeOrigin );
+	dest = currentTimeOrigin - oldTimeOrigin;
+}
+
+
+
+/***
+*
+*
+*	Linear Mover.
+*
+*
+***/
 // Constructor/Deconstructor.
 SVGBaseLinearMover::SVGBaseLinearMover( PODEntity *podEntity ) : Base( podEntity ) {
 
+}
+
+/**
+*	@brief
+**/
+void SVGBaseLinearMover::SetMoveDirection( const vec3_t& angles, const bool resetAngles ) {
+	const vec3_t VEC_UP = { 0, -1.f, 0 };
+	const vec3_t MOVEDIR_UP = { 0, 0, 1.f };
+	const vec3_t VEC_DOWN = { 0, -2.f, 0 };
+	const vec3_t MOVEDIR_DOWN = { 0, 0, -1.f };
+
+	const vec3_t AnglesUp[] = { 
+		{ 90.f, 0, 0 }, 
+		{ -270.f, 0, 0 } 
+	};
+	
+	const vec3_t AnglesDown[] = { 
+		{ 270.f, 0, 0 }, 
+		{ -90.f, 0, 0 } 
+	};
+
+	if ( vec3_equal( angles, VEC_UP ) || vec3_equal( angles, AnglesUp[0] ) || vec3_equal( angles, AnglesUp[1] ) ) {
+		moveDirection = MOVEDIR_UP;
+	} else if ( vec3_equal( angles, VEC_DOWN ) || vec3_equal( angles, AnglesDown[0] ) || vec3_equal( angles, AnglesDown[1] ) ) {
+		moveDirection = MOVEDIR_DOWN;
+	} else {
+		AngleVectors( angles, &moveDirection, NULL, NULL );
+		//SetAngles(angles);
+	}
+
+	// Admer: is this really intended? Some entities may control their angle
+	// and align it directly with the movement direction.
+	// I suggest we add a bool parameter to this method, 'resetAngles',
+	// which will zero the entity's angles if true
+	if ( resetAngles == true ) {
+		SetAngles( vec3_zero() );
+	}
 }
 
 /**
@@ -79,262 +171,128 @@ void SVGBaseLinearMover::SpawnKey( const std::string& key, const std::string& va
 	}
 }
 
-//
-//===============
-// SVGBaseLinearMover::SetMoveDirection
-//
-//===============
-//
-void SVGBaseLinearMover::SetMoveDirection( const vec3_t& angles, const bool resetAngles ) {
-	const vec3_t VEC_UP = { 0, -1.f, 0 };
-	const vec3_t MOVEDIR_UP = { 0, 0, 1.f };
-	const vec3_t VEC_DOWN = { 0, -2.f, 0 };
-	const vec3_t MOVEDIR_DOWN = { 0, 0, -1.f };
-
-	const vec3_t AnglesUp[] = { 
-		{ 90.f, 0, 0 }, 
-		{ -270.f, 0, 0 } 
-	};
-	
-	const vec3_t AnglesDown[] = { 
-		{ 270.f, 0, 0 }, 
-		{ -90.f, 0, 0 } 
-	};
-
-	if ( vec3_equal( angles, VEC_UP ) || vec3_equal( angles, AnglesUp[0] ) || vec3_equal( angles, AnglesUp[1] ) ) {
-		moveDirection = MOVEDIR_UP;
-	} else if ( vec3_equal( angles, VEC_DOWN ) || vec3_equal( angles, AnglesDown[0] ) || vec3_equal( angles, AnglesDown[1] ) ) {
-		moveDirection = MOVEDIR_DOWN;
-	} else {
-		AngleVectors( angles, &moveDirection, NULL, NULL );
-		//SetAngles(angles);
-	}
-
-	// Admer: is this really intended? Some entities may control their angle
-	// and align it directly with the movement direction.
-	// I suggest we add a bool parameter to this method, 'resetAngles',
-	// which will zero the entity's angles if true
-	if ( resetAngles == true ) {
-		SetAngles( vec3_zero() );
-	}
-}
-
-//===============
-// SVGBaseLinearMover::CalculateEndPosition
-//===============
-vec3_t SVGBaseLinearMover::CalculateEndPosition() {
-	const vec3_t& size = GetSize();
-	vec3_t absoluteDir{
-		fabsf( moveDirection.x ),
-		fabsf( moveDirection.y ),
-		fabsf( moveDirection.z ) 
-	};
-	
-	moveInfo.distance = ( absoluteDir.x * size.x ) + ( absoluteDir.y * size.y ) + ( absoluteDir.z * size.z ) - GetLip();
-
-	return vec3_fmaf( GetStartPosition(), moveInfo.distance, moveDirection );
-}
-
-//===============
-// SVGBaseLinearMover::SwapPositions
-//===============
-void SVGBaseLinearMover::SwapPositions() {
-	vec3_t temp = GetEndPosition();			// temp = endpos
-	SetEndPosition( GetStartPosition() );	// endpos = startpos
-	SetStartPosition( temp );				// startpos = temp
-}
 
 
-
-/*
-* GS_LinearMovement
-*/
-int32_t SG_LinearMovement( const LinearPushMoveInfo *pmi, const GameTime &time, vec3_t &dest ) {
-	vec3_t dist = vec3_zero();
-	GameTime moveTime = GameTime::zero();
-	double moveFrac = 0.;
-
-	moveTime = time - pmi->linearMovementTimeStamp;
-	if( moveTime == GameTime::zero() || moveTime < 0ms ) {
-		moveTime = 0ms;
-	}
-
-	if( pmi->linearMovementDuration > 0ms ) {
-		if( moveTime > pmi->linearMovementDuration ) {
-			moveTime = pmi->linearMovementDuration;
-		}
-
-		dist = pmi->linearMovementEnd - pmi->linearMovementBegin; //VectorSubtract( pmi->linearMovementEnd, pmi->linearMovementBegin, dist );
-		moveFrac = (float)moveTime.count() / (float)pmi->linearMovementDuration.count();
-		//#define Q_clamp( a, b, c ) ( ( b ) >= ( c ) ? ( a ) = ( b ) : ( a ) < ( b ) ? ( a ) = ( b ) : ( a ) > ( c ) ? ( a ) = ( c ) : ( a ) )
-		//Q_clamp( moveFrac, 0, 1 );
-
-		moveFrac = Clampf( moveFrac, 0.0f, 1.0f );
-		dest = vec3_fmaf( pmi->linearMovementBegin, moveFrac, dist );
-	} else {
-		moveFrac = moveTime.count() * static_cast<double>(0.001);
-		dest = vec3_fmaf( pmi->linearMovementBegin, moveFrac, pmi->linearMovementVelocity );
-	}
-	//SVG_DPrint( fmt::format( "startOrigin({},{},{}), endOrigin({},{},{}), dest({},{},{})\n",
-	//	pmi->startOrigin.x,
-	//	pmi->startOrigin.y,
-	//	pmi->startOrigin.z,
-	//		   
-	//	pmi->endOrigin.x,
-	//	pmi->endOrigin.y,
-	//	pmi->endOrigin.z,
-
-	//	dest.x,
-	//	dest.y,
-	//	dest.z
-	//));
-
-	return moveTime.count();
-}
-
-/*
-* GS_LinearMovementDelta
-*/
-//void SG_LinearMovementDelta( const LinearPushMoveInfo *pmi, const GameTime &oldTime, const GameTime &curTime, vec3_t &dest ) {
-//	vec3_t p1, p2;
-//	SG_LinearMovement( pmi, oldTime, p1 );
-//	SG_LinearMovement( pmi, curTime, p2 );
-//	dest = p2 - p1;
-//}
-
-
-
-
-// =========================
-// SVGBaseLinearMover::BrushMoveDone
-// =========================
+/***
+*
+*
+*	General Linear Brush Move. (Velocity based.)
+*
+*
+***/
+/**
+*	@brief
+**/
 void SVGBaseLinearMover::BrushMoveDone() {
 	SetVelocity( vec3_zero() );
 	moveInfo.OnEndFunction( this );
 	DispatchStopCallback();
+
+//	BrushMoveUpdateLinearVelocity( 0, 0 );
 }
 
-//===============
-// SVGBaseLinearMover::BrushMoveFinal
-//===============
+/**
+*	@brief
+**/
 void SVGBaseLinearMover::BrushMoveFinal() {
-	//// We've traveled our world, time to rest
-	//if ( moveInfo.remainingDistance == 0.0f ) {
-	//	BrushMoveDone();
-	//	return;
-	//}
-
-	//// Move only as far as to clear the remaining distance
-	//SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME_S.count() ) );
-
-	//SetThinkCallback( &SVGBaseLinearMover::BrushMoveDone );
-	//SetNextThinkTime( level.time + FRAMETIME_S );
 }
 
-//===============
-// SVGBaseLinearMover::BrushMoveBegin
-//===============
+/**
+*	@brief
+**/
 void SVGBaseLinearMover::BrushMoveWatch() {
-	GameTime moveTime = level.time - moveInfo.linearMovementTimeStamp;
-
-	if ( moveTime.count() >= moveInfo.linearMovementDuration.count() ) {
+	// Get POD Entity.
+	PODEntity *podEntity = GetPODEntity();
+	// Calculate move time.
+	int32_t moveTime = level.time.count() - podEntity->linearMovementTimeStamp;
+	
+	// If it exceeds our duration, prepare for finishing our move.
+	if( moveTime >= static_cast< int32_t >( podEntity->linearMovementDuration ) ) {
 		SetThinkCallback( &SVGBaseLinearMover::BrushMoveDone );
 		SetNextThinkTime( level.time + FRAMERATE_MS );
 		return;
 	}
 
+	// Otherwise, setup to watch our move for next frame just like we're doing right now.
 	SetThinkCallback( &SVGBaseLinearMover::BrushMoveWatch );
 	SetNextThinkTime( level.time + FRAMERATE_MS );
 }
-void SVGBaseLinearMover::BrushMoveUpdateLinearVelocity( const float distance, const float speed ) {
-	int64_t duration = 0;
 
-	if ( speed ) {
-		duration = (float)distance * 1000.0f / speed;
-		if (!duration) {
+/**
+*	@brief
+**/
+void SVGBaseLinearMover::BrushMoveUpdateLinearVelocity( const float distance, const float speed ) {
+	// Move duration.
+	int32_t duration = 0;
+	
+	// Calculate duration in seconds based on distance and speed.
+	if( speed ) {
+		duration = static_cast<float>( distance * 1000.0f / speed );
+		if( !duration ) {
 			duration = 1;
 		}
 	}
 
-	moveInfo.isLinearMoving = speed != 0;
-	if ( !moveInfo.isLinearMoving ) {
+	// Setup the linear movement state properties.
+	PODEntity *podEntity = GetPODEntity();
+	podEntity->linearMovement = ( speed != 0 ? true : false );
+	if( !podEntity->linearMovement ) {
 		return;
 	}
 
-	moveInfo.linearMovementBegin = GetOrigin();
-	moveInfo.linearMovementEnd = moveInfo.dest;
-	
-	moveInfo.linearMovementTimeStamp = level.time - FRAMERATE_MS;
-	moveInfo.linearMovementDuration = GameTime( duration );
-
-	//SVG_DPrint( fmt::format( "moveTimeStamp({}), moveDuration({}), moveBegin({},{},{}), moveEnd({},{},{})\n",
-	//	moveInfo.linearMovementTimeStamp.count(),
-	//	moveInfo.linearMovementDuration.count(),
-
-	//	moveInfo.linearMovementBegin.x,
-	//	moveInfo.linearMovementBegin.y,
-	//	moveInfo.linearMovementBegin.z,
-
-	//	moveInfo.linearMovementEnd.x,
-	//	moveInfo.linearMovementEnd.y,
-	//	moveInfo.linearMovementEnd.z
-	//));
+	podEntity->linearMovementEndOrigin = moveInfo.dest;
+	podEntity->linearMovementBeginOrigin = GetOrigin();
+	podEntity->linearMovementTimeStamp = ( level.time /*- FRAMERATE_MS */).count();
+	podEntity->linearMovementDuration = duration;
 }
+
+/**
+*	@brief
+**/
 void SVGBaseLinearMover::BrushMoveBegin() {
-	// Calculate velocity.
+	// Calculate directional velocity.
 	const vec3_t dir = moveInfo.dest - GetOrigin();
-	float dist = 0.f;
+	float dist = 0.;
 	vec3_normalize_length( dir, dist );
-	SetVelocity( vec3_scale( dir, moveInfo.speed * BASE_FRAMERATE ) );
+	SetVelocity( vec3_scale( dir, moveInfo.speed ) ); // VectorScale( dir, ent->moveinfo.speed, ent->velocity );
 
-	SetThinkCallback( &SVGBaseLinearMover::BrushMoveWatch );
-	SetNextThinkTime( level.time + FRAMERATE_MS);//Frametime(frames * FRAMETIME_S.count()) );
+	// Prepare watching our move for next frame.
+	SetThinkCallback( &SVGBaseLinearMover::BrushMoveWatch ); ////	ent->think = LinearMove_Watch;
+	SetNextThinkTime( level.time + FRAMERATE_MS ); //	ent->nextThink = level.time + 1;
 
-	BrushMoveUpdateLinearVelocity( dist, GetSpeed() );
+	// Calculate the new move duration and set its move timestamp.
+	BrushMoveUpdateLinearVelocity( dist, moveInfo.speed );
 }
 
-//===============
-// SVGBaseLinearMover::BrushMoveCalc
-//===============
-void SVGBaseLinearMover::BrushMoveCalc( const vec3_t& destination, LinearPushMoveEndFunction* function ) {
+/**
+*	@brief
+**/
+void SVGBaseLinearMover::BrushMoveCalc( const vec3_t& destination, LinearPushMoveEndFunction* pushMoveEndFunction ) {
+	// Unset its velocity.
 	SetVelocity( vec3_zero() );
+
+	// Update move info destination.
 	moveInfo.dest = destination;
-	moveInfo.OnEndFunction = function;
+	moveInfo.OnEndFunction = pushMoveEndFunction;
 	BrushMoveUpdateLinearVelocity( 0, 0 );
 
-		if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) ) {
-			BrushMoveBegin();
-		} else {
-			SetThinkCallback( &SVGBaseLinearMover::BrushMoveBegin );
-			SetNextThinkTime( level.time + FRAMERATE_MS );
-		}
-
-
-
-
-	//LinearPushMoveInfo& mi = moveInfo;
-
-	//SetVelocity( vec3_zero() );
-	//mi.dir = destination - GetOrigin();
-	//mi.remainingDistance = VectorNormalize( moveInfo.dir );
-	//mi.OnEndFunction = function;
-
-	//if ( EqualEpsilonf( mi.speed, mi.acceleration, BASEMOVER_EPSILON ) && EqualEpsilonf( mi.speed, mi.deceleration, BASEMOVER_EPSILON  ) ) {
-	//	if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) ) {
-	//		BrushMoveBegin();
-	//	} else {
-	//		SetThinkCallback( &SVGBaseLinearMover::BrushMoveBegin );
-	//		SetNextThinkTime( level.time + FRAMERATE_MS );
-	//	}
-	//} else {
-	//	// Accelerative movement
-	//	mi.currentSpeed = 0;
-
-	//	SetThinkCallback( &SVGBaseLinearMover::BrushAccelerateThink );
-	//	SetNextThinkTime( level.time + FRAMERATE_MS );
-	//}
+	if( level.currentEntity == ( ( GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this ) ) {
+		BrushMoveBegin( );
+	} else {
+		SetThinkCallback( &SVGBaseLinearMover::BrushMoveBegin);
+		SetNextThinkTime( level.time + FRAMERATE_MS + FRAMERATE_MS );
+	}
 }
 
+
+
+/***
+*
+*
+*	Angular Linear Brush Move. (Angular velocity based.)
+*
+*
+***/
 //===============
 // SVGBaseLinearMover::BrushAngleMoveDone
 //===============

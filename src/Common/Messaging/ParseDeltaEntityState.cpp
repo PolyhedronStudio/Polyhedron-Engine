@@ -136,8 +136,8 @@ void MSG_ParseDeltaEntityState(const EntityState* from, EntityState* to, int32_t
 
     // Read in the Bounding Box.
     if (byteMask & EntityMessageBits::Bounds) {
-
-        //MSG_WriteIntBase128(to->solid);
+		// We expect the mins to arrive at > 0.
+		// Revert them back to their negative value.
 		to->mins.x = -MSG_ReadUint8();
 		to->mins.y = -MSG_ReadUint8();
 		to->mins.z = -MSG_ReadUint8();

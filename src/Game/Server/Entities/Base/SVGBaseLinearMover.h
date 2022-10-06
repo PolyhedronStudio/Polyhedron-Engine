@@ -97,7 +97,7 @@ struct LinearPushMoveInfo {
 class SVGBaseLinearMover : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
-    SVGBaseLinearMover(PODEntity *svEntity);
+    SVGBaseLinearMover( PODEntity *svEntity);
     virtual ~SVGBaseLinearMover() = default;
 
 	// Inherit from SVGBaseTrigger.

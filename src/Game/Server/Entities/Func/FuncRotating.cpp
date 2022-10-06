@@ -33,10 +33,11 @@ FuncRotating::FuncRotating( Entity* entity )
 void FuncRotating::Spawn() {
 
 	// Allow for angles to determine direction.
-	//SetMoveDirection(vec3_normalize(GetAngles()));
+
+	//SetMoveDirection( vec3_normalize( GetAngles() ) );
 
 	//// Reset Angles.
-	//SetAngles(vec3_zero());
+	SetAngles(vec3_zero());
 
 	// TODO: Implement properly. Someone, feel free to submit a PR :)
 	// Set the axis of rotation, support custom axes as well
@@ -48,9 +49,9 @@ void FuncRotating::Spawn() {
 		moveDirection = vec3_t { 0.0f, 1.0f, 0.0f };
 	}
 
-	SetSolid(Solid::BSP);
-	SetModel(GetModel());
-	SetMoveType((GetSpawnFlags() & SF_StopOnBlock) ? MoveType::Stop : MoveType::Push);
+	SetSolid( Solid::BSP );
+	SetModel( GetModel() );
+	SetMoveType( ( GetSpawnFlags() & SF_StopOnBlock ) ? MoveType::Stop : MoveType::Push );
 
 	if ( GetSpawnFlags() & SF_Reverse ) {
 	    moveDirection = vec3_negate(moveDirection);
@@ -71,9 +72,6 @@ void FuncRotating::Spawn() {
 	} else if ( GetSpawnFlags() & SF_AnimatedFast ) {
 		SetEffects( GetEffects() | EntityEffectType::AnimCycleAll30hz );
 	}
-
-	SetNextThinkTime( level.time + FRAMERATE_MS );
-	SetThinkCallback( &FuncRotating::RotatorThink );
 
 	LinkEntity();
 }
@@ -108,8 +106,9 @@ void FuncRotating::RotatorUse( IServerGameEntity* other, IServerGameEntity* acti
 		SetAngularVelocity( vec3_zero() );
 		SetTouchCallback( nullptr );
 	} else {
-		//SetSound( moveInfo.middleSoundIndex );
 		SetAngularVelocity( vec3_scale( moveDirection, speed ) );
+		SetNextThinkTime( level.time + FRAMERATE_MS );
+		SetThinkCallback( &FuncRotating::RotatorThink );
 		if ( GetSpawnFlags() & SF_HurtTouch ) {
 			SetTouchCallback( &FuncRotating::RotatorHurtTouch );
 		}
@@ -117,10 +116,11 @@ void FuncRotating::RotatorUse( IServerGameEntity* other, IServerGameEntity* acti
 }
 
 void FuncRotating::RotatorThink() {
-			SetAngularVelocity( vec3_scale( moveDirection, speed ) );
+
 	SetNextThinkTime( level.time + FRAMERATE_MS );
 	SetThinkCallback( &FuncRotating::RotatorThink );
 }
+
 void FuncRotating::SpawnKey(const std::string& key, const std::string& value) { 
 	if (key == "speed") {
         // Parsed int.

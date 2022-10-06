@@ -310,7 +310,8 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
 
     // Write out the Bounding Box.
     if (byteMask & EntityMessageBits::Bounds) {
-        //MSG_WriteIntBase128(to->solid);
+		// We expect the mins to already be < 0.
+		// Remove the negative so we got room for larger bboxes.
 		MSG_WriteUint8(-to->mins.x);
 		MSG_WriteUint8(-to->mins.y);
 		MSG_WriteUint8(-to->mins.z);

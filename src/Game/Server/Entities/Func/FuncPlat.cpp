@@ -11,17 +11,17 @@
 //! Server Game Local headers.
 #include "Game/Server/ServerGameLocals.h"
 // Needed for SVG_BecomeExplosion1
-#include "../../Effects.h"
+#include "Game/Server/Effects.h"
 // Inherited Base classes.
-#include "../Base/SVGBaseEntity.h"
-#include "../Base/SVGBaseTrigger.h"
-#include "../Base/SVGBaseMover.h"
+#include "Game/Server/Entities/Base/SVGBaseEntity.h"
+#include "Game/Server/Entities/Base/SVGBaseTrigger.h"
+#include "Game/Server/Entities/Base/SVGBaseLinearMover.h"
 // Touch Auto Trigger for the Platforms.
-#include "../Trigger/TriggerAutoPlatform.h"
+#include "Game/Server/Entities/Trigger/TriggerAutoPlatform.h"
 // Gamemode Interface.
-#include "../../Gamemodes/IGamemode.h"
+#include "Game/Server/Gamemodes/IGamemode.h"
 // FuncPlat
-#include "FuncPlat.h"
+#include "Game/Server/Entities/Func/FuncPlat.h"
 
 
 
@@ -142,12 +142,12 @@ void FuncPlat::PostSpawn() {
 
 	// Start at state up.
 	if ( (spawnFlags & SF_PlatformStartRaised) ) {
-		moveInfo.state = MoverState::Top;
+		moveInfo.state = LinearMoverState::Top;
 	} else {
 		// Default to end(bottom) position.
 		SetOrigin( GetEndPosition() );
 		// Change its state.
-		moveInfo.state = MoverState::Bottom;
+		moveInfo.state = LinearMoverState::Bottom;
 	}
     
     // Setup move info.
@@ -159,6 +159,7 @@ void FuncPlat::PostSpawn() {
     moveInfo.startAngles = GetAngles();
     moveInfo.endOrigin = GetEndPosition();
     moveInfo.endAngles = GetAngles();
+
     // Link it.
     LinkEntity();
 }
@@ -184,9 +185,9 @@ void FuncPlat::Callback_Use( IServerGameEntity* other, IServerGameEntity* activa
     }
 
 	// Action is determined by move state.
-	if (moveInfo.state == MoverState::Bottom) {
+	if (moveInfo.state == LinearMoverState::Bottom) {
 		Callback_EngageRaiseMove();
-	} else if (moveInfo.state == MoverState::Top) {
+	} else if (moveInfo.state == LinearMoverState::Top) {
 		Callback_EngageLowerMove();
 		//platformEntity->SetNextThinkTime(level.time + FRAMERATE_MS);
 		//platformEntity->SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
@@ -213,7 +214,7 @@ void FuncPlat::Callback_Blocked( IServerGameEntity* other ) {
 
     GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 
-    if (moveInfo.state == MoverState::Down) {
+    if (moveInfo.state == LinearMoverState::Down) {
 	    Callback_EngageRaiseMove( );
     } else {
 	    Callback_EngageLowerMove();
@@ -284,8 +285,9 @@ void FuncPlat::Callback_RaisePlatform() {
 	    }
 	    SetSound(moveInfo.middleSoundIndex);
     }
-    moveInfo.state = MoverState::Up;
-    LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+    moveInfo.state = LinearMoverState::Up;
+    BrushMoveCalc( GetStartPosition(), OnPlatformHitTop );//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
+	SetAngularVelocity( vec3_scale( { 0., 1., 0. }, 500 * FRAMETIME_S.count() ) );
 }
 
 /**
@@ -299,8 +301,9 @@ void FuncPlat::Callback_LowerPlatform() {
 	    SetSound(moveInfo.middleSoundIndex);
     }
 
-    moveInfo.state = MoverState::Down;
-    LinearMove_Calc( this, GetEndPosition(), OnPlatformHitBottom);//BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
+    moveInfo.state = LinearMoverState::Down;
+    BrushMoveCalc( GetEndPosition(), OnPlatformHitBottom );//BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
+	SetAngularVelocity( vec3_scale( { 0., 1., 0. }, 500 * FRAMETIME_S.count() ) );
 }
 
 /**
@@ -315,7 +318,7 @@ void FuncPlat::Callback_ReachedRaisedPosition() {
         SetSound( 0 );
     }
 
-    moveInfo.state = MoverState::Top;
+    moveInfo.state = LinearMoverState::Top;
 
 	// When SF_PlatformToggle is set we..
 	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
@@ -344,7 +347,7 @@ void FuncPlat::Callback_ReachedLoweredPosition() {
         SetSound( 0 );
     }
 	
-    moveInfo.state = MoverState::Bottom;
+    moveInfo.state = LinearMoverState::Bottom;
 
 	// When SF_PlatformToggle is set we..
 	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
@@ -419,7 +422,7 @@ void FuncPlat::CalculateMoveSpeed() {
 
 	// Find the smallest distance any member of the team will be moving
 	min = fabsf(moveInfo.distance);
-	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseLinearMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
 		distance = fabsf(ent->moveInfo.distance);
 		if (distance < min) {
 			min = distance;
@@ -429,7 +432,7 @@ void FuncPlat::CalculateMoveSpeed() {
 	time = min / GetSpeed();
 
 	// Adjust speeds so they will all complete at the same time
-	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseLinearMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
 		newSpeed = fabsf(ent->moveInfo.distance) / time;
 		ratio = newSpeed / ent->moveInfo.speed;
 
@@ -495,7 +498,7 @@ void FuncPlat::SpawnTopTouchTrigger() {
     // Add points to the generated bounding box for the trigger.
     for (IServerGameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
-	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
+	    if (!teamMember->IsSubclassOf<SVGBaseLinearMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
 	        break;
 	    }
@@ -551,7 +554,7 @@ void FuncPlat::SpawnBottomTouchTrigger() {
     // Add points to the generated bounding box for the trigger.
     for (IServerGameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
-	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
+	    if (!teamMember->IsSubclassOf<SVGBaseLinearMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
 	        break;
 	    }

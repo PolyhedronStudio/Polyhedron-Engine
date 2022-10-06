@@ -351,6 +351,9 @@ void ViewCamera::CalculateWeaponViewBob( PlayerState *previousPlayerState, Playe
 *	@brief	Calculates the weapon viewmodel offset (tracing it against other objects and adjusting its position to that.)
 **/
 void ViewCamera::TraceViewWeaponOffset() {
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
 	// Actual offsets from origin.
     constexpr float gunLengthOffset = 56.f;
     constexpr float gunRightOffset = 10.f;
@@ -360,6 +363,9 @@ void ViewCamera::TraceViewWeaponOffset() {
     const vec3_t gunMins = { -4, -2, -12 };
 	const vec3_t gunMaxs = { 4, 8, 12 };
 
+	// Get client entity, in order to skip it for tracing.
+	GameEntity *geClient = gameWorld->GetClientGameEntity();
+
 	// Calculate gun origin.
     vec3_t gunOrigin = vec3_fmaf( rEntWeaponViewModel.origin, gunRightOffset, viewRight );
     gunOrigin = vec3_fmaf( gunOrigin, gunUpOffset, viewUp );
@@ -368,10 +374,10 @@ void ViewCamera::TraceViewWeaponOffset() {
     const vec3_t gunTipOrigin = vec3_fmaf(gunOrigin, gunLengthOffset, viewForward );
 
     // Perform gun tip trace.
-    TraceResult trace = clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, nullptr, BrushContentsMask::PlayerSolid); 
+    CLGTraceResult trace = CLG_Trace( gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid );//clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid); 
 
 	// In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
-    if (trace.fraction != 1.0f || trace.ent != nullptr) {
+    if (trace.fraction != 1.0f || trace.podEntity != nullptr) {
         rEntWeaponViewModel.origin = vec3_fmaf( trace.endPosition, -gunLengthOffset, viewForward );
         rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, -gunRightOffset, viewRight );
         rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, -gunUpOffset, viewUp );

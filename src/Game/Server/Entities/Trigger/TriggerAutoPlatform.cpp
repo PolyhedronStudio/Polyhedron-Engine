@@ -9,20 +9,20 @@
 //! Server Game Local headers.
 #include "Game/Server/ServerGameLocals.h"
 
-#include "../../Effects.h"
-#include "../../Entities.h"
-#include "../../Utilities.h"
+#include "Game/Server/Effects.h"
+#include "Game/Server/Entities.h"
+#include "Game/Server/Utilities.h"
 
 // Entities.
-#include "../Base/SVGBaseTrigger.h"
-#include "../Base/SVGBaseMover.h"
-#include "../Func/FuncPlat.h"
+#include "Game/Server/Entities/Base/SVGBaseTrigger.h"
+#include "Game/Server/Entities/Base/SVGBaseLinearMover.h"
+#include "Game/Server/Entities/Func/FuncPlat.h"
 
 // World.
-#include "../../World/ServerGameWorld.h"
+#include "Game/Server/World/ServerGameWorld.h"
 
 // Trigger Auto Platform.
-#include "TriggerAutoPlatform.h"
+#include "Game/Server/Entities/Trigger/TriggerAutoPlatform.h"
 
 //===============
 // TriggerAutoPlatform::ctor

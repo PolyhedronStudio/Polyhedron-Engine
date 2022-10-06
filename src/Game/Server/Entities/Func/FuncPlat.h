@@ -23,14 +23,14 @@
 /**
 *	Predeclarations.
 **/
-class SVGBaseMover;
+class SVGBaseLinearMover;
 class TriggerAutoPlatform;
 
 
 /**
 *	@brief	Entity: "func_plat"
 **/
-class FuncPlat : public SVGBaseMover {
+class FuncPlat : public SVGBaseLinearMover {
 public:
 	/**
 	*	Friend Class(-es).
@@ -46,7 +46,7 @@ public:
 	/**
 	*	Class Definition.
 	**/
-    DefineMapClass( "func_plat", FuncPlat, SVGBaseMover );
+    DefineMapClass( "func_plat", FuncPlat, SVGBaseLinearMover );
 
 
 

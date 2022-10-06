@@ -923,9 +923,7 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up);
 inline void AnglesToAxis(const vec3_t& angles, vec3_t* axis)
 {
     AngleVectors(angles, &axis[0], &axis[1], &axis[2]);
-    //VectorInverse(axis[1]);
     axis[1] = vec3_negate(axis[1]);
-    //vec3_negate()
 }
 
 //

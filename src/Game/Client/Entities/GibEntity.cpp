@@ -91,6 +91,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &size, const vec
     //gibEntity->SetClipMask( BrushContentsMask::DeadSolid | BrushContentsMask::PlayerSolid | BrushContentsMask::Solid );
 	gibEntity->SetClipMask( BrushContentsMask::PlayerSolid | BrushContentsMask::MonsterSolid );
 	gibEntity->SetClientFlags( EntityClientFlags::Monster );
+		gibEntity->SetServerFlags( EntityServerFlags::Monster );
 	//gibEntity->SetFlags( gibEntity->GetFlags() | EntityFlags::NoKnockBack );
     //gibEntity->SetTakeDamage( 1 );
     //gibEntity->SetDieCallback( &GibEntity::GibEntityDie );

@@ -339,10 +339,14 @@ void SV_BuildClientFrame(client_t *client)
             if (!ent->currentState.eventID) {
                 continue;
             }
-            if (ent->currentState.eventID = EntityEvent::Footstep) {
-                continue;
-            }
+            //if (ent->currentState.event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {
+            //    continue;
+            //}
         }
+        
+		//if (ent->currentState.effects == EntityEffects::Gib && client->settings[CLS_NOFOOTSTEPS]) {
+        //    continue;
+        //}
 
         ent_visible = true;
 
@@ -404,16 +408,16 @@ void SV_BuildClientFrame(client_t *client)
         
         *state = es;
 
-        if (ent->currentState.eventID = EntityEvent::Footstep) {
-            ent->currentState.eventID = 0;
-        }
+        //if ( ent->currentState.eventID = EntityEvent::Footstep && client->settings[CLS_NOFOOTSTEPS] ) {
+        //    ent->currentState.eventID = 0;
+        //}
 
         // hide POV entity from renderer, unless this is player's own entity
-        if (e == frame->clientNumber + 1 && ent != clent) {
+        if ( e == frame->clientNumber + 1 && ent != clent ) {
             state->modelIndex = 0;
         }
 
-        if (ent->owner == clent) {
+        if ( ent->owner == clent ) {
             //    // don't mark players missiles as solid
             state->solid = 0;
             //} else if (client->esFlags & MSG_ES_LONGSOLID) {
@@ -423,7 +427,7 @@ void SV_BuildClientFrame(client_t *client)
 
         svs.next_entity++;
 
-        if (++frame->num_entities == MAX_PACKET_ENTITIES) {
+        if ( ++frame->num_entities == MAX_PACKET_ENTITIES ) {
             break;
         }
     }
