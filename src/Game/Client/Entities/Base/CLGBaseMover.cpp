@@ -34,25 +34,25 @@ CLGBaseMover::CLGBaseMover(PODEntity *svEntity) : Base(svEntity) {
 **/
 const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
 	// Relative move time.
-	int64_t moveTime = ( time /*- FRAMERATE_MS.count()*/ )  - podEntity->linearMovementTimeStamp;
+	int64_t moveTime = ( time /*- FRAMERATE_MS.count()*/ )  - podEntity->linearMovement.timeStamp;
 	if( moveTime < 0 ) {
 		moveTime = 0;
 	}
 
 	// Determine the destination vector based on the fraction of our movement duration and current moveTime.
-	if( podEntity->linearMovementDuration ) {
-		if( moveTime > (int32_t)podEntity->linearMovementDuration ) {
-			moveTime = podEntity->linearMovementDuration;
+	if( podEntity->linearMovement.duration ) {
+		if( moveTime > (int32_t)podEntity->linearMovement.duration ) {
+			moveTime = podEntity->linearMovement.duration;
 		}
 
-		const vec3_t dist = podEntity->linearMovementEndOrigin - podEntity->linearMovementBeginOrigin;
-		double moveFrac = (double)moveTime / (double)podEntity->linearMovementDuration;
+		const vec3_t dist = podEntity->linearMovement.endOrigin - podEntity->linearMovement.beginOrigin;
+		double moveFrac = (double)moveTime / (double)podEntity->linearMovement.duration;
 		moveFrac = Clampf( moveFrac, 0., 1. );
-		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, dist );
+		dest = vec3_fmaf( podEntity->linearMovement.beginOrigin, moveFrac, dist );
 	// Otherwise, take a velocity approach. (Later on, projectiles?)
 	} else {
 		const double moveFrac = moveTime * 0.001;
-		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, podEntity->linearMovementVelocity );
+		dest = vec3_fmaf( podEntity->linearMovement.beginOrigin, moveFrac, podEntity->linearMovement.velocity );
 	}
 
 	return moveTime;
@@ -100,15 +100,15 @@ void LinearMove_UpdateLinearVelocity( CLGBaseMover *geMover, float dist, const i
 
 	// Setup the linear movement state properties.
 	PODEntity *podEntity = geMover->GetPODEntity();
-	podEntity->linearMovement = speed != 0;//ent->s.linearMovement = speed != 0;
-	if( !podEntity->linearMovement ) {//if( !ent->s.linearMovement ) {
+	podEntity->linearMovement.isMoving = speed != 0;//ent->s.linearMovement = speed != 0;
+	if( !podEntity->linearMovement.isMoving ) {//if( !ent->s.linearMovement ) {
 		return;
 	}
 
-	podEntity->linearMovementEndOrigin = geMover->GetPushMoveInfo()->destOrigin;
-	podEntity->linearMovementBeginOrigin = geMover->GetOrigin();
-	podEntity->linearMovementTimeStamp = ( GameTime( cl->serverTime ) ).count();
-	podEntity->linearMovementDuration = duration;
+	podEntity->linearMovement.endOrigin = geMover->GetPushMoveInfo()->destOrigin;
+	podEntity->linearMovement.beginOrigin = geMover->GetOrigin();
+	podEntity->linearMovement.timeStamp = ( GameTime( cl->serverTime ) ).count();
+	podEntity->linearMovement.duration = duration;
 }
 
 void LinearMove_Done( CLGBaseMover *geMover ) {
@@ -134,9 +134,9 @@ void LinearMove_Watch( CLGBaseMover *geMover ) {
 	// Get POD Entity.
 	PODEntity *podEntity = geMover->GetPODEntity();
 
-	int32_t moveTime = ( level.time - FRAMERATE_MS ).count() - podEntity->linearMovementTimeStamp;
+	int32_t moveTime = ( level.time - FRAMERATE_MS ).count() - podEntity->linearMovement.timeStamp;
 	
-	if( ( moveTime ) >= static_cast<int32_t>( podEntity->linearMovementDuration ) ) {
+	if( ( moveTime ) >= static_cast<int32_t>( podEntity->linearMovement.duration ) ) {
 		//geMover->DisableExtrapolation();
 		
 		//geMover->SetThinkCallback( &CLGBaseMover::LinearBrushMoveDone );

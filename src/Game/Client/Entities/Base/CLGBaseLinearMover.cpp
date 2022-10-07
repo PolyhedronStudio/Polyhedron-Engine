@@ -152,18 +152,18 @@ int32_t SG_LinearMovement( const LinearPushMoveInfo *pmi, const GameTime &time, 
 	GameTime moveTime = GameTime::zero();
 	double moveFrac = 0.;
 
-	moveTime = time - pmi->linearMovementTimeStamp;
+	moveTime = time - pmi->linearMovement.timeStamp;
 	if( moveTime == GameTime::zero() || moveTime < 0ms ) {
 		moveTime = 0ms;
 	}
 
-	if( pmi->linearMovementDuration > 0ms ) {
-		if( moveTime > pmi->linearMovementDuration ) {
-			moveTime = pmi->linearMovementDuration;
+	if( pmi->linearMovement.duration > 0ms ) {
+		if( moveTime > pmi->linearMovement.duration ) {
+			moveTime = pmi->linearMovement.duration;
 		}
 
 		dist = pmi->linearMovementEnd - pmi->linearMovementBegin; //VectorSubtract( pmi->linearMovementEnd, pmi->linearMovementBegin, dist );
-		moveFrac = (float)moveTime.count() / (float)pmi->linearMovementDuration.count();
+		moveFrac = (float)moveTime.count() / (float)pmi->linearMovement.duration.count();
 		//#define Q_clamp( a, b, c ) ( ( b ) >= ( c ) ? ( a ) = ( b ) : ( a ) < ( b ) ? ( a ) = ( b ) : ( a ) > ( c ) ? ( a ) = ( c ) : ( a ) )
 		//Q_clamp( moveFrac, 0, 1 );
 
@@ -171,7 +171,7 @@ int32_t SG_LinearMovement( const LinearPushMoveInfo *pmi, const GameTime &time, 
 		dest = vec3_fmaf( pmi->linearMovementBegin, moveFrac, dist );
 	} else {
 		moveFrac = moveTime.count() * static_cast<double>(0.001);
-		dest = vec3_fmaf( pmi->linearMovementBegin, moveFrac, pmi->linearMovementVelocity );
+		dest = vec3_fmaf( pmi->linearMovementBegin, moveFrac, pmi->linearMovement.velocity );
 	}
 	//CLG_Print( PrintType::Developer, fmt::format( "CLGBaseLinearMover: startOrigin({},{},{}), endOrigin({},{},{}), dest({},{},{})\n",
 	//	pmi->startOrigin.x,
@@ -221,9 +221,9 @@ void CLGBaseLinearMover::BrushMoveFinal() {}
 // CLGBaseLinearMover::BrushMoveBegin
 //===============
 void CLGBaseLinearMover::BrushMoveWatch() {
-	GameTime moveTime = GameTime( level.time ) - moveInfo.linearMovementTimeStamp;
+	GameTime moveTime = GameTime( level.time ) - moveInfo.linearMovement.timeStamp;
 
-	if ( moveTime.count() >= moveInfo.linearMovementDuration.count() ) {
+	if ( moveTime.count() >= moveInfo.linearMovement.duration.count() ) {
 		SetThinkCallback( &CLGBaseLinearMover::BrushMoveDone );
 		SetNextThinkTime( level.time + FRAMERATE_MS );
 		return;
@@ -252,12 +252,12 @@ void CLGBaseLinearMover::BrushMoveUpdateLinearVelocity( const float distance, co
 	moveInfo.linearMovementBegin = GetOrigin();
 	moveInfo.linearMovementEnd = moveInfo.dest;
 	
-	moveInfo.linearMovementTimeStamp = level.time - FRAMERATE_MS;
-	moveInfo.linearMovementDuration = GameTime( duration );
+	moveInfo.linearMovement.timeStamp = level.time - FRAMERATE_MS;
+	moveInfo.linearMovement.duration = GameTime( duration );
 
 	CLG_Print( PrintType::Developer, fmt::format( "CLGBaseLinearMover: moveTimeStamp({}), moveDuration({}), moveBegin({},{},{}), moveEnd({},{},{})\n",
-		moveInfo.linearMovementTimeStamp.count(),
-		moveInfo.linearMovementDuration.count(),
+		moveInfo.linearMovement.timeStamp.count(),
+		moveInfo.linearMovement.duration.count(),
 
 		moveInfo.linearMovementBegin.x,
 		moveInfo.linearMovementBegin.y,

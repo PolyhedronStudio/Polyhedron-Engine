@@ -287,7 +287,6 @@ void FuncPlat::Callback_RaisePlatform() {
     }
     moveInfo.state = LinearMoverState::Up;
     BrushMoveCalc( GetStartPosition(), OnPlatformHitTop );//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
-	SetAngularVelocity( vec3_scale( { 0., 1., 0. }, 500 * FRAMETIME_S.count() ) );
 }
 
 /**
@@ -303,7 +302,6 @@ void FuncPlat::Callback_LowerPlatform() {
 
     moveInfo.state = LinearMoverState::Down;
     BrushMoveCalc( GetEndPosition(), OnPlatformHitBottom );//BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
-	SetAngularVelocity( vec3_scale( { 0., 1., 0. }, 500 * FRAMETIME_S.count() ) );
 }
 
 /**

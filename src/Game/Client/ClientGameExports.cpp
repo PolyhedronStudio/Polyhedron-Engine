@@ -285,7 +285,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 		PlayerState gePlayerState = gePlayer->GetClient()->playerState;
 
 		// Extrapolate view origin in case the 'ground mover' is performing linear extrapolating movement.
-		if ( geGround && geGround->GetPODEntity()->linearMovement ) {
+		if ( geGround && geGround->GetPODEntity()->linearMovement.isMoving ) {
 			// Construct the old view origin based on the latest valid frame received player state.
 	        oldViewOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
 

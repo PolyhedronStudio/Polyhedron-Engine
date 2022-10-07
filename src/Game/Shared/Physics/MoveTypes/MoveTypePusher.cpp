@@ -298,7 +298,86 @@ void G_RotatePoint( vec3_t &point, vec3_t *matrix) {
 }
 
 /////////////////////////////////////////////////////////////
-const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, const vec3_t &deltaMove, const vec3_t &angularMove ) {
+/**
+*	@brief	Tests the 'push entity' (not the mover) for whether it should be pushed, or skipped from
+*			being pushed.
+*	@return	False if no push should be performed for this entity, or gePushEntity is (nullptr).
+*			Conditions are based on its moveType and whether the entity is local or not.
+*
+*			If it passes all tests, it returns true indicating this entity should be along pushed with the move.
+**/
+static inline bool SG_Mover_ShouldPushEntity( GameEntity *gePushEntity ) {
+	// Make sure it is valid.
+	if ( !gePushEntity ) {
+		return false;
+	}
+
+	// Get ourselves easy access to data we wish to check upon.
+    const int32_t	pushEntityMoveType = gePushEntity->GetMoveType();
+
+	// Local entity.
+	#ifdef SHAREDGAME_CLIENTGAME
+	const bool isLocalEntity = gePushEntity->GetPODEntity()->isLocal;
+	#endif
+
+	//#ifdef SHAREDGAME_CLIENTGAME
+	//const std::string pushablesStr2 = fmt::format(
+	//	"CLG!!: Entity({}), inUse({}), moveType({}, linkCount({}), groundLinkEntityCount({}), origin({},{},{})\n",
+	//	geCheck->GetNumber(),
+	//	isInUse,
+	//	moveType,
+	//	geCheck->GetLinkCount(),
+	//	geCheck->GetGroundEntityLinkCount(),
+	//	geCheck->GetOrigin().x,
+	//	geCheck->GetOrigin().y,
+	//	geCheck->GetOrigin().z
+	//);
+	//SG_Print( PrintType::DeveloperWarning, pushablesStr2 );
+	//#endif
+	//#ifdef SHAREDGAME_SERVERGAME
+	//const std::string pushablesStr2 = fmt::format(
+	//	"SVG!!: Entity({}), inUse({}), moveType({}, linkCount({}), groundLinkEntityCount({}), origin({},{},{})\n",
+	//	geCheck->GetNumber(),
+	//	isInUse,
+	//	moveType,
+	//	geCheck->GetLinkCount(),
+	//	geCheck->GetGroundEntityLinkCount(),
+	//	geCheck->GetOrigin().x,
+	//	geCheck->GetOrigin().y,
+	//	geCheck->GetOrigin().z
+	//);
+	//SG_Print( PrintType::DeveloperWarning, pushablesStr2 );
+	//#endif
+
+	// Skip moveTypes that aren't pushed around at all.
+	#ifdef SHAREDGAME_CLIENTGAME
+    if ( pushEntityMoveType == MoveType::Push   || pushEntityMoveType == MoveType::Stop   ||
+			pushEntityMoveType == MoveType::NoClip || pushEntityMoveType == MoveType::Spectator ||
+		( isLocalEntity && pushEntityMoveType == MoveType::None ) ) {
+        return false;
+	}
+	#endif
+	#ifdef SHAREDGAME_SERVERGAME
+    if ( pushEntityMoveType == MoveType::Push   || pushEntityMoveType == MoveType::Stop   ||
+			pushEntityMoveType == MoveType::None   || pushEntityMoveType == MoveType::NoClip ||
+			pushEntityMoveType == MoveType::Spectator ) {
+        return false;
+	}
+	#endif
+
+	// Entity has to be linked in.
+    if ( !gePushEntity->GetPODEntity()->area.prev ) {
+        return false;       // not linked in anywhere
+	}
+
+	return true;
+}
+
+/**
+*	@brief	Will push the mover into its deltaMove + deltaAngularMove combined offset direction.
+*	@return	false if the move failed (i.e could've been blocked.), true if it succeeds.
+**/
+const bool SG_MoverPush( SGEntityHandle &entityHandle, const vec3_t &partOrigin, const vec3_t &deltaMove, const vec3_t &angularDeltaMove ) {
     GameEntity* geCheck = nullptr;
     GameEntity* geBlock = nullptr;
     PushedEntityState *p = nullptr;
@@ -319,12 +398,16 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 	const vec3_t move = deltaMove; //pusherMove;
 
     // We need this for pushing things later
-    org = vec3_negate(angularMove);
+    org = vec3_negate( angularDeltaMove );
     AngleVectors(org, &forward, &right, &up);
 	
-	// Store the needed pushed entity information in a pushed entity state.
+	// We push the required 'moment in time' state to later on reverse this move if required. (i.e it got blocked)
 	SG_PushEntityState( gePusher );
 
+	// Calculate the pusher bounds as well as the entire move's bounds.
+	// The first is used to test whether any entities found in the entire move are standing on it or not.
+	// The second is used to get all entities 'within its box' to use for testing.
+	//
 	// mins/maxs are the bounds at destination.
 	// totalMins / totalMaxs are the bounds for the entire move
 	vec3_t mins = vec3_zero();
@@ -332,7 +415,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 	vec3_t totalMins = vec3_zero();
 	vec3_t totalMaxs = vec3_zero();
 
-	// Special handling for rotating pushers.
+	// Special handling for any rotating pushers.
 	if ( vec3_equal( gePusher->GetAngles(), vec3_zero() ) || vec3_equal( gePusher->GetAngularVelocity(), vec3_zero() ) ) {
 		// Get bounds radius.
 		const float radius = RadiusFromBounds( gePusher->GetMins(), gePusher->GetMaxs() );
@@ -340,15 +423,16 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 		// Calculate bounds at destination.
 		const vec3_t pusherOrigin = gePusher->GetOrigin();
 
+		// Adjust move to rotating bounds radius.
 		for ( int32_t i = 0; i < 3; i++ ) {
 			mins[i] = pusherOrigin[i] + move[i] - radius;
 			maxs[i] = pusherOrigin[i] + move[i] + radius;
 			totalMins[i] = mins[i] - move[i];
 			totalMaxs[i] = maxs[i] - move[i];
 		}
-	// Non rotating pushers.
+	// Handling for non rotating pushers.
 	} else {
-		// Find the bounding box of this move.
+		// Find the bounding box of the pusher's move.
 		mins = gePusher->GetAbsoluteMin() + move;
 	    maxs = gePusher->GetAbsoluteMax() + move;
 
@@ -356,19 +440,21 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 		totalMins = gePusher->GetAbsoluteMin();
 		totalMaxs = gePusher->GetAbsoluteMax();
 
-		for ( int32_t i = 0; i < 3; i++ ) {
-			if ( move[i] > 0 ) {
-				totalMaxs[i] += move[i];
-			} else {
-				totalMins[i] += move[i];
-			}
-		}
+		// Finish off totalMins and totalMaxs.
+		//for ( int32_t i = 0; i < 3; i++ ) {
+		//	if ( move[i] > 0 ) {
+		//		totalMaxs[i] += move[i];
+		//	} else {
+		//		totalMins[i] += move[i];
+		//	}
+		//}
+		// Add the move coordinates to the 'total' bounds in order to get the entire move bounds.
+		AddPointToBounds( move, totalMins, totalMaxs );
 	}
 
 	// Unlink first.
-	// Move the Pusher to its wished final position.
     gePusher->SetOrigin( gePusher->GetOrigin() + deltaMove );
-    gePusher->SetAngles( gePusher->GetAngles() + angularMove );
+    gePusher->SetAngles( gePusher->GetAngles() + angularDeltaMove );
 	gePusher->LinkEntity();
 
 	/**	
@@ -398,76 +484,27 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 
 	// Iterate over the pushable entities.
 	for ( auto geCheck : gePushables ) {
-        // Fetch its properties to work with.
-        const qboolean isInUse = geCheck->IsInUse();
-        const int32_t moveType = geCheck->GetMoveType();
-        const vec3_t absMin = geCheck->GetAbsoluteMin();
-        const vec3_t absMax = geCheck->GetAbsoluteMax();
-		// Local entity.
-		#ifdef SHAREDGAME_CLIENTGAME
-		const bool isLocalEntity = geCheck->GetPODEntity()->isLocal;
-		#endif
-
-		#ifdef SHAREDGAME_CLIENTGAME
-		const std::string pushablesStr2 = fmt::format(
-			"CLG!!: Entity({}), inUse({}), moveType({}, linkCount({}), groundLinkEntityCount({}), origin({},{},{})\n",
-			geCheck->GetNumber(),
-			isInUse,
-			moveType,
-			geCheck->GetLinkCount(),
-			geCheck->GetGroundEntityLinkCount(),
-			geCheck->GetOrigin().x,
-			geCheck->GetOrigin().y,
-			geCheck->GetOrigin().z
-		);
-		SG_Print( PrintType::DeveloperWarning, pushablesStr2 );
-		#endif
-		#ifdef SHAREDGAME_SERVERGAME
-		const std::string pushablesStr2 = fmt::format(
-			"SVG!!: Entity({}), inUse({}), moveType({}, linkCount({}), groundLinkEntityCount({}), origin({},{},{})\n",
-			geCheck->GetNumber(),
-			isInUse,
-			moveType,
-			geCheck->GetLinkCount(),
-			geCheck->GetGroundEntityLinkCount(),
-			geCheck->GetOrigin().x,
-			geCheck->GetOrigin().y,
-			geCheck->GetOrigin().z
-		);
-		SG_Print( PrintType::DeveloperWarning, pushablesStr2 );
-		#endif
-
-		// Skip moveTypes that aren't pushed around at all.
-		#ifdef SHAREDGAME_CLIENTGAME
-        if ( moveType == MoveType::Push   || moveType == MoveType::Stop   ||
-			 moveType == MoveType::NoClip || moveType == MoveType::Spectator ||
-			( isLocalEntity && moveType == MoveType::None ) ) {
-            continue;
-		}
-		#endif
-		#ifdef SHAREDGAME_SERVERGAME
-        if ( moveType == MoveType::Push   || moveType == MoveType::Stop   ||
-			 moveType == MoveType::None   || moveType == MoveType::NoClip ||
-			 moveType == MoveType::Spectator ) {
-            continue;
-		}
-		#endif
-
-		// Entity has to be linked in.
-        if ( !geCheck->GetPODEntity()->area.prev ) {
-            continue;       // not linked in anywhere
+		// Figure out whether this entity should be pushed along this move or be skipped instead.
+		if ( !SG_Mover_ShouldPushEntity( geCheck ) ) {
+			continue;
 		}
 
+		// Check whether the entity is standing on our pusher(making him a rider), in which case he will
+		// definitely need to be moved.
         // if the entity is standing on the pusher, it will definitely be moved
 		GameEntity *geCheckGroundEntity = SGGameWorld::ValidateEntity( geCheck->GetGroundEntityHandle() );
+
+		// (Can't be the same entity in that case, so make sure we check for that.)
+		const vec3_t checkAbsoluteMins = geCheck->GetAbsoluteMin();
+		const vec3_t checkAbsoluteMaxs = geCheck->GetAbsoluteMax();
 		if ( !SG_Push_IsSameEntity( geCheckGroundEntity, gePusher ) ) {
             // see if the ent needs to be tested
-            if ( absMin[0] >= maxs[0]	||
-                absMin[1] >= maxs[1]	||
-                absMin[2] >= maxs[2]	||
-                absMax[0] <= mins[0]	||
-                absMax[1] <= mins[1]	||
-                absMax[2] <= mins[2] ) {
+            if ( checkAbsoluteMins[0] >= maxs[0]	||
+                checkAbsoluteMins[1] >= maxs[1]	||
+                checkAbsoluteMins[2] >= maxs[2]	||
+                checkAbsoluteMaxs[0] <= mins[0]	||
+                checkAbsoluteMaxs[1] <= mins[1]	||
+                checkAbsoluteMaxs[2] <= mins[2] ) {
                 continue;
 			}
 
@@ -484,11 +521,12 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 			**/
 			SG_PushEntityState( geCheck );
 			
-			//-------------------------------------------------------------------------
-			// try moving the contacted entity 
-			// figure movement due to the pusher's amove
+			/**
+			*	In order to start moving our contacted entity, we need to calculate its full final
+			*	move based on the optional angular delta move vector.
+			**/
 			vec3_t matrix[3], transpose[3];
-			AnglesToAxis( angularMove, transpose );//G_CreateRotationMatrix( angularMove, transpose );
+			AnglesToAxis( angularDeltaMove, transpose );//G_CreateRotationMatrix( angularMove, transpose );
 			G_TransposeMatrix( transpose, matrix );//G_TransposeMatrix( transpose, matrix );
 			if ( geCheck->GetClient() ) {
 				// geCheck->GetClient()->playerState.pmove.origin <-- should be the actual current moment in time origin if linear mover.
@@ -500,8 +538,6 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 			org2 = org;
 			RotatePoint( org2, matrix );//G_RotatePoint( org2, matrix );
 			move2 = org2 - org;
-			//VectorSubtract (org2, org, move2);
-			//---------------------------------------------------------------------
 
 			/**
 			*	Try moving the contacted entity.
@@ -512,18 +548,13 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
                 // FIXME: skuller: needs client side interpolation
 				#if USE_SMOOTH_DELTA_ANGLES
 				geCheck->GetClient()->playerState.pmove.origin += deltaMove;
-				geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
+				geCheck->GetClient()->playerState.pmove.deltaAngles[ vec3_t::Yaw ] += angularDeltaMove[ vec3_t::Yaw ];
 				#endif
+
 			} else {
 				#if USE_SMOOTH_DELTA_ANGLES
 				vec3_t angles = geCheck->GetAngles();
-				angles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
-				//				SG_Print( PrintType::DeveloperWarning, fmt::format("[Ent(#{}) Client(nullptr)]:", geCheck->GetNumber(), 
-				//		 angularMove[vec3_t::Pitch],
-				//		 angularMove[vec3_t::Yaw],
-				//		angularMove[vec3_t::Roll]
-				//	)
-				//);
+				angles[ vec3_t::Yaw ] += angularDeltaMove[ vec3_t::Yaw ];
 				geCheck->SetAngles(angles);
 				#endif
 			}
@@ -568,7 +599,7 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 					geCheck->GetClient()->playerState.pmove.origin -= move2;
 
 					// Rotate back angles.
-					geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] -= angularMove[vec3_t::Yaw];
+					geCheck->GetClient()->playerState.pmove.deltaAngles[ vec3_t::Yaw ] -= angularDeltaMove[ vec3_t::Yaw ];
 					//geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] -= move2[vec3_t::Yaw];
 				} else {
 					// Get current angles to rotate back from.
@@ -577,9 +608,9 @@ const bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &partOrigin, cons
 					// Rotate back origin.
 					geCheck->SetOrigin( geCheck->GetOrigin() - move );
 					geCheck->SetOrigin( geCheck->GetOrigin() - move2 );
-
+					
 					// Rotate back angles.
-					checkAngles[vec3_t::Yaw] -= angularMove[vec3_t::Yaw];
+					checkAngles[ vec3_t::Yaw ] -= angularDeltaMove[ vec3_t::Yaw ];
 					//checkAngles[vec3_t::Yaw] -= move2[vec3_t::Yaw];
 					
 					// Apply new angles.
@@ -718,8 +749,8 @@ retry:
         if ( !vec3_equal( partVelocity, vec3_zero() ) || !vec3_equal( partAngularVelocity, vec3_zero() ) ) {
 			PODEntity *partPODEntity = part->GetPODEntity();
 			vec3_t partOrigin = vec3_zero();
-
-			if ( partPODEntity->linearMovement ) {
+			
+			if ( partPODEntity->linearMovement.isMoving ) {
 			#ifdef SHAREDGAME_CLIENTGAME
 				// Calculate the actual origin of the mover for the next serverframe moment in time. 
 				SG_LinearMovement( partPODEntity, (level.extrapolatedTime ).count(), partOrigin );
@@ -755,14 +786,14 @@ retry:
 						 fromMove.x, fromMove.y, fromMove.z, toMove.x, toMove.y, toMove.z, move.x, move.y, move.z
 				));
 			#endif
+			// Regular velocity and angular movement.
 			} else {
-				// object is moving
 				move = vec3_scale( part->GetVelocity(), FRAMETIME_S.count() );
 				amove = vec3_scale( part->GetAngularVelocity(), FRAMETIME_S.count() );
 			}
 
             SGEntityHandle partHandle(part);
-            if ( !SG_Push( partHandle, partOrigin, move, amove ) )
+            if ( !SG_MoverPush( partHandle, partOrigin, move, amove ) )
                 break;  // move was Blocked
         }
     }

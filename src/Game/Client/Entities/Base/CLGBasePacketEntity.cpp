@@ -584,7 +584,7 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
-	if ( IsExtrapolating() || podEntity->linearMovement ) {
+	if ( IsExtrapolating() || podEntity->linearMovement.isMoving ) {
 		SetNextThinkTime( level.extrapolatedTime );
 	} else {
 		// Setup same think for the next frame.
@@ -1473,15 +1473,15 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
     *	Origin:
     **/
     // Step origin discretely, because the model frames do the animation properly.
-	if (renderEffects& RenderEffects::FrameLerp) {
+	if ( renderEffects & RenderEffects::FrameLerp ) {
         refreshEntity.origin = podEntity->currentState.origin;
         refreshEntity.oldorigin = podEntity->currentState.oldOrigin;
 	// Interpolate start and end points for beams
-	} else if (renderEffects& RenderEffects::Beam) {
+	} else if ( renderEffects & RenderEffects::Beam ) {
         refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
         refreshEntity.oldorigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
     } else {
-        if (currentState->number == cl->frame.clientNumber + 1) {
+        if ( currentState->number == cl->frame.clientNumber + 1 ) {
             // In case of this being our actual client entity, we use the predicted origin.
             refreshEntity.origin = cl->playerEntityOrigin;
             refreshEntity.oldorigin = cl->playerEntityOrigin;
@@ -1490,7 +1490,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			PODEntity *podGroundEntity = GetGroundPODEntity();
 
 			// Extrapolate the mover.
-			if ( IsExtrapolating() || podEntity->linearMovement ) {
+			if ( IsExtrapolating() || podEntity->linearMovement.isMoving ) {
 				//refreshEntity.oldorigin = refreshEntity.origin;		
 				//if ( cl->xerpFraction ) {
 				//	refreshEntity.oldorigin = vec3_mix( previousState->oldOrigin, currentState->oldOrigin, 1.0 - cl->xerpFraction );
@@ -1509,7 +1509,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 //				refreshEntity.oldorigin = refreshEntity.origin;
 			}
 			// Extrapolate for ground entity movement.
-			else if ( (podGroundEntity && podGroundEntity->linearMovement) ) {
+			else if ( ( podGroundEntity && podGroundEntity->linearMovement.isMoving ) ) {
 					//refreshEntity.oldorigin = vec3_mix( previousState->oldOrigin, currentState->oldOrigin, 1.0 - cl->xerpFraction );
 					//refreshEntity.origin = vec3_mix( previousState->origin, currentState->origin, 1.0 - cl->xerpFraction );
 				if ( cl->xerpFraction ) {

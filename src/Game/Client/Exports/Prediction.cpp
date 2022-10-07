@@ -175,7 +175,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		// Update player entity.
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 		// Is the ground a valid pointer?
-		if ( geGround && geGround->GetPODEntity()->linearMovement ) {
+		if ( geGround && geGround->GetPODEntity()->linearMovement.isMoving ) {
 			SG_LinearMovementDelta( geGround->GetPODEntity(), cmd->prediction.moverLevelTime, cmd->prediction.moverNextLevelTime, linearMove );
 		}
 
@@ -197,7 +197,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 
 		// Is the ground a valid pointer?
-		if ( geGround && geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
+		if ( geGround && geGround->GetPODEntity()->linearMovement.isMoving ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
 			SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
 		}
 	}
@@ -290,7 +290,7 @@ void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm, GameEntity 
 	// EXCEPTION: If the mover is NOT moving, we make sure to adjust to our frame again.
 	GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
 
-	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || ( geGround && !geGround->GetPODEntity()->linearMovement ) )  {
+	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || ( geGround && !geGround->GetPODEntity()->linearMovement.isMoving ) )  {
 		gePlayer->SetOrigin( pm->state.origin );
 		gePlayer->SetVelocity( pm->state.velocity );
 	}

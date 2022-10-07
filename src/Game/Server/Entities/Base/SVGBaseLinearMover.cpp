@@ -37,23 +37,23 @@ static constexpr float BASEMOVER_EPSILON = 0.03125;
 **/
 const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest ) {
 	// Relative move time.
-	int64_t moveTime = time - podEntity->linearMovementTimeStamp;
+	int64_t moveTime = time - podEntity->linearMovement.timeStamp;
 	if( moveTime < 0 ) {
 		moveTime = 0;
 	}
 
-	if( podEntity->linearMovementDuration ) {
-		if( moveTime > (int)podEntity->linearMovementDuration ) {
-			moveTime = podEntity->linearMovementDuration;
+	if( podEntity->linearMovement.duration ) {
+		if( moveTime > (int)podEntity->linearMovement.duration ) {
+			moveTime = podEntity->linearMovement.duration;
 		}
 
-		const vec3_t dist = podEntity->linearMovementEndOrigin - podEntity->linearMovementBeginOrigin;
-		double moveFrac = (double)moveTime / (double)podEntity->linearMovementDuration;
+		const vec3_t dist = podEntity->linearMovement.endOrigin - podEntity->linearMovement.beginOrigin;
+		double moveFrac = (double)moveTime / (double)podEntity->linearMovement.duration;
 		moveFrac = Clampf( moveFrac, 0., 1. );
-		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, dist );
+		dest = vec3_fmaf( podEntity->linearMovement.beginOrigin, moveFrac, dist );
 	} else {
 		double moveFrac = moveTime * 0.001;
-		dest = vec3_fmaf( podEntity->linearMovementBeginOrigin, moveFrac, podEntity->linearMovementVelocity );
+		dest = vec3_fmaf( podEntity->linearMovement.beginOrigin, moveFrac, podEntity->linearMovement.velocity );
 	}
 
 	return moveTime;
@@ -204,10 +204,10 @@ void SVGBaseLinearMover::BrushMoveWatch() {
 	// Get POD Entity.
 	PODEntity *podEntity = GetPODEntity();
 	// Calculate move time.
-	int32_t moveTime = level.time.count() - podEntity->linearMovementTimeStamp;
+	int32_t moveTime = level.time.count() - podEntity->linearMovement.timeStamp;
 	
 	// If it exceeds our duration, prepare for finishing our move.
-	if( moveTime >= static_cast< int32_t >( podEntity->linearMovementDuration ) ) {
+	if( moveTime >= static_cast< int32_t >( podEntity->linearMovement.duration ) ) {
 		SetThinkCallback( &SVGBaseLinearMover::BrushMoveDone );
 		SetNextThinkTime( level.time + FRAMERATE_MS );
 		return;
@@ -235,15 +235,15 @@ void SVGBaseLinearMover::BrushMoveUpdateLinearVelocity( const float distance, co
 
 	// Setup the linear movement state properties.
 	PODEntity *podEntity = GetPODEntity();
-	podEntity->linearMovement = ( speed != 0 ? true : false );
-	if( !podEntity->linearMovement ) {
+	podEntity->linearMovement.isMoving = ( speed != 0 ? true : false );
+	if( !podEntity->linearMovement.isMoving ) {
 		return;
 	}
 
-	podEntity->linearMovementEndOrigin = moveInfo.dest;
-	podEntity->linearMovementBeginOrigin = GetOrigin();
-	podEntity->linearMovementTimeStamp = ( level.time /*- FRAMERATE_MS */).count();
-	podEntity->linearMovementDuration = duration;
+	podEntity->linearMovement.endOrigin = moveInfo.dest;
+	podEntity->linearMovement.beginOrigin = GetOrigin();
+	podEntity->linearMovement.timeStamp = ( level.time /*- FRAMERATE_MS */).count();
+	podEntity->linearMovement.duration = duration;
 }
 
 /**

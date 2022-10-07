@@ -107,21 +107,28 @@ struct PODEntity {
 	*	Linear Movement, used for prediction:
 	*		- Currently in try-out for 'func_plat'.
 	**/
-	//! When extrapolating, parsed entity states will NOT set the origin.
-	bool isExtrapolating			= false;
-	//! Whether we are moving along a linear movement path, or not.
-	bool linearMovement				= false;
-	//! The current velocity that this entity is traveling along its linear movement path.
-	vec3_t linearMovementVelocity	= vec3_zero();
-	//! The starting origin for the entity's linear movement path
-	vec3_t linearMovementBeginOrigin	= vec3_zero();
-	//! The end origin for the entity's linear movement path
-	vec3_t linearMovementEndOrigin		= vec3_zero();
+	struct LinearMovement {
+		//! Level timestamp of when this move should start.
+		int64_t timeStamp	= 0;
+		//! uint32_t movement duration.
+		uint32_t duration	= 0;
 
-	//! uint32_t movement duration.
-	uint32_t linearMovementDuration	= 0;
-	//! Movement start timestamp.
-	int64_t linearMovementTimeStamp	= 0;
+		//! When extrapolating, parsed entity states will NOT set the origin.
+		bool isExtrapolating	= false;
+		//! True if we are at or past timeStamp and within duration.
+		bool isMoving			= false;
+		//! The current velocity that this entity is traveling along its linear movement path.
+		vec3_t velocity		= vec3_zero();
+		//! The starting origin for the linear movement path
+		vec3_t beginOrigin	= vec3_zero();
+		//! The end origin for the linear movement path
+		vec3_t endOrigin	= vec3_zero();
+
+		//! The starting angles for the linear movement path
+		vec3_t beginAngles	= vec3_zero();
+		//! The end angles for the linear movement path
+		vec3_t endAngles	= vec3_zero();
+	} linearMovement;
 
 	/**
 	*	Game Specific POD:

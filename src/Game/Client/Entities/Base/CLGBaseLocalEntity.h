@@ -101,13 +101,13 @@ public:
     * 
     ***/
 	virtual void EnableExtrapolation() override {
-		podEntity->isExtrapolating = true;
+		podEntity->linearMovement.isExtrapolating = true;
 	}
 	virtual void DisableExtrapolation() override {
-		podEntity->isExtrapolating = false;
+		podEntity->linearMovement.isExtrapolating = false;
 	}
 	virtual const bool IsExtrapolating() override {
-		return podEntity->isExtrapolating;
+		return podEntity->linearMovement.isExtrapolating;
 	}
 
     /**
@@ -491,7 +491,7 @@ public:
 				// In case we had set its inUse to false, however we did receive it in our frame packet,
 				// do a more specific check for its 'inUse'.
 				return ( 
-						podEntity->isExtrapolating 
+						podEntity->linearMovement.isExtrapolating 
 						|| ( GetModelIndex() || GetEffects() || GetSound() || GetEventID() ) );
 			}
         } 

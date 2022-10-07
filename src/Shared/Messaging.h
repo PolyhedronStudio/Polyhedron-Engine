@@ -166,16 +166,16 @@ struct EntityState {
 	////! Whether we are moving along a linear movement path, or not.
 	//bool linearMovement				= false;
 	////! The current velocity that this entity is traveling along its linear movement path.
-	//vec3_t linearMovementVelocity	= vec3_zero();
+	//vec3_t linearMovement.velocity	= vec3_zero();
 	////! The starting origin for the entity's linear movement path
-	//vec3_t linearMovementBeginOrigin	= vec3_zero();
+	//vec3_t linearMovement.beginOrigin	= vec3_zero();
 	////! The end origin for the entity's linear movement path
-	//vec3_t linearMovementEndOrigin		= vec3_zero();
+	//vec3_t linearMovement.endOrigin		= vec3_zero();
 
 	////! uint32_t movement duration.
-	//uint32_t linearMovementDuration	= 0;
+	//uint32_t linearMovement.duration	= 0;
 	////! Movement start timestamp.
-	//int64_t linearMovementTimeStamp	= 0;
+	//int64_t linearMovement.timeStamp	= 0;
 
 
 	/**

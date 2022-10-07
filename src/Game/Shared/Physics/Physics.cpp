@@ -438,7 +438,7 @@ const bool SG_RunThink( GameEntity *geThinker ) {
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
 	// For non extrapolating entities:
-	if ( !geThinker->IsExtrapolating() && !geThinker->GetPODEntity()->linearMovement ) {
+	if ( !geThinker->IsExtrapolating() && !geThinker->GetPODEntity()->linearMovement.isMoving ) {
 		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
 			return true;
 		}
