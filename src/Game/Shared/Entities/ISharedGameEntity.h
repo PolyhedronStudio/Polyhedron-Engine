@@ -151,7 +151,7 @@ public:
     virtual const qboolean HasTouchCallback() = 0;
 
     // template<typename function> inline void SetDamageCallback(function f) = 0;
-    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
+    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection = vec3_zero() ) = 0;
     virtual const qboolean HasTakeDamageCallback() = 0;
 
     // template<typename function> inline void SetStopCallback(function f) = 0;

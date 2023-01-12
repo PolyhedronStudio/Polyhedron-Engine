@@ -71,7 +71,7 @@ void MiscExplosionBox::Spawn() {
     //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
     // Set solid.
-    SetSolid( Solid::OctagonBox );
+    SetSolid( Solid::BoundingBox );
     // Set clip mask.
     SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
     // Set the barrel model, and model index.

@@ -196,7 +196,7 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 	PushMoveInfo& mi = moveInfo;
 
 	SetVelocity( vec3_zero() );
-	mi.dir = destination - GetOrigin();
+	mi.dir = vec3_normalize( destination - GetOrigin() );
 	mi.remainingDistance = VectorNormalize( moveInfo.dir );
 	mi.OnEndFunction = function;
 
@@ -262,7 +262,7 @@ void SVGBaseMover::BrushAngleMoveBegin() {
 	}
 
 	// Get the length of destinationDelta to then get time to reach the destination
-	length = vec3_length( destinationDelta );
+	length = vec3_length( vec3_clamp_euler( destinationDelta ) );
 	travelTime = length / moveInfo.speed;
 
 	if ( travelTime < FRAMETIME_S.count() ) {
@@ -409,7 +409,6 @@ void SVGBaseMover::BrushAccelerateThink() {
 	}
 
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * BASE_FRAMERATE ) );
-
 	SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
 	SetNextThinkTime( level.time + FRAMERATE_MS );
 }

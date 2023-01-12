@@ -128,6 +128,7 @@ extern cvar_t* cl_predict;
 extern cvar_t* cl_rollhack;
 extern cvar_t* cl_thirdperson_angle;
 extern cvar_t* cl_thirdperson_range;
+extern cvar_t* cl_thirdperson_traceshape;
 extern cvar_t* cl_vwep;
 
 /**

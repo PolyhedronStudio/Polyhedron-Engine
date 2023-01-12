@@ -14,14 +14,14 @@
 /**
 *	Predeclarations.
 **/
-class CLGBaseMover;
+class CLGBaseLinearMover;
 class TriggerAutoPlatform;
 
 
 /**
 *	@brief	Entity: "func_plat"
 **/
-class FuncPlat : public CLGBaseMover {
+class FuncPlat : public CLGBaseLinearMover {
 public:
 	virtual void Think() override;
 	/**
@@ -35,10 +35,13 @@ public:
     FuncPlat( Entity* entity );
     virtual ~FuncPlat() = default;
 
+		// Remove later on, it is here temporarily for testing.
+	vec3_t tempPlatAvelocity = vec3_zero();
+
 	/**
 	*	Class Definition.
 	**/
-    DefineMapClass( "kutfunc_plat", FuncPlat, CLGBaseMover );
+    DefineMapClass( "xfunc_plat", FuncPlat, CLGBaseLinearMover );
 
 
 

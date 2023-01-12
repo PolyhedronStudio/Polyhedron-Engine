@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "../../Shared/Shared.h"
 #include "../Client.h"
+#include "Common/CollisionModel/Tracing.h"
 #include "Sound.h"
 #include "QAL/AL/efx-presets.h"
 
@@ -509,7 +510,7 @@ void AL_InitReverbEffect(void)
 }
 
 
-extern const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
+extern const TraceResult CL_World_Trace( const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, const int32_t traceShape );
 void UpdateReverb(void)
 {
 	static vec3_t mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
@@ -538,12 +539,12 @@ void UpdateReverb(void)
 
 	if (ReverbEffect == 0)
 		return;
-
-	traceA = CL_Trace(listener_origin, up, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
-	traceB = CL_Trace(listener_origin, forward, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
-	traceC = CL_Trace(listener_origin, backward, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
-	traceD = CL_Trace(listener_origin, left, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
-	traceE = CL_Trace(listener_origin, right, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
+	
+	traceA = CM_BoxTrace( &cl.cm, listener_origin, up, bbox3_t{ mins, maxs }, nullptr, BrushContentsMask::DeadSolid );
+	traceB = CM_BoxTrace( &cl.cm, listener_origin, forward, bbox3_t{ mins, maxs }, nullptr, BrushContentsMask::DeadSolid );
+	traceC = CM_BoxTrace( &cl.cm, listener_origin, backward, bbox3_t{ mins, maxs }, nullptr, BrushContentsMask::DeadSolid );
+	traceD = CM_BoxTrace( &cl.cm, listener_origin, left, bbox3_t{ mins, maxs }, nullptr, BrushContentsMask::DeadSolid );
+	traceE = CM_BoxTrace( &cl.cm, listener_origin, right, bbox3_t{ mins, maxs }, nullptr, BrushContentsMask::DeadSolid );
 
 	lengthA = traceA.endPosition - listener_origin; //VectorSubtract(trace1.endPosition, listener_origin, length1);
 	lengthB = traceB.endPosition - listener_origin;
@@ -804,7 +805,7 @@ static void AL_Spatialize(channel_t *ch)
 
 	if (cl.bsp && s_occlusion->integer)
 	{
-		trace = CM_BoxTrace(origin, listener_origin, mins, maxs, cl.bsp->nodes, BrushContentsMask::PlayerSolid);
+		trace = CM_BoxTrace(&cl.cm, origin, listener_origin, bbox3_t{ mins, maxs }, cl.bsp->nodes, BrushContentsMask::PlayerSolid);
 		if (trace.fraction < 1.0 && !(ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult))
 		{
 			VectorSubtract(origin, listener_origin, distance);

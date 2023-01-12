@@ -272,14 +272,18 @@ void ClientGameEntities::PacketEntityEvent( int32_t number ) {
 
 	// With a valid entity we can notify it about its new received event.
 	if (podEventTarget->currentState.eventID != 0) {
+		geEventTarget->OnEventID( podEventTarget->currentState.eventID );
 
+		//CLG_Print(PrintType::Developer, fmt::format(
+		//	"OnEventID fired: [Entity(#{}), EventID({})]\n",
+		//	number, podEventTarget->currentState.eventID
+		//));
 		//Com_DPrint("(%s): eventID != 0 for PODEntity(#%i)! podEntityTarget=(%s), geEntityTarget=(%s)\n", __func__, number, (podEventTarget ? podEventTarget->clientEntityNumber : -1), (geEventTarget ? geEventTarget->GetNumber() : -1));
 	} else {
 		//Com_DPrint("(%s): PODEntity(#%i): eventID(#%i) origin(%s), oldOrigin(%s)\n", __func__, number, podEventTarget->currentState.eventID, Vec3ToString(podEventTarget->currentState.origin), Vec3ToString(podEventTarget->currentState.oldOrigin));
 	}
 
 	//PODEntity* clientEntity = &cs->entities[ number ];
-	geEventTarget->OnEventID( podEventTarget->currentState.eventID );
 }
 
 /**
@@ -455,6 +459,109 @@ void ClientGameEntities::SetDeltaFrameLevelTime() {
 		gePlayer->GetClient()->playerState.pmove.velocity = geVelocity;
 	}
 };
+
+
+/**
+*	@brief	Runs all non pusher packet entities, should get called before RunPusherEntities.
+**/
+void ClientGameEntities::RunNonPusherPacketEntities() {
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
+	// This needs to be set of course.
+	if (!gameWorld) {
+		return;
+	}
+
+	/**
+	*	#1: Iterate through our packet entities, and run their local 'think' if demanded.
+	**/
+    for (int32_t entityNumber = 1; entityNumber < MAX_WIRED_POD_ENTITIES; entityNumber++) {
+		// Get POD Entity, and validate it to get our Game Entity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityNumber );
+		GameEntity *gameEntity = gameWorld->GetGameEntityByIndex( podEntity->clientEntityNumber );//ClientGameWorld::ValidateEntity(podEntity);
+
+		// Make sure it has: [PODEntity ptr], [GameEntity ptr], [POD In Use], [NO Movetype: Push or Stop]
+		// TODO: Should really be checking game entity inuse also hmm?
+		if ( ( !podEntity || !gameEntity || !gameEntity->IsInUse() )
+			|| ( gameEntity->GetMoveType() == MoveType::Push || gameEntity->GetMoveType() == MoveType::Stop ) ) {
+            continue;
+        }
+
+		// Let the world know about the current entity we're running.
+		level.currentEntity = gameEntity;
+		
+        // Store previous(old) origin.
+        gameEntity->SetOldOrigin( gameEntity->GetOrigin() );
+
+        // For non client entities: If the ground entity moved, make sure we are still on it
+		// For clients we perform this elsewhere.
+		if ( !gameEntity->GetClient() ) {
+			// Validate handle.
+			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
+			// Redo a Check for Ground if the link count does not match to its ground link count.
+			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
+				// Reset ground entity.
+				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+
+				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+				if ( !( gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) ) {
+					// Check for a new ground entity that resides below this entity.
+					SG_Monster_CheckGround( gameEntity );
+					//if ( gameEntity->GetServerFlags() & EntityServerFlags::Monster ) {
+					//	SG_Monster_CheckGround( gameEntity );
+					//} else {
+					//	SG_CheckGround( gameEntity );
+					//}
+				}
+			}
+		}
+
+        // Run it for a frame.
+		SGEntityHandle geHandle = gameEntity;
+		SG_RunEntity(geHandle);
+    }
+}
+
+/**
+*	@brief	Runs all pusher packet entities, should get called before RunPusherEntities.
+**/
+void ClientGameEntities::RunPusherPacketEntities() {
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
+	// This needs to be set of course.
+	if (!gameWorld) {
+		return;
+	}
+
+	/**
+	*	#0: Iterate through our pusher packet entities, perform physics and run think depending on their results.
+	**/
+    for (int32_t entityNumber = 1; entityNumber < MAX_WIRED_POD_ENTITIES; entityNumber++) {
+		// Get POD Entity, and validate it to get our Game Entity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityNumber );
+		GameEntity *gameEntity = gameWorld->GetGameEntityByIndex( podEntity->clientEntityNumber );//ClientGameWorld::ValidateEntity(podEntity);
+
+		// Make sure it has: [PODEntity ptr], [GameEntity ptr], [POD In Use], [NO Movetype: Push or Stop]
+		// TODO: Should really be checking game entity inuse also hmm?
+		if ( ( !podEntity || !gameEntity || !gameEntity->IsInUse() )
+			|| ( gameEntity->GetMoveType() != MoveType::Push && gameEntity->GetMoveType() != MoveType::Stop ) ) {
+            continue;
+        }
+
+		// Let the world know about the current entity we're running.
+		level.currentEntity = gameEntity;
+		
+        // Store previous(old) origin.
+        gameEntity->SetOldOrigin( gameEntity->GetOrigin() );
+
+        // Run it for a frame.
+		SGEntityHandle geHandle = gameEntity;
+		SG_RunEntity(geHandle);
+    }
+}
+
 /**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
@@ -487,56 +594,12 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
     }
 
 	/**
-	*	#1: Iterate through our packet entities, and run their local 'think' if demanded.
+	*	#1: Iterate through our packet entities, running non pushers first so they can work
+	*		their physics and 'think' ticks. Running all pushers second afterwards so we are
+	*		sure we are working with the final state data to move/push properly.
 	**/
-    for (int32_t entityNumber = 0; entityNumber < MAX_WIRED_POD_ENTITIES; entityNumber++) {
-		//// Get frame entity current state.
-		//EntityState *currentEntityState = &cl->entityStates[ entityStateIndex ];
-		//// Fetch the entity index.
-		//const int32_t entityIndex = (cl->frame.firstEntity + entityNumber) & PARSE_ENTITIES_MASK;
-
-		// Get POD Entity, and validate it to get our Game Entity.
-		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityNumber );
-		GameEntity *gameEntity = gameWorld->GetGameEntityByIndex( podEntity->clientEntityNumber );//ClientGameWorld::ValidateEntity(podEntity);
-
-        // If invalid for whichever reason, warn and continue to next iteration.
-        if ( !podEntity || !gameEntity|| !gameEntity->IsInUse() ) {
-        //    CLG_Print( PrintType::DeveloperWarning, fmt::format( "ClientGameEntites::RunFrame: Entity #{} is nullptr\n", entityNumber ));
-            continue;
-        }
-
-		// Let the world know about the current entity we're running.
-		level.currentEntity = gameEntity;
-		
-        // Store previous(old) origin.
-        gameEntity->SetOldOrigin( gameEntity->GetOrigin() );
-
-        // For non client entities: If the ground entity moved, make sure we are still on it
-		if ( !gameEntity->GetClient() ) {
-			// Validate handle.
-			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
-			// Redo a Check for Ground if the link count does not match to its ground link count.
-			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
-				// Reset ground entity.
-				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-
-				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				if ( !( gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) ) {
-					// Check for a new ground entity that resides below this entity.
-					//if ( gameEntity->GetServerFlags() & EntityServerFlags::Monster ) {
-					//	SG_Monster_CheckGround( gameEntity );
-					//} else {
-					//	SG_CheckGround( gameEntity );
-					//}
-					SG_Monster_CheckGround( gameEntity );
-				}
-			}
-		}
-
-        // Run it for a frame.
-		SGEntityHandle geHandle = gameEntity;
-		SG_RunEntity(geHandle);
-    }
+	RunNonPusherPacketEntities();
+	RunPusherPacketEntities();
 
 	/**
 	*	#0: Call upon BeginLocalFrame for the client.

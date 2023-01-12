@@ -61,12 +61,8 @@ void CLG_DrawDebugLine(const vec3_t& start, const vec3_t& end, const vec4_t& col
     }
 }
 
-// Draws a debug bounding box.
-void CLG_DrawDebugBoundingBox(const vec3_t& origin, const vec3_t& mins, const vec3_t& maxs, const vec4_t& color) {
-	// Add origin to the mins and maxs.
-	vec3_t absoluteMins = origin + mins;
-	vec3_t absoluteMaxs = origin + maxs;
-	
+// Performs the actual drawing.
+void CLG_DrawDebugBoundingBox( const vec3_t &absoluteMins, const vec3_t &absoluteMaxs, const vec4_t &color ) {
 	//
 	// Horizontal lines. (From mins z to maxs z.)
 	//
@@ -133,6 +129,15 @@ void CLG_DrawDebugBoundingBox(const vec3_t& origin, const vec3_t& mins, const ve
 	start = vec3_t { absoluteMins.x, absoluteMaxs.y, absoluteMaxs.z };
 	end = vec3_t { absoluteMaxs.x, absoluteMaxs.y, absoluteMaxs.z };
 	CLG_DrawDebugLine(start, end, color);
+}
+// Draws a debug bounding box.
+void CLG_DrawDebugBoundingBox(const vec3_t& origin, const vec3_t& mins, const vec3_t& maxs, const vec4_t& color) {
+	// Add origin to the mins and maxs.
+	const vec3_t absoluteMins = origin + mins;
+	const vec3_t absoluteMaxs = origin + maxs;
+	
+	// Draw
+	CLG_DrawDebugBoundingBox( absoluteMins, absoluteMaxs, color );
 }
 
 #else

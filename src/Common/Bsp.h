@@ -133,23 +133,26 @@ typedef struct mnode_s {
     /* ======> */
     CollisionPlane            *plane;     // never NULL to differentiate from leafs
 
+	// PH: We need this data.
+	bbox3_t bounds;
+	//int visframe;
+	//int                 numfaces;
 #if USE_REF
 //    union {
 //        vec_t           minmaxs[6];
-        struct bounds_t {
-            bounds_t() = default;
-            vec3_t mins;
-            vec3_t maxs;
-        } bounds;
+        //struct bounds_t {
+        //    bounds_t() = default;
+        //    vec3_t mins;
+        //    vec3_t maxs;
+        //} bounds;
     //};
-
     int                 visframe;
 #endif
     struct mnode_s      *parent;
     /* <====== */
 
     struct mnode_s      *children[2];
-
+// PH: We need this data.
 #if USE_REF
     int                 numfaces;
     mface_t             *firstface;
@@ -171,12 +174,18 @@ typedef struct {
 typedef struct {
     /* ======> */
     CollisionPlane            *plane;     // always NULL to differentiate from nodes
-#if USE_REF
-    vec3_t              mins;
-    vec3_t              maxs;
+
+	// PH: For testing axial planes
+	bbox3_t bounds;
+
+// PH: We need this data.
+//#if USE_REF
+//#if USE_REF
+//    vec3_t              mins;
+//    vec3_t              maxs;
 
     int                 visframe;
-#endif
+//#endif
     struct mnode_s      *parent;
     /* <====== */
 
@@ -185,6 +194,7 @@ typedef struct {
     int             area;
     mbrush_t        **firstleafbrush;
     int             numleafbrushes;
+// PH: We need this data.
 #if USE_REF
     mface_t         **firstleafface;
     int             numleaffaces;

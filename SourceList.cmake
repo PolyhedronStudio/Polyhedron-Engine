@@ -28,8 +28,10 @@ list( APPEND HEADERS_SHARED
 	"${SRC_SHARED_DIR}/Interfaces/IServerGameImports.h"
 
 	# Math lib.
+	"${SRC_SHARED_DIR}/Math/BBox3.h"
 	"${SRC_SHARED_DIR}/Math/Color.h"
 	"${SRC_SHARED_DIR}/Math/DualQuaternion.h"
+	"${SRC_SHARED_DIR}/Math/GLM.h"
 	"${SRC_SHARED_DIR}/Math/Matrix3x3.h"
 	"${SRC_SHARED_DIR}/Math/Matrix4x4.h"
 	"${SRC_SHARED_DIR}/Math/Plane.h"
@@ -148,6 +150,14 @@ LIST( APPEND SRC_COMMON
 	"${SRC_COMMON_DIR}/Utilities.cpp"
 	"${SRC_COMMON_DIR}/Zone.cpp"
 
+	"${SRC_COMMON_DIR}/CollisionModel/AreaPortals.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/BoundingBoxHull.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/CapsuleHull.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/OctagonBoxHull.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/SphereHull.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Testing.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing.cpp"
+
 	"${SRC_COMMON_DIR}/Models/Iqm.cpp"
 
 	"${SRC_COMMON_DIR}/Hashes/Crc32.cpp"
@@ -187,6 +197,14 @@ LIST( APPEND HEADERS_COMMON
 	#"${SRC_COMMON_DIR}/Tests.h"
 	"${SRC_COMMON_DIR}/Utilities.h"
 	"${SRC_COMMON_DIR}/Zone.h"
+
+	"${SRC_COMMON_DIR}/CollisionModel/AreaPortals.h"
+	"${SRC_COMMON_DIR}/CollisionModel/BoundingBoxHull.h"
+	"${SRC_COMMON_DIR}/CollisionModel/CapsuleHull.h"
+	"${SRC_COMMON_DIR}/CollisionModel/OctagonBoxHull.h"
+	"${SRC_COMMON_DIR}/CollisionModel/SphereHull.h"
+	"${SRC_COMMON_DIR}/CollisionModel/Testing.h"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing.h"
 
 	"${SRC_COMMON_DIR}/Net/INetNToP.h"
 	"${SRC_COMMON_DIR}/Net/INetPToN.h"
@@ -400,7 +418,6 @@ list( APPEND SRC_CLIENT
 	"${SRC_CLIENT_DIR}/Predict.cpp"
 	"${SRC_CLIENT_DIR}/Refresh.cpp"
 	"${SRC_CLIENT_DIR}/Screen.cpp"
-	"${SRC_CLIENT_DIR}/Traces.cpp"
 	"${SRC_CLIENT_DIR}/View.cpp"
 	"${SRC_CLIENT_DIR}/World.cpp"
 
@@ -434,7 +451,6 @@ list( APPEND HEADERS_CLIENT
 	"${SRC_CLIENT_DIR}/Input.h"
 	"${SRC_CLIENT_DIR}/Keys.h"
 	"${SRC_CLIENT_DIR}/Models.h"
-	"${SRC_CLIENT_DIR}/Traces.h"
 	"${SRC_CLIENT_DIR}/UI.h"
 	"${SRC_CLIENT_DIR}/Video.h"
 	"${SRC_CLIENT_DIR}/World.h"
@@ -582,7 +598,7 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLocalEntity.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePacketEntity.cpp"
 
-		#"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLinearMover.cpp"
+		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseLinearMover.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseMover.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBasePlayer.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Entities/Base/CLGBaseTrigger.cpp"
@@ -775,6 +791,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibHead.cpp" 
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscSphereBall.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscTeleporter.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscTeleporterDest.cpp"
 
@@ -894,6 +911,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscSphereBall.h"
 
 		#"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.h"

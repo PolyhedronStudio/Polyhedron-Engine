@@ -18,9 +18,11 @@
 #include "Game/Client/Exports/Core.h"
 #include "Game/Client/Exports/Media.h"
 #include "Game/Client/Exports/Movement.h"
+#include "Game/Client/Exports/View.h"
 
 #include "Game/Client/Effects/Particles.h"
 
+#include "Game/Client/View/ViewCamera.h"
 
 /**
 *   @brief  Load or download any custom player skins and models
@@ -90,6 +92,18 @@ static void cl_noskins_changed(cvar_t* self) {
 
 static void cl_player_model_changed(cvar_t* self) {
 
+}
+static void cl_thirdperson_traceshape_changed( cvar_t* self ) {
+    if (clgi.GetClienState() < ClientConnectionState::Loading) {
+        return;
+    }
+
+	if ( strcmp( self->string, "sphere" ) == 0 ) {
+		clge->view->GetViewCamera()->SetThirdpersonTraceShape( 1 );
+	} else {
+		clge->view->GetViewCamera()->SetThirdpersonTraceShape( 0 );
+	}
+	
 }
 
 static void cl_vwep_changed(cvar_t* self) {
@@ -164,7 +178,11 @@ void ClientGameCore::Initialize() {
     cl_player_model = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
     cl_player_model->changed = cl_player_model_changed;
     cl_thirdperson_angle = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
-    cl_thirdperson_range = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
+    cl_thirdperson_range = clgi.Cvar_Get("cl_thirdperson_range", "92", 0);
+	cl_thirdperson_traceshape = clgi.Cvar_Get("cl_thirdperson_traceshape", "sphere", 0);
+	cl_thirdperson_traceshape->changed = cl_thirdperson_traceshape_changed;
+	// Make sure it gets set.
+	cl_thirdperson_traceshape_changed( cl_thirdperson_traceshape );
 
     cl_chat_notify = clgi.Cvar_Get("cl_chat_notify", "1", 0);
     cl_chat_sound = clgi.Cvar_Get("cl_chat_sound", "1", 0);

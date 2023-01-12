@@ -51,6 +51,7 @@ cvar_t *cl_predict              = nullptr;
 cvar_t *cl_rollhack             = nullptr;
 cvar_t *cl_thirdperson_angle    = nullptr;
 cvar_t *cl_thirdperson_range    = nullptr;
+cvar_t *cl_thirdperson_traceshape    = nullptr;
 cvar_t *cl_vwep                 = nullptr;
 
 /**

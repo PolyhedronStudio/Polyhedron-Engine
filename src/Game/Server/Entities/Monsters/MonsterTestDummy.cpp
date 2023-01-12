@@ -132,8 +132,24 @@ void MonsterTestDummy::Spawn() {
     // Set the barrel model, and model index.
     SetModel( "models/monsters/testdummy/testdummy.iqm" );
 	SetModelIndex3( SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm") );
+
+	#define CAPSULEMONSTER
+	#ifdef CAPSULEMONSTER
     // Set the bounding box.
-    SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
+	SetSolid( Solid::Capsule );
+	//SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
+	//SetMins( { -16, -16, 0 } );
+	//SetMaxs( { 16, 16, 88 } );
+	//SetBoundingBox( { -16, -16, -44 }, { 16, 16, 44 } );
+	SetMins( { -16, -16, 0 } );
+	SetMaxs( { 16, 16, 88 } );
+	#else
+    // Set the bounding box.
+	SetSolid( Solid::BoundingBox );
+	SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
+	SetMins( { -16, -16, 0 } );
+	SetMaxs( { 16, 16, 88 } );
+	#endif
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
     SetDieCallback( &MonsterTestDummy::DieCallback_FallDead );

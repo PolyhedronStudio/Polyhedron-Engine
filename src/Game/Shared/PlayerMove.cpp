@@ -152,7 +152,75 @@ static const vec3_t PM_ClipVelocity( const vec3_t &in, const vec3_t &normal, flo
 const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins, const vec3_t & maxs, const vec3_t & end) {
 	// For us this works fine with just a normal trace, not sure about... if we ever need it. Seems to make no difference other than performance (big time).
 #if 1
-    return pm->Trace(start, mins, maxs, end);
+    //return pm->Trace(start, mins, maxs, end);
+
+	TraceResult traceResult = pm->Trace(start, mins, maxs, end);
+
+//#define DEBUG_SOLIDS
+//#define DEBUG_PLANE
+
+#ifdef SHAREDGAME_CLIENTGAME
+const std::string gameStr = "PM Client Trace ";
+#else
+const std::string gameStr = "PM Server Trace ";
+#endif
+
+#ifdef SHAREDGAME_SERVERGAME
+#ifdef DEBUG_SOLIDS
+// Debug the solid tests, fractional and end position
+SG_Print( PrintType::Developer, 
+			fmt::format("{} Solids: traceResult.allSolid({}), traceResult.startSolid({}), traceResult.fraction({}), traceResult.endPosition({}, {}, {})\n",
+			gameStr,
+			( traceResult.allSolid ? "true" : "false" ),
+			( traceResult.startSolid ? "true" : "false" ),
+			( traceResult.fraction ),
+			( traceResult.endPosition.x ),
+			( traceResult.endPosition.y ),
+			( traceResult.endPosition.z )
+) );
+#endif
+#ifdef DEBUG_PLANE
+// Debug the solid tests, fractional and end position
+SG_Print( PrintType::Developer, 
+			fmt::format("{} Plane: contents({}), dist({}), type({}), signBits({}), normal({}, {}, {})\n",
+			gameStr,
+		 			( traceResult.contents),
+			 ( traceResult.plane.dist ),
+			 ( traceResult.plane.type ),
+			( traceResult.plane.signBits ),
+			( traceResult.plane.normal.x ),
+			( traceResult.plane.normal.y ),
+			( traceResult.plane.normal.z )	
+) );
+#endif
+#endif
+
+// Debug the plane:
+	//SG_Print( PrintType::Developer, 
+	//		 fmt::format("{}({}): {}\n",
+	//			traceResult.allSolid,
+	//		 traceResult.contents,
+	//		 traceResult.endPosition,
+	//		 traceResult.ent,
+	//		 traceResult.fraction,
+	//		 traceResult.offsets,
+	//		 traceResult.plane,
+	//		 traceResult.startSolid,
+	//		 traceResult.surface) );
+
+	//SG_Print( PrintType::Developer, 
+	//		 fmt::format("{}({}): {}\n",
+	//			traceResult.allSolid,
+	//		 traceResult.contents,
+	//		 traceResult.endPosition,
+	//		 traceResult.ent,
+	//		 traceResult.fraction,
+	//		 traceResult.offsets,
+	//		 traceResult.plane,
+	//		 traceResult.startSolid,
+	//		 traceResult.surface) );
+
+	return traceResult;
 #else
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
@@ -281,7 +349,7 @@ static bool PM_CheckStep(const TraceResult * trace) {
 /**
 *   @brief  Steps the player down to the trace origin, calculated the stepHeight for interpolation.
 **/
-static void PM_StepDown(const TraceResult * trace) {
+static void PM_StepDown( const TraceResult * trace ) {
     // Set current origin to the trace end position.
     pm->state.origin = trace->endPosition;
 
@@ -289,7 +357,7 @@ static void PM_StepDown(const TraceResult * trace) {
     const float stepHeight = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
 
     // Set step variable in case the absolute value of stepHeight is equal or heigher than PM_STEP_HEIGHT_MIN.
-    if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
+    if ( fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN ) {
         pm->step = stepHeight;
         PM_Debug( fmt::format( "Set pm->step to {}f.", pm->step ) );
     } else {
@@ -858,21 +926,30 @@ static void PM_CheckGround(void) {
 
 		// See if the old ground entity number matches the traced ent number.
 		const int32_t traceEntityGroundNumber = SG_GetEntityNumber( trace.ent );
-
+		#if 0
 		// See if we should have a: 'extrapolating ground mover', flag set in order to prevent the prediction code of correcting our player's position.
 		if ( traceEntityGroundNumber != pm->groundEntityNumber ) {
 			// See if this ground is an extrapolating mover by chance.
 			GameEntity *geGround = SG_GetGameEntityByNumber( pm->groundEntityNumber );
-			//if ( geGround && geGround->IsSubclassOf<SGBaseLinearMover>() && geGround->GetPODEntity()->linearMovement ) {//geGround->IsExtrapolating() ) {
-			//	pm->state.flags |= PMF_EXTRAPOLATING_GROUND_MOVER;
-			//} else {
+			#ifdef SHAREDGAME_CLIENTGAME
+			if ( geGround && geGround->IsSubclassOf<SGBaseMover>() && geGround->IsExtrapolating() ) {//geGround->IsExtrapolating() ) {
+				#else
+			if ( geGround && geGround->IsSubclassOf<SGBaseMover>() ) {//geGround->IsExtrapolating() ) {
+			#endif
+				pm->state.flags |= PMF_EXTRAPOLATING_GROUND_MOVER;
+			} else if ( geGround && geGround->IsSubclassOf<SGBaseLinearMover>() && geGround->GetPODEntity()->linearMovement.isMoving ) {//geGround->IsExtrapolating() ) {
+				pm->state.flags |= PMF_EXTRAPOLATING_GROUND_MOVER;
+			} else {
 				pm->state.flags &= ~PMF_EXTRAPOLATING_GROUND_MOVER;
-			//}
+			}
 		}
+		#else
+		pm->state.flags &= ~PMF_EXTRAPOLATING_GROUND_MOVER;
+		#endif
 
         // Save a reference to the ground
         pm->state.flags |= PMF_ON_GROUND;
-		pm->groundEntityNumber = SG_GetEntityNumber( trace.ent );
+		pm->groundEntityNumber = traceEntityGroundNumber;
 
         // Sink down to it if not trick jumping
         if ( !(pm->state.flags & PMF_TIME_TRICK_JUMP) ) {
@@ -1563,4 +1640,14 @@ void PMove(PlayerMove * pmove)
 
     // Check for view step changes, if so, interpolate.
     PM_CheckViewStep();
+
+	#ifdef SHAREDGAME_SERVERGAME
+	//SG_Print( PrintType::Developer, fmt::format( "PMove: origin({}, {}, {}), stepOffset({}), step({})\n",
+	//	pm->state.origin.x,
+	//	pm->state.origin.y,
+	//	pm->state.origin.z,
+	//	pm->state.stepOffset,
+	//	pm->step
+	//));
+	#endif
 }

@@ -474,7 +474,7 @@ void DefaultGameMode::InflictDamage(IServerGameEntity* target, IServerGameEntity
         //M_ReactToDamage(targ, attacker);
 
         //if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
-        target->DispatchTakeDamageCallback(attacker, knockBack, damageTaken);
+        target->DispatchTakeDamageCallback( attacker, knockBack, damageTaken, dir );
         //// nightmare mode monsters don't go into pain frames often
         //if (skill->value == 3)
         //    targ->debouncePainTime = level.time + 5;
@@ -484,10 +484,10 @@ void DefaultGameMode::InflictDamage(IServerGameEntity* target, IServerGameEntity
             //if (!(targ->flags & EntityFlags::GodMode) && (take))
             //    targ->Pain(targ, attacker, knockBack, take);
             if (!(target->GetFlags() & EntityFlags::GodMode) && (damageTaken)) {
-                target->DispatchTakeDamageCallback(attacker, knockBack, damageTaken);
+                target->DispatchTakeDamageCallback( attacker, knockBack, damageTaken, dir );
             }
         } else if (damageTaken) {
-            target->DispatchTakeDamageCallback(attacker, knockBack, damageTaken);
+            target->DispatchTakeDamageCallback( attacker, knockBack, damageTaken, dir );
         }
     }
 
@@ -633,6 +633,7 @@ void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
     bodyGameEntity->SetClipMask(ent->GetClipMask());
     bodyGameEntity->SetOwner(ent->GetOwner());
     bodyGameEntity->SetMoveType(ent->GetMoveType());
+	bodyGameEntity->SetHealth( 50 );
     //bodyGameEntity->SetGroundEntity(ent->GetGroundEntityHandle());
 
     // Set the die callback, and set its take damage.
@@ -921,9 +922,9 @@ TraceResult DefaultGameMode::PM_Trace( const vec3_t &start, const vec3_t &mins, 
 	}
 
 	if ( pmSkipEntity->GetHealth() > 0 ) {
-        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::PlayerSolid);
+        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::PlayerSolid, 0);
     } else {
-        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::DeadSolid);
+        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::DeadSolid, 0);
     }
 }
 

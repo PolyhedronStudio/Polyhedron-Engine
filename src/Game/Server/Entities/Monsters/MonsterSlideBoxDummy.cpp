@@ -124,6 +124,7 @@ void MonsterSlideBoxDummy::Spawn() {
     SetModel( "models/monsters/testdummy/testdummy.iqm" );
 	SetModelIndex3( SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm") );
     // Set the bounding box.
+	SetSolid( Solid::BoundingBox );
     SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.

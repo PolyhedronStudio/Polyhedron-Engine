@@ -9,7 +9,7 @@
 ***/
 #pragma once
 
-#include "../Shared.h"
+#include "Shared/Shared.h"
 
 //-----------------
 // plane_t structure
@@ -43,7 +43,8 @@ typedef struct cplane_s {
 void SetPlaneType(CollisionPlane* plane);
 void SetPlaneSignbits(CollisionPlane* plane);
 
-int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, CollisionPlane* p);
+
+const int32_t BoxOnPlaneSide( const bbox3_t& ebounds, CollisionPlane* p );
 
 //
 //===============
@@ -61,9 +62,9 @@ static inline vec_t Plane_Difference(const vec3_t& v, CollisionPlane* p) {
 static inline vec_t Plane_FastDifference(const vec3_t& v, CollisionPlane* p)
 {
     // fast axial cases
-    if (p->type < 3) {
-        return v.xyz[p->type] - p->dist;
-    }
+    //if (p->type < 3) {
+    //    return v.xyz[p->type] - p->dist;
+    //}
 
     // slow generic case
     return Plane_Difference(v, p);
@@ -81,18 +82,18 @@ struct BoxPlane {
 /**
 *   @brief  Tries to perform fast axial tests before resorting to the slower more thorough Box On Plane Side function.
 **/
-static inline int BoxOnPlaneSideFast(const vec3_t& emins, const vec3_t& emaxs, CollisionPlane* p)
+static inline const int32_t BoxOnPlaneSideFast( const bbox3_t &ebounds, CollisionPlane* p)
 {
     // Fast axial cases.
-    if (p->type < 3) {
-        if (p->dist <= emins.xyz[p->type])
-            return BoxPlane::InFront;
-        if (p->dist >= emaxs.xyz[p->type])
-            return BoxPlane::Behind;
+    //if (p->type < 3) {
+    //    if (p->dist <= ebounds.mins.xyz[p->type])
+    //        return BoxPlane::InFront;
+    //    if (p->dist >= ebounds.maxs.xyz[p->type])
+    //        return BoxPlane::Behind;
 
-        return BoxPlane::Intersects;
-    }
+    //    return BoxPlane::Intersects;
+    //}
 
     // Slow generic case.
-    return BoxOnPlaneSide(emins, emaxs, p);
+    return BoxOnPlaneSide( ebounds, p );
 }

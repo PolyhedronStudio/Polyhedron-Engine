@@ -87,7 +87,7 @@ void SVGBasePlayer::Spawn() {
     SetTakeDamage(TakeDamage::Aim);
     // Fresh movetype and solid.
     SetMoveType(MoveType::PlayerMove);
-    SetSolid(Solid::OctagonBox);
+    SetSolid( Solid::BoundingBox );
     // Mass.
     SetMass(200);
     // Undead itself.
@@ -96,19 +96,18 @@ void SVGBasePlayer::Spawn() {
     SetAirFinishedTime(level.time + 12s);
     // Clip mask this client belongs to.
     SetClipMask(BrushContentsMask::PlayerSolid);
-    // Fresh default model.
+    // Default model.
     SetModel("players/alphadummy/alphadummy.iqm");
-    /*ent->pain = player_pain;*/
-    // Fresh water level and type.
+    // Water level and type.
     SetWaterLevel(0);
     SetWaterType(0);
-    // Fresh flags.
+    // Flags.
     SetFlags(GetFlags() & ~EntityFlags::NoKnockBack);
     SetServerFlags(GetServerFlags() & ~EntityServerFlags::DeadMonster);
-    // Fresh player move bounding box.
+    // Player move bounding box.
     SetMins(vec3_scale(PM_MINS, PM_SCALE));
     SetMaxs(vec3_scale(PM_MAXS, PM_SCALE));
-    // Fresh view height.
+    // View height.
     SetViewHeight(72);
     // Zero out velocity in case it had any at all.
     SetVelocity(vec3_zero());
@@ -795,11 +794,11 @@ void SVGBasePlayer::UpdateEvent() {
     }
 
     // Are we on-ground and "speeding" hard enough?
-    if (ServerGameWorld::ValidateEntity(GetGroundEntityHandle()) && bobMove.XYSpeed > 225) {
+    if (ServerGameWorld::ValidateEntity( GetGroundEntityHandle() ) && bobMove.XYSpeed > 225) {
         // Do a footstep, from left, to right, left, to right.
         // Do the Bob!
         if ((int)(client->bobTime + bobMove.move) != bobMove.cycle ) {
-            SetEventID(EntityEvent::Footstep);
+            SetEventID( EntityEvent::Footstep );
         } else {
             //gi.DPrintf("client->bobTime + bobMove[%i]\nbobMove.cycle[%i]\n-----------------\n");
         }

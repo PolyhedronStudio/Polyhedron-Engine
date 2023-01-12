@@ -97,7 +97,7 @@ public:
     //! 'Blocked' Callback Pointer.
     using BlockedCallbackPointer    = void(GameEntity::*)(GameEntity* other);
     //! 'Damage' Callback Pointer.
-    using TakeDamageCallbackPointer = void(GameEntity::*)(GameEntity* other, float kick, int32_t damage);
+    using TakeDamageCallbackPointer = void(GameEntity::*)(GameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection );
     //! 'Die' Callback Pointer.
     using DieCallbackPointer        = void(GameEntity::*)(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
@@ -136,7 +136,7 @@ public:
     *   @param  kick:
     *   @param  damage:
     **/
-    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
+    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection = vec3_zero() ) = 0;
     /**
     *   @brief  Dispatches 'Stop' callback.
     **/

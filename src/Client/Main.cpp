@@ -59,6 +59,7 @@ cvar_t  *cl_showclamp;
 cvar_t  *cl_player_model;
 cvar_t  *cl_thirdperson_angle;
 cvar_t  *cl_thirdperson_range;
+cvar_t *cl_thirdperson_traceshape;
 
 //cvar_t  *cl_disable_particles;
 //cvar_t  *cl_disable_explosions;

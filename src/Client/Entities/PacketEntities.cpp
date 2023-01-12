@@ -216,6 +216,7 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 		}
 	}
 
+	//---------------- TODO: Move into a function for checking and setting extrapolated states?
     // Work around Q2PRO server bandwidth optimization.
     const bool isPlayerEntity = PacketEntity_IsPlayer( state );
 
@@ -230,8 +231,25 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 		}
     }
 
+	// FUNC_ROTATE:
+	// Store its extrapolated state if we're extrapolating.
+	struct ExtraPolatedStates {
+		EntityState current;
+		EntityState previous;
+	} extraPolatedStates;
+	if ( clEntity->linearMovement.isExtrapolating ) {
+		extraPolatedStates.current = clEntity->currentState;
+		extraPolatedStates.previous = clEntity->previousState;
+	}
+	// EOF FUNC_ROTATE:
+	//----------------- END OF TODO.
+
 	// Assign its clientEntity number.
 	clEntity->clientEntityNumber = state->number;
+	
+	if (clEntity->clientEntityNumber == 14) {
+		int x = 10; // FUNC_ROTATE bug
+	}
 
     // Was this entity in our previous frame, or not?
     if ( PacketEntity_IsNew( clEntity, state ) ) {
@@ -257,6 +275,9 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 	// Assign the fresh new received state as the entity's current.
     clEntity->currentState = *state;
 
+	//---------------- TODO: Move into a function for checking and setting origins?
+
+
     // work around Q2PRO server bandwidth optimization
     if ( isPlayerEntity ) {
         PacketEntity_PlayerToEntityState( &cl.frame.playerState, &clEntity->currentState );
@@ -264,6 +285,33 @@ void PacketEntity_UpdateState( const EntityState *state ) {
 		// We need to link it in here in order for each packet entity delta frame.
 		CL_PF_World_LinkEntity( clEntity );
 	}
+
+	// FUNC_ROTATE:
+	// Store its extrapolated state if we're extrapolating.
+	if ( clEntity->linearMovement.isExtrapolating ) {
+		clEntity->currentState.origin = extraPolatedStates.current.origin;
+		clEntity->currentState.angles = extraPolatedStates.current.angles;
+		clEntity->currentState.oldOrigin = extraPolatedStates.current.oldOrigin;
+
+		//clEntity->previousState.origin = extraPolatedStates.previous.origin;
+		//clEntity->previousState.angles = extraPolatedStates.previous.angles;
+		//clEntity->previousState.oldOrigin = extraPolatedStates.previous.oldOrigin;
+
+		//Com_DPrintf( "Extrapolating Entity(#%i): angles(%f,%f,%f), origin(%f,%f,%f), oldOrigin(%f,%f,%f)\n",
+		//			clEntity->clientEntityNumber,
+		//			extraPolatedStates.current.angles.x,
+		//			extraPolatedStates.current.angles.y,
+		//			extraPolatedStates.current.angles.z,
+		//			extraPolatedStates.current.origin.x,
+		//			extraPolatedStates.current.origin.y,
+		//			extraPolatedStates.current.origin.z,
+		//			extraPolatedStates.current.oldOrigin.x,
+		//			extraPolatedStates.current.oldOrigin.y,
+		//			extraPolatedStates.current.oldOrigin.z
+		//			);
+	}
+	// EOF FUNC_ROTATE:
+	//----------------- END OF TODO.
 }
 
 /**

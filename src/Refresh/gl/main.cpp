@@ -129,7 +129,7 @@ glCullResult_t GL_CullBox(vec3_t bounds[2])
 
     cull = CULL_IN;
     for (i = 0; i < 4; i++) {
-        bits = BoxOnPlaneSide(bounds[0], bounds[1], &glr.frustumPlanes[i]);
+		bits = BoxOnPlaneSide( bbox3_t { bounds[0], bounds[1] }, &glr.frustumPlanes[i]);
         if (bits == BoxPlane::Behind) {
             return CULL_OUT;
         }

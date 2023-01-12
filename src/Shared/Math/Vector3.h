@@ -164,6 +164,12 @@ typedef vec3_template<double> dvec35_t;
 //=============================================================================
 //
 
+/**
+*	@brief	Returns a vec3 containing only v's X/Y coordinates, and Z as 0.f
+**/
+static inline const vec3_t vec3_xy( const vec3_t &v ) {
+	return { v.x, v.y, 0.f };
+}
 
 //
 //===============
@@ -172,7 +178,7 @@ typedef vec3_template<double> dvec35_t;
 // Returns the cross product of 'a x b'.
 //===============
 //
-inline vec3_t vec3_cross(const vec3_t &a, const vec3_t &b) {
+inline const vec3_t vec3_cross(const vec3_t &a, const vec3_t &b) {
     return vec3_t{
         a.y * b.z - a.z * b.y,
         a.z * b.x - a.x * b.z,
@@ -184,11 +190,23 @@ inline vec3_t vec3_cross(const vec3_t &a, const vec3_t &b) {
 //===============
 // vec3_dot
 // 
-// Returns the dot product of 'a · b'.
+// Returns the dot product of 'a'.
 //===============
 //
-inline float vec3_dot(const vec3_t &a, const vec3_t &b) {
+inline const float vec3_dot(const vec3_t &a, const vec3_t &b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+//
+//===============
+// vec3_dot
+// 
+// Returns the dot product of 'a · a'. A useful alternative for calculating the length
+// of a vector without requiring a square root.
+//===============
+//
+inline const float vec3_dot( const vec3_t &a ) {
+    return vec3_dot( a, a );
 }
 
 //
@@ -198,7 +216,7 @@ inline float vec3_dot(const vec3_t &a, const vec3_t &b) {
 // Returns the vector 'v' scaled by 'scale'.
 //===============
 //
-inline vec3_t vec3_scale(const vec3_t &v, float scale) {
+inline const vec3_t vec3_scale(const vec3_t &v, float scale) {
     return vec3_t{
         v.x * scale,
         v.y * scale,
@@ -213,7 +231,7 @@ inline vec3_t vec3_scale(const vec3_t &v, float scale) {
 // Returns the negated vector 'v'.
 //===============
 //
-inline vec3_t vec3_negate(const vec3_t &v) {
+inline const vec3_t vec3_negate(const vec3_t &v) {
     return vec3_scale(v, -1.f);
 }
 
@@ -226,7 +244,7 @@ inline vec3_t vec3_negate(const vec3_t &v) {
 // `vec3_t { 1.f, 1.f, 1.f }`
 //===============
 //
-inline vec3_t vec3_one(void) {
+inline const vec3_t vec3_one(void) {
     return vec3_t{
         1.f,
         1.f,
@@ -242,13 +260,12 @@ inline vec3_t vec3_one(void) {
 // `vec3_t { 0.f, 0.f, 0.f }`
 //===============
 //
-inline const vec3_t& vec3_zero(void) {
-    static const vec3_t vec = vec3_t{ 
+inline const vec3_t vec3_zero(void) {
+    return vec3_t{ 
         0.f, 
         0.f, 
         0.f
     };
-    return vec;
 }
 
 //
@@ -279,6 +296,28 @@ inline const vec3_t vec3_down(void) {
     return vec3_negate(vec3_up());
 }
 
+//===============
+// vec3_random_range
+// 
+// Return a vector with random values between 'begin' and 'end'.
+//===============
+static inline vec3_t vec3_random_range( float begin, float end ) {
+    return vec3_t {
+        RandomRangef(begin, end),
+        RandomRangef(begin, end),
+        RandomRangef(begin, end)
+    };
+}
+
+//===============
+// vec3_random
+// 
+// A vector with random values between '0' and '1'.
+//===============
+static inline vec3_t vec3_random( void ) {
+    return vec3_random_range( 0.f, 1.f );
+}
+
 //
 //===============
 // vec3_equalepsilon
@@ -286,7 +325,7 @@ inline const vec3_t vec3_down(void) {
 // Returns true if 'a'and 'b' are equal using the specified epsilon.
 //===============
 //
-inline qboolean vec3_equal_epsilon(const vec3_t &a, const vec3_t &b, float epsilon = FLT_EPSILON) {
+inline const qboolean vec3_equal_epsilon(const vec3_t &a, const vec3_t &b, float epsilon = FLT_EPSILON) {
     return EqualEpsilonf(a.x, b.x, epsilon) &&
         EqualEpsilonf(a.y, b.y, epsilon) &&
         EqualEpsilonf(a.z, b.z, epsilon);
@@ -299,7 +338,7 @@ inline qboolean vec3_equal_epsilon(const vec3_t &a, const vec3_t &b, float epsil
 // Returns true if 'a' and 'b' are equal.
 //===============
 //
-inline qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
+inline const qboolean vec3_equal(const vec3_t &a, const vec3_t &b) {
     return vec3_equal_epsilon(a, b);
 }
 
@@ -649,10 +688,10 @@ inline float vec3_length_squared(const vec3_t &v) {
 // Returns the length (magnitude) of 'v'.
 //===============
 //
-inline float vec3_length(const vec3_t &v) {
+inline const float vec3_length(const vec3_t &v) {
     return sqrtf(vec3_length_squared(v));
 }
-inline double vec3_dlength(const vec3_t &v) {
+inline const double vec3_dlength(const vec3_t &v) {
     return sqrtf((double)vec3_length_squared(v));
 }
 
@@ -664,7 +703,7 @@ inline double vec3_dlength(const vec3_t &v) {
 // the vector 'length'.
 //===============
 //
-inline vec3_t vec3_normalize_length(const vec3_t &v, float &length) {
+inline const vec3_t vec3_normalize_length(const vec3_t &v, float &length) {
     length = vec3_length(v);
     if (length > 0.f) {
         return vec3_scale(v, 1.f / length);
@@ -681,7 +720,7 @@ inline vec3_t vec3_normalize_length(const vec3_t &v, float &length) {
 // Returns the normalized vector 'v'.
 //===============
 //
-inline vec3_t vec3_normalize(const vec3_t &v) {
+inline const vec3_t vec3_normalize(const vec3_t &v) {
     float length;
     return vec3_normalize_length(v, length);
 }
@@ -693,7 +732,7 @@ inline vec3_t vec3_normalize(const vec3_t &v) {
 // Returns the length of `a - b` as well as the normalized directional vector.
 //===============
 //
-inline float vec3_distance_direction(const vec3_t &a, const vec3_t &b, vec3_t& dir) {
+inline const float vec3_distance_direction(const vec3_t &a, const vec3_t &b, vec3_t& dir) {
     float length;
 
     dir = vec3_normalize_length(a - b, length);
@@ -708,7 +747,7 @@ inline float vec3_distance_direction(const vec3_t &a, const vec3_t &b, vec3_t& d
 // Returns the normalized direction vector between points a and b.
 //===============
 //
-inline vec3_t vec3_direction(const vec3_t &a, const vec3_t &b) {
+inline const vec3_t vec3_direction(const vec3_t &a, const vec3_t &b) {
     return vec3_normalize(a - b);
 }
 
@@ -720,7 +759,7 @@ inline vec3_t vec3_direction(const vec3_t &a, const vec3_t &b) {
 // Returns the squared length of the vector `a - b`.
 //===============
 //
-inline float vec3_distance_squared(const vec3_t &a, const vec3_t &b) {
+inline const float vec3_distance_squared(const vec3_t &a, const vec3_t &b) {
     return vec3_length_squared(a - b);
 }
 
@@ -731,7 +770,7 @@ inline float vec3_distance_squared(const vec3_t &a, const vec3_t &b) {
 // Returns the length of the vector `a - b`.
 //===============
 //
-inline float vec3_distance(const vec3_t &a, const vec3_t &b) {
+inline const float vec3_distance(const vec3_t &a, const vec3_t &b) {
     return vec3_length(a - b);
 }
 

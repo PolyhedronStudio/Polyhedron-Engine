@@ -263,10 +263,12 @@ extern "C" {
 		int32_t (*PointContents) (const vec3_t &point);
 		// Point Contents for Client.
 		int32_t (*World_PointContents) (const vec3_t &point);
-        // Executes a client side trace, on received server entities.
-        const TraceResult (*Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
+		// Performs client side clipping against packet and local entities.
+		const TraceResult (*Clip) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape );
+        // Performs client side tracing against packet and local entities.
+        const TraceResult (*Trace) ( const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, const int32_t traceShape );
 		// Executes a full world client side trace, on all entities.
-		const TraceResult (*World_Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
+		const TraceResult (*World_Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, const int32_t traceShape );
 
         //---------------------------------------------------------------------
         // Command Buffer.
@@ -287,21 +289,20 @@ extern "C" {
         // Collision Model.
         //---------------------------------------------------------------------
         // Creates a clipping hull for an arbitrary box.
-        mnode_t     *(*CM_HeadnodeForBox) (const vec3_t &mins, const vec3_t &maxs);
+        mnode_t     *(*CM_HeadnodeForBox) ( const bbox3_t &bounds, const int32_t contents );
         // Creates a clipping hull for an arbitrary octagon.
-        mnode_t     *(*CM_HeadnodeForOctagon) (const vec3_t &mins, const vec3_t &maxs);
+        mnode_t     *(*CM_HeadnodeForOctagon) ( const bbox3_t &bounds, const int32_t contents );
 		        // We need a way to share these values to cgame dll.
         mmodel_t    *(*BSP_InlineModel) (const char *name);
 		// We need a way to share these values to cgame dll.
         mmodel_t    *(*CM_InlineModel) (cm_t *cm, const char *name);
         // TODO: Document.
-        int         (*CM_PointContents) (const vec3_t &p, mnode_t *headNode);
-        int         (*CM_TransformedPointContents) (const vec3_t &p, mnode_t *headNode,
-                                                    const vec3_t &origin, const vec3_t &angles);
 
-        const TraceResult (*CM_BoxTrace)(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask);
-        const TraceResult (*CM_TransformedBoxTrace) (const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin, const vec3_t& angles);
-        void        (*CM_ClipEntity) (TraceResult* dst, const TraceResult* src, struct PODEntity* ent);
+        const TraceResult (*CM_BoxTrace)( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, mnode_t *headNode, int32_t brushMask );
+        const TraceResult (*CM_TransformedBoxTrace) ( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, mnode_t *headNode, int32_t brushMask, const glm::mat4 &entityMatrix, const glm::mat4 &invEntityMatrix );
+        int32_t         (*CM_PointContents) (cm_t *cm, const vec3_t &p, mnode_t *headNode, const glm::mat4 &matInvTransform );
+        //void (*CM_ClipEntity) (TraceResult* dst, const TraceResult* src, struct PODEntity* ent);
+		
 		void (*CM_SetAreaPortalState)(int portalnum, qboolean open);
 
 		//---------------------------------------------------------------------

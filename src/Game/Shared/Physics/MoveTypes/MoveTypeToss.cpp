@@ -15,6 +15,56 @@
 // Physics.
 #include "Game/Shared/Physics/Physics.h"
 
+/**
+*	@brief	Pushes the entity. Does not change the entities velocity at all
+**/
+SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset ) {
+	SGTraceResult trace;
+    int32_t     mask = 0;
+
+	GameEntity *ent = gePushEntity;
+
+    // Calculate start for push.
+    vec3_t start = ent->GetOrigin();
+
+    // Calculate end for push.
+    vec3_t end = start + pushOffset;
+
+retry:
+    if (ent->GetClipMask())
+        mask = ent->GetClipMask();
+    else
+        mask = BrushContentsMask::Solid;
+
+    trace = SG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
+
+	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
+	if (!trace.startSolid) {//if (!trace.startSolid) {
+		ent->SetOrigin(trace.endPosition);
+	}
+	//}
+    //ent->SetOrigin(trace.endPosition);
+    ent->LinkEntity();
+
+    if ( trace.fraction != 1.0f ) {
+		// Dispatch impact callbacks.
+        SG_Impact(ent, trace);
+
+        // if the pushed entity went away and the pusher is still there
+        if ( (!trace.gameEntity || !trace.gameEntity->IsInUse()) && ent->GetMoveType() == MoveType::Push && ent->IsInUse()) {
+            // move the pusher back and try again
+            ent->SetOrigin( start );
+            ent->LinkEntity();
+            goto retry;
+        }
+    }
+
+    if ( ent->IsInUse() ) {
+        SG_TouchTriggers( ent );
+	}
+
+    return trace;
+}
 
 
 /**

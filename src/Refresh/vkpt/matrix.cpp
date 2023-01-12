@@ -308,24 +308,6 @@ inverse(const mat4_t &m, mat4_t &inv)
 		inv[i] = inv[i] * det;
 }
 
-mat4_t
-mult_matrix_matrix(const mat4_t &a, const mat4_t &b)
-{
-	mat4_t p = mat4_identity();
-
-	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < 4; j++) {
-			p[i * 4 + j] =
-				a[0 * 4 + j] * b[i * 4 + 0] +
-				a[1 * 4 + j] * b[i * 4 + 1] +
-				a[2 * 4 + j] * b[i * 4 + 2] +
-				a[3 * 4 + j] * b[i * 4 + 3];
-		}
-	}
-
-	return p;
-}
-
 void
 mult_matrix_matrix(float *p, const mat4_t &a, const mat4_t &b)
 {
@@ -350,21 +332,5 @@ mult_matrix_vector(float* v, const mat4_t &a, const vec4_t &b)
 			a[2 * 4 + j] * b[2] +
 			a[3 * 4 + j] * b[3];
 	}
-}
-
-mat4_t
-mult_matrix_vector(const mat4_t &a, const vec4_t &b)
-{
-	mat4_t p = mat4_identity();
-
-	for (int32_t j = 0; j < 4; j++) {
-		p[j] =
-			a[0 * 4 + j] * b[0] +
-			a[1 * 4 + j] * b[1] +
-			a[2 * 4 + j] * b[2] +
-			a[3 * 4 + j] * b[3];
-	}
-
-	return p;
 }
 

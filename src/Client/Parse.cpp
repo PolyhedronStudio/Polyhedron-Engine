@@ -62,7 +62,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
 	//		entityState->oldOrigin = oldEntityState->origin;
 	//} else {
 	//	//*entityState = *oldEntityState;
-	if ( cs.entities[ newEntityNumber ].linearMovement.isMoving ) {
+	if ( cs.entities[ newEntityNumber ].linearMovement.isMoving || cs.entities[ newEntityNumber ].linearMovement.isExtrapolating ) {
 		EntityState *currentState  = &cs.entities[ newEntityNumber ].currentState;
 		EntityState *previousState = &cs.entities[ newEntityNumber ].previousState;
 		entityState->oldOrigin = previousState->origin;
@@ -71,6 +71,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
 
 		// TODO: Same for angles?
 		entityState->angles = currentState->angles;
+		//entityState->angles = oldEntityState->angles;
 	}
 }
 

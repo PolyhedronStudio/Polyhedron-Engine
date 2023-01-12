@@ -21,6 +21,24 @@ class SVGBaseTrigger;
 **/
 using LinearPushMoveEndFunction = void(IServerGameEntity*);
 
+
+/**
+*	@brief 
+**/
+const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest );
+
+/**
+*	@brief 
+**/
+void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest );
+
+void LinearMove_Calc( SVGBaseMover *geMover, const vec3_t &dest, LinearPushMoveEndFunction *pushMoveEndFunction );
+void LinearMove_Begin( SVGBaseMover *geMover );
+void LinearMove_Watch( SVGBaseMover *geMover );
+void LinearMove_Done( SVGBaseMover *geMover );
+void LinearMove_UpdateLinearVelocity( SVGBaseMover *geMover, float dist, const int32_t speed );
+
+
 struct LinearMoverState
 {
 	//! The mover's state when it has finished moving up, it is at the "top".

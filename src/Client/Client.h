@@ -320,7 +320,7 @@ extern cvar_t    *cl_beginmapcmd;
 extern cvar_t    *cl_player_model;
 extern cvar_t    *cl_thirdperson_angle;
 extern cvar_t    *cl_thirdperson_range;
-
+extern cvar_t *cl_thirdperson_traceshape;
 extern cvar_t    *cl_async;
 
 //

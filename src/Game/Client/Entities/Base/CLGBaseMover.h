@@ -13,27 +13,8 @@
 // Client Game GameEntity Interface.
 #include "Game/Client/Entities/Base/CLGBaseTrigger.h"
 
-
-
 // Callbacks used at the end of a pushmove action.
 using PushMoveEndFunction = void(GameEntity*);
-
-/**
-*	@brief 
-**/
-const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest );
-
-/**
-*	@brief 
-**/
-void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest );
-
-void LinearMove_Calc( CLGBaseMover *geMover, const vec3_t &dest, PushMoveEndFunction *pushMoveEndFunction );
-void LinearMove_Begin( CLGBaseMover *geMover );
-void LinearMove_Watch( CLGBaseMover *geMover );
-void LinearMove_Done( CLGBaseMover *geMover );
-void LinearMove_UpdateLinearVelocity( CLGBaseMover *geMover, float dist, const int32_t speed );
-
 
 struct MoverState
 {
@@ -158,7 +139,7 @@ public:
         this->speed = speed;
     }
     // Set the 'startPosition' vec3_t value.
-    virtual inline void SetStartPosition(const vec3_t& startPosition) {
+    virtual inline void SetStartPosition(const vec3_t& startPosition)  {
         this->startPosition = startPosition;
     }
     // Sets the lip
@@ -196,54 +177,26 @@ protected:
     float       CalculateAccelerationDistance( float targetSpeed, float accelerationRate );
 
 protected:
-
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
     //
-    // The speed that this objects travels at.     
+    //! How far away to stop, from the destination
+    float lip{ 0.0f };
+    //! The speed that this objects travels at.     
     float speed = 0.f;
-    // Acceleration speed.
+    //! Acceleration speed.
     float acceleration = 0.f;
-    // Deceleration speed.
+    //! Deceleration speed.
     float deceleration = 0.f;
-    // Direction of which to head down to when moving.
+    //! Direction of which to head down to when moving.
     vec3_t moveDirection = vec3_zero();
-    // Well, positions...
+    //! Well, positions...
     //vec3_t position1, position2;
-    // Position at where to start moving this thing from.
+    //! Position at where to start moving this thing from.
     vec3_t startPosition = vec3_zero();
-    // Position at where to end this thing from moving at all.
+    //! Position at where to end this thing from moving at all.
     vec3_t endPosition = vec3_zero();
-    // BaseMover moveInfo.
+    //! BaseMover moveInfo.
     PushMoveInfo moveInfo;
-    // How far away to stop, from the destination
-    float		lip{ 0.0f };
-    // Kill target when triggered.
-    //std::string killTargetStr;
 
-    // Message when triggered.
-    //std::string messageStr;
-
-    // Master trigger entity.
-    //std::string masterStr;
-
-    // Timestamp that the trigger has been called at.
-    //
-    // Entity pointers.
-    // 
-
-
-public:
-
-
-protected:
-    //
-    // Callback function pointers.
-    //
-    //ThinkCallbackPointer        thinkFunction;
-    //UseCallbackPointer          useFunction;
-    //TouchCallbackPointer        touchFunction;
-    //BlockedCallbackPointer      blockedFunction;
-    //TakeDamageCallbackPointer   takeDamageFunction;
-    //DieCallbackPointer          dieFunction;
 };

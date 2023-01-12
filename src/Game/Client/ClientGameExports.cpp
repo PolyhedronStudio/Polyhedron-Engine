@@ -23,6 +23,7 @@
 
 // Core entities (Need access to some for view attributes.)
 #include "Game/Client/Entities/Base/CLGBaseMover.h"
+#include "Game/Client/Entities/Base/CLGBaseLinearMover.h"
 #include "Game/Client/Entities/Func/FuncPlat.h"
 
 // Gamemodes.

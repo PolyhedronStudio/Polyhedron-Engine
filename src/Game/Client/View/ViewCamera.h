@@ -74,6 +74,10 @@ public:
 	void UpdateViewWeaponModel( PlayerState *previousPlayerState, PlayerState *currentPlayerState );
 
 
+	/**
+	*	@brief	Sets the 'trace' shape to use for the third person camera.
+	**/
+	void SetThirdpersonTraceShape( int32_t shape );
 
     /***
     *
@@ -156,6 +160,8 @@ private:
 
     //! True if in a third person game frame.
     bool isThirdperson = false;
+	//! Determines the trace shape to use for the thirdperson camera.
+	int32_t thirdPersonTraceShape = 0;
 	//! Forward View Vector, based on viewAngles.
     vec3_t viewForward = vec3_zero();
     //! Forward View Vector, based on viewAngles.

@@ -228,8 +228,11 @@ void CL_DeltaFrame(void)
         // Update the entity state. (Updates current and previous state.)
         PacketEntity_UpdateState( state );
 
-        // Fire entity event.
-        PacketEntity_FireEvent( podEntity->clientEntityNumber );
+        // Fire entity event if it has one.
+		if ( podEntity->currentState.eventID ) {
+			PacketEntity_FireEvent( podEntity->clientEntityNumber );
+			//podEntity->currentState.eventID = 0;
+		}
     }
 		
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {

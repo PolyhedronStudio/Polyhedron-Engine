@@ -81,6 +81,33 @@ void ViewCamera::SetupThirdpersonViewProjection() {
     const float rscale = sinf(angle);
     viewOrigin = vec3_fmaf(viewOrigin, -range * fscale, viewForward);
     viewOrigin = vec3_fmaf(viewOrigin, -range * rscale, viewRight);
+	
+// Cam Drag
+	static vec3_t lastOrigin = vec3_zero();
+	// Actual lag we allow to stay behind.
+	static constexpr float maxCameraLag = 1.35f * 3.f;
+	
+	//Calculate the difference between current and last facing origin.
+	vec3_t difference = vec3_normalize( lastOrigin - viewOrigin );
+
+	// Actual speed to move the camera at.
+	constexpr float constSpeed = 0.025;
+	float speed = constSpeed;
+
+	// Prefent getting choppy and lagging behind if we move it too fast.
+	const float distance = vec3_length( difference );
+	if ( distance > maxCameraLag ) {
+		speed *= distance / maxCameraLag;
+	}
+
+	// Calculate and set lastOrigin.
+	lastOrigin = vec3_fmaf( lastOrigin, speed * clgi.GetFrameTime(), difference );
+	//lastOrigin = vec3_normalize( lastOrigin );
+
+	difference = vec3_negate( difference );
+	viewOrigin = vec3_fmaf( viewOrigin, constSpeed, difference );
+
+// End of Cam Drag.
 
     // TODO: Uncomment when I get back to work on thirdperson camera.
     // This is the start of having a camera that is nice third person wise.
@@ -89,26 +116,75 @@ void ViewCamera::SetupThirdpersonViewProjection() {
     // Experimenting with a side third person view.
     //cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, 24, cl->v_right);
     
-    // Execute a line trace to see if we collide with the world.
-    TraceResult trace = clgi.Trace(cl->playerEntityOrigin, vec3_zero(), vec3_zero(), viewOrigin , nullptr, BrushContentsMask::PlayerSolid);
+    // Execute a spherical line trace to see if we collide with the world.
+	// Determin the shape to use.
+	const int32_t traceShape = thirdPersonTraceShape;
+
+    // Perform gun tip sphere trace.
+	//clgi.Trace(cl->playerEntityOrigin, mins, maxs, viewOrigin, geClient, BrushContentsMask::PlayerSolid); 
+	TraceResult trace = clgi.Trace(cl->playerEntityOrigin, mins, maxs, viewOrigin, nullptr, BrushContentsMask::PlayerSolid, traceShape );
 
     if (trace.fraction != 1.0f) {
         // We've collided with the world, let's adjust our view origin.
         viewOrigin = trace.endPosition;
     }
     
-    // Subtract view origin from focus point.
+    //// Subtract view origin from focus point.
     focus -= viewOrigin;
 
-    // Calculate the new distance to use.
+    //// Calculate the new distance to use.
     float dist = sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
 
-    // Set our view angles.
+    //// Set our view angles.
     viewAngles[vec3_t::Pitch] = -180.f / M_PI * atan2f(focus[2], dist);
     viewAngles[vec3_t::Yaw] -= cl_thirdperson_angle->value;
 
-    // Last but not least, let it be known we are in thirdperson view.
+    //// Last but not least, let it be known we are in thirdperson view.
     cl->thirdPersonView = true;
+
+
+
+
+	//
+	// Get this stuff integrated into thirdperson cam, that'd be radical haha
+	//
+	// Last facing direction.
+
+
+    //// Subtract view origin from focus point.
+    //focus -= viewOrigin;
+
+    //// Calculate the new distance to use.
+    //float dist = sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
+
+    //// Set our view angles.
+    //viewAngles[vec3_t::Pitch] = -180.f / M_PI * atan2f(focus[2], dist);
+    //viewAngles[vec3_t::Yaw] -= cl_thirdperson_angle->value;
+
+    //// Last but not least, let it be known we are in thirdperson view.
+    //cl->thirdPersonView = true;
+
+	//// When the yaw is rotating too fast, it'll get choppy and "lag" behind. Interpolate to neatly catch up,
+	//// gives a more realism effect to go along with it.
+	//const float distance = vec3_length( difference );
+	//if ( distance > maxViewModelLag ) {
+	//	speed *= distance / maxViewModelLag;
+	//}
+
+	//lastFacingAngles = vec3_fmaf( lastFacingAngles, speed * clgi.GetFrameTime(), difference );
+	//VectorNormalize( lastFacingAngles );
+
+	//difference = vec3_negate( difference );
+	//rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, constSpeed, difference );
+
+	//// Calculate Pitch.
+	//float pitch = AngleMod( rEntWeaponViewModel.angles[vec3_t::PYR::Pitch] );
+	//if ( pitch > 180.0f ) {
+	//	pitch -= 360.0f;
+	//}
+	//else if ( pitch < -180.0f ) {
+	//	pitch += 360.0f;
+	//}
 }
 
 
@@ -360,8 +436,8 @@ void ViewCamera::TraceViewWeaponOffset() {
     constexpr float gunUpOffset = -5.f;
 
 	// Gun tip bounding box.
-    const vec3_t gunMins = { -4, -2, -12 };
-	const vec3_t gunMaxs = { 4, 8, 12 };
+    const vec3_t gunMins = { -12, -12, -12 };
+	const vec3_t gunMaxs = { 12, 12, 12 };
 
 	// Get client entity, in order to skip it for tracing.
 	GameEntity *geClient = gameWorld->GetClientGameEntity();
@@ -373,11 +449,12 @@ void ViewCamera::TraceViewWeaponOffset() {
 	// Calculate gun tip origin.
     const vec3_t gunTipOrigin = vec3_fmaf(gunOrigin, gunLengthOffset, viewForward );
 
-    // Perform gun tip trace.
-    CLGTraceResult trace = CLG_Trace( gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid );//clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid); 
+    // Perform gun tip sphere trace.
+    CLGTraceResult trace = CLG_Trace( gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid, 1 );
+	//clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid); 
 
 	// In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
-    if (trace.fraction != 1.0f || trace.podEntity != nullptr) {
+    if ( trace.fraction < 1.f || trace.podEntity != nullptr) {
         rEntWeaponViewModel.origin = vec3_fmaf( trace.endPosition, -gunLengthOffset, viewForward );
         rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, -gunRightOffset, viewRight );
         rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, -gunUpOffset, viewUp );
@@ -418,6 +495,12 @@ void ViewCamera::UpdateViewWeaponModel( PlayerState *previousPlayerState, Player
     if (rEntWeaponViewModel.frame < 0) {
         rEntWeaponViewModel.frame = rEntWeaponViewModel.oldframe;
     }
+}
+/**
+*	@brief	Sets the 'trace' shape to use for the third person camera.
+**/
+void ViewCamera::SetThirdpersonTraceShape( int32_t shape ) {
+	thirdPersonTraceShape = shape;
 }
 
 /**

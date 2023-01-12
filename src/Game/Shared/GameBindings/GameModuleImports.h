@@ -34,6 +34,7 @@
 
 //! Func Entities for Physics.
 #include "Game/Client/Entities/Func/FuncPlat.h"
+#include "Game/Client/Entities/Func/FuncRotating.h"
 
 //! SharedGame Client Bindings.
 #include "Game/Shared/GameBindings/ClientBinding.h"

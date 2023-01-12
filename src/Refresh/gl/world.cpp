@@ -451,7 +451,7 @@ static inline qboolean GL_ClipNode(mnode_t *node, int *clipflags)
         if (flags & mask) {
             continue;
         }
-        bits = BoxOnPlaneSide(node->bounds.mins, node->bounds.maxs,
+		bits = BoxOnPlaneSide( bbox3_t { node->bounds.mins, node->bounds.maxs },
                               &glr.frustumPlanes[i]);
         if (bits == BoxPlane::Behind) {
             return false;

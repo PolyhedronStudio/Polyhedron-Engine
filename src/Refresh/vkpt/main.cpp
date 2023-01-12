@@ -2787,8 +2787,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	vec3_t sky_matrix[3];
 	prepare_sky_matrix(fd->time, sky_matrix);
 
-	sun_light_t sun_light = {
-	};
+	sun_light_t sun_light = { };
 	if (render_world)
 	{
 		vkpt_evaluate_sun_light(&sun_light, sky_matrix, fd->time);

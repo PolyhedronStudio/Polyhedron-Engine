@@ -141,7 +141,17 @@ public:
 	*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 	**/
 	void RunPackEntitiesPredictionFrame(int64_t msec);
+private:
+	/**
+	*	@brief	Runs all non pusher packet entities, should get called before RunPusherEntities.
+	**/
+	void RunNonPusherPacketEntities();
+	/**
+	*	@brief	Runs all pusher packet entities, should get called before RunPusherEntities.
+	**/
+	void RunPusherPacketEntities();
 
+public:
 
 
 	/**

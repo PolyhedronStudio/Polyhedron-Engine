@@ -273,14 +273,14 @@ public:
     **/
     virtual const vec3_t& GetAbsoluteMin() override { 
         if (podEntity) {
-            return podEntity->absMin;
+            return podEntity->absoluteBounds.mins;
         } else {
             return ZeroVec3;
         }
     };
     virtual void SetAbsoluteMin(const vec3_t &absMin) override {
         if (podEntity) {
-            podEntity->absMin = absMin;
+            podEntity->absoluteBounds.mins = absMin;
         }
     };
 
@@ -289,14 +289,14 @@ public:
     **/
     virtual const vec3_t& GetAbsoluteMax() override { 
         if (podEntity) {
-            return podEntity->absMax;
+            return podEntity->absoluteBounds.maxs;
         } else {
             return ZeroVec3;
         }
     };
     virtual void SetAbsoluteMax(const vec3_t &absMax) override {
         if (podEntity) {
-            podEntity->absMax = absMax;
+            podEntity->absoluteBounds.maxs = absMax;
         }
     };
 
@@ -1010,7 +1010,7 @@ public:
     //! 'Blocked' Callback Pointer.
     using BlockedCallbackPointer    = void(IClientGameEntity::*)(IClientGameEntity* other);
     //! 'Damage' Callback Pointer.
-    using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage);
+    using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection );
     //! 'Die' Callback Pointer.
     using DieCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
 
@@ -1048,7 +1048,7 @@ public:
     *   @param  kick:
     *   @param  damage:
     **/
-    void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) override;
+    void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection = vec3_zero() ) override;
     /**
     *   @brief  Dispatches 'Stop' callback.
     **/

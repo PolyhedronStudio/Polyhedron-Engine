@@ -22,6 +22,23 @@ class CLGBaseTrigger;
 **/
 using LinearPushMoveEndFunction = void(IClientGameEntity*);
 
+
+/**
+*	@brief 
+**/
+const int64_t SG_LinearMovement( const PODEntity *podEntity, const int64_t &time, vec3_t &dest );
+
+/**
+*	@brief 
+**/
+void SG_LinearMovementDelta( const PODEntity *podEntity, const int64_t &oldTime, const int64_t &curTime, vec3_t &dest );
+
+void LinearMove_Calc( CLGBaseLinearMover *geMover, const vec3_t &dest, LinearPushMoveEndFunction *pushMoveEndFunction );
+void LinearMove_Begin( CLGBaseLinearMover* geMover );
+void LinearMove_Watch( CLGBaseLinearMover *geMover );
+void LinearMove_Done( CLGBaseLinearMover *geMover );
+void LinearMove_UpdateLinearVelocity( CLGBaseLinearMover *geMover, float dist, const int32_t speed );
+
 struct LinearMoverState
 {
 	//! The mover's state when it has finished moving up, it is at the "top".
@@ -48,6 +65,8 @@ struct LinearPushMoveInfo {
     vec3_t endOrigin = vec3_zero();
     vec3_t endAngles = vec3_zero();
 
+	//! Current heading forward to destination origin.
+	vec3_t destOrigin = vec3_zero();
     // Mover sound indices.
     int32_t startSoundIndex = 0;
     int32_t middleSoundIndex = 0;
@@ -183,7 +202,7 @@ protected:
 
     // Swaps startPosition and endPosition, using the origin as an intermediary
     void        SwapPositions();
-
+public:
     // Brush movement methods
     void		BrushMoveDone();
     void		BrushMoveFinal();
@@ -191,7 +210,7 @@ protected:
     void		BrushMoveWatch();
     void		BrushMoveCalc( const vec3_t& destination, LinearPushMoveEndFunction* function );	
 	void		BrushMoveUpdateLinearVelocity( const float distance, const float speed );
-
+protected:
 	// Same but for angular movement
     void        BrushAngleMoveDone();
     void        BrushAngleMoveFinal();

@@ -98,6 +98,13 @@ static inline void SinCosRadians(const float radians, float  &s, float &c) {
 }
 
 /**
+*	@brief	Returns the squared float value.
+**/
+static inline const float flt_square(const float x) {
+	return x * x;
+}
+
+/**
 *   @brief  Initializes the Random Number generator for use with generating random vector coordinates.
 **/
 inline void InitRandomNumberGenerator() {

@@ -48,7 +48,8 @@ public:
 	**/
     DefineMapClass( "func_plat", FuncPlat, SVGBaseLinearMover );
 
-
+	// Remove later on, it is here temporarily for testing.
+	vec3_t tempPlatAvelocity = vec3_zero();
 
 	/**
 	*	Spawnflags.

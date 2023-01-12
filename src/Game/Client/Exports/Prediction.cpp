@@ -20,6 +20,7 @@
 // Server Game Base Entity.
 //#include "../Entities/Base/BodyCorpse.h"
 #include "Game/Client/Entities/Base/CLGBaseMover.h"
+#include "Game/Client/Entities/Base/CLGBaseLinearMover.h"
 #include "Game/Client/Entities/Base/CLGBasePlayer.h"
 
 //! Plat entity for prediction.
@@ -34,9 +35,11 @@
 // Distance that is allowed to be taken as a delta before we reset it.
 static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
 
-
 // GameWorld.
 #include "../World/ClientGameWorld.h"
+
+//#define PREDICTION_LINEAR_MOVERS 
+//#define PREDICTION_BASEMOVERS_ROTATOR
 
 /**
 *   @brief  Checks for prediction incorectness. If found, corrects it.
@@ -58,25 +61,42 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
         return;
     }
 
-	ClientGameWorld *gameWorld = GetGameWorld();
 	vec3_t linearMove = vec3_zero();
+	#ifdef PREDICTION_BASEMOVERS_ROTATOR
+	// We calculate the total difference between the last valid frame's received pmove origin, and the current origin we are at,
+	ClientGameWorld *gameWorld = GetGameWorld();
 	if ( gameWorld ) {
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( moveCommand->prediction.groundEntityNumber );
-
+		// Is the ground a valid pointer?
+		if ( geGround && geGround->IsSubclassOf<CLGBaseMover>() ) {// geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
+		}
+	}
+	#endif
+	#ifdef PREDICTION_LINEAR_MOVERS
+	ClientGameWorld *gameWorld = GetGameWorld();
+	if ( gameWorld ) {
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( moveCommand->prediction.groundEntityNumber );
 		// Is the ground a valid pointer?
 		if ( geGround && geGround->IsSubclassOf<CLGBaseMover>() ) {// geGround->GetPODEntity()->linearMovement ) { //geGround->IsExtrapolating() ) { // geGround->GetPODEntity()->linearMovement ) {
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time ).count(), ( level.time ).count(), linearMove );
-			
-			
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time ).count(), (level.time + FRAMERATE_MS).count(), linearMove);
 			SG_LinearMovementDelta( geGround->GetPODEntity(), moveCommand->prediction.moverLevelTime, moveCommand->prediction.moverNextLevelTime, linearMove );
-			
 			//SG_LinearMovementDelta( geGround->GetPODEntity(), ( level.time - FRAMERATE_MS ).count(), (level.time).count(), linearMove );
 		}
 	}
+	#endif
 
     // Subtract what the server returned from our predicted origin for that frame
-    out->error = moveCommand->prediction.error = ( (moveCommand->prediction.origin + linearMove ) - in->origin);
+    //out->error = moveCommand->prediction.error = ( (moveCommand->prediction.origin + linearMove ) - in->origin);
+	out->error = moveCommand->prediction.error = moveCommand->prediction.origin;
+	#ifdef PREDICTION_BASEMOVERS_ROTATOR
+	out->error = moveCommand->prediction.error += moveCommand->prediction.rotatorOffset; //) - in->origin);
+	#endif
+	#ifdef PREDICTION_LINEAR_MOVERS
+	out->error = moveCommand->prediction.error += linearMove;
+	#endif
+	// Now subtract the new received origin.
+	out->error -= in->origin;
 
     // If the error is too large, it was likely a teleport or respawn, so ignore it
     const float len = vec3_length(out->error);
@@ -146,12 +166,15 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 
         // If the command has an msec value it means movement has taken place and we prepare for 
         // processing another simulation.
+		//#ifdef PREDICTION_LINEAR_MOVERS
 		vec3_t linearMove = vec3_zero();
+		vec3_t rotatorOffset = vec3_zero();
+		//#endif
 
 		// Store level times in case we got to predict ground movers' movement.
 		cmd->prediction.moverLevelTime = level.extrapolatedTime.count();//level.time.count();
 		cmd->prediction.moverNextLevelTime = ( level.extrapolatedTime + FRAMERATE_MS ).count();//( level.time + FRAMERATE_MS ).count();
-
+	
 		if (cmd->input.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
@@ -173,26 +196,44 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		}
 
 		// Update player entity.
+		#ifdef PREDICTION_LINEAR_MOVERS
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 		// Is the ground a valid pointer?
 		if ( geGround && geGround->GetPODEntity()->linearMovement.isMoving ) {
 			SG_LinearMovementDelta( geGround->GetPODEntity(), cmd->prediction.moverLevelTime, cmd->prediction.moverNextLevelTime, linearMove );
 		}
+		#endif
 
         // Save for error detection
         cmd->prediction.groundEntityNumber = pm.groundEntityNumber;
 		cmd->prediction.origin = pm.state.origin;// + linearMove;
+
+		#ifdef PREDICTION_BASEMOVERS_ROTATOR
+		// Needs frame to be valid.
+		if ( gameWorld && cl->frame.valid ) {
+			GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
+
+			// Is the ground a valid pointer?
+			if (geGround && geGround->IsSubclassOf<CLGBaseMover>() && geGround->IsExtrapolating() ) {
+				rotatorOffset = cmd->prediction.rotatorOffset = pm.state.origin - cl->frame.playerState.pmove.origin;
+			}
+		} else {
+//			rotatorOffset = cmd->prediction.rotatorOffset = vec3_zero();
+		}
+		#endif
 	}
 
 	// Run the player move prediction process using the current pending frame user input.
 	//vec3_t groundPredictionOffset = vec3_zero();
 	vec3_t linearMove = vec3_zero();
-	
+	vec3_t rotatorOffset = vec3_zero();
+
 	// Store level times in case we got to predict ground movers' movement.
 	cl->moveCommand.prediction.moverLevelTime = level.time.count();
 	cl->moveCommand.prediction.moverNextLevelTime = ( level.extrapolatedTime ).count();
 
 	// Calculate current delta move for the ground entity origin if it is a linear moving trajectory entity.
+	#ifdef PREDICTION_LINEAR_MOVERS
 	if ( gameWorld ) {
 		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
 
@@ -201,7 +242,7 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 			SG_LinearMovementDelta( geGround->GetPODEntity(), cl->moveCommand.prediction.moverLevelTime, cl->moveCommand.prediction.moverNextLevelTime, linearMove );
 		}
 	}
-
+	#endif
 	// Process it if it had any input.
 	if (cl->moveCommand.input.msec) {
         // Saved for prediction error checking.
@@ -226,13 +267,32 @@ void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, ui
 		cl->moveCommand.prediction.groundEntityNumber = pm.groundEntityNumber;
 		cl->moveCommand.prediction.origin = pm.state.origin;// + linearMove;
 	}
+	#ifdef PREDICTION_BASEMOVERS_ROTATOR
+	// Needs frame to be valid.
+	if ( gameWorld && cl->frame.valid ) {
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm.groundEntityNumber );
+
+		// Is the ground a valid pointer?
+		if (geGround && geGround->IsSubclassOf<CLGBaseMover>() && geGround->IsExtrapolating()) {
+			rotatorOffset = cl->moveCommand.prediction.rotatorOffset = pm.state.origin - cl->frame.playerState.pmove.origin;
+		}
+	} else {
+	//	rotatorOffset = vec3_zero();
+	}
+	#endif
 
     // Copy results out for rendering
     //if ( vec3_distance( cl->predictedState.viewOrigin, pm.state.origin ) > 0.03125f ) {
 	//	// TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
 	//	cl->predictedState.viewOrigin = pm.state.origin;
 	//}
-	cl->predictedState.viewOrigin = pm.state.origin;// + linearMove;
+	cl->predictedState.viewOrigin = pm.state.origin;
+	#ifdef PREDICTION_LINEAR_MOVERS
+	cl->predictedState.viewOrigin += linearMove;
+	#endif
+	#ifdef PREDICTION_BASEMOVERS_ROTATOR
+	cl->predictedState.viewOrigin += rotatorOffset;// + linearMove;
+	#endif
 	cl->predictedState.viewAngles = pm.viewAngles;
     cl->predictedState.viewOffset = pm.state.viewOffset;
     cl->predictedState.stepOffset = pm.state.stepOffset;
@@ -290,10 +350,23 @@ void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm, GameEntity 
 	// EXCEPTION: If the mover is NOT moving, we make sure to adjust to our frame again.
 	GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
 
-	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || ( geGround && !geGround->GetPODEntity()->linearMovement.isMoving ) )  {
+	#ifdef PREDICTION_LINEAR_MOVERS
+	if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || (!geGround) || ( geGround && !geGround->GetPODEntity()->linearMovement.isMoving ) )  {
 		gePlayer->SetOrigin( pm->state.origin );
 		gePlayer->SetVelocity( pm->state.velocity );
 	}
+	#else
+		#ifdef PREDICTION_BASEMOVERS_ROTATOR
+		if ( !( pm->state.flags & PMF_EXTRAPOLATING_GROUND_MOVER ) || (!geGround) || 
+					(geGround && geGround->IsSubclassOf<CLGBaseMover>() && geGround->IsExtrapolating())) {
+			gePlayer->SetOrigin( pm->state.origin );
+			gePlayer->SetVelocity( pm->state.velocity );
+		}
+		#else
+			gePlayer->SetOrigin( pm->state.origin );
+			gePlayer->SetVelocity( pm->state.velocity );
+		#endif
+	#endif
 
     gePlayer->SetMins( pm->mins );
     gePlayer->SetMaxs( pm->maxs );
@@ -389,13 +462,13 @@ TraceResult ClientGamePrediction::PM_Trace( const vec3_t& start, const vec3_t& m
 	PODEntity *podClient = (geClient ? geClient->GetPODEntity() : nullptr);
 
 	if ( podClient && cl->frame.playerState.stats[PlayerStats::Health] > 0 ) {
-	    cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::PlayerSolid );
+	    cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::PlayerSolid, 0 );
 	} else if ( podClient ) {
-		cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::DeadSolid );
+		cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::DeadSolid, 0 );
 	} else {
 		// TODO: Com_Error, or just perform a trace without skip entity...? Hmmm..
 		//Com_Error( ErrorType::Drop, "ClientGamePrediction::PM_Trace called without a valid skipEntity\n" );
-		cmTrace = clgi.Trace( start, mins, maxs, end, 0, BrushContentsMask::DeadSolid );
+		cmTrace = clgi.Trace( start, mins, maxs, end, 0, BrushContentsMask::DeadSolid, 0 );
 	}
 
     return cmTrace;

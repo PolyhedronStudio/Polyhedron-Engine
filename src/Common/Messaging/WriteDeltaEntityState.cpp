@@ -114,11 +114,14 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
 	    byteMask |= EntityMessageBits::Solid;
     }
     
-	if ( (to->solid != PACKED_BSP && to->solid != Solid::BSP ) || (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
+	//if ( (to->solid != PACKED_BSP && to->solid != Solid::BSP ) || (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
+ //       byteMask |= EntityMessageBits::Bounds;
+ //   } else if ( to->solid != from->solid ) {
+ //       byteMask |= EntityMessageBits::Bounds;
+	//}
+	if ( (to->solid != PACKED_BSP && to->solid != Solid::BSP ) && (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
         byteMask |= EntityMessageBits::Bounds;
-    } else if ( to->solid != from->solid ) {
-        byteMask |= EntityMessageBits::Bounds;
-	}
+    }
 
     // Event is not delta compressed, it's bit is set when eventID is non 0.
     if (to->eventID) {
@@ -218,6 +221,9 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
 
     // Write out the ModelIndex.
     if (byteMask & EntityMessageBits::ModelIndex) { 
+		if (to->modelIndex < 0) {
+			int x = 10; // FUNC_ROTATE BUG
+		}
         MSG_WriteUint8(to->modelIndex);
     }
     // Write out the ModelIndex2.
@@ -312,13 +318,13 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
     if (byteMask & EntityMessageBits::Bounds) {
 		// We expect the mins to already be < 0.
 		// Remove the negative so we got room for larger bboxes.
-		MSG_WriteUint8(-to->mins.x);
-		MSG_WriteUint8(-to->mins.y);
-		MSG_WriteUint8(-to->mins.z);
+		MSG_WriteUint8( -to->mins.x );
+		MSG_WriteUint8( -to->mins.y );
+		MSG_WriteUint8( -to->mins.z );
 
-		MSG_WriteUint8(to->maxs.x);
-		MSG_WriteUint8(to->maxs.y);
-		MSG_WriteUint8(to->maxs.z);
+		MSG_WriteUint8( to->maxs.x );
+		MSG_WriteUint8( to->maxs.y );
+		MSG_WriteUint8( to->maxs.z );
     }
 
     // Write out the Animation Start Time.

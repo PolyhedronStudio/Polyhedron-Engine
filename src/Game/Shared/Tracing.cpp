@@ -127,16 +127,16 @@ SGTraceResult::SGTraceResult(const TraceResult& traceResult) :
 /**
 *	@brief	SharedGame Trace Functionality: Supports GameEntities :-)
 **/
-SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t& contentMask) {
+SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask, const int32_t traceShape ) {
     // Fetch POD Entity to use for pass entity testing.
     PODEntity* podEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
 
 	// Execute and return the actual trace.
 #ifdef SHAREDGAME_SERVERGAME
-    return gi.Trace(start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask);
+    return gi.Trace(start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask, traceShape );
 #endif
 #ifdef SHAREDGAME_CLIENTGAME
-    return clgi.Trace(start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask);
+    return clgi.Trace(start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask, traceShape );
 #endif
 }
 

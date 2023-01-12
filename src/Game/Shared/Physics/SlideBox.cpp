@@ -55,7 +55,7 @@ static constexpr float STOP_EPSILON = 0.1;
 *	@brief	Wrapper for easily tracing our slide box moves. All pointer arguments are optionable
 *			in that if set, it overrides the values it'd otherwise grab from the SlideBoxMove* itself.
 **/
-static SGTraceResult &&SBM_Trace( SlideBoxMove* move, const vec3_t *origin, const vec3_t *mins, const vec3_t *maxs, const vec3_t *end, const int32_t skipEntityNumber = -1, const int32_t contentMask = -1 ) {
+static SGTraceResult SBM_Trace( SlideBoxMove* move, const vec3_t *origin, const vec3_t *mins, const vec3_t *maxs, const vec3_t *end, const int32_t skipEntityNumber = -1, const int32_t contentMask = -1 ) {
 	/**
 	*	#0: Determine whether to use move state or custom values.
 	**/
@@ -76,7 +76,13 @@ static SGTraceResult &&SBM_Trace( SlideBoxMove* move, const vec3_t *origin, cons
 	GameEntity *geSkip = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( traceSkipEntityNumber ) );
 
 	// Perform and return trace results.
-	return std::move( SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask ) );
+	if ( geSkip ) {
+		// Sphere tracing if need be.
+		if ( geSkip->GetSolid() == Solid::Sphere ) {
+			return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask, 1 );
+		}
+	}
+	return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask );
 }
 
 /**

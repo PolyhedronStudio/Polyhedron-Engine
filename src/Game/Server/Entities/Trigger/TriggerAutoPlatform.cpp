@@ -36,7 +36,6 @@ TriggerAutoPlatform::TriggerAutoPlatform( Entity* entity )
 //===============
 void TriggerAutoPlatform::Spawn() {
 	Base::Spawn();
-
 	// Initialize brush trigger.
 	InitBrushTrigger();
 
@@ -123,12 +122,12 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 //===============
 // TriggerAutoPlatform::Create
 //===============
-TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity *ownerEntity, const vec3_t triggerOrigin, const vec3_t &triggerMins, const vec3_t &triggerMaxs  ) {
-    TriggerAutoPlatform* autoPlatform = GetGameWorld()->CreateGameEntity<TriggerAutoPlatform>();
+TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity *ownerEntity, const vec3_t &triggerOrigin, const vec3_t &triggerMins, const vec3_t &triggerMaxs  ) {
+    TriggerAutoPlatform* autoPlatform = GetGameWorld()->CreateGameEntity< TriggerAutoPlatform >();
     autoPlatform->SetOrigin( triggerOrigin );
 	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();
-	autoPlatform->SetSolid(Solid::Trigger);
+	autoPlatform->SetSolid( Solid::Trigger );
 	autoPlatform->SetMins( triggerMins );
 	autoPlatform->SetMaxs( triggerMaxs );
 	autoPlatform->SetOwner( ownerEntity );

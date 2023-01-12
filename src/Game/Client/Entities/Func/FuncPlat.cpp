@@ -12,7 +12,7 @@
 //! Client Game Local headers.
 #include "Game/Client/ClientGameLocals.h"
 //! BaseMover.
-#include "Game/Client/Entities/Base/CLGBaseMover.h"
+#include "Game/Client/Entities/Base/CLGBaseLinearMover.h"
 //#include "Game/Entities/Trigger/TriggerAutoDoor.h"
 //#include "Game/Entities/Func/FuncAreaportal.h"
 #include "Game/Client/Entities/Func/FuncPlat.h"
@@ -111,13 +111,13 @@ void FuncPlat::Spawn() {
 	// Calculate movement speed to use.
 	// Start at state up.
 	if ( (spawnFlags & SF_PlatformStartRaised) ) {
-		moveInfo.state = MoverState::Top;
+		moveInfo.state = LinearMoverState::Top;
 		moveInfo.destOrigin =  GetEndPosition();
 	} else {
 		// Default to end(bottom) position.
 		SetOrigin( GetEndPosition() );
 		// Change its state.
-		moveInfo.state = MoverState::Bottom;
+		moveInfo.state = LinearMoverState::Bottom;
 		moveInfo.destOrigin = GetStartPosition();
 	}
 
@@ -179,13 +179,13 @@ void FuncPlat::PostSpawn() {
 	// Calculate movement speed to use.
 	// Start at state up.
 	if ( (spawnFlags & SF_PlatformStartRaised) ) {
-		moveInfo.state = MoverState::Top;
+		moveInfo.state = LinearMoverState::Top;
 		moveInfo.destOrigin =  GetEndPosition();
 	} else {
 		// Default to end(bottom) position.
 		SetOrigin( GetEndPosition() );
 		// Change its state.
-		moveInfo.state = MoverState::Bottom;
+		moveInfo.state = LinearMoverState::Bottom;
 		moveInfo.destOrigin = GetStartPosition();
 	}
 
@@ -348,7 +348,7 @@ void FuncPlat::Callback_RaisePlatform() {
 	   // }
 	   // SetSound(moveInfo.middleSoundIndex);
     //}
-    moveInfo.state = MoverState::Up;
+    moveInfo.state = LinearMoverState::Up;
 	//EnableExtrapolation();
 
 	//EnableExtrapolation();
@@ -360,7 +360,9 @@ void FuncPlat::Callback_RaisePlatform() {
 	//level.time -= FRAMERATE_MS;
 	//SG_Physics_Pusher( handlePusher );
 	
-	
+	if ( !vec3_equal( tempPlatAvelocity, vec3_zero() ) ) {
+		SetAngularVelocity( vec3_negate( tempPlatAvelocity ) );
+	}	
 	//level.time -= FRAMERATE_MS;
 	//LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);
 
@@ -387,7 +389,7 @@ void FuncPlat::Callback_RaisePlatform() {
 *	@brief	Performs the platform 'lower' movement for the current 'think' frame.
 **/
 void FuncPlat::Callback_LowerPlatform() {
-    moveInfo.state = MoverState::Down;
+    moveInfo.state = LinearMoverState::Down;
 	//EnableExtrapolation();
 
 	SGEntityHandle handlePusher;
@@ -397,7 +399,9 @@ void FuncPlat::Callback_LowerPlatform() {
 	//level.time -= FRAMERATE_MS;
 	//SG_Physics_Pusher( handlePusher );
 	
-	
+	if ( !vec3_equal( tempPlatAvelocity, vec3_zero() ) ) {
+		SetAngularVelocity( tempPlatAvelocity );
+	}
 	//level.time -= FRAMERATE_MS;
 	//LinearMove_Calc( this, GetStartPosition(), OnPlatformHitTop);
 
@@ -410,6 +414,7 @@ void FuncPlat::Callback_LowerPlatform() {
 	level.time += FRAMERATE_MS;
 	SG_Physics_Pusher( handlePusher );
 	level.time -= FRAMERATE_MS;
+	EnableExtrapolation();
 	const std::string debugStr = fmt::format( "LowerMove Event: speed({}), wait({}), destOrigin({}, {}, {}), startOrigin({}, {}, {}), endOrigin({}, {}, {})\n",
 				moveInfo.speed,
 				moveInfo.wait.count(),
@@ -431,8 +436,9 @@ void FuncPlat::Callback_ReachedRaisedPosition() {
     //    }
     //    SetSound( 0 );
     //}
+	SetAngularVelocity( vec3_t { 0, 0, 0 } );
 
-    moveInfo.state = MoverState::Top;
+    moveInfo.state = LinearMoverState::Top;
 	// We set the origin here so it won't be slightly off (timing.)
 	SetOrigin( GetStartPosition() );
 	LinkEntity();
@@ -465,7 +471,9 @@ void FuncPlat::Callback_ReachedLoweredPosition() {
     //    }
     //    SetSound( 0 );
     //}
-    moveInfo.state = MoverState::Bottom;
+	SetAngularVelocity( vec3_t { 0, 0, 0 } );
+
+    moveInfo.state = LinearMoverState::Bottom;
 	SetOrigin( GetEndPosition() );
 	LinkEntity();
 //	DisableExtrapolation();
@@ -545,7 +553,7 @@ void FuncPlat::CalculateMoveSpeed() {
 
 	// Find the smallest distance any member of the team will be moving
 	min = fabsf(moveInfo.distance);
-	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseLinearMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
 		distance = fabsf(ent->moveInfo.distance);
 		if (distance < min) {
 			min = distance;
@@ -555,7 +563,7 @@ void FuncPlat::CalculateMoveSpeed() {
 	time = min / GetSpeed();
 
 	// Adjust speeds so they will all complete at the same time
-	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseLinearMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
 		newSpeed = fabsf(ent->moveInfo.distance) / time;
 		ratio = newSpeed / ent->moveInfo.speed;
 
@@ -695,8 +703,12 @@ void FuncPlat::SpawnBottomTouchTrigger() {
 // Light::SpawnKey
 //===============
 void FuncPlat::SpawnKey(const std::string& key, const std::string& value) {
+	// Angular velocity for rotation.
+	if ( key == "avel" ) {
+		ParseKeyValue( key, value, tempPlatAvelocity );
+	}
     // Height value.
-    if (key == "height") {
+    else if (key == "height") {
         // Parsed int.
         float parsedFloat = 0.f;
 

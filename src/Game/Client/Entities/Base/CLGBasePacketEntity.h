@@ -259,14 +259,14 @@ public:
     **/
     virtual const vec3_t& GetAbsoluteMin() override { 
         if (podEntity) {
-            return podEntity->absMin;
+            return podEntity->absoluteBounds.mins;
         } else {
             return ZeroVec3;
         }
     };
     virtual void SetAbsoluteMin(const vec3_t &absMin) override {
         if (podEntity) {
-            podEntity->absMin = absMin;
+            podEntity->absoluteBounds.mins = absMin;
         }
     };
 
@@ -275,14 +275,14 @@ public:
     **/
     virtual const vec3_t& GetAbsoluteMax() override { 
         if (podEntity) {
-            return podEntity->absMax;
+            return podEntity->absoluteBounds.maxs;
         } else {
             return ZeroVec3;
         }
     };
     virtual void SetAbsoluteMax(const vec3_t &absMax) override {
         if (podEntity) {
-            podEntity->absMax = absMax;
+            podEntity->absoluteBounds.maxs = absMax;
         }
     };
 
@@ -311,9 +311,9 @@ public:
     *   @brief Get/Set: Angular Velocity
     **/
     virtual const vec3_t& GetAngularVelocity() override { 
-        return angularVelocity;
+        return this->angularVelocity;
     };
-    virtual void SetAngularVelocity(const vec3_t& angularVelocity) override {
+    virtual void SetAngularVelocity( const vec3_t& angularVelocity ) override {
         // This minght need to be networked in the future?
         this->angularVelocity = angularVelocity;
     };
@@ -595,6 +595,7 @@ public:
 
 			//////////////////////////////////////////////////
 			// Set modelstr.
+			// Set modelstr.
 			this->model = model;
 
 			// Register model.
@@ -610,31 +611,14 @@ public:
 					mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
 
 					if (inlineModel) {
-						podEntity->currentState.mins = inlineModel->mins;
-						podEntity->currentState.maxs = inlineModel->maxs;
+						podEntity->mins = podEntity->currentState.mins = inlineModel->mins;
+						podEntity->maxs = podEntity->currentState.maxs = inlineModel->maxs;
 					
 						// Link it for collision testing.
 						LinkEntity();
 					}
 				}
 			}
-
-			/////////////////////////////////////////////////////////////////////
-			//// If it is an inline model, get the size information for it.
-			//if (model[0] == '*') {
-			//	mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
-
-			//	if (inlineModel) {
-			//		podEntity->mins = inlineModel->mins;
-			//		podEntity->maxs = inlineModel->maxs;
-			//		
-			//		// Link it for collision testing.
-			//		LinkEntity();
-			//	}
-			//}
-
-			//// Update model index.
-			//SetModelIndex(clgi.R_RegisterModel(model.c_str()));
 	};
 
     /**
@@ -1178,7 +1162,7 @@ public:
     *   @param  kick:
     *   @param  damage:
     **/
-    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) override;
+    virtual void DispatchTakeDamageCallback( GameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection ) override;
     /**
     *   @brief  Dispatches 'Stop' callback.
     **/

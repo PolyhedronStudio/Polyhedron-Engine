@@ -285,6 +285,9 @@ void FuncPlat::Callback_RaisePlatform() {
 	    }
 	    SetSound(moveInfo.middleSoundIndex);
     }
+	if ( !vec3_equal( tempPlatAvelocity, vec3_zero() ) ) {
+		SetAngularVelocity( vec3_negate( tempPlatAvelocity ) );
+	}
     moveInfo.state = LinearMoverState::Up;
     BrushMoveCalc( GetStartPosition(), OnPlatformHitTop );//BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 }
@@ -299,6 +302,10 @@ void FuncPlat::Callback_LowerPlatform() {
 	    }
 	    SetSound(moveInfo.middleSoundIndex);
     }
+
+	if ( !vec3_equal( tempPlatAvelocity, vec3_zero() ) ) {
+		SetAngularVelocity( tempPlatAvelocity );
+	}
 
     moveInfo.state = LinearMoverState::Down;
     BrushMoveCalc( GetEndPosition(), OnPlatformHitBottom );//BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
@@ -317,6 +324,7 @@ void FuncPlat::Callback_ReachedRaisedPosition() {
     }
 
     moveInfo.state = LinearMoverState::Top;
+	SetAngularVelocity( vec3_t { 0, 0, 0 } );
 
 	// When SF_PlatformToggle is set we..
 	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
@@ -346,6 +354,7 @@ void FuncPlat::Callback_ReachedLoweredPosition() {
     }
 	
     moveInfo.state = LinearMoverState::Bottom;
+	SetAngularVelocity( vec3_t { 0, 0, 0 } );
 
 	// When SF_PlatformToggle is set we..
 	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
@@ -501,8 +510,11 @@ void FuncPlat::SpawnTopTouchTrigger() {
 	        break;
 	    }
 
-        AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
-	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+//      AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
+//	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+        AddPointToBounds(teamMember->GetPODEntity()->absoluteBounds.mins, triggerMins, triggerMaxs);
+	    AddPointToBounds(teamMember->GetPODEntity()->absoluteBounds.maxs, triggerMins, triggerMaxs);
+
     }
     
     // At last, create platform trigger entity.
@@ -557,8 +569,10 @@ void FuncPlat::SpawnBottomTouchTrigger() {
 	        break;
 	    }
 
-        AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
-	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+//      AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
+//	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+        AddPointToBounds(teamMember->GetPODEntity()->absoluteBounds.mins, triggerMins, triggerMaxs);
+	    AddPointToBounds(teamMember->GetPODEntity()->absoluteBounds.maxs, triggerMins, triggerMaxs);
     }
     
     // At last, create platform trigger entity.
@@ -569,8 +583,12 @@ void FuncPlat::SpawnBottomTouchTrigger() {
 // Light::SpawnKey
 //===============
 void FuncPlat::SpawnKey(const std::string& key, const std::string& value) {
+	// Angular velocity for rotation.
+	if ( key == "avel" ) {
+		ParseKeyValue( key, value, tempPlatAvelocity );
+	}
     // Height value.
-    if (key == "height") {
+    else if (key == "height") {
         // Parsed int.
         float parsedFloat = 0.f;
 

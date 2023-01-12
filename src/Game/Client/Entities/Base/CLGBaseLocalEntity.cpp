@@ -402,13 +402,13 @@ void CLGBaseLocalEntity::DispatchTouchCallback(IClientGameEntity* self, IClientG
 *   @param  kick:
 *   @param  damage:
 **/
-void CLGBaseLocalEntity::DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) {
+void CLGBaseLocalEntity::DispatchTakeDamageCallback( IClientGameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection ) {
 	// Safety check.
 	if (takeDamageFunction == nullptr)
 		return;
 
 	// Execute 'Die' callback function.
-	(this->*takeDamageFunction)(other, kick, damage);
+	(this->*takeDamageFunction)(other, kick, damage, damageDirection);
 }
 
 /**

@@ -31,7 +31,7 @@
 #include "../Shared/CLGame.h"
 
 // Traces & World.
-#include "Traces.h"
+#include "Common/CollisionModel/Tracing.h"
 #include "World.h"
 
 // Contains the functions being exported to client game dll.
@@ -108,7 +108,7 @@ void _wrp_Cvar_Reset(cvar_t *var) {
 
 // CMODEL
 mmodel_t *_wrp_BSP_InlineModel(const char *name) {
-	if (!cl.bsp) {
+	if (!cl.cm.cache) {
 		return nullptr;
 	}
     
@@ -547,6 +547,7 @@ void CL_InitGameProgs(void)
 	importAPI.PointContents = CL_World_PointContents;
 	importAPI.World_PointContents = CL_World_PointContents;
     importAPI.Trace = CL_World_Trace;
+	importAPI.Clip = CL_World_Clip;
 	importAPI.World_Trace = CL_World_Trace;
 
     // Command Buffer.
@@ -561,10 +562,10 @@ void CL_InitGameProgs(void)
     importAPI.BSP_InlineModel = _wrp_BSP_InlineModel;
 	importAPI.CM_InlineModel = _wrp_CM_InlineModel;
     importAPI.CM_PointContents = CM_PointContents;
-    importAPI.CM_TransformedPointContents = CM_TransformedPointContents;
+//    importAPI.CM_TransformedPointContents = CM_TransformedPointContents;
     importAPI.CM_BoxTrace = CM_BoxTrace;
     importAPI.CM_TransformedBoxTrace = CM_TransformedBoxTrace;
-    importAPI.CM_ClipEntity = CM_ClipEntity;
+//    importAPI.CM_ClipEntity = CM_ClipEntity;
 	importAPI.CM_SetAreaPortalState = _wrp_CM_SetAreaPortalState;
 
 	// Collision Model PVS.

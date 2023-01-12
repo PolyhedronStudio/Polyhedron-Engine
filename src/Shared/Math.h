@@ -9,47 +9,56 @@
 ***/
 #pragma once
 
-//-----------------
-// Utilities
-//-----------------
+/**
+*	Utilities
+**/
 #include "Math/Utilities.h"
 
-//-----------------
-// Vectors
-//-----------------
+/**
+*	Vectors
+**/
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
 #include "Math/Vector5.h"
 
-//-----------------
-// Matrixes
-//-----------------
+/**
+*	Matrices
+**/
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
 
-//-----------------
-// Plane
-//-----------------
+/**
+*	BoundingBox(vec3_t)
+**/
+#include "Math/BBox3.h"
+
+/**
+*	Plane
+**/
 #include "Math/Plane.h"
 
-//-----------------
-// Colors
-//-----------------
+/**
+*	Colors
+**/
 #include "Math/Color.h"
 
-//-----------------
-// Rectangles.
-//-----------------
+/**
+*	Rectangles.
+**/
 #include "Math/Rectangle.h"
 
-//-----------------
-// Quaternions.
-//-----------------
+/**
+*	Quaternions
+**/
 #include "Math/Quaternion.h"
 #include "Math/DualQuaternion.h"
 
 
+/**
+*	GLM Binding/Utilities
+**/
+#include "Math/GLM.h"
 
 //-----------------
 // Specific Byte and Direction Vector Utilities.

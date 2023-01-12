@@ -21,8 +21,6 @@
 #define SG_VELOCITY_BOUNCE_CLAMPING
 #define SG_VELOCITY_CLIP_CLAMPING
 
-static constexpr float STOP_EPSILON = 0.1;
-
 //static inline const bool IsGroundPlane( const CollisionPlane &plane, const vec3_t &gravityDir) {
 //	return ( vec3_dot( plane.normal, gravityDir ) < -0.45f);
 //}
@@ -114,9 +112,6 @@ const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction ) {
     // Acquire the rotational velocity first.
     vec3_t angularVelocity = geRotateFriction->GetAngularVelocity();
 
-    // Set angles in proper direction.
-    geRotateFriction->SetAngles( vec3_fmaf( geRotateFriction->GetAngles(), FRAMETIME_S.count(), angularVelocity ) );
-
     // Calculate adjustment to apply.
     const float adjustment = FRAMETIME_S.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
 
@@ -133,6 +128,9 @@ const vec3_t SG_CalculateRotationalFriction( GameEntity *geRotateFriction ) {
                 angularVelocity[n] = 0;
         }
     }
+
+    // Set angles in proper direction.
+    geRotateFriction->SetAngles( vec3_clamp_euler( vec3_fmaf( geRotateFriction->GetAngles(), FRAMETIME_S.count(), angularVelocity ) ) );
 
 	// Return the angular velocity.
 	return angularVelocity;
@@ -445,7 +443,7 @@ const bool SG_RunThink( GameEntity *geThinker ) {
 
 	} else {
 		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime + FRAMERATE_MS ) {
-		if (nextThinkTime <= GameTime::zero() || nextThinkTime >= level.extrapolatedTime + FRAMERATE_MS ) {
+		if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.extrapolatedTime + FRAMERATE_MS ) {
 		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > GameTime( cl->serverTime ) + FRAMERATE_MS ) {
 		//if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time + FRAMERATE_MS ) {
 			return true;
@@ -502,7 +500,11 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	// SG_Physics_Pusher:
 		case MoveType::Push:
         case MoveType::Stop:
+			//#ifdef SHAREDGAME_CLIENTGAME
+			//SG_Physics_None(entityHandle);
+			//#else
 			SG_Physics_Pusher(entityHandle);
+			//#endif
         break;
 	// SG_Physics_NoClip:
         case MoveType::NoClip:
@@ -523,7 +525,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 			GameEntity *geSlide = *entityHandle;
 			SlideBoxMove slideBoxMove;
 			int32_t geSlideContentMask = (geSlide && geSlide->GetClipMask() ? geSlide->GetClipMask() : BrushContentsMask::PlayerSolid);
-			const float slideBounce = 1.01f;
+			const float slideBounce = 1.03f;
 			const float slideFriction = 10.f;
 
 			SG_Physics_TossSlideBox( geSlide, geSlideContentMask, slideBounce, slideFriction, &slideBoxMove );

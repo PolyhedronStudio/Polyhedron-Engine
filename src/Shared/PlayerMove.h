@@ -98,6 +98,8 @@ struct ClientMoveCommand {
 		//! Ground Mover (Push Entities) Level Frame Time, and Next Frame Time, used to reproduce the delta move offset at the time of processing the move command.
 		uint64_t moverLevelTime = 0;		//! The actual time of this mover at arrival of our server frame.
 		uint64_t moverNextLevelTime = 0;	//! The actual extrapolated time of this mover during transition to next frame.
+		//! BaseMovers (Frame based movement)
+		vec3_t rotatorOffset = vec3_zero(); //! The offset set by extrapolating base movers between last valid received frame player move origin, and that of our current client frame.
 
 		//! Predicted move results at the time of after processing the move command..
 		vec3_t origin	= vec3_zero();		//! The predicted origin for this command.

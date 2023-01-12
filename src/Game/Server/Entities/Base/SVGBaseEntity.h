@@ -211,7 +211,7 @@ public:
     *   @param  kick:
     *   @param  damage:
     **/
-    virtual void DispatchTakeDamageCallback(IServerGameEntity* other, float kick, int32_t damage) override;
+    virtual void DispatchTakeDamageCallback(IServerGameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection = vec3_zero() ) override;
     /**
     *   @brief  Dispatches 'Stop' callback.
     **/
@@ -252,14 +252,14 @@ public:
     /**
     *   @brief Get/Set: BoundingBox Mins
     **/
-    virtual const vec3_t&    GetAbsoluteMin() override { return podEntity->absMin; }
-    virtual void             SetAbsoluteMin(const vec3_t &absMin) override { podEntity->absMin = absMin; }
+    virtual const vec3_t&    GetAbsoluteMin() override { return podEntity->absoluteBounds.mins; }
+    virtual void             SetAbsoluteMin(const vec3_t &absMin) override { podEntity->absoluteBounds.mins = absMin; }
 
     /**
     *   @brief Get/Set: BoundingBox Maxs
     **/
-    virtual const vec3_t&    GetAbsoluteMax() override { return podEntity->absMax; }
-    virtual void             SetAbsoluteMax(const vec3_t &absMax) override { podEntity->absMax = absMax; }
+    virtual const vec3_t&    GetAbsoluteMax() override { return podEntity->absoluteBounds.maxs; }
+    virtual void             SetAbsoluteMax(const vec3_t &absMax) override { podEntity->absoluteBounds.maxs = absMax; }
 
     /**
     *   @brief Get/Set: Activator
@@ -434,8 +434,8 @@ public:
     /**
     *   @brief Get/Set: Bounding Box 'Maxs'
     **/
-    virtual const vec3_t&    GetMaxs() override { return podEntity->maxs; }
-    virtual void             SetMaxs(const vec3_t& maxs) override { podEntity->maxs = maxs; }
+	virtual const vec3_t&    GetMaxs() override { return podEntity->bounds.maxs; }//podEntity->maxs; }
+    virtual void             SetMaxs(const vec3_t& maxs) override { podEntity->bounds.maxs = podEntity->maxs = maxs; }
 
     /**
     *   @brief Get/Set: Message
@@ -446,8 +446,8 @@ public:
     /**
     *   @brief Get/Set: Bounding Box 'Mins'
     **/
-    virtual const vec3_t&    GetMins() override { return podEntity->mins; }
-    virtual void             SetMins(const vec3_t& mins) override { podEntity->mins = mins; }
+	virtual const vec3_t&    GetMins() override { return podEntity->bounds.mins; } //podEntity->mins; }
+    virtual void             SetMins(const vec3_t& mins) override { podEntity->bounds.mins = podEntity->mins = mins; }
    
     /**
     *   @brief Get/Set: Model

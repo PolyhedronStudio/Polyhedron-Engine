@@ -427,7 +427,7 @@ void CLGBasePacketEntity::OnDeallocate() {
 /**
 *	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
 **/
-void CLGBasePacketEntity::OnEventID(uint32_t eventID) {
+void CLGBasePacketEntity::OnEventID( uint32_t eventID ) {
     // EF_TELEPORTER acts like an event, but is not cleared each frame
     if ((GetEffects()  & EntityEffectType::Teleporter)) {
         ParticleEffects::Teleporter(GetOrigin());
@@ -444,8 +444,9 @@ void CLGBasePacketEntity::OnEventID(uint32_t eventID) {
             ParticleEffects::Teleporter(GetOrigin());
             break;
         case EntityEvent::Footstep:
-            if (cl_footsteps->integer)
+            if (cl_footsteps->integer) {
                 clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Body, cl_sfx_footsteps[rand() & 3], 1, Attenuation::Normal, 0);
+			}
             break;
         case EntityEvent::FallShort:
             clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
@@ -532,13 +533,13 @@ void CLGBasePacketEntity::DispatchTouchCallback(GameEntity* self, GameEntity* ot
 *   @param  kick:
 *   @param  damage:
 **/
-void CLGBasePacketEntity::DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) {
+void CLGBasePacketEntity::DispatchTakeDamageCallback( GameEntity* other, float kick, int32_t damage, const vec3_t &damageDirection ) {
 	// Safety check.
 	if (takeDamageFunction == nullptr)
 		return;
 
 	// Execute 'Die' callback function.
-	(this->*takeDamageFunction)(other, kick, damage);
+	(this->*takeDamageFunction)( other, kick, damage, damageDirection );
 }
 
 /**
@@ -1383,9 +1384,6 @@ EntitySkeletonBlendActionState *CLGBasePacketEntity::GetBlendActionState( const 
 * 
 *
 **/
-/**
-*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
-**/
 void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) {
 	extern qhandle_t cl_mod_laser;
 
@@ -1530,15 +1528,25 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 				// Neatly copy it as the refreshEntity's oldorigin.
 				refreshEntity.oldorigin = refreshEntity.origin;
 			}
-        }
+        } 
     }
 
+	if ( GetSolid() == PACKED_BSP) {
+		//refreshEntity.origin = bbox3_center( podEntity->absoluteBounds );
+		glm::vec3 refreshOrigin = podEntity->translateMatrix[3];
+		refreshEntity.origin = glmvec3_to_phvec( refreshOrigin );
+	} else {
+		glm::vec3 refreshOrigin = podEntity->translateMatrix[3];
+		refreshEntity.origin = glmvec3_to_phvec( refreshOrigin );
+	}
+	refreshEntity.oldorigin = refreshEntity.origin;
 
 	/**
 	*	Particle Debug BoundingBox:
 	**/
 	if ( renderEffects& RenderEffects::DebugBoundingBox ) {
-	    CLG_DrawDebugBoundingBox( podEntity->lerpOrigin, podEntity->mins, podEntity->maxs );
+	    //CLG_DrawDebugBoundingBox( podEntity->lerpOrigin, podEntity->mins, podEntity->maxs );
+		CLG_DrawDebugBoundingBox( podEntity->absoluteBounds.mins, podEntity->absoluteBounds.maxs );
 	}
 
 
@@ -1620,7 +1628,11 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         refreshEntity.angles = cl->playerEntityAngles;
     } else {
         // Otherwise, lerp angles by default.
-        refreshEntity.angles = vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
+		//refreshEntity.angles = vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
+		refreshEntity.angles = vec3_clamp_euler( vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction ) );
+
+		//refreshEntity.angles = vec3_mix_euler( vec3_normalize( podEntity->previousState.angles ), vec3_normalize( podEntity->currentState.angles ), cl->lerpFraction );
+		//refreshEntity.angles = glm_quat_slerp_ph_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
 
         // Mimic original ref_gl "leaning" bug (uuugly!)
         if (currentState->modelIndex == 255 && cl_rollhack->integer) {
@@ -1654,8 +1666,8 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         // Don't tilt the model - looks weird
         refreshEntity.angles[0] = 0.f;
         // Temporary fix, not quite perfect though. Add some z offset so the shadow isn't too dark under the feet.
-        refreshEntity.origin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
-        refreshEntity.oldorigin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+        refreshEntity.origin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, /*4.f + */PM_MINS.z };
+        refreshEntity.oldorigin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, /*4.f + */PM_MINS.z };
     }
 
     // If set to invisible, skip

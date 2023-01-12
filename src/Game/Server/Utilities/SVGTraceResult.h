@@ -65,4 +65,4 @@ struct SVGTraceResult{
 /**
 *	@brief	ServerGame Trace function. Supports Game Entities.
 **/
-SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipEntity, const int32_t& contentMask);
+SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipEntity, const int32_t contentMask, const int32_t traceShape = 0 );

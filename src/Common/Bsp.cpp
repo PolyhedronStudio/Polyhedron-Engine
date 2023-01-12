@@ -33,8 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../System/Hunk.h"
 
 //extern mtexinfo_t nulltexinfo;
-extern CollisionModel collisionModel;
-
 static cvar_t *map_visibility_patch;
 
 /*
@@ -213,7 +211,7 @@ LOAD(BrushSides)
         out->plane = bsp->planes + planenum;
         texinfo = LittleShort(in->texinfo);
         if (texinfo == (uint16_t)-1) {
-            out->texinfo = &collisionModel.nullTextureInfo;
+            out->texinfo = CM_GetNullTextureInfo();
         } else {
             if (texinfo >= bsp->numtexinfo) {
                 DEBUG("bad texinfo");
@@ -246,7 +244,7 @@ LOAD_EXT(BrushSides) {
         out->plane = bsp->planes + planenum;
         texinfo = LittleLong(in->texinfo);
         if (texinfo == (uint32_t)-1) {
-            out->texinfo = &collisionModel.nullTextureInfo;
+            out->texinfo = CM_GetNullTextureInfo();
         }
         else {
             if (texinfo >= bsp->numtexinfo) {
@@ -708,6 +706,13 @@ LOAD(Leafs)
         out->firstleafbrush = bsp->leafbrushes + firstleafbrush;
         out->numleafbrushes = numleafbrushes;
 
+		// PH: For axial plane tests.
+#if !USE_REF
+		for (int32_t j = 0; j < 3; j++) {
+            out->bounds.mins[j] = LittleShort(in->mins[j]);
+            out->bounds.maxs[j] = LittleShort(in->maxs[j]);
+        }
+#endif
 #if USE_REF
         firstleafface = LittleShort(in->firstleafface);
         numleaffaces = LittleShort(in->numleaffaces);
@@ -720,8 +725,8 @@ LOAD(Leafs)
         out->numleaffaces = numleaffaces;
 
         for (j = 0; j < 3; j++) {
-            out->mins[j] = (int16_t)LittleShort(in->mins[j]);
-            out->maxs[j] = (int16_t)LittleShort(in->maxs[j]);
+            out->bounds.mins[j] = (int16_t)LittleShort(in->mins[j]);
+            out->bounds.maxs[j] = (int16_t)LittleShort(in->maxs[j]);
         }
 
         out->parent = NULL;
@@ -796,6 +801,14 @@ LOAD_EXT(Leafs) {
         out->firstleafbrush = bsp->leafbrushes + firstleafbrush;
         out->numleafbrushes = numleafbrushes;
 
+// PH: We still want to know about the bounds, even when not compiling with a refresh module.
+#if !USE_REF
+        for (int32_t j = 0; j < 3; j++) {
+            out->bounds.mins[j] = LittleFloat(in->mins[j]);
+            out->bounds.maxs[j] = LittleFloat(in->maxs[j]);
+        }
+#endif
+
 #if USE_REF
         firstleafface = LittleLong(in->firstleafface);
         numleaffaces = LittleLong(in->numleaffaces);
@@ -808,8 +821,8 @@ LOAD_EXT(Leafs) {
         out->numleaffaces = numleaffaces;
 
         for (j = 0; j < 3; j++) {
-            out->mins[j] = LittleFloat(in->mins[j]);
-            out->maxs[j] = LittleFloat(in->maxs[j]);
+            out->bounds.mins[j] = LittleFloat(in->mins[j]);
+            out->bounds.maxs[j] = LittleFloat(in->maxs[j]);
         }
 
         out->parent = NULL;
@@ -831,6 +844,7 @@ LOAD(Nodes)
     mnode_t     *out;
     int         i, j;
     uint32_t    planenum, child;
+// PH: We need this data.
 #if USE_REF
     uint16_t    firstface, numfaces, lastface;
 #endif
@@ -871,6 +885,13 @@ LOAD(Nodes)
             }
         }
 
+// PH: We still want to know about the bounds, even when not compiling with a refresh module.
+#if !USE_REF
+        for (j = 0; j < 3; j++) {
+            out->bounds.mins[j] = (int16_t)LittleShort(in->mins[j]);
+            out->bounds.maxs[j] = (int16_t)LittleShort(in->maxs[j]);
+        }
+#endif
 #if USE_REF
         firstface = LittleShort(in->firstface);
         numfaces = LittleShort(in->numfaces);
@@ -900,6 +921,8 @@ LOAD_EXT(Nodes) {
     mnode_t* out;
     int         i, j;
     uint32_t    planenum, child;
+
+// PH: We need this data.
 #if USE_REF
     uint32_t    firstface, numfaces, lastface;
 #endif
@@ -941,6 +964,13 @@ LOAD_EXT(Nodes) {
             }
         }
 
+// PH: We still want to know about the bounds, even when not compiling with a refresh module.
+#if !USE_REF
+        for (j = 0; j < 3; j++) {
+            out->bounds.mins[j] = LittleFloat(in->mins[j]);
+            out->bounds.maxs[j] = LittleFloat(in->maxs[j]);
+        }
+#endif
 #if USE_REF
         firstface = LittleLong(in->firstface);
         numfaces = LittleLong(in->numfaces);

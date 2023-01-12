@@ -334,49 +334,6 @@ void SVG_SpawnEntities(const char* mapName, const char* entities, const char* sp
     // Spawn entities.
     gameworld->PrepareBSPEntities(mapName, entities, spawnpoint);
 }
-//
-//=====================
-// SVG_ClientEndServerFrames
-//
-// Called when the game is at the end of its run for this frame, and decides to now
-// instantiate a process for updating each client by the current server frame.
-//=====================
-//
-void SVG_ClientEndServerFrames(void)
-{
-    ServerGameWorld* gameworld = GetGameWorld();
-
-    // Acquire server entities array.
-    Entity* serverEntities = gameworld->GetPODEntities();
-
-    // Go through each client and calculate their final view for the state.
-    // (This happens here, so we can take into consideration objects that have
-    // pushed the player. And of course, because damage has been added.)
-    for (int32_t clientIndex = 0; clientIndex < game.GetMaxClients(); clientIndex++) {
-        // First, fetch entity state number.
-        int32_t stateNumber = serverEntities[1 + clientIndex].currentState.number;  // WID: 1 +, because 0 == Worldspawn.
-
-        // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
-        Entity *entity = &serverEntities[stateNumber];
-
-        // Acquire player entity pointer.
-        GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(entity, true, true);
-
-        // Sanity check.
-        if (!validGameEntity|| !validGameEntity->IsSubclassOf<SVGBasePlayer>()) {
-            continue;
-        }
-
-        // Save to cast now.
-        SVGBasePlayer *player = static_cast<SVGBasePlayer*>(validGameEntity);
-
-        // Acquire server client.
-        ServerClient *client = player->GetClient();
-
-        // Notify game mode about this client ending its server frame.
-        gameworld->GetGameMode()->ClientEndServerFrame(player, client);
-    }
-}
 
 /*
 =================
@@ -509,6 +466,21 @@ void SVG_CheckDMRules(void)
 }
 
 
+
+/*
+
+
+
+
+
+
+
+*/
+
+/**
+*	@brief	Checks the entity for whether its hashed classname still matches that of its current state.
+*			If it does not match then it'll update the currentState's hashed classname.
+**/
 void SVG_UpdateHashedClassName(PODEntity *podEntity) {
 	if (podEntity) {
 		//if (podEntity->gameEntity) {
@@ -528,62 +500,28 @@ void SVG_UpdateHashedClassName(PODEntity *podEntity) {
 	}
 }
 
-/*
-================
-SVG_RunFrame
-
-Advances the world by FRAMETIME_S(for 50hz=0.019) seconds
-================
-*/
-
-void SVG_RunFrame(void) {
-	// Increment and use the frame number to calculate the current level time with.
-	level.frameNumber++;
-    level.time += FRAMERATE_MS; //level.frameNumber * FRAMERATE_MS;
-	
-    // Check for whether an intermission point wants to exit this level.
-    if (level.intermission.exitIntermission) {
-        GetGameMode()->OnLevelExit();
-        return;
-    }
-
-    //
-    // Treat each object in turn
-    // "even the world gets a chance to Think", it does.
-    //
-    // Acquire server and class entities arrays.
-    
-    //GameEntityVector gameEntities = game.world->GetGameEntities();
+static void SVG_RunNonPusherEntitiesFrame() {
+	    // Treat each object in turn "even the world gets a chance to Think", it does. 
 	ServerGameWorld *gameWorld = GetGameWorld();
-	//Entity* serverEntities = gameWorld->GetPODEntities();
-    // Loop through the server entities, and run the base entity frame if any exists.
-    for (int32_t i = 1; i < globals.numberOfEntities; i++) {
-        // Acquire state number.
-        //int32_t stateNumber = serverEntities[i].currentState.number;
-		int32_t stateNumber = globals.entities[i].currentState.number;
-
-		const int32_t entityIndex = stateNumber;
-		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+    for ( int32_t i = 1; i < globals.numberOfEntities; i++ ) {
+		// Get POD Entity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( i );
+		// Create its handle.
 		SGEntityHandle geHandle = podEntity;
+		// Validate it in order to get a safe game entity.
 		GameEntity *gameEntity = ServerGameWorld::ValidateEntity( geHandle );
 		
-		// If invalid for whichever reason, warn and continue to next iteration.
-        if (!podEntity || !gameEntity || !podEntity->inUse) {
-            //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
+		// Make sure it has: [PODEntity ptr], [GameEntity ptr], [POD In Use], [NO Movetype: Push or Stop]
+		// TODO: Should really be checking game entity inuse also hmm?
+		if ( !podEntity || !gameEntity || /*!podEntity->inUse || */!gameEntity->IsInUse()
+			|| ( gameEntity->GetMoveType() == MoveType::Push || gameEntity->GetMoveType() == MoveType::Stop ) ) {
             continue;
         }
 
         // Admer: entity was marked for removal at the previous tick
-        if (podEntity && gameEntity && (gameEntity->GetServerFlags() & EntityServerFlags::Remove)) {
+        if (podEntity && gameEntity && ( gameEntity->GetServerFlags() & EntityServerFlags::Remove ) ) {
             // Free server entity.
-            game.world->FreePODEntity(podEntity);
-
-            // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
-            // 
-            // Other entities may wish to point at this entity for the current tick. By unsetting
-            // the server entity we can prevent malicious situations from happening.
-            //gameEntity->SetPODEntity(nullptr);
-
+            game.world->FreePODEntity( podEntity );
             // Skip further processing of this entity, it's removed.
             continue;
         }
@@ -595,20 +533,6 @@ void SVG_RunFrame(void) {
         // Store previous(old) origin.
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
-  //      // If the ground entity moved, make sure we are still on it
-		//if (!gameEntity->GetClient()) {
-		//	GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( gameEntity->GetGroundEntityHandle() );
-		//	if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
-		//		// Reset ground entity.
-		//		//gameEntity->SetGroundEntity( SGEntityHandle() );
-
-		//		// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-		//		if ( !( gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) && ( gameEntity->GetServerFlags() & EntityServerFlags::Monster ) ) {
-		//			// Check for a new ground entity that resides below this entity.
-		//			SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
-		//		}
-		//	}
-		//}
         // For non client entities: If the ground entity moved, make sure we are still on it
 		if ( !gameEntity->GetClient() ) {
 			// Validate handle.
@@ -617,7 +541,6 @@ void SVG_RunFrame(void) {
 			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
 				// Reset ground entity.
 				gameEntity->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
 				if ( !(gameEntity->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly )) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster) ) {
 					// Check for a new ground entity that resides below this entity.
@@ -654,13 +577,114 @@ void SVG_RunFrame(void) {
 		// Update the entities Hashed Classname, it might've changed during logic processing.
 		SVG_UpdateHashedClassName(podEntity);
     }
+}
+static void SVG_RunPusherEntitiesFrame() {
+    // Treat each object in turn "even the world gets a chance to Think", it does. 
+	ServerGameWorld *gameWorld = GetGameWorld();
+    for ( int32_t i = 1; i < globals.numberOfEntities; i++ ) {
+		// Get POD Entity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( i );
+		// Create its handle.
+		SGEntityHandle geHandle = podEntity;
+		// Validate it in order to get a safe game entity.
+		GameEntity *gameEntity = ServerGameWorld::ValidateEntity( geHandle );
+		
+		// If invalid for whichever reason, warn and continue to next iteration.
+        if ( !podEntity || !gameEntity || /*!podEntity->inUse || */!gameEntity->IsInUse()
+			|| ( gameEntity->GetMoveType() != MoveType::Push && gameEntity->GetMoveType() != MoveType::Stop ) ) {
+
+            continue; //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
+        }
+
+        // Admer: entity was marked for removal at the previous tick
+        if (podEntity && gameEntity && ( gameEntity->GetServerFlags() & EntityServerFlags::Remove ) ) {
+            // Free server entity.
+            game.world->FreePODEntity( podEntity );
+            // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
+            // 
+            // Other entities may wish to point at this entity for the current tick. By unsetting
+            // the server entity we can prevent malicious situations from happening.
+            //gameEntity->SetPODEntity(nullptr);
+
+            // Skip further processing of this entity, it's removed.
+            continue;
+        }
+
+
+        // Let the level data know which entity we are processing right now.
+        level.currentEntity = gameEntity;
+
+        // Store previous(old) origin.
+        gameEntity->SetOldOrigin(gameEntity->GetOrigin());
+
+        // Last but not least, "run" process the entity.
+	    //SVG_RunEntity(entityHandle);
+		SGEntityHandle entityHandle = gameEntity;
+		SG_RunEntity(entityHandle);
+
+		// Update the entities Hashed Classname, it might've changed during logic processing.
+		SVG_UpdateHashedClassName(podEntity);
+    }
+}
+/**
+*	@brief	Advances the world's time by FRAMERATE_MS and iterates through all entities, client entities, non pushers,
+*			and pusher entities, executing their 'think' and 'physics' tick logic.
+**/
+void SVG_RunFrame(void) {
+	// Increment and use the frame number to calculate the current level time with.
+	level.frameNumber++;
+    level.time += FRAMERATE_MS; //level.frameNumber * FRAMERATE_MS;
+	
+    // Check for whether an intermission point wants to exit this level.
+    if (level.intermission.exitIntermission) {
+        GetGameMode()->OnLevelExit();
+        return;
+    }
+
+	// #0: Run all non pusher entities first so that we don't end up with them moving in between push frames.
+	// (That can cause them to get stick on rotators.)
+	SVG_RunNonPusherEntitiesFrame();
+	// #1: Now that they've had their chance to move for this frame, push them, or 'drive' them as 'riders' if standing on top.
+	SVG_RunPusherEntitiesFrame();
 
     // See if it is time to end a deathmatch.
     SVG_CheckDMRules();
-
     // See if needpass needs updated.
     SVG_CheckNeedPass();
-
     // Build the playerstate_t structures for all players in this frame.
     SVG_ClientEndServerFrames();
+}
+
+/**
+*	@brief	Called for all client at the end of the RunFrame function. Iterates over the clients in descending order.
+*			(This allows us to adjust the player if it has been pushed around by other entities, or damage, etc.)
+**/
+void SVG_ClientEndServerFrames(void) {
+    // Go through each client and calculate their final view for the state.
+    // ( This allows us to adjust the player if it has been pushed around by other entities, or damage, etc. )
+    ServerGameWorld* gameWorld = GetGameWorld();
+	for (int32_t clientIndex = game.GetMaxClients(); clientIndex >= 0; clientIndex--) {
+		// Client entities are always + 1, because the entities array starts indexing with 0 as Worldspawn.
+		PODEntity *podClient = gameWorld->GetPODEntityByIndex( 1 + clientIndex );
+        // Acquire player entity pointer.
+        GameEntity *geClient = ServerGameWorld::ValidateEntity(podClient, true, true);
+
+        // Make sure it is a valid pointer.
+        if ( !geClient) { 
+            continue;
+        }
+		// Make sure that the actual entity is of a SVGBasePlayer derived type.
+		if ( !geClient->IsSubclassOf<SVGBasePlayer>() ) {
+			continue;
+		}
+
+        // Save to cast now.
+        SVGBasePlayer *gePlayer = static_cast< SVGBasePlayer* >( geClient );
+
+        // Acquire server client.
+        ServerClient *client = gePlayer->GetClient();
+
+        // Notify game mode about this client ending its server frame.
+        gameWorld->GetGameMode()->ClientEndServerFrame( gePlayer, client );
+    }
 }
