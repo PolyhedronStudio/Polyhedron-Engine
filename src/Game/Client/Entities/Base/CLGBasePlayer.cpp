@@ -65,7 +65,7 @@ void CLGBasePlayer::Spawn() {
     SetTakeDamage( TakeDamage::Aim );
     // Fresh movetype and solid.
     SetMoveType( MoveType::PlayerMove );
-    SetSolid( Solid::BoundingBox );
+    SetSolid( Solid::Capsule );
     // Mass.
     SetMass(200);
     // Undead itself.

@@ -34,17 +34,25 @@ struct bisphere_t {
 *
 ***/
 /**
-*	@brief	Sphere data type, offset is origin from 0,0,0
+*	@brief	Sphere Data Type: Contains the parameters of a sphere, set in 'World Space' at its 'origin',
+*			applying a 'Model Space' offset from its 'origin' in order to also be able to apply for use
+*			with 'Capsules/Pill Shaped' maths.
 **/
 struct sphere_t {
-	//! Actual sphere radius from offset.
+	//! Radius of the sphere.
 	float radius = 0.f;
+	//! Radius used for calculating offset of the sphere's with.
+	float offsetRadius = 0.f;
+
 	//! The halfHeight from offset.
 	float halfHeight = 0.f;
 	//! The halfWidth from offset.
 	float halfWidth = 0.f;
 
-	//! The offset of the sphere. (i.e, its centered origin in world space.)
+	//! The the sphere 'World Space' from its origin.
+	vec3_t origin = vec3_zero();
+
+	//! The 'offset' of the sphere in 'Model Space' from its origin.
 	vec3_t offset = vec3_zero();
 };
 
@@ -52,14 +60,16 @@ struct sphere_t {
 *	@brief	Returns true if the point lies within the sphere.
 **/
 inline const bool sphere_contains_point( const sphere_t &sphere, const vec3_t &point ) {
-	return vec3_dot( sphere.offset - point ) <= flt_square( sphere.radius );
+	const vec3_t sphereOffsetOrigin = sphere.origin + sphere.offset;
+	return vec3_dot( sphereOffsetOrigin - point ) <= flt_square( sphere.radius );
 }
 
 /**
 *	@brief	Returns true if the point lies within the circular 2D(X/Y) of the sphere sphere.
 **/
 inline const bool sphere_contains_point_2d( const sphere_t &sphere, const vec3_t &point ) {
-	return vec3_dot( vec3_xy( sphere.offset ) - vec3_xy( point ) ) <= flt_square( sphere.radius );
+	const vec3_t sphereOffsetOrigin = sphere.origin + sphere.offset;
+	return vec3_dot( vec3_xy( sphereOffsetOrigin ) - vec3_xy( point ) ) <= flt_square( sphere.radius );
 }
 
 
@@ -104,3 +114,8 @@ void CM_InitSphereHull( );
 *   @brief  
 **/
 mnode_t *CM_HeadnodeForSphere( const vec3_t &mins , const vec3_t &maxs );
+
+/**
+*	@return	A standalone CapsuleHull
+**/
+SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents );

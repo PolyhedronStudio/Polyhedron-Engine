@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// MiscSphereBall.cpp
+// MiscCapsuleMesh.cpp
 //
 //
 */
@@ -23,7 +23,7 @@
 #include "Game/Shared/Physics/RootMotionMove.h"
 
 // Misc Explosion Box Entity.
-#include "MiscSphereBall.h"
+#include "MiscCapsuleMesh.h"
 
 #include "../../Gamemodes/IGamemode.h"
 #include "../../World/ServerGameWorld.h"
@@ -31,7 +31,7 @@
 //
 // Constructor/Deconstructor.
 //
-MiscSphereBall::MiscSphereBall(PODEntity *svEntity) 
+MiscCapsuleMesh::MiscCapsuleMesh(PODEntity *svEntity) 
     : Base(svEntity) {
 
 }
@@ -42,16 +42,16 @@ MiscSphereBall::MiscSphereBall(PODEntity *svEntity)
 //
 //
 //===============
-// MiscSphereBall::Precache
+// MiscCapsuleMesh::Precache
 //
 //===============
 //
-void MiscSphereBall::Precache() {
+void MiscCapsuleMesh::Precache() {
     // Always call parent class method.
     Base::Precache();
 
     // Precache actual barrel model.
-    SVG_PrecacheModel("models/misc/spheres/sphereball.iqm");
+    SVG_PrecacheModel("models/misc/capsules/capsulemesh.iqm");
 
     // Precache the debris.
     SVG_PrecacheModel("models/objects/debris1/tris.md2");
@@ -61,25 +61,41 @@ void MiscSphereBall::Precache() {
 
 //
 //===============
-// MiscSphereBall::Spawn
+// MiscCapsuleMesh::Spawn
 //
 //===============
 //
-void MiscSphereBall::Spawn() {
+void MiscCapsuleMesh::Spawn() {
     // Always call parent class method.
     Base::Spawn();
     //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
     // Set solid.
-    SetSolid( Solid::Sphere );
+    SetSolid( Solid::Capsule );
     // Set clip mask.
     SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
     // Set the barrel model, and model index.
-    SetModel( "models/misc/spheres/sphereball.iqm" );
+    SetModel( "models/misc/capsules/capsulemesh.iqm" );
 
-	bbox3_t radiusBounds = bbox3_from_center_radius( 24, vec3_zero() );
-	SetMins( radiusBounds.mins );
-	SetMaxs( radiusBounds.maxs );
+	//bbox3_t radiusBounds = bbox3_from_center_radius( 20, vec3_zero() );
+	#define CAPSULEBOUNDS
+	#ifdef CAPSULEBOUNDS
+    // Set the bounding box.
+	SetSolid( Solid::Capsule );
+	//SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
+	//SetMins( { -16, -16, 0 } );
+	//SetMaxs( { 16, 16, 88 } );
+	//SetBoundingBox( { -16, -16, -44 }, { 16, 16, 44 } );
+	SetMins( { -16, -16, -48 } );
+	SetMaxs( { 16, 16, 48 } );
+	#else
+    // Set the bounding box.
+	SetSolid( Solid::BoundingBox );
+	SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
+	SetMins( { -16, -16, 0 } );
+	SetMaxs( { 16, 16, 88 } );
+	#endif
+
 	//SetMins( { -24, -24, -24 } );
 	//SetMaxs( { 24, 24, 24 } );
     // Set move type.
@@ -101,18 +117,18 @@ void MiscSphereBall::Spawn() {
     // We need it to take damage in case we want it to explode.
     SetTakeDamage( TakeDamage::Yes );
 
-    // Setup our MiscSphereBall callbacks.
-    SetUseCallback( &MiscSphereBall::SphereBallUse );
-	SetDieCallback( &MiscSphereBall::SphereBallDie );
-    SetTouchCallback( &MiscSphereBall::SphereBallTouch );
-	SetTakeDamageCallback( &MiscSphereBall::SphereBallTakeDamage );
+    // Setup our MiscCapsuleMesh callbacks.
+    SetUseCallback( &MiscCapsuleMesh::CapsuleMeshUse );
+	SetDieCallback( &MiscCapsuleMesh::CapsuleMeshDie );
+ //   SetTouchCallback( &MiscCapsuleMesh::CapsuleMeshTouch );
+//	SetTakeDamageCallback( &MiscCapsuleMesh::CapsuleMeshTakeDamage );
 
 	// Physics callbacks.
-	SetStopCallback(&MiscSphereBall::SphereBallStop);
+	SetStopCallback(&MiscCapsuleMesh::CapsuleMeshStop);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME_S);
-    SetThinkCallback(&MiscSphereBall::SphereBallDropToFloor);
+    SetThinkCallback(&MiscCapsuleMesh::CapsuleMeshDropToFloor);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -120,41 +136,41 @@ void MiscSphereBall::Spawn() {
 
 //
 //===============
-// MiscSphereBall::Respawn
+// MiscCapsuleMesh::Respawn
 //
 //===============
 //
-void MiscSphereBall::Respawn() {
+void MiscCapsuleMesh::Respawn() {
     Base::Respawn();
 }
 
 //
 //===============
-// MiscSphereBall::PostSpawn
+// MiscCapsuleMesh::PostSpawn
 //
 //===============
 //
-void MiscSphereBall::PostSpawn() {
+void MiscCapsuleMesh::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 }
 
 //
 //===============
-// MiscSphereBall::Think
+// MiscCapsuleMesh::Think
 //
 //===============
 //
-void MiscSphereBall::Think() {
+void MiscCapsuleMesh::Think() {
     // Always call parent class method.
     Base::Think();
 }
 
 //===============
-// MiscSphereBall::SpawnKey
+// MiscCapsuleMesh::SpawnKey
 //
 //===============
-void MiscSphereBall::SpawnKey(const std::string& key, const std::string& value) {
+void MiscCapsuleMesh::SpawnKey(const std::string& key, const std::string& value) {
 	Base::SpawnKey(key, value);
 }
 
@@ -164,16 +180,16 @@ void MiscSphereBall::SpawnKey(const std::string& key, const std::string& value) 
 //
 
 // ==============
-// MiscSphereBall::SphereBallUse
+// MiscCapsuleMesh::CapsuleMeshUse
 // 
 // So that mappers can trigger this entity in order to blow it up
 // ==============
-void MiscSphereBall::SphereBallUse( IServerGameEntity* caller, IServerGameEntity* activator )
+void MiscCapsuleMesh::CapsuleMeshUse( IServerGameEntity* caller, IServerGameEntity* activator )
 {
-    SphereBallDie( caller, activator, 999, GetOrigin() );
+    CapsuleMeshDie( caller, activator, 999, GetOrigin() );
 }
 
-void MiscSphereBall::SphereBallThink(void) {
+void MiscCapsuleMesh::CapsuleMeshThink(void) {
 	// Store whether we had a ground entity at all.
     const qboolean wasOnGround = ( GetGroundEntityHandle() ? true : false );
 
@@ -286,17 +302,17 @@ void MiscSphereBall::SphereBallThink(void) {
 	LinkEntity();
 
 	SetNextThinkTime( level.time + FRAMERATE_MS );
-	SetThinkCallback( &MiscSphereBall::SphereBallThink );
+	SetThinkCallback( &MiscCapsuleMesh::CapsuleMeshThink );
 }
 
 //
 //===============
-// MiscSphereBall::SphereBallDropToFloor
+// MiscCapsuleMesh::CapsuleMeshDropToFloor
 //
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 //
-void MiscSphereBall::SphereBallDropToFloor(void) {
+void MiscCapsuleMesh::CapsuleMeshDropToFloor(void) {
 	constexpr float groundOffset = 0.03125;
 
     // First, ensure our origin is +1 off the floor.
@@ -328,18 +344,18 @@ void MiscSphereBall::SphereBallDropToFloor(void) {
     LinkEntity();
 
 	SetNextThinkTime( level.time + FRAMERATE_MS );
-	SetThinkCallback( &MiscSphereBall::SphereBallThink );
+	SetThinkCallback( &MiscCapsuleMesh::CapsuleMeshThink );
 }
 
 //
 //===============
-// MiscSphereBall::MiscSphereBallExplode
+// MiscCapsuleMesh::MiscCapsuleMeshExplode
 //
 // 'Think' callback that is set when the explosion box is exploding.
 // (Has died due to taking damage.)
 //===============
 //
-void MiscSphereBall::MiscSphereBallExplode(void) {
+void MiscCapsuleMesh::MiscCapsuleMeshExplode(void) {
     // Execute radius damage.
     GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
@@ -421,18 +437,18 @@ void MiscSphereBall::MiscSphereBallExplode(void) {
 
     // Ensure we have no more think callback pointer set when this entity has "died"
     //SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
-    //SetThinkCallback(&MiscSphereBall::SVGBaseEntityThinkFree);
+    //SetThinkCallback(&MiscCapsuleMesh::SVGBaseEntityThinkFree);
 	Remove();
 }
 
 //
 //===============
-// MiscSphereBall::SphereBallDie
+// MiscCapsuleMesh::CapsuleMeshDie
 //
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MiscSphereBall::SphereBallDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
+void MiscCapsuleMesh::CapsuleMeshDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
 
@@ -452,11 +468,11 @@ void MiscSphereBall::SphereBallDie(IServerGameEntity* inflictor, IServerGameEnti
 	}
 
 	// Set explosion callback.
-	//SetThinkCallback(&MiscSphereBall::MiscSphereBallExplode);
+	//SetThinkCallback(&MiscCapsuleMesh::MiscCapsuleMeshExplode);
 
 	// For temporary reasons we do this right here for now.
     // Set think function.
-	SetThinkCallback( &MiscSphereBall::SVGBaseEntityThinkNull );
+	SetThinkCallback( &MiscCapsuleMesh::SVGBaseEntityThinkNull );
    	// Notify the server this is, specifically a monster, by adding the Monster flag.
     SetServerFlags( GetServerFlags() | EntityServerFlags::DeadMonster );
 	// Unset movetype and solid.
@@ -476,12 +492,12 @@ void MiscSphereBall::SphereBallDie(IServerGameEntity* inflictor, IServerGameEnti
 
 //
 //===============
-// MiscSphereBall::SphereBallTouch
+// MiscCapsuleMesh::CapsuleMeshTouch
 //
 // 'Touch' callback, to calculate the direction to move into.
 //===============
 //
-void MiscSphereBall::SphereBallTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void MiscCapsuleMesh::CapsuleMeshTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Validate 'other' first.
 	GameEntity *geValidatedOther = ServerGameWorld::ValidateEntity(other);
 
@@ -537,8 +553,8 @@ void MiscSphereBall::SphereBallTouch(IServerGameEntity* self, IServerGameEntity*
 	const vec3_t force = speedVector * invVelocityDirection;
 
 	// Adjust angular velocity.
-	const vec3_t oldAngularVelocity = GetAngularVelocity();
-	SetAngularVelocity( oldAngularVelocity + angularForce );
+	//const vec3_t oldAngularVelocity = GetAngularVelocity();
+	//SetAngularVelocity( oldAngularVelocity + angularForce );
 	//SetAngularVelocity( oldAngularVelocity + angularForce );
 	
 	// Calculate new velocity.
@@ -550,14 +566,14 @@ void MiscSphereBall::SphereBallTouch(IServerGameEntity* self, IServerGameEntity*
 //    SVG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME_S.count()));
 }
 
-void MiscSphereBall::SphereBallStop() {
-	//gi.DPrintf("SphereBall STOP! :-)\n");
+void MiscCapsuleMesh::CapsuleMeshStop() {
+	//gi.DPrintf("CapsuleMesh STOP! :-)\n");
 }
 
 /**
 *	@brief	
 **/
-void MiscSphereBall::SphereBallTakeDamage( IServerGameEntity *other, float kick, int32_t damage, const vec3_t &damageDirection ) {
+void MiscCapsuleMesh::CapsuleMeshTakeDamage( IServerGameEntity *other, float kick, int32_t damage, const vec3_t &damageDirection ) {
 	// Direction for velocities.
 	const vec3_t velocityDirection = vec3_normalize( damageDirection );
 	const vec3_t invVelocityDirection = vec3_negate( vec3_normalize ( damageDirection ) );
@@ -583,8 +599,8 @@ void MiscSphereBall::SphereBallTakeDamage( IServerGameEntity *other, float kick,
 	const vec3_t force = speedVector * velocityDirection;
 
 	// Adjust angular velocity.
-	const vec3_t oldAngularVelocity = GetAngularVelocity();
-	SetAngularVelocity( oldAngularVelocity + angularForce );
+	//const vec3_t oldAngularVelocity = GetAngularVelocity();
+	//SetAngularVelocity( oldAngularVelocity + angularForce );
 	
 	// Calculate new velocity.
 	const vec3_t oldVelocity = GetVelocity();
@@ -594,12 +610,12 @@ void MiscSphereBall::SphereBallTakeDamage( IServerGameEntity *other, float kick,
 
 //
 //===============
-// MiscSphereBall::SpawnDebris1Chunk
+// MiscCapsuleMesh::SpawnDebris1Chunk
 // 
 // Function to spawn "debris1/tris.md2" chunks.
 //===============
 //
-void MiscSphereBall::SpawnDebris1Chunk() {
+void MiscCapsuleMesh::SpawnDebris1Chunk() {
     // Acquire a pointer to the game world.
     ServerGameWorld* gameworld = GetGameWorld();
 
@@ -623,12 +639,12 @@ void MiscSphereBall::SpawnDebris1Chunk() {
 
 //
 //===============
-// MiscSphereBall::SpawnDebris2Chunk
+// MiscCapsuleMesh::SpawnDebris2Chunk
 //
 // Function to spawn "debris2/tris.md2" chunks.
 //===============
 //
-void MiscSphereBall::SpawnDebris2Chunk() {
+void MiscCapsuleMesh::SpawnDebris2Chunk() {
     // Speed to throw debris at.
     float speed = 2.f * GetDamage() / 200.f;
 
@@ -648,12 +664,12 @@ void MiscSphereBall::SpawnDebris2Chunk() {
 
 //
 //===============
-// MiscSphereBall::SpawnDebris3Chunk
+// MiscCapsuleMesh::SpawnDebris3Chunk
 // 
 // Function to spawn "debris3/tris.md2" chunks.
 //===============
 //
-void MiscSphereBall::SpawnDebris3Chunk(const vec3_t &origin) {
+void MiscCapsuleMesh::SpawnDebris3Chunk(const vec3_t &origin) {
     // Speed to throw debris at.
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 

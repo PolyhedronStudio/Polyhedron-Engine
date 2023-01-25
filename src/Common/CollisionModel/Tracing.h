@@ -9,6 +9,44 @@
 ***/
 #pragma once
 
+
+/**
+*	Trace Configuration:
+**/
+//! Use FLT_EPSILON for FRAC_EPSILON
+#define USE_FLT_EPSILON_AS_FRAC_EPSILON
+//! Fraction Epsilon
+#ifdef USE_FLT_EPSILON_AS_FRAC_EPSILON
+static constexpr float FRAC_EPSILON = FLT_EPSILON; //1.0f / 1024.0f;
+#else
+static constexpr float FRAC_EPSILON = 1.0f / 1024.0f;
+#endif
+
+//! Use a smaller DIST_EPSILON ( 0.03125 instead of 0.125 )
+#define USE_SMALLER_DIST_EPSILON
+//! 1/32 Epsilon to keep floating point happy, yay, happy floating point be happy * cough *
+#ifdef USE_SMALLER_DIST_EPSILON
+static constexpr float DIST_EPSILON = 1.0 / 32.0; // = 0.03125
+#else
+static constexpr float DIST_EPSILON = 0.125;
+#endif
+
+//! Enable optimized point trace support. (Seems broken for capsules atm)
+//#define TRACE_ENABLE_BOUNDS_POINT_CASE
+
+
+//! 1.0 epsilon for cylinder and sphere radius offsets.
+static constexpr float CM_RAD_EPSILON = 1.0;
+
+
+
+
+/**
+*	End of Trace Configuration.
+**/
+
+
+
 /**
 *	@brief	Determines the traceType for the traceContext to perform,
 *			and also is used to describe what headNode type we are dealing
@@ -124,7 +162,6 @@ struct TraceContext {
 };
 
 
-
 /**
 *	@return	The entire absolute trace bounds in world space.
 **/
@@ -133,11 +170,19 @@ const bbox3_t CM_CalculateBoxTraceBounds( const vec3_t &start, const vec3_t &end
 *	@return	The entire absolute 'capsule' trace bounds in world space.
 **/
 const bbox3_t CM_CalculateCapsuleTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius );
-/**
-*	@return	The box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
-**/
-const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, const bbox3_t &bounds );
 
+/**
+*	@return	True if the bounds intersected.
+**/
+const bool CM_TraceIntersectBounds( TraceContext &traceContext, const bbox3_t &testBounds );
+/**
+*	@return	True if the sphere and the trace bounds intersect.
+**/
+const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon = 0.f );
+/**
+*	@return	True if the 2D Cylinder and the trace bounds intersect.
+**/
+const bool CM_TraceIntersect2DCylinder( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon = 0.f );
 
 /**
 *   @brief  Clips the source trace result against given entity.

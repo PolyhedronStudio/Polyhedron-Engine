@@ -52,6 +52,7 @@ struct cm_t {
 **/
 void        CM_Init( void );
 
+
 /**
 *   @brief  Loads in the BSP map and its "submodels".
 **/
@@ -60,6 +61,7 @@ qerror_t CM_LoadMap( cm_t *cm, const char *name );
 *   @brief  Frees the map and all of its "submodels".
 **/
 void        CM_FreeMap( cm_t *cm );
+
 
 /**
 *   @brief  Creates the collision model using the already loaded BSP as its cache.
@@ -70,10 +72,13 @@ const cm_t &&CM_CreateFromBSP( bsp_t *bsp, const char *name );
 **/
 void CM_FreeFromBSP( cm_t *cm ); 
 
+
 /**
 *   @return Pointer to the leaf matching vec3 'p'. Nullptr if it is called without a map loaded.
 **/
 mleaf_t *CM_PointLeaf( cm_t *cm, const vec3_t &p );
+
+
 /**
 *	@return	Used as a 'nullptr' for scenarios where a leaf is null.
 **/
@@ -84,16 +89,16 @@ mleaf_t *CM_GetNullLeaf();
 mtexinfo_t *CM_GetNullTextureInfo();
 
 
-
 int         CM_NumClusters(cm_t *cm);
 int         CM_NumInlineModels(cm_t *cm);
 char        *CM_EntityString(cm_t *cm);
 mnode_t     *CM_NodeNum(cm_t *cm, int number);
 mleaf_t     *CM_LeafNum(cm_t *cm, int number);
 
-#define CM_InlineModel(cm, name) BSP_InlineModel((cm)->cache, name)
 
+#define CM_InlineModel(cm, name) BSP_InlineModel((cm)->cache, name)
 #define CM_NumNode(cm, node) ((node) ? ((node) - (cm)->cache->nodes) : -1)
+
 
 // creates a clipping hull for an arbitrary box
 mnode_t *CM_HeadnodeForBox( const bbox3_t &bounds, const int32_t contents );
@@ -101,35 +106,47 @@ mnode_t *CM_HeadnodeForCapsule( const bbox3_t &bounds, const int32_t contents );
 mnode_t *CM_HeadnodeForSphere( const bbox3_t &bounds, const int32_t contents );
 mnode_t *CM_HeadnodeForOctagon( const bbox3_t &bounds, const int32_t contents );
 
-//// returns an ORed contents mask
-//int32_t CM_PointContents( cm_t *cm, const vec3_t &p, mnode_t *headNode);
-//int32_t CM_TransformedPointContents( cm_t *cm, const vec3_t &p, mnode_t *headNode, const glm::mat4 &matInvTransform );
-
-//const TraceResult CM_BoxTrace(cm_t *cm, const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushmask);
-//const TraceResult CM_TransformedBoxTrace(cm_t *cm, const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin = vec3_zero(), const vec3_t& angles = vec3_zero());
-//void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct PODEntity *ent);
-
-// call with topnode set to the headNode, returns with topnode
-// set to the first node that splits the box
-//int CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize, mnode_t **topnode);
 
 #define CM_LeafContents(leaf)   (leaf)->contents
 #define CM_LeafCluster(leaf)    (leaf)->cluster
 #define CM_LeafArea(leaf)       (leaf)->area
 
+
 byte        *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis);
+
 
 void        CM_SetAreaPortalState(cm_t *cm, int portalnum, qboolean open);
 qboolean    CM_AreasConnected(cm_t *cm, int area1, int area2);
+
 
 int         CM_WriteAreaBits(cm_t *cm, byte *buffer, int area);
 int         CM_WritePortalBits(cm_t *cm, byte *buffer);
 void        CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes);
 qboolean    CM_HeadnodeVisible(mnode_t *headNode, byte *visbits);
 
+
 void        CM_WritePortalState(cm_t *cm, qhandle_t f);
 void        CM_ReadPortalState(cm_t *cm, qhandle_t f);
 
-
+/**
+*	@return	The transformed by 'matrix' recalculated 'plane'. (distance, normal, signbits and type)
+**/
+CollisionPlane CM_TransformPlane( CollisionPlane *plane, const glm::mat4 &transformMatrix = ph_mat_identity() );
+/**
+*	@brief	Projects a point onto a vector.
+**/
+const vec3_t CM_ProjectPointOntoVector( const vec3_t vPoint, const vec3_t vStart, const vec3_t vDir );
+/**
+*	@brief	Point distance from line.
+**/
+const float CM_DistanceFromLineSquared( const vec3_t &p, const vec3_t &lp1, const vec3_t &lp2, const vec3_t &dir );
+/**
+*	@brief	Transforms the bounds' mins and maxs by the matrix.
+**/
+const bbox3_t CM_Matrix_TransformBounds( const glm::mat4 &matrix, const bbox3_t &bounds );
+/**
+*	@return	The box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
+**/
+const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, const bbox3_t &bounds );
 #endif // CGAME_INCLUDE
 #endif // CMODEL_H

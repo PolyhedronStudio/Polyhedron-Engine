@@ -161,7 +161,8 @@ void MonsterTestDummy::Spawn() {
 	// Setup thinking.
     SetThinkCallback( &MonsterTestDummy::ThinkCallback_General );
 	SetNextThinkTime(level.time + FRAMETIME_S);
-
+	SetMaxHealth(99999);
+	SetHealth(99999);
     // Link the entity to world, for collision testing.
     LinkEntity();
 }

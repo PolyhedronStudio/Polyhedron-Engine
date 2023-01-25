@@ -28,8 +28,9 @@
 CapsuleHull capsuleHull = {};
 
 // TODO: Obvious, clean this up
-sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t offset = vec3_zero() );
-sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t offset = vec3_zero() );
+sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t &origin = vec3_zero() );
+sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
+sphere_t CM_CapsuleSphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
 
 /**
 *   @brief   
@@ -118,6 +119,9 @@ mnode_t *CM_HeadnodeForCapsule( const bbox3_t &bounds, const int32_t contents ) 
     return capsuleHull.headNode;
 }
 
+/**
+*	@return	A standalone CapsuleHull
+**/
 CapsuleHull CM_NewCapsuleHull( const bbox3_t &bounds, const int32_t contents ) {
 	CapsuleHull newCapsuleHull;
 
@@ -168,18 +172,20 @@ CapsuleHull CM_NewCapsuleHull( const bbox3_t &bounds, const int32_t contents ) {
 	newCapsuleHull.leaf.contents = contents;
 	
 	// Calculate a properly centered box for generating our planes with.
-	const vec3_t offset = vec3_scale( bounds.mins + bounds.maxs, 0.5f );
+	//const vec3_t offset = vec3_scale( bounds.mins + bounds.maxs, 0.5f );
 
-    const vec3_t size[2] = {
-        bounds.mins - offset, // Not sure why but this --> mins - offset, // was somehow not working well.
-        bounds.maxs - offset, // Not sure why but this --> maxs - offset, // was somehow not working well.
-    };
-	
-	const vec3_t mins = size[0];
-	const vec3_t maxs = size[1];
+ //   const vec3_t size[2] = {
+ //       bounds.mins - offset, // Not sure why but this --> mins - offset, // was somehow not working well.
+ //       bounds.maxs - offset, // Not sure why but this --> maxs - offset, // was somehow not working well.
+ //   };
+	//
+	//const vec3_t mins = size[0];
+	//const vec3_t maxs = size[1];
+	const vec3_t mins = bounds.mins;
+	const vec3_t maxs = bounds.maxs;
 	
 	// Setup head and leaf -node bounds.
-	newCapsuleHull.headNode->bounds = newCapsuleHull.leaf.bounds = { size[0], size[1] };
+	newCapsuleHull.headNode->bounds = newCapsuleHull.leaf.bounds = bounds;
 
 	// Now generate our actual 'box' plane data.
     newCapsuleHull.planes[0].dist = maxs[0];
@@ -196,7 +202,6 @@ CapsuleHull CM_NewCapsuleHull( const bbox3_t &bounds, const int32_t contents ) {
     newCapsuleHull.planes[11].dist = -mins[2];
 
 	// Calculate the spherical data for the Capsule.
-	newCapsuleHull.sphere = CM_SphereFromBounds( newCapsuleHull.leaf.bounds, bbox3_center( newCapsuleHull.leaf.bounds ) + offset );
-
+	newCapsuleHull.sphere = CM_CapsuleSphereFromBounds( bounds, bbox3_center( bounds ) );
 	return newCapsuleHull;
 }

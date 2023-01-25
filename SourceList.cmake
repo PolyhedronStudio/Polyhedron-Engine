@@ -158,6 +158,11 @@ LIST( APPEND SRC_COMMON
 	"${SRC_COMMON_DIR}/CollisionModel/Testing.cpp"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing.cpp"
 
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTests.cpp"	
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTraces.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTests.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTraces.cpp"
+
 	"${SRC_COMMON_DIR}/Models/Iqm.cpp"
 
 	"${SRC_COMMON_DIR}/Hashes/Crc32.cpp"
@@ -205,6 +210,11 @@ LIST( APPEND HEADERS_COMMON
 	"${SRC_COMMON_DIR}/CollisionModel/SphereHull.h"
 	"${SRC_COMMON_DIR}/CollisionModel/Testing.h"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing.h"
+
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTests.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTraces.h"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTests.h"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTraces.h"
 
 	"${SRC_COMMON_DIR}/Net/INetNToP.h"
 	"${SRC_COMMON_DIR}/Net/INetPToN.h"
@@ -789,6 +799,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibArm.cpp" 
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibLeg.cpp" 
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibHead.cpp" 
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscCapsuleMesh.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscSphereBall.cpp"
@@ -909,6 +920,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponSMG.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponNone.h"
 
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscCapsuleMesh.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscSphereBall.h"

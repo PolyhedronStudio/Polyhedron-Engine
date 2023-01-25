@@ -115,6 +115,9 @@ mnode_t *CM_HeadnodeForBox( const bbox3_t &bounds, const int32_t contents ) {
 }
 
 
+/**
+*	@return	A standalone CapsuleHull
+**/
 BoxHull CM_NewBoundingBoxHull( const bbox3_t &bounds, const int32_t contents ) {
 	BoxHull newBoxHull;
 

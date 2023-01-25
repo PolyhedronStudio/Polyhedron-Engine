@@ -66,7 +66,7 @@ void FuncWall::Spawn() {
         SetSolid( Solid::Not );
         SetServerFlags( GetServerFlags() | EntityServerFlags::NoClient );
     }
-	SetAngles( { 0.f, 57.50f, 0.f } );
+//	SetAngles( { 0.f, 57.50f, 0.f } );
     LinkEntity();
 }
 

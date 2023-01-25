@@ -27,8 +27,8 @@
 SphereHull sphereHull = {};
 
 // TODO: Obvious, clean this up
-sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t offset = vec3_zero() );
-sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t offset = vec3_zero() );
+sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t &origin = vec3_zero() );
+sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
 
 /**
 *   @brief   
@@ -166,18 +166,20 @@ SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents ) {
 	newSphereHull.brush.contents = contents;
 	newSphereHull.leaf.contents = contents;
 	
-	// Calculate half size for mins and maxs.
-	const vec3_t offset = vec3_scale( bounds.mins + bounds.maxs, 0.5f );
+	//// Calculate half size for mins and maxs.
+	//const vec3_t offset = vec3_scale( bounds.mins + bounds.maxs, 0.5f );
 
-    const vec3_t size[2] = {
-        bounds.mins - offset, // Not sure why but this --> mins - offset, // was somehow not working well.
-        bounds.maxs - offset, // Not sure why but this --> maxs - offset, // was somehow not working well.
-    };
+ //   const vec3_t size[2] = {
+ //       bounds.mins - offset, // Not sure why but this --> mins - offset, // was somehow not working well.
+ //       bounds.maxs - offset, // Not sure why but this --> maxs - offset, // was somehow not working well.
+ //   };
+	//
+	//const vec3_t mins = size[0];
+	//const vec3_t maxs = size[1];
+	const vec3_t mins = bounds.mins;
+	const vec3_t maxs = bounds.maxs;
 	
-	const vec3_t mins = size[0];
-	const vec3_t maxs = size[1];
-	
-	newSphereHull.headNode->bounds = newSphereHull.leaf.bounds = { size[0], size[1] };
+	newSphereHull.headNode->bounds = newSphereHull.leaf.bounds = bounds;
 
     newSphereHull.planes[0].dist = maxs[0];
     newSphereHull.planes[1].dist = -maxs[0];
@@ -192,7 +194,7 @@ SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents ) {
     newSphereHull.planes[10].dist = mins[2];
     newSphereHull.planes[11].dist = -mins[2];
 
-	newSphereHull.sphere = CM_SphereFromBounds( newSphereHull.leaf.bounds, bbox3_center( newSphereHull.leaf.bounds ) );
+	newSphereHull.sphere = CM_SphereFromBounds( bounds, bbox3_center( bounds ) );
 
 	return newSphereHull;
 }

@@ -86,6 +86,7 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	if ( !geGroundEntity ) {
 		SG_AddGravity( geSlider );
 	} else {
+
 		//SG_AddGroundFriction( geSlider, 0.25, 10 );
 		//SG_AddGroundFriction( geSlider, SLIDEBOX_GROUND_FRICTION, SLIDEBOX_STOP_SPEED );
 		//SG_AddGroundFriction( geSlider, 3.25f, 12 );

@@ -69,7 +69,13 @@ struct BiSphereHull {
 *   @brief  
 **/
 void CM_InitCapsuleHull( );
+
 /**
-*   @brief  
+*   @brief   
 **/
-mnode_t *CM_HeadnodeForCapsule( const vec3_t &mins , const vec3_t &maxs );
+mnode_t *CM_HeadnodeForCapsule( const bbox3_t &bounds, const int32_t contents );
+
+/**
+*	@return	A standalone CapsuleHull
+**/
+CapsuleHull CM_NewCapsuleHull( const bbox3_t &bounds, const int32_t contents );

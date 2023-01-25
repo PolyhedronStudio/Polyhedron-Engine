@@ -31,3 +31,8 @@ void CM_InitBoxHull( );
 *           BSP trees instead of being compared directly.
 **/
 mnode_t *CM_HeadnodeForBox( const vec3_t &mins , const vec3_t &maxs );
+
+/**
+*	@return	A standalone BoxHull
+**/
+BoxHull CM_NewBoundingBoxHull( const bbox3_t &bounds, const int32_t contents );

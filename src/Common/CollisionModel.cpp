@@ -51,8 +51,79 @@ cvar_t *map_noareas = nullptr; // TODO: Let's have this not be extern.
 *
 **/
 /**
-*	@brief	General purpose routine shared to the ServerGame module.
-*			Links entity to PVS leafs.
+*	@return	The transformed by 'matrix' recalculated 'plane'. (distance, normal, signbits and type)
+**/
+CollisionPlane CM_TransformPlane( CollisionPlane *plane, const glm::mat4 &transformMatrix ) {
+	CollisionPlane transformedPlane = *plane;
+
+	// Scake for dist.
+	const float scale = sqrtf(transformMatrix[0][0] * transformMatrix[0][0] + transformMatrix[0][1] * transformMatrix[0][1] + transformMatrix[0][2] * transformMatrix[0][2]);
+	const float iscale = 1.f / scale;
+
+	// Normal.
+	const vec3_t n = transformedPlane.normal;
+	const float x = (n.x * transformMatrix[0][0] + n.y * transformMatrix[1][0] + n.z * transformMatrix[2][0]) * iscale;
+	const float y = (n.x * transformMatrix[0][1] + n.y * transformMatrix[1][1] + n.z * transformMatrix[2][1]) * iscale;
+	const float z = (n.x * transformMatrix[0][2] + n.y * transformMatrix[1][2] + n.z * transformMatrix[2][2]) * iscale;
+
+	// Assign new dist and normal.
+	transformedPlane.dist = transformedPlane.dist * scale + (x * transformMatrix[3][0] + y * transformMatrix[3][1] + z * transformMatrix[3][2]);;
+	transformedPlane.normal = { x, y, z };
+
+	// Update plane signbits and type.
+	SetPlaneSignbits( &transformedPlane );
+	SetPlaneType( &transformedPlane );
+
+	// Return new plane.
+	return transformedPlane;
+}
+
+/**
+*	@brief	Projects a point onto a vector.
+**/
+const vec3_t CM_ProjectPointOntoVector( const vec3_t vPoint, const vec3_t vStart, const vec3_t vDir ) {
+	
+	// Project onto the directional vector for this segment.
+	const vec3_t projectVector = vPoint - vStart;						//VectorSubtract( point, vStart, pVec );
+	return vec3_fmaf( vStart, vec3_dot( projectVector, vDir ), vDir );	//VectorMA( vStart, DotProduct( pVec, vDir ), vDir, vProj );
+}
+
+/**
+*	@brief	Point distance from line.
+**/
+const float CM_DistanceFromLineSquared( const vec3_t &p, const vec3_t &lp1, const vec3_t &lp2, const vec3_t &dir )
+{
+	vec3_t t;
+	int32_t j = 0;
+
+	vec3_t proj = CM_ProjectPointOntoVector( p, lp1, dir );
+
+	for ( j = 0; j < 3; j++ ) {
+		if ( ( proj[ j ] > lp1[ j ] && proj[ j ] > lp2[ j ] ) || ( proj[ j ] < lp1[ j ] && proj[ j ] < lp2[ j ] ) )
+		{
+			break;
+		}
+	}
+
+	if ( j < 3 ) {
+		if ( fabsf( proj[ j ] - lp1[ j ] ) < fabsf( proj[ j ] - lp2[ j ] ) ) {
+			//t = p - lp1; //VectorSubtract( p, lp1, t );
+			return vec3_length_squared( p - lp1 );
+		} else {
+			//t = p - lp2; //VectorSubtract( p, lp2, t );
+			return vec3_length_squared( p - lp2 );
+		}
+
+		//return vec3_length_squared( t );//VectorLengthSquared( t );
+	}
+
+	//VectorSubtract( p, proj, t );
+	//return VectorLengthSquared( t );
+	return vec3_length_squared( p - proj );
+}
+
+/**
+*	@brief	Transforms the bounds' mins and maxs by the matrix.
 **/
 const bbox3_t CM_Matrix_TransformBounds( const glm::mat4 &matrix, const bbox3_t &bounds ) {
 	// Convert box to points that we can operate with.
@@ -100,8 +171,6 @@ const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, co
 	//	return CM_Matrix_TransformBounds( matrix, bounds );
 	//}
 }
-
-
 
 /**
 *
