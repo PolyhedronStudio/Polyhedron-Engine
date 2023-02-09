@@ -79,6 +79,38 @@ CollisionPlane CM_TransformPlane( CollisionPlane *plane, const glm::mat4 &transf
 }
 
 /**
+*	@return	The translated by 'matrix' recalculated 'plane'. (distance, normal, signbits and type)
+**/
+CollisionPlane CM_TranslatePlane( CollisionPlane *plane, const glm::mat4 &translateMatrix ) {
+	CollisionPlane transformedPlane = *plane;
+
+	glm::vec3 translate = translateMatrix[3];
+
+	const glm::mat4 transformMatrix = glm::translate( ph_mat_identity(), translate );
+
+	// Scake for dist.
+	const float scale = sqrtf(transformMatrix[0][0] * transformMatrix[0][0] + transformMatrix[0][1] * transformMatrix[0][1] + transformMatrix[0][2] * transformMatrix[0][2]);
+	const float iscale = 1.f / scale;
+
+	// Normal.
+	const vec3_t n = transformedPlane.normal;
+	const float x = (n.x * transformMatrix[0][0] + n.y * transformMatrix[1][0] + n.z * transformMatrix[2][0]) * iscale;
+	const float y = (n.x * transformMatrix[0][1] + n.y * transformMatrix[1][1] + n.z * transformMatrix[2][1]) * iscale;
+	const float z = (n.x * transformMatrix[0][2] + n.y * transformMatrix[1][2] + n.z * transformMatrix[2][2]) * iscale;
+
+	// Assign new dist and normal.
+	transformedPlane.dist = transformedPlane.dist * scale + (x * transformMatrix[3][0] + y * transformMatrix[3][1] + z * transformMatrix[3][2]);;
+	transformedPlane.normal = { x, y, z };
+
+	// Update plane signbits and type.
+	SetPlaneSignbits( &transformedPlane );
+	SetPlaneType( &transformedPlane );
+
+	// Return new plane.
+	return transformedPlane;
+}
+
+/**
 *	@brief	Projects a point onto a vector.
 **/
 const vec3_t CM_ProjectPointOntoVector( const vec3_t vPoint, const vec3_t vStart, const vec3_t vDir ) {
@@ -145,6 +177,20 @@ const bbox3_t CM_Matrix_TransformBounds( const glm::mat4 &matrix, const bbox3_t 
 
 	// Return transformed bounds.
 	return transformedBounds;
+}
+
+/**
+*	@brief	Transforms the sphere's origin by the matrix.
+**/
+const sphere_t CM_Matrix_TransformSphere( const glm::mat4 &matrix, const sphere_t &sphere ) {
+	sphere_t transformedSphere = sphere;
+
+	glm::vec4 transformedOrigin = matrix * phvec_to_glmvec4( transformedSphere.origin ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
+	glm::vec3 vTransformedOrigin = glm::vec3( transformedOrigin.x / transformedOrigin.w, transformedOrigin.y / transformedOrigin.w, transformedOrigin.z / transformedOrigin.w );
+	transformedSphere.origin = glmvec3_to_phvec( vTransformedOrigin );
+
+	// Return transformed bounds.
+	return transformedSphere;
 }
 
 /**

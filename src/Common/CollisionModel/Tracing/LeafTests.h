@@ -39,6 +39,11 @@ void CM_TestBoxLeafInCapsule( TraceContext &traceContext, mleaf_t *leaf );
 **/
 void CM_TestBoxLeafInSphere( TraceContext &traceContext, mleaf_t *leaf );
 
+/**
+*   @brief	Performs a 'Sphere' trace test on the 'Sphere' leaf node.
+**/
+void CM_TestSphereLeafInSphere( TraceContext &traceContext, mleaf_t *leaf );
+
 
 /**
 *

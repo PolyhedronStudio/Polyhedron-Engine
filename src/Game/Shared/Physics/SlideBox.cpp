@@ -88,7 +88,7 @@ static SGTraceResult SBM_Trace( SlideBoxMove* move, const vec3_t *origin, const 
 /**
 *	@brief	
 **/
-static void SG_AddTouchEntity( SlideBoxMove *move, const int32_t entNum ) {
+static void SG_AddTouchEntity( SlideBoxMove *move, const int32_t entNum, const CollisionPlane &plane, CollisionSurface *surface  ) {
 	if( move->numTouchEntities >= MAX_SLIDEBOX_TOUCH_ENTITIES || entNum < 0 ) {
 		return;
 	}
@@ -102,6 +102,12 @@ static void SG_AddTouchEntity( SlideBoxMove *move, const int32_t entNum ) {
 
 	// add it
 	move->touchEntities[move->numTouchEntities] = entNum;
+	move->touchEntityPlanes[move->numTouchEntities] = plane;
+	if ( surface ) {
+		move->touchEntitySurfaces[move->numTouchEntities] = surface;
+	} else {
+		move->touchEntitySurfaces[move->numTouchEntities] = nullptr;
+	}
 	move->numTouchEntities++;
 }
 
@@ -166,7 +172,7 @@ static const int32_t SG_SlideMoveClipMove( SlideBoxMove *move /*, const bool ste
 	// If all solid, only add touch entity if not world(0), and return with a trapped flag additioned to our mask.
 	if( trace.allSolid ) {
 		if( entityNumber > 0) {
-			SG_AddTouchEntity( move, entityNumber );
+			SG_AddTouchEntity( move, entityNumber, trace.plane, trace.surface );
 		}
 		return blockedMask | SLIDEBOXFLAG_TRAPPED;
 	}
@@ -184,7 +190,7 @@ static const int32_t SG_SlideMoveClipMove( SlideBoxMove *move /*, const bool ste
 	// We weren't able to move all the way, move that which we can.
 	if( trace.fraction < 1.0f ) {
 		// Add touch entity.
-		SG_AddTouchEntity( move, entityNumber );
+		SG_AddTouchEntity( move, entityNumber,  trace.plane, trace.surface );
 		// Impose we also touched a plane because of that.
 		blockedMask |= SLIDEBOXFLAG_PLANE_TOUCHED;
 

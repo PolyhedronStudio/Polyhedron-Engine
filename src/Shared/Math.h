@@ -29,6 +29,11 @@
 #include "Math/Matrix4x4.h"
 
 /**
+*	Sphere
+**/
+#include "Math/Sphere.h"
+
+/**
 *	BoundingBox(vec3_t)
 **/
 #include "Math/BBox3.h"

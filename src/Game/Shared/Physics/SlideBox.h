@@ -98,6 +98,16 @@ struct SlideBoxMove {
 	//! Number of touched entities.
 	int32_t numTouchEntities = 0;
 	int32_t touchEntities[ MAX_SLIDEBOX_TOUCH_ENTITIES ];
+
+	//! The ground plane we hit, set properly in case groundEntity >= 0
+	CollisionPlane groundEntityPlane;
+	//! The ground surface we hit, set properly in case groundEntity >= 0
+	CollisionSurface groundEntitySurface;
+
+	//! The plane we hit when touching other entities.
+	CollisionPlane touchEntityPlanes[ MAX_SLIDEBOX_TOUCH_ENTITIES ];
+	//! The surfaces we hit when touching other entities.
+	CollisionSurface *touchEntitySurfaces[ MAX_SLIDEBOX_TOUCH_ENTITIES ];
 };
 
 /**

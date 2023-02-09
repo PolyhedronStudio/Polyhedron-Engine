@@ -391,12 +391,14 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
             //    SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
             //}
         
+
+			// UNCOMMENT WHEN I WANT BULLET SPREAD BACK IN:
             client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
             client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
 
             // TODO: Tracing should start from a bone on the weapon mesh.
             // get start / end positions
-            vec3_t angles = client->aimAngles;// + client->kickAngles;
+            vec3_t angles = client->aimAngles + client->kickAngles;
             vec3_t forward = vec3_zero(), right = vec3_zero();
             AngleVectors(angles, &forward, &right, NULL);
 
@@ -420,8 +422,9 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
 
 			}
 
-            // Fire a bullet.
-            SVG_FireBullet(player, bulletStart, forward, 10, 50, hSpread, vSpread, 0);
+            // Fire a bullet. UNCOMMENT WHEN I WANT BULLET SPREAD BACK IN
+            //SVG_FireBullet(player, bulletStart, forward, 10, 50, hSpread, vSpread, 0);
+			SVG_FireBullet(player, bulletStart, forward, 10, 50, 0, 0, 0);
 
             // send muzzle flash
             gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);

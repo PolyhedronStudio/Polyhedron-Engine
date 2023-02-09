@@ -3,6 +3,7 @@
 #############################################################################
 list( APPEND SRC_SHARED
 	"${SRC_SHARED_DIR}/Math/Plane.cpp"
+	"${SRC_SHARED_DIR}/Math/Sphere.cpp"
 	"${SRC_SHARED_DIR}/Math/Vector3.cpp"
 
 	"${SRC_SHARED_DIR}/Math.cpp"
@@ -37,6 +38,7 @@ list( APPEND HEADERS_SHARED
 	"${SRC_SHARED_DIR}/Math/Plane.h"
 	"${SRC_SHARED_DIR}/Math/Rectangle.h"
 	"${SRC_SHARED_DIR}/Math/Quaternion.h"
+	"${SRC_SHARED_DIR}/Math/Sphere.h"
 	"${SRC_SHARED_DIR}/Math/Utilities.h"
 	"${SRC_SHARED_DIR}/Math/Vector2.h"
 	"${SRC_SHARED_DIR}/Math/Vector3.h"

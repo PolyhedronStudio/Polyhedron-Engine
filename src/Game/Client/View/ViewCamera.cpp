@@ -447,14 +447,19 @@ void ViewCamera::TraceViewWeaponOffset() {
     gunOrigin = vec3_fmaf( gunOrigin, gunUpOffset, viewUp );
 
 	// Calculate gun tip origin.
-    const vec3_t gunTipOrigin = vec3_fmaf(gunOrigin, gunLengthOffset, viewForward );
+    const vec3_t gunTipOrigin = vec3_fmaf( gunOrigin, gunLengthOffset, viewForward );
 
     // Perform gun tip sphere trace.
     CLGTraceResult trace = CLG_Trace( gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid, 1 );
-	//clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid); 
+	//TraceResult trace = clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient->GetPODEntity(), BrushContentsMask::PlayerSolid, 1);
 
 	// In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
-    if ( trace.fraction < 1.f || trace.podEntity != nullptr) {
+    if ( trace.fraction < 1.f || trace.podEntity != nullptr ) {
+		//CLG_Print( PrintType::Developer, fmt::format( "Trace: (fraction {}), (Normal x={}, y={}, z={}), (endPos x={}, y={}, z={})\n",
+		//		  trace.fraction, 
+		//		  trace.plane.normal.x, trace.plane.normal.y, trace.plane.normal.z,
+		//		  trace.endPosition.x, trace.endPosition.y, trace.endPosition.z
+		//));
         rEntWeaponViewModel.origin = vec3_fmaf( trace.endPosition, -gunLengthOffset, viewForward );
         rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, -gunRightOffset, viewRight );
         rEntWeaponViewModel.origin = vec3_fmaf( rEntWeaponViewModel.origin, -gunUpOffset, viewUp );

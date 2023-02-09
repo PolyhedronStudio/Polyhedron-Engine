@@ -86,7 +86,6 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	if ( !geGroundEntity ) {
 		SG_AddGravity( geSlider );
 	} else {
-
 		//SG_AddGroundFriction( geSlider, 0.25, 10 );
 		//SG_AddGroundFriction( geSlider, SLIDEBOX_GROUND_FRICTION, SLIDEBOX_STOP_SPEED );
 		//SG_AddGroundFriction( geSlider, 3.25f, 12 );
@@ -167,10 +166,14 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 			}
 
 			// First dispatch a touch on the object we're hitting.
+			// TODO: Add plane and surfaces for otherEntity responsiveness also.
+			//CollisionPlane otherPlane = slideBoxMove->touchEntityPlanes[ i ];
+			//otherPlane.normal = vec3_negate( otherPlane.normal );
+			//otherEntity->DispatchTouchCallback( otherEntity, geSlider, &otherPlane, nullptr );
 			otherEntity->DispatchTouchCallback( otherEntity, geSlider, nullptr, nullptr );
 
 			// Now dispatch a touch callback for THIS entity.
-			geSlider->DispatchTouchCallback( geSlider, otherEntity, nullptr, nullptr );
+			geSlider->DispatchTouchCallback( geSlider, otherEntity, &slideBoxMove->touchEntityPlanes[ i ], slideBoxMove->touchEntitySurfaces[ i ] );
 
 			// In case touch callbacks caused it to be non 'in-use':
 			if( !geSlider->IsInUse() ) {
@@ -191,18 +194,18 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 
 		// Apply ground friction now since we're officially on-ground.
 		if (geNewGroundEntity) {
-			SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION ), SLIDEBOX_STOP_SPEED );
+		//	SG_AddGroundFriction( geSlider, ( friction != 0 ? friction : SLIDEBOX_GROUND_FRICTION ), SLIDEBOX_STOP_SPEED );
 		}
 
-		// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.
-		if( geNewGroundEntity && vec3_dlength( geSlider->GetVelocity() ) <= 1 && oldVelocityLength > 1 ) {
-			// Zero out velocities.
-			geSlider->SetVelocity( vec3_zero() );
-			geSlider->SetAngularVelocity( vec3_zero() );
+		//// Stop to a halt in case velocity becomes too low, this way it won't look odd and jittery.
+		//if( geNewGroundEntity && vec3_dlength( geSlider->GetVelocity() ) <= 1 && oldVelocityLength > 1 ) {
+		//	// Zero out velocities.
+		//	geSlider->SetVelocity( vec3_zero() );
+		//	geSlider->SetAngularVelocity( vec3_zero() );
 
-			// Stop.
-			geSlider->DispatchStopCallback( );
-		}
+		//	// Stop.
+		//	geSlider->DispatchStopCallback( );
+		//}
 
 		geSlider->LinkEntity();
 	}

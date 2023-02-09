@@ -1536,6 +1536,8 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 		glm::vec3 refreshOrigin = podEntity->translateMatrix[3];
 		refreshEntity.origin = glmvec3_to_phvec( refreshOrigin );
 	} else {
+		//glm::vec3 refreshOrigin = podEntity->translateMatrix[3];
+		//refreshEntity.origin = glmvec3_to_phvec( refreshOrigin );
 		glm::vec3 refreshOrigin = podEntity->translateMatrix[3];
 		refreshEntity.origin = glmvec3_to_phvec( refreshOrigin );
 	}
@@ -1628,8 +1630,8 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         refreshEntity.angles = cl->playerEntityAngles;
     } else {
         // Otherwise, lerp angles by default.
-		//refreshEntity.angles = vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
-		refreshEntity.angles = vec3_clamp_euler( vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction ) );
+		refreshEntity.angles = vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );
+		//refreshEntity.angles = vec3_clamp_euler( vec3_mix_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction ) );
 
 		//refreshEntity.angles = vec3_mix_euler( vec3_normalize( podEntity->previousState.angles ), vec3_normalize( podEntity->currentState.angles ), cl->lerpFraction );
 		//refreshEntity.angles = glm_quat_slerp_ph_euler( podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction );

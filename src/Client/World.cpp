@@ -517,6 +517,9 @@ void CL_PF_World_LinkEntity( PODEntity *podEntity ) {
 		//} else {
 		//	entityAngles = { 0.f, podEntity->currentState.angles[ vec3_t::Yaw ], 0.f };
 		//}
+	// Sphere testing for lulz:
+	} else if ( podEntity->solid == Solid::Sphere ) {
+		entityAngles = vec3_clamp_euler( podEntity->currentState.angles );
 	} else {
 		entityAngles = vec3_zero();
 	}
@@ -554,6 +557,31 @@ void CL_PF_World_LinkEntity( PODEntity *podEntity ) {
 
 		// Translate to point matrices.
 		const glm::mat4 matBoxOriginTranslate = glm::translate( ph_mat_identity(), phvec_to_glmvec3( brushOrigin ) );
+		const glm::mat4 matInvBoxOriginTranslate = glm::inverse( matBoxOriginTranslate ); // glm::translate( ph_mat_identity(), phvec_to_glmvec3( vec3_negate( entityOrigin + brushOrigin ) ) ); //
+
+		// Create orientation quat and euler quat to rotate about.
+		const glm::quat quatOrientation( ph_mat_identity() );
+		const glm::quat quatEuler = glm_quat_from_ph_euler( eulerAngles );
+		const glm::quat quatRotation = glm::normalize( quatOrientation * quatEuler );
+
+		// Convert quat to local box rotation.
+		const glm::mat4 matBoxRotation = glm::mat4_cast( quatRotation );
+		
+		// Create actual entity rotation matrix.
+		matRotation = matBoxOriginTranslate * matBoxRotation * matInvBoxOriginTranslate;
+		//matRotation = matInvBoxOriginTranslate * matBoxRotation * matBoxOriginTranslate;
+	// Sphere Route:
+	} else if ( podEntity->solid == Solid::Sphere ) {
+		// Get brush origin.
+		const vec3_t entityNodeOrigin = (brushModel ? brushModel->origin : vec3_zero() );
+		// Clamp the entity angles.
+		const vec3_t eulerAngles = vec3_clamp_euler( { entityAngles.x, entityAngles.y, entityAngles.z } );
+
+		// Fill in entity offset.
+		vecEntityOriginOffset = phvec_to_glmvec3( entityNodeOrigin );
+
+		// Translate to point matrices.
+		const glm::mat4 matBoxOriginTranslate = glm::translate( ph_mat_identity(), phvec_to_glmvec3( entityNodeOrigin ) );
 		const glm::mat4 matInvBoxOriginTranslate = glm::inverse( matBoxOriginTranslate ); // glm::translate( ph_mat_identity(), phvec_to_glmvec3( vec3_negate( entityOrigin + brushOrigin ) ) ); //
 
 		// Create orientation quat and euler quat to rotate about.

@@ -178,11 +178,11 @@ const bool CM_TraceIntersectBounds( TraceContext &traceContext, const bbox3_t &t
 /**
 *	@return	True if the sphere and the trace bounds intersect.
 **/
-const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon = 0.f );
+const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon );
 /**
 *	@return	True if the 2D Cylinder and the trace bounds intersect.
 **/
-const bool CM_TraceIntersect2DCylinder( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon = 0.f );
+const bool CM_TraceIntersect2DCylinder( TraceContext &traceContext, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon );
 
 /**
 *   @brief  Clips the source trace result against given entity.

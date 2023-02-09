@@ -15,7 +15,7 @@
 //! Inherited Base classes.
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
-
+#include "Game/Server/Entities/Misc/MiscSphereBall.h"
 //! Gamemode Interface.
 #include "../../Gamemodes/IGamemode.h"
 
@@ -80,16 +80,42 @@ void TargetGibSpawn::Callback_Use( IServerGameEntity* other, IServerGameEntity* 
     }
 
 	if (targettedEntity) {
-		ServerGameWorld *gameWorld = GetGameWorld();
-		gameWorld->ThrowGib( targettedEntity, "models/objects/gibs/sm_meat/tris.md2", GetCount(), GetDamage(), GibType::Organic);
+	// Original code.
+	// Create a gib entity.
+	
+	//	ServerGameWorld *gameWorld = GetGameWorld();
+	//	gameWorld->ThrowGib( targettedEntity, "models/objects/gibs/sm_meat/tris.md2", GetCount(), GetDamage(), GibType::Organic);
+	
+		
+	// Temp for testing spheres.
+    MiscSphereBall *gibEntity = GetGameWorld()->CreateGameEntity< MiscSphereBall >( nullptr );
+	gibEntity->Spawn();
+	gibEntity->SetOrigin( other->GetOrigin() + gibEntity->GetSize() );
+	gibEntity->LinkEntity();
+    // Generate angular velocity.
+    gibEntity->SetAngularVelocity({
+		10.f + (Randomf() * 90.f), 
+		10.f + (Randomf() * 90.f), 
+		10.f + (Randomf() * 11.f)
+		//50.f + (Randomf() * 150.f), 
+		//50.f + (Randomf() * 150.f), 
+		//50.f + (Randomf() * 150.f)
+	});
+    // Generate angular velocity.
+    gibEntity->SetVelocity({
+		10.f + (Randomf() * 90.f), 
+		10.f + (Randomf() * 90.f), 
+		10.f + (Randomf() * 100.f)
+		//50.f + (Randomf() * 150.f), 
+		//50.f + (Randomf() * 150.f), 
+		//50.f + (Randomf() * 150.f)
+	});
 		//gi.MSG_WriteUint8( ServerGameCommand::TempEntityEvent );//WriteByte( ServerGameCommand::TempEntityEvent );
 		//gi.MSG_WriteUint8( TempEntityEvent::BodyGib );
 		//gi.MSG_WriteUint16( targettedEntity->GetNumber() );
 		//gi.MSG_WriteUint8( GetCount() );
-//	gi.DPrintf( "%s count: %i damage %i\n", "Spawning dem gibs still fails butz I foundz tzhe entity target", GetCount(), GetDamage() );
-
-
-		////gi.MSG_WriteVector3( GetOrigin(), false );//WriteVector3( GetOrigin() );
+		//i.DPrintf( "%s count: %i damage %i\n", "Spawning dem gibs still fails butz I foundz tzhe entity target", GetCount(), GetDamage() );
+		//gi.MSG_WriteVector3( GetOrigin(), false );//WriteVector3( GetOrigin() );
 		//gi.Multicast( GetOrigin(), Multicast::PVS );
 	}
 }

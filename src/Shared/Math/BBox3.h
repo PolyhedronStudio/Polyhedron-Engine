@@ -29,6 +29,17 @@ struct bbox3_t {
         };
     };
 
+	/**
+	*	@brief	Specific Intersection Test Types for use with bbox3_intersects_sphere.
+	**/
+	struct IntersectType {
+		// Box VS Sphere Types:
+		static constexpr int32_t HollowBox_HollowSphere = 0;
+		static constexpr int32_t HollowBox_SolidSphere = 1;
+		static constexpr int32_t SolidBox_HollowSphere = 2;
+		static constexpr int32_t SolidBox_SolidSphere = 3;
+	};
+
     /**
     *	Constructors.
     **/
@@ -349,16 +360,16 @@ inline const bbox3_t bbox3_from_center_radius( const float radius, const vec3_t 
 //	return bbox3_expand_vec3( box, vec3_t{ expansion, expansion, expansion } );
 //}
 
-static bbox3_t bbox3_expand3( const bbox3_t &bounds, const vec3_t &expansion ) {
+inline const bbox3_t bbox3_expand3( const bbox3_t &bounds, const vec3_t &expansion ) {
 	return bbox3_t {
 		bounds.mins - expansion,
 		bounds.maxs + expansion
 	};
 }
-static bbox3_t bbox3_expand( const bbox3_t &bounds, const float expansion ) {
+inline const bbox3_t bbox3_expand( const bbox3_t &bounds, const float expansion ) {
 	return bbox3_expand3( bounds, vec3_t { expansion, expansion, expansion } );
 }
-static bbox3_t bbox3_expand_box( const bbox3_t &boundsA, const bbox3_t &boundsB ) {
+inline const bbox3_t bbox3_expand_box( const bbox3_t &boundsA, const bbox3_t &boundsB ) {
 	return bbox3_t { 
 		boundsA.mins + boundsB.mins,
 		boundsA.maxs + boundsB.maxs 
@@ -412,3 +423,29 @@ inline const bbox3_t bbox3_scale( const bbox3_t &bounds, const float scale ) {
 		vec3_scale( bounds.maxs, scale ),
 	};
 }
+
+/**
+*	@brief	"A Simple Method for Box-Sphere Intersection Testing",
+*			by Jim Arvo, in "Graphics Gems", Academic Press, 1990.
+*
+*			This routine tests for intersection between an axis-aligned box (bbox3_t)
+*			and a dimensional sphere(sphere_t). The 'testType' argument indicates whether the shapes
+*			are to be regarded as plain surfaces, or plain solids.
+*						
+*	@param	testType	Mode:  Meaning:
+*			
+*						0      'Hollow Box' vs 'Hollow Sphere'
+*						1      'Hollow Box' vs 'Solid  Sphere'
+*						2      'Solid  Box' vs 'Hollow Sphere'
+*						3      'Solid  Box' vs 'Solid  Sphere'
+**/
+const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon );
+
+/**
+*	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with sphere/capsule hull tracing.
+**/
+sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin );
+/**
+*	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
+**/
+sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin );

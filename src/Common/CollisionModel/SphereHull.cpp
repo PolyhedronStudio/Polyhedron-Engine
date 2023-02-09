@@ -27,8 +27,8 @@
 SphereHull sphereHull = {};
 
 // TODO: Obvious, clean this up
-sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t &origin = vec3_zero() );
-sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
+sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin = vec3_zero() );
+sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
 
 /**
 *   @brief   
@@ -194,7 +194,7 @@ SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents ) {
     newSphereHull.planes[10].dist = mins[2];
     newSphereHull.planes[11].dist = -mins[2];
 
-	newSphereHull.sphere = CM_SphereFromBounds( bounds, bbox3_center( bounds ) );
+	newSphereHull.sphere = bbox3_to_sphere( bounds, bbox3_center( bounds ) );
 
 	return newSphereHull;
 }

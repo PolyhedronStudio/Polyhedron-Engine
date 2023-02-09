@@ -30,10 +30,14 @@
 
 
 // TEMPORARILY, NEED TO ALLOW TRACETHROUGHLEAF to HAVE A 2 HULL VARIETY AND PREVENT TEMP VAR USAGE LIKE THIS
-SphereHull boundsTestSphereHull;
-CapsuleHull boundsTestCapsuleHull;
+//SphereHull boundsTestSphereHull;
+//CapsuleHull boundsTestCapsuleHull;
 
 
+/**
+*	Temporary Hulls: Adjusted on the fly for each trace, storing the required data for
+*	the 'entity headnodes' passed to the trace.
+**/
 //! All round 'box hull' data, accessed in a few other CollisionModel files as extern.
 extern BoxHull boxHull;
 //! All round 'octagon hull' data, accessed in a few other CollisionModel files as extern.
@@ -44,6 +48,23 @@ extern CapsuleHull capsuleHull;
 extern SphereHull sphereHull;
 
 
+/**
+*	In-Place Hulls: Used during Leaf/Brush Tests and Leaf/Brush Traces when requiring to 
+*	convert a said passed-in Leaf Node into a different Shape type Hull Leaf Node.
+**/
+////! For 'Box' leaf testing.
+//BoxHull leafTestBoxHull;
+////! For 'Sphere' leaf testing.
+//SphereHull leafTestSphereHull;
+////! For 'Ca[si;e' leaf testing.
+//CapsuleHull leafTestCapsuleHull;
+//
+////! For 'Box' leaf tracing.
+//BoxHull leafTraceBoxHull;
+////! For 'Sphere' leaf tracing.
+//SphereHull leafTraceSphereHull;
+////! For 'Capsule' leaf tracing.
+//CapsuleHull leafTraceCapsuleHull;
 
 
 /**
@@ -56,360 +77,10 @@ extern SphereHull sphereHull;
 
 
 
-
 /**
 *
 *
-*
-*	TraceBounds:
-*
-*
-*
-**/
-/**
-*	@return	The entire absolute 'box' trace bounds in world space.
-**/
-const bbox3_t CM_CalculateBoxTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds ) {
-	// Prepare array for from_points method.
-	const vec3_t tracePoints[] = { start,  end };
-
-	// Add bounds epsilon.
-	return bbox3_expand( bbox3_expand_box(						//return bbox3_expand_box(
-				bbox3_from_points( tracePoints, 2 ), bounds ),	//	bbox3_from_points( tracePoints, 2 ), 
-			CM_BOUNDS_EPSILON );								//	bbox3_expand( bounds, CM_BOUNDS_EPSILON ) 
-																//);
-	//return bbox3_expand_box(
-	//			bbox3_from_points( tracePoints, 2 ), 
-	//			bbox3_expand( bounds, CM_BOUNDS_EPSILON ) 
-	//		);
-}
-
-/**
-*	@return	The entire absolute 'Capsule' trace bounds in world space.
-**/
-const bbox3_t CM_CalculateCapsuleTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius ) {
-	vec3_t newStart = start;
-	vec3_t newEnd = end;
-
-	// Add/Subtract the sphere offset from and radiuses in order to get the total start and end points.
-	for ( int32_t i = 0; i < 3; i++ ) {
-		if ( start[i] < end[i] ) {
-			newStart[i] = start[i] - fabsf( sphereOffset[i] ) - sphereRadius;
-			newEnd[i] = end[i] + fabsf( sphereOffset[i] ) + sphereRadius;
-		} else {
-			newStart[i] = end[i] - fabsf( sphereOffset[i] ) - sphereRadius;
-			newEnd[i] = start[i] + fabsf( sphereOffset[i] ) + sphereRadius;
-		}
-	}
-
-	// Prepare array for from_points method.
-	const vec3_t tracePoints[] = { newStart,  newEnd };
-
-	// Add bounds epsilon.
-	return bbox3_expand( bbox3_expand_box(						//return bbox3_expand_box(
-				bbox3_from_points( tracePoints, 2 ), bounds ),	//	bbox3_from_points( tracePoints, 2 ), 
-			CM_BOUNDS_EPSILON );								//	bbox3_expand( bounds, CM_BOUNDS_EPSILON ) 
-}
-
-/**
-*	@return	The entire absolute 'Sphere' trace bounds in world space.
-**/
-const bbox3_t CM_CalculateSphereTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius ) {
-	vec3_t newStart = start;
-	vec3_t newEnd = end;
-
-	for ( int32_t i = 0; i < 3; i++ ) {
-		if ( start[i] < end[i] ) {
-			newStart[i] = start[i] - fabsf( sphereOffset[i] ) - sphereRadius;
-			newEnd[i] = end[i] + fabsf( sphereOffset[i] ) + sphereRadius;
-		} else {
-			newStart[i] = end[i] - fabsf( sphereOffset[i] ) - sphereRadius;
-			newEnd[i] = start[i] + fabsf( sphereOffset[i] ) + sphereRadius;
-		}
-	}
-
-	// Prepare array for from_points method.
-	const vec3_t tracePoints[] = { newStart,  newEnd };
-
-	// Add bounds epsilon.
-	return bbox3_expand( bbox3_expand_box(						//return bbox3_expand_box(
-				bbox3_from_points( tracePoints, 2 ), bounds ),	//	bbox3_from_points( tracePoints, 2 ), 
-			CM_BOUNDS_EPSILON );								//	bbox3_expand( bounds, CM_BOUNDS_EPSILON ) 
-	//// Calc spherical offset bounds.
-	//bbox3_t sphereTraceBounds;
-	//for ( int32_t i = 0; i < 3; i++ ) {
-	//	if ( start[i] < end[i] ) {
-	//		sphereTraceBounds.mins[i] = start[i] - fabsf( sphereOffset[i] ) - sphereRadius;
-	//		sphereTraceBounds.maxs[i] = end[i] + fabsf( sphereOffset[i] ) + sphereRadius;
-	//	} else {
-	//		sphereTraceBounds.mins[i] = end[i] - fabsf( sphereOffset[i] ) - sphereRadius;
-	//		sphereTraceBounds.maxs[i] = start[i] + fabsf( sphereOffset[i] ) + sphereRadius;
-	//	}
-	//}
-	//// Add bounds epsilon.
-	//return bbox3_expand( sphereTraceBounds,	CM_BOUNDS_EPSILON );
-}
-
-/**
-*	@return	True if the bounds intersected.
-**/
-const bool CM_TraceIntersectBounds( TraceContext &traceContext, const bbox3_t &testBounds ) {
-	bbox3_t transformedTestBounds = testBounds;
-
-	// Transform bounds if we're dealing with a transformed trace.
-	if ( traceContext.isTransformedTrace ) {
-		transformedTestBounds = CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
-	}
-
-	return bbox3_intersects( traceContext.absoluteBounds, transformedTestBounds );
-}
-
-
-/**
-*	@brief	Returns true if boxA its bounds intersect the sphere of box B, false otherwise.
-**/
-const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const float radiusDistEpsilon ) {
-	const float testRadius = flt_square( sphere.radius ) + radiusDistEpsilon;
-	
-	// Calculate offset from origin.
-	const vec3_t sphereOffsetOrigin = sphere.origin + sphere.offset;
-	const vec3_t sphereCenter = sphereOffsetOrigin;
-
-	float deltaMin = 0;
-
-	for( int32_t i = 0; i < 3; i++ ) {
-		if( sphereCenter[i] < boxA.mins[i] ) {
-			deltaMin += flt_square( sphereCenter[i] - ( boxA.mins[i] ) ); 
-		} else if( sphereCenter[i] > boxA.maxs[i] ) {
-			deltaMin += flt_square( sphereCenter[i] - ( boxA.maxs[i] ) );     
-		}
-	}
-
-	if( deltaMin <= testRadius) {
-		return true;
-	}
-
-	return false;
-
-	// Other dist eps 
-	//const float testRadius = flt_square( sphere.radius );
-	//const vec3_t sphereCenter = sphere.offset;
-
-	//float deltaMin = 0;
-
-	//for( int32_t i = 0; i < 3; i++ ) {
-	//	if( sphereCenter[i] < boxA.mins[i] ) {
-	//		deltaMin += flt_square( sphereCenter[i] - ( boxA.mins[i] - radiusDistEpsilon ) ); 
-	//	} else if( sphereCenter[i] > boxA.maxs[i] ) {
-	//		deltaMin += flt_square( sphereCenter[i] - ( boxA.maxs[i] + radiusDistEpsilon ) );     
-	//	}
-	//}
-
-	//if( deltaMin <= testRadius) {
-	//	return true;
-	//}
-
-	//return false;
-}
-/**
-*	@return	True if the 2D Cylinder and the Trace Bounds intersect.
-**/
-const bool CM_TraceIntersect2DCylinder( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon ) {
-	sphere_t transformedTestSphere = sphere;
-
-	// Transform bounds if we're dealing with a transformed trace.
-	if ( traceContext.isTransformedTrace ) {
-		glm::vec4 transformedOffset = traceContext.matTransform * phvec_to_glmvec4( transformedTestSphere.offset ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
-		glm::vec3 v3TransformedOffset = glm::vec3( transformedOffset.x / transformedOffset.w, transformedOffset.y / transformedOffset.w, transformedOffset.z / transformedOffset.w );
-		transformedTestSphere.offset = glmvec3_to_phvec( v3TransformedOffset );
-	}
-
-	// Nullify the z of both, bounds and sphere
-	bbox3_t noZBounds = { vec3_xy( traceContext.absoluteBounds.mins ), vec3_xy( traceContext.absoluteBounds.maxs ) };
-	sphere_t noZSphere = transformedTestSphere;
-	noZSphere.offset = vec3_xy( noZSphere.offset );
-
-	return bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTestSphere, radiusDistEpsilon );
-}
-/**
-*	@return	True if the Sphere and the Trace Bounds intersect.
-**/
-const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon ) {
-	sphere_t transformedTestSphere = sphere;
-
-	// Transform bounds if we're dealing with a transformed trace.
-	if ( traceContext.isTransformedTrace ) {
-		glm::vec4 transformedOffset = traceContext.matTransform * phvec_to_glmvec4( transformedTestSphere.offset ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
-		glm::vec3 v3TransformedOffset = glm::vec3( transformedOffset.x / transformedOffset.w, transformedOffset.y / transformedOffset.w, transformedOffset.z / transformedOffset.w );
-		transformedTestSphere.offset = glmvec3_to_phvec( v3TransformedOffset );
-	}
-
-	return bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTestSphere, radiusDistEpsilon );
-}
-
-/**
-*	@return	True if the capsule and the trace bounds intersect.
-**/
-//const bool CM_TraceIntersectCapsule( TraceContext &traceContext, const sphere_t &sphere, const float radiusDistEpsilon ) {
-//	// Top sphere.
-//	sphere_t transformedTopSphere = sphere;
-//	transformedTopSphere.offset + vec3_t{ 0.f, 0.f, sphere.halfHeight };
-//
-//	// 'Cylinder' 'sphere', 2D circle
-//	// Bottom
-//	sphere_t transformedBottomSphere = sphere;
-//	transformedBottomSphere.offset - vec3_t{ 0.f, 0.f, sphere.halfHeight };
-//
-//	// 
-//	// Transform bounds if we're dealing with a transformed trace.
-//	if ( traceContext.isTransformedTrace ) {
-//		// Transform top sphere.
-//		glm::vec4 transformedOffset = traceContext.matTransform * phvec_to_glmvec4( transformedTopSphere.offset ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
-//		transformedTopSphere.offset = glmvec3_to_phvec( glm::vec3( transformedOffset.x / transformedOffset.w, transformedOffset.y / transformedOffset.w, transformedOffset.z / transformedOffset.w ) );
-//
-//		// Transform bottom sphere.
-//		transformedOffset = traceContext.matTransform * phvec_to_glmvec4( transformedBottomSphere.offset ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
-//		transformedBottomSphere.offset = glmvec3_to_phvec( glm::vec3( transformedOffset.x / transformedOffset.w, transformedOffset.y / transformedOffset.w, transformedOffset.z / transformedOffset.w ) );
-//	}
-//
-//	return bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTopSphere, radiusDistEpsilon )
-//		|| bbox3_intersects_sphere( traceContext.absoluteBounds, transformedBottomSphere, radiusDistEpsilon );
-//}
-
-
-
-/**
-*
-*
-*	Sphere CollisionModel Utilities:
-*
-*	TODO: Might move elsewhere.
-*
-*
-**/
-/**
-*	@brief	Calculates a spherical collision shape from a 'size' vector, for use with sphere/capsule hull tracing.
-**/
-sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t &origin = vec3_zero() ) {
-	// Calculkate the new 'offset' centered box.
-	const bbox3_t newBB = bbox3_from_center_size( size, origin );
-
-	// Get its symmetrical size for use on determining a proper 'Offset Radius'.
-	const vec3_t symmetricSize = bbox3_symmetrical( newBB );
-	const float halfHeight= symmetricSize.z;
-	const float halfWidth = symmetricSize.x;
-
-	// Actual radius.
-	const float radius = bbox3_radius( newBB );
-	// 'Offset Radius'
-	const float offsetRadius = ( halfWidth > halfHeight ? halfHeight : halfWidth );
-	//const float radius = ( halfWidth > halfHeight ? halfHeight : halfWidth );
-
-	// And we got our 'sphere'.
-	return {
-		// Actual radius.
-		.radius = offsetRadius,
-		// Offset Radius from its origin point.
-		.offsetRadius = offsetRadius,
-
-		// Half Width/Height.
-		.halfHeight = halfHeight,
-		.halfWidth = halfWidth,
-
-		// The origin.
-		.origin = origin,
-
-		// The offset to use.
-		.offset = vec3_zero() //vec3_t{ 0.f, 0.f, ( halfHeight - offsetRadius ) }
-	};
-}
-
-/**
-*	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with sphere/capsule hull tracing.
-**/
-sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() ) {
-	// Get the bounds size of the box for use with calculating an 'origin' centered bounds box.
-	const vec3_t boundsSize = bbox3_size( bounds );
-
-	// Use FromSize function from here on to calculate the rest.
-	return CM_SphereFromSize( boundsSize, origin );
-}
-
-/**
-*	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
-**/
-sphere_t CM_CapsuleSphereFromSize( const vec3_t &size, const vec3_t &origin = vec3_zero() ) {
-	// Calculkate the new 'origin' centered box.
-	const bbox3_t newBB = bbox3_from_center_size( size, origin );
-
-	// Get its symmetrical size for use on determining a proper 'Offset Radius'.
-	const vec3_t symmetricSize = bbox3_symmetrical( newBB );
-	const float halfHeight= symmetricSize.z;
-	const float halfWidth = symmetricSize.x;
-
-	// Actual radius.
-	const float radius = bbox3_radius( newBB );
-	// 'Offset Radius'
-	const float offsetRadius = ( halfWidth > halfHeight ? halfHeight : halfWidth );
-	//const float radius = ( halfWidth > halfHeight ? halfHeight : halfWidth );
-
-	// And we got our 'sphere'.
-	return {
-		// Actual radius.
-		.radius = offsetRadius,
-		// Offset Radius from its origin point.
-		.offsetRadius = offsetRadius,
-
-		// Half Width/Height.
-		.halfHeight = halfHeight,
-		.halfWidth = halfWidth,
-
-		// The origin.
-		.origin = origin,
-
-		// The offset to use.
-		.offset = vec3_zero() //vec3_t{ 0.f, 0.f, ( halfHeight - offsetRadius ) }
-	};
-}
-
-/**
-*	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
-**/
-sphere_t CM_CapsuleSphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() ) {
-	// Get the bounds size of the box for use with calculating an 'origin' centered bounds box.
-	const vec3_t boundsSize = bbox3_size( bounds );
-
-	// Use FromSize function from here on to calculate the rest.
-	return CM_CapsuleSphereFromSize( boundsSize, origin );
-}
-
-/**
-*	@brief	Appropriately centers a sphere's offset to rotation.
-**/
-void CM_CalculateSphereOffsetRotation( TraceContext &traceContext, sphere_t &sphere ) {
-	//if ( traceContext.isTransformedTrace ) {
-	//	glm::vec4 vOffset = phvec_to_glmvec4( sphere.offset, 1 );
-	//	const float t = sphere.halfHeight - sphere.offsetRadius;
-	//	vOffset = traceContext.matInvTransform * glm::vec4( t, t, t, 1.f ) * traceContext.matTransform;
-	//	glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
-	//	sphere.offset = glmvec3_to_phvec( v3Offset );
-	//} else {
-		const float t = sphere.halfHeight - sphere.radius;
-		sphere.offset = { 0, 0, 0 };
-//	}
-
-	//	//vOffset = glm::vec4( t, t, t, 1.f ) * traceContext.matTransform * vOffset * traceContext.matInvTransform ;
-	//	//vOffset = traceContext.matTransform * glm::vec4( t, t, t, 1.f ) * traceContext.matInvTransform * vOffset;
-		//glm::vec4 vRotationOffset = vOffset + ( vOffset - ( glm::vec4( t, t, t, 1.f ) * traceContext.matTransform ) );
-		//vOffset = vRotationOffset;
-
-}
-
-
-/**
-*
-*
-*	'BSP World Tree' Sweep tracing:
+*	'BSP World Tree' Sweeping:
 *
 *
 **/
@@ -550,62 +221,17 @@ recheck:
 /**
 *
 *
-*	Trace Callbacks:
 *
-*	Each callback prepares a specific traceContext to pass on to the internal trace routine.
+*	TraceBox Calculation:
+*
 *
 *
 **/
 /**
-*   @brief	The actual main trace implementation, operates on a TraceContext prepared and supplied by helper trace functions.
+*	@brief	Sets the 'trace box' to actually sweep and trace with, as well as calculating its
+*			transformed bounds, size, extents, and offsets.
 **/
-static const TraceResult _CM_Trace( TraceContext &traceContext ) {
-	// Determine if we're tracing against box hulls, or the actual world BSP brushes..
-	const bool worldTrace = ( traceContext.headNode != boxHull.headNode 
-							 && traceContext.headNode != capsuleHull.headNode 
-							 && traceContext.headNode != sphereHull.headNode 
-							 && traceContext.headNode != octagonHull.headNode );
-	//const bool worldTrace = !( traceContext.traceType > CMHullType::World );
-	
-	// Whether to use specific position point case testing:
-	const bool positionPointCase = vec3_equal( traceContext.start, traceContext.end );
-	// Whether to use specifics point bounds case testing:
-#ifdef TRACE_ENABLE_BOUNDS_POINT_CASE
-	const bool boundsPointCase = vec3_equal( traceContext.bounds.mins, vec3_zero() ) && vec3_equal( traceContext.bounds.maxs, vec3_zero() );
-#else
-	const bool boundsPointCase = false;
-#endif
-	/**
-	*	For multi-check avoidance.
-	**/
-    traceContext.collisionModel->checkCount++;
-	traceContext.checkCount = traceContext.collisionModel->checkCount;
-
-	/**
-	*	Figure out the leaf/node and get its boundingbox to test for clipping against with.
-	**/
-    if ( !traceContext.headNode ) {
-        return traceContext.traceResult;
-    }
-	
-	/**
-	*	Determine if the headNode is our BSP world, or one of our specific hull types
-	*	set to trace against. (Usually this means we're testing against an entity.)
-	**/
-	mleaf_t *nodeLeaf = (mleaf_t*)&traceContext.headNode;
-	if ( !worldTrace ) {
-		nodeLeaf = traceContext.headNodeLeaf;
-		if ( !nodeLeaf ) {
-			return traceContext.traceResult;
-		}
-	}
-
-    /**
-    *	Calculate Trace Size Extents:
-	*
-	*	Expand our bounds by CM_BOUNDS_EPSILON offset and transform the bounds by our inverse matrix 
-	*	when dealing with a transformedTrace, before calculating its symmetrical size.
-    **/
+void CM_SetTraceBox( TraceContext &traceContext, const bbox3_t &traceBox, const bool boundsPointCase = false ) {
 	// Calculate PointTrace Case Size:
 	if ( boundsPointCase ) {
 		traceContext.isPoint = true;
@@ -621,7 +247,7 @@ static const TraceResult _CM_Trace( TraceContext &traceContext ) {
 		if ( traceContext.isTransformedTrace ) {
 			traceContext.transformedBounds = CM_Matrix_TransformBounds( traceContext.matTransform, traceContext.boundsEpsilonOffset );
 			// NOTE: If the uncommented variety fails somehow, revert to this.
-			//traceContext.extents = bbox3_symmetrical( bbox3_expand( CM_Matrix_TransformBounds( traceContext.matInvTransform, traceContext.bounds ), CM_BOUNDS_EPSILON ) );
+			//traceContext.transformedBounds = bbox3_expand( CM_Matrix_TransformBounds( traceContext.matTransform, traceContext.bounds ), CM_BOUNDS_EPSILON );
 		
 			// The size of the transformedBounds box.
 			traceContext.size = bbox3_size( traceContext.transformedBounds );
@@ -635,7 +261,7 @@ static const TraceResult _CM_Trace( TraceContext &traceContext ) {
 			// The size of the transformedBounds box.
 			traceContext.size = bbox3_size( traceContext.transformedBounds );
 			// Symmetrical extents of our boundsEpislonOffset box.
-			traceContext.extents = bbox3_symmetrical( traceContext.boundsEpsilonOffset );
+			traceContext.extents = bbox3_symmetrical( traceContext.transformedBounds );
 		}
 	}
 
@@ -648,48 +274,230 @@ static const TraceResult _CM_Trace( TraceContext &traceContext ) {
 	/**
 	*	Take care of calculating a correct bounds size matching shape for specific 'Shape' trace types.
 	**/
-	// Calculate needed sphere radius, halfheight, and offsets for a Capsule trace.
+	// Calculate needed capsule radius, halfheight, and offsets for a Capsule trace.
 	if ( traceContext.traceType == CMHullType::Capsule ) {
-		// Setup our context
-		//traceContext.traceSphere = CM_CapsuleSphereFromBounds( traceContext.boundsEpsilonOffset, bbox3_center( traceContext.boundsEpsilonOffset ) );
-		////traceContext.traceSphere.offset.z += traceContext.traceSphere.halfHeight - traceContext.traceSphere.radius;
-		//// Rotated sphere offset for capsule
-		//if ( traceContext.isTransformedTrace ) {
-		//	// GLM:
-		//	glm::vec4 vOffset = phvec_to_glmvec4( traceContext.traceSphere.offset, 1 );
-		//	vOffset = traceContext.matTransform * vOffset;
-		//	glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
-		//	// END OF GLM:
-
-		//	traceContext.traceSphere.offset = glmvec3_to_phvec( v3Offset );
-		//}
-		traceContext.traceSphere = CM_CapsuleSphereFromSize( traceContext.size, bbox3_center( traceContext.transformedBounds ) );
+		// Calculate the trace 'Capsule Sphere' for testing with.
+		traceContext.traceSphere = bbox3_to_capsule( traceContext.bounds, vec3_zero() );
+		// Rotated sphere offset for capsule
+		if ( traceContext.isTransformedTrace ) {
+			traceContext.traceSphere = CM_Matrix_TransformSphere( traceContext.matTransform, traceContext.traceSphere );
+		}
 	// Calculate needed sphere radius, halfheight, and offsets for a Capsule trace.
 	} else if ( traceContext.traceType == CMHullType::Sphere ) {
-		//// Setup our context
-		//traceContext.traceSphere = CM_SphereFromBounds( traceContext.boundsEpsilonOffset, bbox3_center( traceContext.boundsEpsilonOffset ) );
-		//
-		//// Rotated sphere offset for capsule
-		//if ( traceContext.isTransformedTrace ) {
-		//	// GLM:
-		//	glm::vec4 vOffset = phvec_to_glmvec4( traceContext.traceSphere.offset, 1 );
-		//	vOffset = traceContext.matTransform * vOffset;
-		//	glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
-		//	// END OF GLM:
-
-		//	traceContext.traceSphere.offset = glmvec3_to_phvec( v3Offset );
-		//}
-
 		// Calculate the trace 'Sphere' for sphere testing with.
-		traceContext.traceSphere = CM_SphereFromSize( traceContext.size, bbox3_center( traceContext.transformedBounds ) );
+		traceContext.traceSphere = sphere_from_size( bbox3_symmetrical( traceContext.boundsEpsilonOffset ), vec3_zero() );
+		// Rotated sphere offset for capsule
+		if ( traceContext.isTransformedTrace ) {
+			traceContext.traceSphere = CM_Matrix_TransformSphere( traceContext.matTransform, traceContext.traceSphere );
+		}
 
-		//// Calculate its offset from origin in case it was rotated.
-		//if ( traceContext.isTransformedTrace ) {
-		//	// Model offset.
-		//	const float 
-		//	traceContext.traceSphere.offset = traceContext.matInvTransform * matTransform * 
-		//}
+		// Calculate offset rotation.
+		sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, traceContext.traceSphere, traceContext.isTransformedTrace );
 	}
+}
+
+/**
+*	@brief
+**/
+void CM_SetTraceSphere( TraceContext &traceContext, const bbox3_t &sphereBounds, const glm::mat4 &matTransform ) {
+	// Calculate the trace 'Sphere' for sphere testing with.
+	traceContext.traceSphere = sphere_from_size( bbox3_symmetrical( sphereBounds ), vec3_zero() );
+	// Rotated sphere offset for capsule
+	if ( matTransform != ph_mat_identity() ) {//traceContext.isTransformedTrace ) {
+		traceContext.traceSphere = CM_Matrix_TransformSphere( matTransform, traceContext.traceSphere );
+	}
+}
+
+/**
+*
+*
+*
+*	TraceBounds Calculation:
+*
+*
+*
+**/
+/**
+*	@return	The entire absolute 'box' trace bounds in world space.
+**/
+const bbox3_t CM_CalculateBoxTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds ) {
+	// Prepare array for from_points method.
+	const vec3_t tracePoints[] = { start,  end };
+
+	// Add bounds epsilon.
+	return bbox3_expand( bbox3_expand_box(						//return bbox3_expand_box(
+				bbox3_from_points( tracePoints, 2 ), bounds ),	//	bbox3_from_points( tracePoints, 2 ), 
+			CM_BOUNDS_EPSILON );								//	bbox3_expand( bounds, CM_BOUNDS_EPSILON ) //);
+}
+
+/**
+*	@return	The entire absolute 'Capsule' trace bounds in world space.
+**/
+const bbox3_t CM_CalculateCapsuleTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius ) {
+	vec3_t newStart = start;
+	vec3_t newEnd = end;
+
+	// Add/Subtract the sphere offset from and radiuses in order to get the total start and end points.
+	for ( int32_t i = 0; i < 3; i++ ) {
+		if ( start[i] < end[i] ) {
+			newStart[i] = start[i] - fabsf( sphereOffset[i] ) - sphereRadius;
+			newEnd[i] = end[i] + fabsf( sphereOffset[i] ) + sphereRadius;
+		} else {
+			newStart[i] = end[i] - fabsf( sphereOffset[i] ) - sphereRadius;
+			newEnd[i] = start[i] + fabsf( sphereOffset[i] ) + sphereRadius;
+		}
+	}
+
+	// Prepare array for from_points method.
+	const vec3_t tracePoints[] = { newStart,  newEnd };
+
+	// Add bounds epsilon.
+	return bbox3_expand( bbox3_expand_box(						//return bbox3_expand_box(
+				bbox3_from_points( tracePoints, 2 ), bounds ),	//	bbox3_from_points( tracePoints, 2 ), 
+			CM_BOUNDS_EPSILON );								//	bbox3_expand( bounds, CM_BOUNDS_EPSILON ) 
+}
+
+/**
+*	@return	The entire absolute 'Sphere' trace bounds in world space.
+**/
+const bbox3_t CM_CalculateSphereTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius ) {
+	vec3_t newStart = start;
+	vec3_t newEnd = end;
+
+	const float sphereRadiustDistEpsilon = sphereRadius + CM_RAD_EPSILON;
+	for ( int32_t i = 0; i < 3; i++ ) {
+		if ( start[i] < end[i] ) {
+			newStart[i] = start[i] - fabsf( sphereOffset[i] ) - sphereRadiustDistEpsilon;
+			newEnd[i] = end[i] + fabsf( sphereOffset[i] ) + sphereRadiustDistEpsilon;
+		} else {
+			newStart[i] = end[i] - fabsf( sphereOffset[i] ) - sphereRadiustDistEpsilon;
+			newEnd[i] = start[i] + fabsf( sphereOffset[i] ) + sphereRadiustDistEpsilon;
+		}
+	}
+
+	// Prepare array for from_points method.
+	const vec3_t tracePoints[] = { newStart,  newEnd };
+	return bbox3_expand_box(						//return bbox3_expand_box(
+				bbox3_from_points( tracePoints, 2 ), bounds );
+}
+
+/**
+*	@return	True if the bounds intersected.
+**/
+const bool CM_TraceIntersectBounds( TraceContext &traceContext, const bbox3_t &testBounds ) {
+	bbox3_t transformedTestBounds = testBounds;
+
+	// Transform bounds if we're dealing with a transformed trace.
+	if ( traceContext.isTransformedTrace ) {
+		transformedTestBounds = CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
+	}
+
+	return bbox3_intersects( traceContext.absoluteBounds, transformedTestBounds );
+}
+
+/**
+*	@return	True if the 2D Cylinder and the Trace Bounds intersect.
+**/
+const bool CM_TraceIntersect2DCylinder( TraceContext &traceContext, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon ) {
+	sphere_t transformedTestSphere = sphere;
+
+	// Transform bounds if we're dealing with a transformed trace.
+	if ( traceContext.isTransformedTrace ) {
+		glm::vec4 transformedOffset = traceContext.matTransform * phvec_to_glmvec4( transformedTestSphere.offset ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
+		glm::vec3 v3TransformedOffset = glm::vec3( transformedOffset.x / transformedOffset.w, transformedOffset.y / transformedOffset.w, transformedOffset.z / transformedOffset.w );
+		transformedTestSphere.offset = glmvec3_to_phvec( v3TransformedOffset );
+	}
+
+	// Nullify the z of both, bounds and sphere
+	bbox3_t noZBounds = { vec3_xy( traceContext.absoluteBounds.mins ), vec3_xy( traceContext.absoluteBounds.maxs ) };
+	sphere_t noZSphere = transformedTestSphere;
+	noZSphere.offset = vec3_xy( noZSphere.offset );
+
+	return bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTestSphere, testType, radiusDistEpsilon );
+}
+/**
+*	@return	True if the Sphere and the Trace Bounds intersect.
+**/
+const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon ) {
+	sphere_t transformedTestSphere = sphere;
+
+	// Transform bounds if we're dealing with a transformed trace.
+	if ( traceContext.isTransformedTrace ) {
+		glm::vec4 transformedOffset = traceContext.matTransform * phvec_to_glmvec4( transformedTestSphere.origin ); //CM_Matrix_TransformBounds( traceContext.matTransform, transformedTestBounds );
+		glm::vec3 v3TransformedOffset = glm::vec3( transformedOffset.x / transformedOffset.w, transformedOffset.y / transformedOffset.w, transformedOffset.z / transformedOffset.w );
+		transformedTestSphere.origin = glmvec3_to_phvec( v3TransformedOffset );
+	}
+
+	return bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTestSphere, testType, radiusDistEpsilon );
+}
+
+
+
+/**
+*
+*
+*	Trace Callbacks:
+*
+*	Each callback prepares a specific traceContext to pass on to the internal trace routine.
+*
+*
+**/
+/**
+*   @brief	The actual main trace implementation, operates on a TraceContext prepared and supplied by helper trace functions.
+**/
+static const TraceResult _CM_Trace( TraceContext &traceContext ) {
+	// Determine if we're tracing against box hulls, or the actual world BSP brushes..
+	/*const bool worldTrace = ( traceContext.headNode != boxHull.headNode 
+							 && traceContext.headNode != capsuleHull.headNode 
+							 && traceContext.headNode != sphereHull.headNode 
+							 && traceContext.headNode != octagonHull.headNode );
+	*/
+	const bool worldTrace = !( traceContext.traceType > CMHullType::World );
+	
+	// Whether to use specific position point case testing:
+	const bool positionPointCase = vec3_equal( traceContext.start, traceContext.end );
+	// Whether to use specifics point bounds case testing:
+#ifdef TRACE_ENABLE_BOUNDS_POINT_CASE
+	const bool boundsPointCase = vec3_equal( traceContext.bounds.mins, vec3_zero() ) && vec3_equal( traceContext.bounds.maxs, vec3_zero() );
+#else
+	const bool boundsPointCase = false;
+#endif
+	/**
+	*	For multi-check avoidance.
+	**/
+    traceContext.collisionModel->checkCount++;
+	traceContext.checkCount = traceContext.collisionModel->checkCount;
+
+
+	/**
+	*	Figure out the leaf/node and get its boundingbox to test for clipping against with.
+	**/
+    if ( !traceContext.headNode ) {
+        return traceContext.traceResult;
+    }
+	
+
+	/**
+	*	Determine if the headNode is our BSP world, or one of our specific hull types
+	*	set to trace against. (Usually this means we're testing against an entity.)
+	**/
+	mleaf_t *nodeLeaf = (mleaf_t*)&traceContext.headNode;
+	if ( !worldTrace ) {
+		nodeLeaf = traceContext.headNodeLeaf;
+		if ( !nodeLeaf ) {
+			return traceContext.traceResult;
+		}
+	}
+
+
+    /**
+    *	Calculate the 'TraceBox' and its 'Sphere' equivelant match.:
+	*
+	*	Expand our bounds by CM_BOUNDS_EPSILON offset and transform the bounds by our inverse matrix 
+	*	when dealing with a transformedTrace, before calculating its symmetrical size.
+    **/
+	CM_SetTraceBox( traceContext, traceContext.bounds, boundsPointCase );
+
 
 	/**
 	*	Calculate Absolute Tracing Bounds.
@@ -698,18 +506,19 @@ static const TraceResult _CM_Trace( TraceContext &traceContext ) {
 	if ( traceContext.headNodeType == CMHullType::Capsule ) {
 		//traceContext.absoluteBounds = CM_CalculateBoxTraceBounds( traceContext.start, traceContext.end, traceContext.bounds );
 		//traceContext.absoluteBounds = CM_CalculateBoxTraceBounds( traceContext.start, traceContext.end, traceContext.bounds );
-		const vec3_t sphereOffsetOrigin = traceContext.traceSphere.origin + traceContext.traceSphere.offset;
+		const vec3_t sphereOffsetOrigin = traceContext.traceSphere.offset;
 		
-		traceContext.absoluteBounds = CM_CalculateCapsuleTraceBounds( traceContext.start, traceContext.end, traceContext.bounds, sphereOffsetOrigin, traceContext.traceSphere.radius );
+		traceContext.absoluteBounds = CM_CalculateCapsuleTraceBounds( traceContext.start, traceContext.end, traceContext.bounds, sphereOffsetOrigin, traceContext.traceSphere.offsetRadius );
 	// 'Sphere'-specific Trace Bounds:
 	} else if ( traceContext.headNodeType == CMHullType::Sphere ) {
 		const vec3_t sphereOffsetOrigin = traceContext.traceSphere.origin + traceContext.traceSphere.offset;
 		//traceContext.absoluteBounds = CM_CalculateBoxTraceBounds( traceContext.start, traceContext.end, traceContext.bounds );
-		traceContext.absoluteBounds = CM_CalculateSphereTraceBounds( traceContext.start, traceContext.end, traceContext.bounds, sphereOffsetOrigin, traceContext.traceSphere.radius );
+		traceContext.absoluteBounds = CM_CalculateSphereTraceBounds( traceContext.start, traceContext.end, traceContext.bounds, sphereOffsetOrigin, traceContext.traceSphere.offsetRadius );
 	// 'Box' Default Trace Bounds:
 	} else {
 		traceContext.absoluteBounds = CM_CalculateBoxTraceBounds( traceContext.start, traceContext.end, traceContext.bounds );
 	}
+
 
 	/**
 	*	Determine whether said nodeLeaf bounds intersected to our trace bounds.
@@ -778,15 +587,17 @@ static const TraceResult _CM_Trace( TraceContext &traceContext ) {
 			// 'Sphere' Testing:
 			} else if ( traceContext.headNodeType == CMHullType::Sphere ) {
 				// 'Sphere' in 'Sphere'.
-				//if ( traceContext.traceType == CMHullType::Sphere ) {
-					//CM_TestSphereInSphere( traceContext, nodeLeaf );
+				if ( traceContext.traceType == CMHullType::Sphere ) {
+					CM_TestSphereLeafInSphere( traceContext, nodeLeaf );
+					//CM_TestBoxLeafInSphere( traceContext, nodeLeaf );
+
 				// 'Capsule' in 'Sphere'.
 				//} else if ( traceContext.traceType == CMHullType::Capsule) {
 					//CM_TestCapsuleInSphere( traceContext, nodeLeaf );
 				// Default to: 'Bounding Box' in 'Sphere'.
-				//} else {
+				} else {
 					CM_TestBoxLeafInSphere( traceContext, nodeLeaf );
-				//}
+				}
 			// Default 'Box' Testing:
 			} else {
 				// Test whether our trace box intersects with the entity leaf node.
@@ -824,15 +635,15 @@ static const TraceResult _CM_Trace( TraceContext &traceContext ) {
 			}
 		} else if ( traceContext.headNodeType == CMHullType::Sphere ) {
 			//// 'Sphere' in 'Sphere'.
-			//if ( traceContext.traceType == CMHullType::Sphere ) {
-			//	//CM_TraceSphereThroughSphere( traceContext, nodeLeaf );
+			if ( traceContext.traceType == CMHullType::Sphere ) {
+				CM_TraceSphereThroughSphere( traceContext, nodeLeaf );
 			//// 'Capsule' in 'Sphere'.
 			//} else if ( traceContext.traceType == CMHullType::Capsule ) {
 			//	//CM_TraceCapsuleThroughSphere( traceContext, nodeLeaf );
 			//// Default to: 'Bounding Box' in 'Sphere'.
-			//} else {
+			} else {
 				CM_TraceBoxThroughSphere( traceContext, nodeLeaf );
-			//}
+			}
 		// Default 'Box' Tracing:
 		} else {
 			// Test whether our trace box intersects with the entity leaf node.
@@ -1073,7 +884,7 @@ static const TraceResult _CM_Sphere_Trace( TraceContext &traceContext ) {
 		if ( traceContext.isTransformedTrace ) {
 			traceContext.transformedBounds = CM_Matrix_TransformBounds( traceContext.matTransform, traceContext.boundsEpsilonOffset );
 			// NOTE: If the uncommented variety fails somehow, revert to this.
-			//traceContext.extents = bbox3_symmetrical( bbox3_expand( CM_Matrix_TransformBounds( traceContext.matInvTransform, traceContext.bounds ), CM_BOUNDS_EPSILON ) );
+			//traceContext.transformedBounds = bbox3_expand( CM_Matrix_TransformBounds( traceContext.matTransform, traceContext.bounds ), CM_BOUNDS_EPSILON );
 		
 			// The size of the transformedBounds box.
 			traceContext.size = bbox3_size( traceContext.transformedBounds );
@@ -1087,7 +898,7 @@ static const TraceResult _CM_Sphere_Trace( TraceContext &traceContext ) {
 			// The size of the transformedBounds box.
 			traceContext.size = bbox3_size( traceContext.transformedBounds );
 			// Symmetrical extents of our boundsEpislonOffset box.
-			traceContext.extents = bbox3_symmetrical( traceContext.boundsEpsilonOffset );
+			traceContext.extents = bbox3_symmetrical( traceContext.transformedBounds );
 		}
 	}
 
@@ -1099,24 +910,23 @@ static const TraceResult _CM_Sphere_Trace( TraceContext &traceContext ) {
 	/**
 	*	Calculate Absolute Tracing Bounds.
 	**/
-	traceContext.absoluteBounds = CM_CalculateSphereTraceBounds( traceContext.start, traceContext.end, traceContext.bounds, traceContext.traceSphere.offset, traceContext.traceSphere.radius );
+	const vec3_t sphereOffsetOrigin = traceContext.traceSphere.origin + traceContext.traceSphere.offset;
+
+	traceContext.absoluteBounds = CM_CalculateSphereTraceBounds( traceContext.start, traceContext.end, traceContext.bounds, sphereOffsetOrigin, traceContext.traceSphere.offsetRadius );
 
 	/**
 	*	Take care of calculating shapes depending on our trace type.
 	**/
-	// Setup our context
-	traceContext.traceSphere = CM_SphereFromBounds( traceContext.boundsEpsilonOffset, bbox3_center( traceContext.boundsEpsilonOffset ) );
-		
+	// Calculate the trace 'Sphere' for sphere testing with.
+	traceContext.traceSphere = sphere_from_size( bbox3_symmetrical( traceContext.boundsEpsilonOffset ), vec3_zero() );
 	// Rotated sphere offset for capsule
 	if ( traceContext.isTransformedTrace ) {
-		// GLM:
-		glm::vec4 vOffset = glm::vec4( phvec_to_glmvec3( traceContext.traceSphere.offset ), 1 );
-		vOffset = traceContext.matTransform * vOffset;
-		glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
-		// END OF GLM:
-
-		traceContext.traceSphere.offset = glmvec3_to_phvec( v3Offset );
+		traceContext.traceSphere = CM_Matrix_TransformSphere( traceContext.matTransform, traceContext.traceSphere );
 	}
+
+	// Calculate offset rotation.
+	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, traceContext.traceSphere, traceContext.isTransformedTrace );
+
 
 
 	/**
@@ -1165,8 +975,8 @@ static const TraceResult _CM_Sphere_Trace( TraceContext &traceContext ) {
 				CM_TestBoxLeafInCapsule( traceContext, nodeLeaf );
 			// 'Sphere' Testing:
 			} else if ( traceContext.headNodeType == CMHullType::Sphere ) {
-				//CM_TestSphereInSphere( traceContext, nodeLeaf );
-				CM_TestBoxLeafInSphere( traceContext, nodeLeaf );
+				CM_TestSphereLeafInSphere( traceContext, nodeLeaf );
+				//CM_TestBoxLeafInSphere( traceContext, nodeLeaf );
 				//}
 			// Default 'Box' Testing:
 			} else {
@@ -1199,8 +1009,8 @@ static const TraceResult _CM_Sphere_Trace( TraceContext &traceContext ) {
 			//CM_TraceSphereThroughCapsule( traceContext, nodeLeaf );
 			CM_TraceBoxThroughCapsule( traceContext, nodeLeaf );
 		} else if ( traceContext.headNodeType == CMHullType::Sphere ) {
-			//CM_TraceSphereThroughSphere( traceContext, nodeLeaf );
-			CM_TraceBoxThroughSphere( traceContext, nodeLeaf );
+			CM_TraceSphereThroughSphere( traceContext, nodeLeaf );
+			//CM_TraceBoxThroughSphere( traceContext, nodeLeaf );
 		// Default 'Box' Tracing:
 		} else {
 			// Test whether our trace box intersects with the entity leaf node.

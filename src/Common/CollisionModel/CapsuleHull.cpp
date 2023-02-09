@@ -28,9 +28,9 @@
 CapsuleHull capsuleHull = {};
 
 // TODO: Obvious, clean this up
-sphere_t CM_SphereFromSize( const vec3_t &size, const vec3_t &origin = vec3_zero() );
-sphere_t CM_SphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
-sphere_t CM_CapsuleSphereFromBounds( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
+sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin = vec3_zero() );
+sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
+sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
 
 /**
 *   @brief   
@@ -181,6 +181,7 @@ CapsuleHull CM_NewCapsuleHull( const bbox3_t &bounds, const int32_t contents ) {
 	//
 	//const vec3_t mins = size[0];
 	//const vec3_t maxs = size[1];
+
 	const vec3_t mins = bounds.mins;
 	const vec3_t maxs = bounds.maxs;
 	
@@ -202,6 +203,6 @@ CapsuleHull CM_NewCapsuleHull( const bbox3_t &bounds, const int32_t contents ) {
     newCapsuleHull.planes[11].dist = -mins[2];
 
 	// Calculate the spherical data for the Capsule.
-	newCapsuleHull.sphere = CM_CapsuleSphereFromBounds( bounds, bbox3_center( bounds ) );
+	newCapsuleHull.sphere = bbox3_to_capsule( bounds, bbox3_center( bounds ) );
 	return newCapsuleHull;
 }

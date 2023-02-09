@@ -70,16 +70,57 @@ void MiscSphereBall::Spawn() {
     Base::Spawn();
     //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
+	const bool isXLSphere = ( GetSpawnFlags() & 8 );
+
+	// Determine which model to pick (since we cant swithc materials properly yet on tha fly)
+	int32_t colorChoice = 0; // defualt normal glass.
+	std::string modelColorFile = "models/misc/spheres/sphereball.iqm";
+	if ( GetSpawnFlags() & 16 ) { // Red.
+		colorChoice = 1;
+	} else if ( GetSpawnFlags() & 32 ) { // Green.
+		colorChoice = 2;
+	} else if ( GetSpawnFlags() & 64 ) { // Blue.
+		colorChoice = 3;
+	} else if ( GetSpawnFlags() & 128 ) { // Random
+		colorChoice = RandomRangeui( 0, 3 );
+	}
+
+	if ( colorChoice == 1 ) { // Red.
+		if ( isXLSphere ) {
+			modelColorFile = "models/misc/spheres/sphereball_r_xl.iqm";
+		} else {
+			modelColorFile = "models/misc/spheres/sphereball_r.iqm";
+		}
+	} else if ( colorChoice == 2 ) { // Red.
+		if ( isXLSphere ) {
+			modelColorFile = "models/misc/spheres/sphereball_g_xl.iqm";
+		} else {
+			modelColorFile = "models/misc/spheres/sphereball_g.iqm";
+		}
+	} else if ( colorChoice == 3 ) { // Red.
+		if ( isXLSphere ) {
+			modelColorFile = "models/misc/spheres/sphereball_b_xl.iqm";
+		} else {
+			modelColorFile = "models/misc/spheres/sphereball_b.iqm";
+		}
+	} 
+
     // Set solid.
     SetSolid( Solid::Sphere );
     // Set clip mask.
     SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
-    // Set the barrel model, and model index.
-    SetModel( "models/misc/spheres/sphereball.iqm" );
+	// Set the sphere model, and model index.
+	SetModel( modelColorFile );
 
-	bbox3_t radiusBounds = bbox3_from_center_radius( 24, vec3_zero() );
-	SetMins( radiusBounds.mins );
-	SetMaxs( radiusBounds.maxs );
+	if ( isXLSphere ) {
+		bbox3_t radiusBounds = bbox3_from_center_radius( 48, vec3_zero() );
+		SetMins( radiusBounds.mins );
+		SetMaxs( radiusBounds.maxs );
+	} else {
+		bbox3_t radiusBounds = bbox3_from_center_radius( 24, vec3_zero() );
+		SetMins( radiusBounds.mins );
+		SetMaxs( radiusBounds.maxs );
+	}
 	//SetMins( { -24, -24, -24 } );
 	//SetMaxs( { 24, 24, 24 } );
     // Set move type.
@@ -89,7 +130,11 @@ void MiscSphereBall::Spawn() {
 
     // Set default values in case we have none.
     //if ( !GetMass() ) {
+	if ( isXLSphere ) {
+        SetMass( 400 );
+	} else {
         SetMass( 100 );
+	}
     //}
     //if ( !GetHealth() ) {
         SetHealth(99999);
@@ -111,8 +156,9 @@ void MiscSphereBall::Spawn() {
 	SetStopCallback(&MiscSphereBall::SphereBallStop);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME_S);
-    SetThinkCallback(&MiscSphereBall::SphereBallDropToFloor);
+    SetNextThinkTime( level.time + 2.f * FRAMETIME_S );
+    //SetThinkCallback(&MiscSphereBall::SphereBallDropToFloor);
+	SetThinkCallback( &MiscSphereBall::SphereBallThink );
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -174,6 +220,9 @@ void MiscSphereBall::SphereBallUse( IServerGameEntity* caller, IServerGameEntity
 }
 
 void MiscSphereBall::SphereBallThink(void) {
+	// First clear deque of touches.
+	touchList.clear();
+
 	// Store whether we had a ground entity at all.
     const qboolean wasOnGround = ( GetGroundEntityHandle() ? true : false );
 
@@ -204,7 +253,7 @@ void MiscSphereBall::SphereBallThink(void) {
 		// Calculate adjustment to apply.
 		//static constexpr float SPHEREBALL_MOVE_STOP_SPEED = 25.f;
 		//static constexpr float SPHEREBALL_MOVE_GROUND_FRICTION = 4.f;
-		static constexpr float SPHEREBALL_MOVE_STOP_SPEED = 100.f;
+		static constexpr float SPHEREBALL_MOVE_STOP_SPEED = 25.f;
 		static constexpr float SPHEREBALL_MOVE_GROUND_FRICTION = 4.f;
 		const float adjustment = FRAMETIME_S.count() * SPHEREBALL_MOVE_STOP_SPEED * SPHEREBALL_MOVE_GROUND_FRICTION;
 
@@ -251,11 +300,12 @@ void MiscSphereBall::SphereBallThink(void) {
 			if ( ( wasOnGround ) || ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) ) {
 			//if ( geBoxSlide->GetDeadFlag() == DeadFlags::Dead) {//!( geBoxSlide->GetHealth() <= 0.0 ) ) {
 				vec3_t newVelocity = currentVelocity;
-				const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
+				//const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
+				const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] + newVelocity[2] * newVelocity[2] );
 				if (speed) {
 					// TODO: Defines?
-					constexpr float GROUNDFRICTION = 2.f; // Ground friction.
-					constexpr float STOPSPEED = 1.f / GROUNDFRICTION; // Divided by mass.
+					constexpr float GROUNDFRICTION = 1.25f; // Ground friction.
+					constexpr float STOPSPEED = 2.5; // Divided by mass.
 
 					// Calculate friction, and ground control.
 					const float friction = GROUNDFRICTION;
@@ -481,12 +531,17 @@ void MiscSphereBall::SphereBallDie(IServerGameEntity* inflictor, IServerGameEnti
 // 'Touch' callback, to calculate the direction to move into.
 //===============
 //
-void MiscSphereBall::SphereBallTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void MiscSphereBall::SphereBallTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	// Validate 'other' first.
 	GameEntity *geValidatedOther = ServerGameWorld::ValidateEntity(other);
+	// Get Game World.
+	ServerGameWorld *gameWorld = GetGameWorld();
+	GameEntity *geWorldSpawn = gameWorld->GetWorldspawnGameEntity();
 
     // Safety checks.
     if ( !geValidatedOther || geValidatedOther == this ) {
+		// Prevent from continuously 'Touching' each other, resulting in yes, stackoverflow.
+		//|| ( self == this  && other == self ) ) {
 	    return;
     }
 
@@ -494,17 +549,43 @@ void MiscSphereBall::SphereBallTouch(IServerGameEntity* self, IServerGameEntity*
 	GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( geValidatedOther->GetGroundEntityHandle() );
 
     if ( geGroundEntity == this ) {
-	    return;
+	//    return;
+    }
+    if ( geGroundEntity && !geValidatedOther && geGroundEntity->GetSolid() != Solid::BSP ) {
+		//geValidatedOther = geGroundEntity;
+	//    return;
     }
 
+	// Prevent it from touching again.
+	//if ( std::find( touchList.begin(), touchList.end(), geValidatedOther ) != touchList.end() ) {
+	//	return;
+	//}
+
+	//touchList.push_back( geValidatedOther );
+
     // Calculate ratio to use.
-    double ratio = (static_cast<double>(geValidatedOther->GetMass()) / static_cast<double>(GetMass()));
+ //   double ratio = ( 1.0 / static_cast<double>( GetMass() ) ) * geValidatedOther->GetMass(); /// static_cast<double>(GetMass()));
+
+	//if (ratio < 0 ) {
+	//	ratio = abs( ratio );
+	//}
+
+	//const vec3_t speedVector = vec3_t{ 
+	//	(float)speedConst , 
+	//	(float)speedConst , 
+	//	(float)speedConst 
+	//};
+
+    // Calculate ratio to use.
+    //double ratio = (static_cast<double>( geValidatedOther->GetMass() ) / static_cast<double>( GetMass() ) );
+	double ratio = ( 1.0 / static_cast<double>( GetMass() ) ) * static_cast<double>( geValidatedOther->GetMass() );
 
 	if (ratio < 0 ) {
-		ratio = FLT_EPSILON - 1.f;
+	//	ratio = 1;//FLT_EPSILON - 1.f;
+		//ratio = FLT_EPSILON - 1.f;
 	}
 	// Now calculate speed.
-	constexpr float speedConst = 66.25f;
+	constexpr float speedConst = 16.125f;
 	// Speed vec
 	const vec3_t speedVector = vec3_t{ 
 		(float)speedConst * (float)ratio, 
@@ -518,33 +599,117 @@ void MiscSphereBall::SphereBallTouch(IServerGameEntity* self, IServerGameEntity*
 	//};
 
     // Calculate direction.
-    vec3_t damageDirection = vec3_normalize( vec3_negate( GetOrigin() - geValidatedOther->GetOrigin() ) );
- //   vec3_t damageDirection;
-	//if ( plane != nullptr ) {
-	//	damageDirection = plane->normal;//GetOrigin() - geValidatedOther->GetOrigin();
-	//} else {
-	//	damageDirection = vec3_normalize( geValidatedOther->GetOrigin() - GetOrigin());
-	//} 
+    //vec3_t damageDirection = vec3_normalize( vec3_negate( GetOrigin() - geValidatedOther->GetOrigin() ) );
+	//vec3_t damageDirection = vec3_normalize( geValidatedOther->GetOrigin() - GetOrigin() );
+    vec3_t touchDirection = vec3_normalize( GetOrigin() - geValidatedOther->GetOrigin() );
+	vec3_t otherTouchDirection = vec3_normalize( geValidatedOther->GetOrigin() - GetOrigin() );
+	// Special handles:
+	if ( ( plane != nullptr ) ) {
+		if ( geValidatedOther->GetSolid() == Solid::Sphere ) {
+			//if ( !vec3_equal( vec3_zero(), plane->normal ) ) {
+			//	touchDirection = vec3_negate( plane->normal );
+			//if ( ( !vec3_equal( vec3_zero(), plane->normal ) )  ) {
+				//touchDirection = vec3_negate( plane->normal );//GetOrigin() - geValidatedOther->GetOrigin();
+				touchDirection = plane->normal;
+			//}
+
+			//}
+		} else {
+			// Negate for bounce velocity.
+			touchDirection = plane->normal;//GetOrigin() - geValidatedOther->GetOrigin();
+		}
+	}
 	
-	// Direction for velocities.
-	const vec3_t velocityDirection = damageDirection;
-	const vec3_t invVelocityDirection = vec3_negate( damageDirection );
-	
+
+	// Test:
 	// Angular Force.
-	const vec3_t angularForce = speedVector * velocityDirection;
-
+	const vec3_t angularForce = touchDirection * speedVector;
+	SetAngularVelocity( GetAngularVelocity() + angularForce );
 	// Force.
-	const vec3_t force = speedVector * invVelocityDirection;
+	const vec3_t force = touchDirection * speedVector;
+	SetVelocity( GetVelocity() + force );
+	if ( geValidatedOther && geValidatedOther->GetSolid() == Solid::Sphere ) {
 
-	// Adjust angular velocity.
-	const vec3_t oldAngularVelocity = GetAngularVelocity();
-	SetAngularVelocity( oldAngularVelocity + angularForce );
+		if ( plane ) {
+			SetVelocity( SG_BounceVelocity( GetVelocity(), plane->normal, 1.045 ) );
+		} else {
+			SetVelocity( SG_BounceVelocity( GetVelocity(), touchDirection, 1.0125 ) );
+		}
+	}
+	//	if ( plane ) {
+		//	plane->normal = vec3_negate( plane->normal );
+	//	}
+	//	//geValidatedOther->DispatchTouchCallback( geValidatedOther, this, plane, surf );
+
+	//}
+	//} else {
+	//	//if ( plane ) {
+	//	//	SetVelocity( SG_BounceVelocity( GetVelocity(), plane->normal, 1.0125 ) );
+	//	//} else {
+	//	//	SetVelocity( SG_BounceVelocity( GetVelocity(), touchDirection, 1.0125 ) );
+	//	//}
+	//		//SetVelocity( SG_ClipVelocity( GetVelocity(), vec3_negate( touchDirection ) ) );
+	//		//SetVelocity( SG_BounceVelocity( GetVelocity(), touchDirection, 1.0125 ) );
+
+	//	//if ( plane && !IsWalkablePlane( *plane ) ) {
+	//		//SetVelocity( SG_BounceVelocity( GetVelocity(), plane->normal, 1.025 ) );
+	//	//} else {
+	//	//	SetVelocity( SG_BounceVelocity( GetVelocity(), vec3_negate( touchDirection ), 1.025 ) );
+	//	//}
+	//}
+
+
+
+
+
+	// Bounce unless on world
+	if ( geValidatedOther && geValidatedOther->GetSolid() == Solid::Sphere ) {
+		//if (plane) {
+		//	plane->normal = vec3_normalize( 
+		//		vec3_reflect( 
+		//			vec3_negate( plane->normal ),			
+		//			vec3_normalize( GetOrigin() - geValidatedOther->GetOrigin() )
+		//		)
+		//	);
+		//}
+		
+		//geValidatedOther->DispatchTouchCallback( geValidatedOther, this, plane, surf );
+		//SetVelocity( SG_BounceVelocity( GetVelocity(), touchDirection, 1.0185 ) );
+
+		//const vec3_t angularForce = speedVector * otherTouchDirection;
+		//geValidatedOther->SetAngularVelocity( geValidatedOther->GetAngularVelocity()  + angularForce);
+
+		//const vec3_t force = speedVector * otherTouchDirection;
+		//geValidatedOther->SetVelocity( geValidatedOther->GetVelocity()  + force);
+		//geValidatedOther->SetVelocity( SG_BounceVelocity( geValidatedOther->GetVelocity(), otherTouchDirection, 1.0185 ) );
+
+	}
+
+	// Old:
+	////// Angular Force.
+	//const vec3_t angularForce = speedVector * touchDirection;
+	////// Force.
+	//const vec3_t force = speedVector * touchDirection;//invVelocityDirection;
+	//////const vec3_t force = vec3_negate( speedVector ) * invVelocityDirection;
+
+	////// Adjust angular velocity.
+	//const vec3_t oldAngularVelocity = GetAngularVelocity();
 	//SetAngularVelocity( oldAngularVelocity + angularForce );
-	
-	// Calculate new velocity.
-	const vec3_t oldVelocity = GetVelocity();
-	SetVelocity( oldVelocity + force );
-	//SetVelocity( oldVelocity + force ); // SG_BounceVelocity( GetVelocity(), angularForce, 1.025 ) );
+	////SetAngularVelocity( oldAngularVelocity + angularForce );
+	////
+	////// Calculate new velocity.
+	//const vec3_t oldVelocity = GetVelocity();
+	//SetVelocity( oldVelocity + force );
+	//if ( plane != nullptr ) {
+	//	//if ( geWorldSpawn ) {
+	//	//if (!IsWalkablePlane( *plane ) ) {
+	//		SetVelocity( SG_BounceVelocity( GetVelocity(), vec3_negate( plane->normal ), 1.025 ) );
+	////	//} else {
+	////	//	SetVelocity( SG_BounceVelocity( GetVelocity(), damageDirection, 1.025 ) );
+	////	//}
+	//} else {
+	//	SetVelocity( SG_BounceVelocity( GetVelocity(), touchDirection, 1.025 ) );
+	//}
 
     // Last but not least, move a step ahead.
 //    SVG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME_S.count()));
@@ -572,24 +737,24 @@ void MiscSphereBall::SphereBallTakeDamage( IServerGameEntity *other, float kick,
 	const vec3_t kickDamageDiv = kickVector / damageVector;
 
 	// Now calculate speed.
-	constexpr float speedConst = 66.25f;
+	constexpr float speedConst = 20.25f;
 	const vec3_t speedVector = vec3_t{ speedConst, speedConst, speedConst } / kickDamageDiv;
 
 
 	// Angular Force.
-	const vec3_t angularForce = speedVector * invVelocityDirection;
-
+	const vec3_t angularForce = speedVector * velocityDirection;
 	// Force.
 	const vec3_t force = speedVector * velocityDirection;
-
-	// Adjust angular velocity.
+	//const vec3_t force = vec3_negate( speedVector ) * invVelocityDirection;
+	
+	// Calculate new angularvelocity.
 	const vec3_t oldAngularVelocity = GetAngularVelocity();
 	SetAngularVelocity( oldAngularVelocity + angularForce );
-	
 	// Calculate new velocity.
 	const vec3_t oldVelocity = GetVelocity();
 	SetVelocity( oldVelocity + force ); // SG_BounceVelocity( GetVelocity(), angularForce, 1.025 ) );
-	//SetVelocity( oldVelocity + force );  
+
+//	SetVelocity( SG_BounceVelocity( oldVelocity + force, damageDirection, 1.025 ) ); 
 }
 
 //

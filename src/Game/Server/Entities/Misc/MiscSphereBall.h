@@ -54,6 +54,9 @@ private:
 
     // Function to spawn "debris3/tris.md2" chunks.
     void SpawnDebris3Chunk(const vec3_t& origin);
+
+	// Keep track of whether others touched this sphere in this frame before.
+	std::deque<GameEntity*> touchList;
 };
 
 #endif // __SVGAME_ENTITIES_MISC_MISCSPHEREBALL_H__

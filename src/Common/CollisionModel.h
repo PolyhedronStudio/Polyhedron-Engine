@@ -145,6 +145,10 @@ const float CM_DistanceFromLineSquared( const vec3_t &p, const vec3_t &lp1, cons
 **/
 const bbox3_t CM_Matrix_TransformBounds( const glm::mat4 &matrix, const bbox3_t &bounds );
 /**
+*	@brief	Transforms the sphere's origin by the matrix.
+**/
+const sphere_t CM_Matrix_TransformSphere( const glm::mat4 &matrix, const sphere_t &sphere );
+/**
 *	@return	The box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
 **/
 const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, const bbox3_t &bounds );
