@@ -99,6 +99,8 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 	//if ( oldVelocityLength > 0 ) {
 		// Setup our SlideBoxMove structure. Keeps track of state for the current frame's move we're about to perform.
 		*slideBoxMove = {
+			.traceType	= ( geSlider->GetSolid() == Solid::Sphere ? 1 : 0 ),
+
 			// Working State & Final Move Attributes.
 			.velocity	= geSlider->GetVelocity(),
 			.origin		= geSlider->GetOrigin(),

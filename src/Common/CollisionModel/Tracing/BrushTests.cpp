@@ -149,9 +149,9 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	//if ( !CM_TraceIntersectBounds( traceContext, leafTestBoxHull.leaf.bounds ) ) {
-	//	return;
-	//}
+	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+		return;
+	}
 
 
 	/**
@@ -159,6 +159,7 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 	**/
 	// Get the sphere to trace with.
 	sphere_t testSphere = leafTestSphereHull.sphere;
+	//sphere_t 
 
 	if ( !CM_TraceIntersectSphere( traceContext, testSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0.f ) ) {// CM_RAD_EPSILON ) ) {
 		return;
@@ -168,6 +169,7 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 	/**
 	*	Trace the 'Capsule Sphere' through each plane of the brush.
 	**/
+	//testSphere = traceContext.traceSphere;
 	// Sphere offset origin 
 	const vec3_t sphereOffsetOrigin = /*testSphere.origin + */testSphere.offset;
 
@@ -180,19 +182,22 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 		// This is the plane we actually work with, making sure it is transformed properly if we are performing a transformed trace.
 		CollisionPlane transformedPlane = *brushSide->plane;
 		CollisionPlane translatedPlane = *brushSide->plane;
+
 		if ( traceContext.isTransformedTrace ) {
+			// Needed for the distance to use.
 			transformedPlane = CM_TransformPlane( &transformedPlane, traceContext.matTransform );
+			// Needed for normal testing.
 			translatedPlane = CM_TranslatePlane( &translatedPlane, traceContext.matTransform );
 		}
 
 		// Determine the plane distance.
 		float dist = 0.f;
 		if ( traceContext.isPoint ) {
-			dist = transformedPlane.dist;
+			dist = translatedPlane.dist;
 		} else {
 			// Adjust the plane distance appropriately for radius.
 			//const float dist = transformedPlane.dist + traceContext.traceSphere.radius;
-			dist = transformedPlane.dist + testSphere.radius;
+			dist = translatedPlane.dist + testSphere.radius;
 		}
 
 		// Find the closest point on the capsule to the plane
@@ -202,15 +207,15 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 		vec3_t endPoint = traceContext.end;
 		if ( t > 0.0f ) {
 			startPoint = traceContext.start - sphereOffsetOrigin;
-			//startPoint = traceContext.start - sphereOffsetOrigin;
+		////	//startPoint = traceContext.start - sphereOffsetOrigin;
 
 		} else {
 			startPoint = traceContext.start + sphereOffsetOrigin;
-			//startPoint = traceContext.start + sphereOffsetOrigin;
+		////	//startPoint = traceContext.start + sphereOffsetOrigin;
 		}
 	
 		// Calculate trace line.
-		const float d1 = vec3_dot( startPoint, transformedPlane.normal) - dist;
+		const float d1 = vec3_dot( startPoint, transformedPlane.normal ) - dist;
 
 		// if completely in front of face, no intersection
 		if ( d1 > 0.0f )

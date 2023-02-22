@@ -67,6 +67,9 @@ static constexpr float SLIDEBOX_SPEED_FALL_FAR		= -900;
 *			functions on and apply the final results to the entity. (If movement succeeded.)
 **/
 struct SlideBoxMove {
+	//! The solid that we're tracing.
+	int32_t traceType = 0; // 0 == Bounds Box, 1 == Sphere
+
 	//! Velocity.
 	vec3_t velocity = vec3_zero();
 	//! Origin.

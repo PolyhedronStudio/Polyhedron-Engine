@@ -22,10 +22,10 @@
 *	Constants.
 **/
 //! Maximum of Clipping Planes to bump and slide along to.
-static constexpr int32_t MAX_SLIDEBOX_CLIP_PLANES = 16;
+static constexpr int32_t MAX_SLIDEBOX_CLIP_PLANES = 8;
 
 //! Epsilon value for plane interaction tests.
-static constexpr float SLIDEBOX_PLANEINTERACT_EPSILON = 0.015625;
+static constexpr float SLIDEBOX_PLANEINTERACT_EPSILON = 1.0 / 32.0;
 
 // 
 static constexpr int32_t SLIDEBOXFLAG_PLANE_TOUCHED = 16;
@@ -36,7 +36,7 @@ static constexpr int32_t SLIDEBOXFLAG_MOVED = 1;
 
 //#define SG_SLIDEBOX_DEBUG_TRAPPED
 
-static constexpr float STOP_EPSILON = 0.1;
+static constexpr float STOP_EPSILON = FLT_EPSILON; //0.1;
 
 //static inline const bool IsGroundPlane( const CollisionPlane &plane, const vec3_t &gravityDir) {
 //	return ( vec3_dot( plane.normal, gravityDir ) < -0.45f);
@@ -76,13 +76,7 @@ static SGTraceResult SBM_Trace( SlideBoxMove* move, const vec3_t *origin, const 
 	GameEntity *geSkip = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( traceSkipEntityNumber ) );
 
 	// Perform and return trace results.
-	if ( geSkip ) {
-		// Sphere tracing if need be.
-		if ( geSkip->GetSolid() == Solid::Sphere ) {
-			return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask, 1 );
-		}
-	}
-	return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask );
+	return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask, move->traceType );
 }
 
 /**
@@ -140,7 +134,7 @@ static void SG_AddClippingPlane( SlideBoxMove *move, const vec3_t &planeNormal )
 
 	// see if we are already clipping to this plane
 	for( i = 0; i < move->numClipPlanes; i++ ) {
-		if( vec3_dot( planeNormal, move->clipPlaneNormals[i] ) >= ( 1.0f - MAX_SLIDEBOX_CLIPPING_PLANES ) ) {
+		if( vec3_dot( planeNormal, move->clipPlaneNormals[i] ) >= ( 1.0f - SLIDEBOX_PLANEINTERACT_EPSILON ) ) {
 			return;
 		}
 	}

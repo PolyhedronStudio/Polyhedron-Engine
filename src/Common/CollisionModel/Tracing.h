@@ -36,7 +36,7 @@ static constexpr float DIST_EPSILON = 0.125;
 
 
 //! 1.0 epsilon for cylinder and sphere radius offsets.
-static constexpr float CM_RAD_EPSILON = 1.0;
+static constexpr float CM_RAD_EPSILON = 1.0; // = 1.0; // Used to be 1.0.
 
 
 
@@ -147,8 +147,10 @@ struct TraceContext {
 	//! The centered to 0,0,0 and symmetrical trace bounds for use with rotations.
 	vec3_t extents = vec3_zero();
 
-	//! Spheric data for Capsule trace types.
+	//! Non-Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
 	sphere_t traceSphere;
+	//! Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
+	sphere_t transformedTraceSphere;
 	//! BiSpheric data for Capsule trace types.
 	bisphere_t traceBiSphere;
 

@@ -160,10 +160,12 @@ LIST( APPEND SRC_COMMON
 	"${SRC_COMMON_DIR}/CollisionModel/Testing.cpp"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing.cpp"
 
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BoxSweep.cpp"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTests.cpp"	
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTraces.cpp"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTests.cpp"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTraces.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/SphereSweep.cpp"
 
 	"${SRC_COMMON_DIR}/Models/Iqm.cpp"
 
@@ -213,10 +215,12 @@ LIST( APPEND HEADERS_COMMON
 	"${SRC_COMMON_DIR}/CollisionModel/Testing.h"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing.h"
 
-	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTests.cpp"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BoxSweep.h"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTests.h"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/BrushTraces.h"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTests.h"
 	"${SRC_COMMON_DIR}/CollisionModel/Tracing/LeafTraces.h"
+	"${SRC_COMMON_DIR}/CollisionModel/Tracing/SphereSweep.h"
 
 	"${SRC_COMMON_DIR}/Net/INetNToP.h"
 	"${SRC_COMMON_DIR}/Net/INetPToN.h"

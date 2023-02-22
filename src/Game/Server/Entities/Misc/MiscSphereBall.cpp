@@ -546,7 +546,7 @@ void MiscSphereBall::SphereBallTouch( IServerGameEntity* self, IServerGameEntity
     }
 
     // Ground entity checks.
-	GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( geValidatedOther->GetGroundEntityHandle() );
+	GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( GetGroundEntityHandle() );
 
     if ( geGroundEntity == this ) {
 	//    return;
@@ -628,14 +628,13 @@ void MiscSphereBall::SphereBallTouch( IServerGameEntity* self, IServerGameEntity
 	// Force.
 	const vec3_t force = touchDirection * speedVector;
 	SetVelocity( GetVelocity() + force );
-	if ( geValidatedOther && geValidatedOther->GetSolid() == Solid::Sphere ) {
-
-		if ( plane ) {
-			SetVelocity( SG_BounceVelocity( GetVelocity(), plane->normal, 1.045 ) );
-		} else {
-			SetVelocity( SG_BounceVelocity( GetVelocity(), touchDirection, 1.0125 ) );
-		}
-	}
+	//if ( geValidatedOther && geValidatedOther->GetSolid() == Solid::Sphere ) {
+	//	if ( plane ) {
+	//		SetVelocity( SG_BounceVelocity( GetVelocity(), plane->normal, 1.045 ) );
+	//	} else {
+	//		SetVelocity( SG_BounceVelocity( GetVelocity(), otherTouchDirection, 1.0125 ) );
+	//	}
+	//}
 	//	if ( plane ) {
 		//	plane->normal = vec3_negate( plane->normal );
 	//	}

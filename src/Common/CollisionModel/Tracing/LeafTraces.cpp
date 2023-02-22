@@ -71,7 +71,7 @@ CapsuleHull leafTraceCapsuleHull;
 **/
 void CM_TraceThroughVerticalCylinder( TraceContext &traceContext, const vec3_t &origin, const float radius, const float halfHeight, const vec3_t &start, const vec3_t &end, const int32_t leafContents );
 void CM_TraceThroughSphere( TraceContext &traceContext, const vec3_t &origin, const vec3_t &offset, const float radius, const vec3_t &start, const vec3_t &end, const int32_t leafContents );
-
+void CM_TraceSphereThroughSphere( TraceContext &traceContext, mleaf_t *leaf );
 
 
 /**
@@ -80,9 +80,22 @@ void CM_TraceThroughSphere( TraceContext &traceContext, const vec3_t &origin, co
 *			traceContext's traceType. (Capsule, Sphere, Box, etc).
 **/
 void CM_TraceThroughLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
+	// Ensure the collision model is properly precached.
+	if ( !traceContext.collisionModel || !traceContext.collisionModel->cache ) {
+		return;
+	}
+
+	// Ensure leaf contents are valid.
     if ( !( leaf->contents & traceContext.contentsMask ) ) {
         return;
     }
+
+	/**
+	*	Ensure we are hitting this bounding box before testing any further.
+	**/
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 
     // Trace line against all brushes in the leaf
     mbrush_t **leafbrush = leaf->firstleafbrush;
@@ -103,14 +116,24 @@ void CM_TraceThroughLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
             continue;
         }
         
-		// Perform a specific hull type test based on our trace type.
-		// 'Capsule' brush Trace:
-		if ( traceContext.traceType == CMHullType::Capsule ) {
-			CM_TraceCapsuleThroughBrush( traceContext, brush, leaf );
-		// 'Sphere' brush Trace:
-		} else if ( traceContext.traceType == CMHullType::Sphere ) {
+		/**
+		*	Determine what Leaf Trace to use.
+		**/
+		// 'Sphere' THROUGH 'Box Brush' Trace:
+		if ( traceContext.headNodeType == CMHullType::World &&
+			traceContext.traceType == CMHullType::Sphere ) {
 			CM_TraceSphereThroughBrush( traceContext, brush, leaf );
-		// Default to, 'Box' brush Trace:
+		// 'Sphere' THROUGH 'Box Brush' Trace:
+		} else if ( traceContext.headNodeType == CMHullType::Box &&
+			traceContext.traceType == CMHullType::Sphere ) {
+			CM_TraceSphereThroughBrush( traceContext, brush, leaf );
+
+		// 'Sphere' THROUGH 'Sphere' Trace:
+		} else if ( traceContext.headNodeType == CMHullType::Sphere &&
+			traceContext.traceType == CMHullType::Sphere ) {
+			CM_TraceSphereThroughSphere( traceContext, leaf );
+
+		// Default: 'Box' IN 'Brush' Trace:
 		} else {
 	        CM_TraceBoxThroughBrush( traceContext, brush, leaf );
 		}
@@ -333,7 +356,7 @@ void CM_TraceBoxThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	/**
 	*	Calculate the 'Leaf Sphere' to test the trace with.
 	**/
-	const bbox3_t oldLeafBounds = oldLeafNode->bounds;
+	//const bbox3_t oldLeafBounds = oldLeafNode->bounds;
 	const bbox3_t traceBounds = traceContext.boundsEpsilonOffset;
 	const vec3_t traceTransformOrigin = glmvec4_to_phvec( traceContext.matTransform[3] );
 
@@ -347,7 +370,7 @@ void CM_TraceBoxThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	if ( traceContext.isTransformedTrace ) {
 	//	CM_Matrix_TransformSphere( traceContext.matTransform, traceSphere );
 	}
-//	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, traceSphere, !traceContext.isTransformedTrace );
+	//	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, traceSphere, !traceContext.isTransformedTrace );
 
 
 	/**
@@ -394,10 +417,17 @@ void CM_TraceBoxThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	// Replace the head node we're working with.
 	traceContext.headNode = leafTraceBoxHull.headNode;
 	traceContext.headNodeLeaf = &leafTraceBoxHull.leaf;
-	traceContext.headNodeType = CMHullType::Sphere;
+	traceContext.headNodeType = CMHullType::Box;
 	
 	// Perform Trace.
 	CM_TraceThroughLeaf( traceContext, &leafTraceBoxHull.leaf );
+
+	// Make sure to reset trace type, headnode(leaf) and its type.
+	//traceContext.traceType = oldTraceType;
+	//traceContext.headNode = oldHeadNode;
+	//traceContext.headNodeLeaf = oldLeafNode;
+	//traceContext.headNodeType = oldHeadNodeType;
+
 	//CM_TraceThroughLeaf( traceContext, leaf );
 }
 
@@ -409,9 +439,9 @@ void CM_TraceSphereThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-	//	return;
-	//}
+	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+		return;
+	}
 
 
 	/**
@@ -423,7 +453,7 @@ void CM_TraceSphereThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	}
 
 	// Create the test sphere.
-	sphere_t leafSphere = sphere_from_size( bbox3_symmetrical( leafBounds ), vec3_zero() );
+	sphere_t leafSphere = sphere_from_size( bbox3_symmetrical( leafBounds ), bbox3_center( leafBounds ) );
 	leafSphere.offset = { 0.f, 0.f, 0.f };
 
 	// Calculate offset rotation.
@@ -440,9 +470,9 @@ void CM_TraceSphereThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	}
 	// Spheres are always transformed when tested and traced against, so
 	// transform the sphere if needed.
-	if ( !traceContext.isTransformedTrace ) {
-		leafSphere = CM_Matrix_TransformSphere( traceContext.matTransform, leafSphere );
-	}
+	//if ( !traceContext.isTransformedTrace ) {
+	//	leafSphere = CM_Matrix_TransformSphere( traceContext.matInvTransform, leafSphere );
+	//}
 
 
 	/**
@@ -459,12 +489,13 @@ void CM_TraceSphereThroughSphere( TraceContext &traceContext, mleaf_t *leaf ) {
 	const vec3_t leafSphereStart		= traceContext.start - leafSphereOffsetOrigin; //leafSphere.offset;// + traceSphereOffsetOrigin;
 	const vec3_t leafSphereEnd			= traceContext.end - leafSphereOffsetOrigin; //leafSphere.offset;// - traceSphereOffsetOrigin;
 	
-	// Total test radius.
+	// Total test radius. ( Seems to work. )
+	//const float testRadius = ( traceSphere.radius + CM_RAD_EPSILON ) + ( leafSphere.radius + CM_RAD_EPSILON );
 	const float testRadius = ( traceSphere.radius + CM_RAD_EPSILON ) + ( leafSphere.radius + CM_RAD_EPSILON );
 
 	// Now perform sphere trace.
-	//CM_TraceThroughSphere( traceContext, traceContext.traceSphere.origin, traceContext.traceSphere.offset, testRadius, leafSphereStart, leafSphereEnd, leaf->contents );
-	CM_TraceThroughSphere( traceContext, leafSphere.origin + leafSphere.offset, leafSphere.offset, testRadius, traceSphereStart, traceSphereEnd, leaf->contents );
+	CM_TraceThroughSphere( traceContext, traceSphereOffsetOrigin, traceContext.traceSphere.offset, testRadius, leafSphereStart, leafSphereEnd, leaf->contents );
+	//CM_TraceThroughSphere( traceContext, leafSphereOffsetOrigin, leafSphere.offset, testRadius, traceSphereStart, traceSphereEnd, leaf->contents );
 }
 
 
@@ -538,9 +569,11 @@ void CM_TraceThroughSphere( TraceContext &traceContext, const vec3_t &origin, co
 	//dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
 	b = 2.0f * ( dir[ 0 ] * v1[ 0 ] + dir[ 1 ] * v1[ 1 ] + dir[ 2 ] * v1[ 2 ] );
 	c = ( v1[ 0 ] * v1[ 0 ] ) + ( v1[ 1 ] * v1[ 1 ] ) + ( v1[ 2 ] * v1[ 2 ] ) - ( radius + CM_RAD_EPSILON ) * ( radius + CM_RAD_EPSILON );
-	//const float a = (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 	d = b * b - 4.0f * c; // * a;
 	
+	//const float a = (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+	//d = b * b - 4.0f * a; // * a;
+
 	if ( d > 0 ) {
 		// Calculate Trace Hit fraction.
 		//sqrtd = sqrtf( d );
