@@ -26,9 +26,6 @@
 //! All round 'sphere hull' data, accessed in a few other CollisionModel files as extern.
 SphereHull sphereHull = {};
 
-// TODO: Obvious, clean this up
-sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin = vec3_zero() );
-sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
 
 /**
 *   @brief   
@@ -80,44 +77,56 @@ void CM_InitSphereHull( ) {
 /**
 *   @brief   
 **/
-mnode_t *CM_HeadnodeForSphere( const bbox3_t &bounds, const int32_t contents ) {
-	// Get the radius from the bounds.
-	const float radius = bbox3_radius( bounds );
-
+mnode_t *CM_HeadnodeForSphere( const bbox3_t &bounds, const sphere_t &sphere, const int32_t contents ) {
 	// Set Brush and Leaf contents
 	sphereHull.brush.contents = contents;
 	sphereHull.leaf.contents = contents;
 	
 	// Calculate half size for mins and maxs.
-	const vec3_t offset = vec3_scale( bounds.mins + bounds.maxs, 0.5f );
+	//const vec3_t offset = vec3_scale( bounds.mins + bounds.maxs, 0.5f );
+	//const vec3_t size[2] = {
+	//	bounds.mins - offset, // Not sure why but this --> mins - offset, // was somehow not working well.
+	//	bounds.maxs - offset, // Not sure why but this --> maxs - offset, // was somehow not working well.
+	//};
+	//const vec3_t mins = size[0];
+	//const vec3_t maxs = size[1];
 
-    const vec3_t size[2] = {
-        bounds.mins - offset, // Not sure why but this --> mins - offset, // was somehow not working well.
-        bounds.maxs - offset, // Not sure why but this --> maxs - offset, // was somehow not working well.
-    };
-	
-	const vec3_t mins = size[0];
-	const vec3_t maxs = size[1];
-	
+
+	//const bbox3_t epsilonBounds = bbox3_expand( bounds, CM_RAD_EPSILON );
+	//const bbox3_t symmetricBounds = bbox3_from_center_size( 
+	//	bbox3_symmetrical( epsilonBounds ), 
+	//	bbox3_center( epsilonBounds ) 
+	//);
+	//sphereHull.headNode->bounds = sphereHull.leaf.bounds = epsilonBounds;
+
+	// Bounds
+	const bbox3_t symmetricBounds = bbox3_from_center_size( 
+		bbox3_symmetrical( bounds ), 
+		bbox3_center( bounds ) 
+	);
 	sphereHull.headNode->bounds = sphereHull.leaf.bounds = bounds;
 
-    sphereHull.planes[0].dist = bounds.maxs[0];
-    sphereHull.planes[1].dist = -bounds.maxs[0];
-    sphereHull.planes[2].dist = bounds.mins[0];
-    sphereHull.planes[3].dist = -bounds.mins[0];
-    sphereHull.planes[4].dist = bounds.maxs[1];
-    sphereHull.planes[5].dist = -bounds.maxs[1];
-    sphereHull.planes[6].dist = bounds.mins[1];
-    sphereHull.planes[7].dist = -bounds.mins[1];
-    sphereHull.planes[8].dist = bounds.maxs[2];
-    sphereHull.planes[9].dist = -bounds.maxs[2];
-    sphereHull.planes[10].dist = bounds.mins[2];
-    sphereHull.planes[11].dist = -bounds.mins[2];
+	// Sphere Shape.
+	sphereHull.leaf.shapeType = CMHullType::Sphere;
+	sphereHull.leaf.sphereShape = sphere;
+
+    sphereHull.planes[0].dist = symmetricBounds.maxs[0];
+    sphereHull.planes[1].dist = -symmetricBounds.maxs[0];
+    sphereHull.planes[2].dist = symmetricBounds.mins[0];
+    sphereHull.planes[3].dist = -symmetricBounds.mins[0];
+    sphereHull.planes[4].dist = symmetricBounds.maxs[1];
+    sphereHull.planes[5].dist = -symmetricBounds.maxs[1];
+    sphereHull.planes[6].dist = symmetricBounds.mins[1];
+    sphereHull.planes[7].dist = -symmetricBounds.mins[1];
+    sphereHull.planes[8].dist = symmetricBounds.maxs[2];
+    sphereHull.planes[9].dist = -symmetricBounds.maxs[2];
+    sphereHull.planes[10].dist = symmetricBounds.mins[2];
+    sphereHull.planes[11].dist = -symmetricBounds.mins[2];
 
     return sphereHull.headNode;
 }
 
-SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents ) {
+SphereHull CM_NewSphereHull( const bbox3_t &bounds, const sphere_t &sphere, const int32_t contents ) {
 	SphereHull newSphereHull;
 
     newSphereHull.headNode = &newSphereHull.nodes[0];
@@ -179,7 +188,15 @@ SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents ) {
 	const vec3_t mins = bounds.mins;
 	const vec3_t maxs = bounds.maxs;
 	
-	newSphereHull.headNode->bounds = newSphereHull.leaf.bounds = bounds;
+	// Bounds.
+	const bbox3_t symmetricBounds = bbox3_from_size( bbox3_symmetrical( bounds ) );
+	
+	// Bounds
+	newSphereHull.headNode->bounds = newSphereHull.leaf.bounds = symmetricBounds;
+
+	// Sphere Shape.
+	newSphereHull.leaf.shapeType = CMHullType::Sphere;
+	newSphereHull.leaf.sphereShape = sphere;
 
     newSphereHull.planes[0].dist = maxs[0];
     newSphereHull.planes[1].dist = -maxs[0];
@@ -194,7 +211,7 @@ SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents ) {
     newSphereHull.planes[10].dist = mins[2];
     newSphereHull.planes[11].dist = -mins[2];
 
-	newSphereHull.sphere = bbox3_to_sphere( bounds, bbox3_center( bounds ) );
+	//newSphereHull.sphere = bbox3_to_sphere( bounds, bbox3_center( bounds ) );
 
 	return newSphereHull;
 }

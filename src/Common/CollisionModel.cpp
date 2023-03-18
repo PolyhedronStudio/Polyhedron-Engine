@@ -68,7 +68,7 @@ CollisionPlane CM_TransformPlane( CollisionPlane *plane, const glm::mat4 &transf
 
 	// Assign new dist and normal.
 	transformedPlane.dist = transformedPlane.dist * scale + (x * transformMatrix[3][0] + y * transformMatrix[3][1] + z * transformMatrix[3][2]);;
-	transformedPlane.normal = { x, y, z };
+	transformedPlane.normal = vec3_normalize( { x, y, z } );
 
 	// Update plane signbits and type.
 	SetPlaneSignbits( &transformedPlane );
@@ -100,7 +100,7 @@ CollisionPlane CM_TranslatePlane( CollisionPlane *plane, const glm::mat4 &transl
 
 	// Assign new dist and normal.
 	transformedPlane.dist = transformedPlane.dist * scale + (x * transformMatrix[3][0] + y * transformMatrix[3][1] + z * transformMatrix[3][2]);;
-	transformedPlane.normal = { x, y, z };
+	//transformedPlane.normal = vec3_normalize( { x, y, z } );
 
 	// Update plane signbits and type.
 	SetPlaneSignbits( &transformedPlane );
@@ -194,7 +194,7 @@ const sphere_t CM_Matrix_TransformSphere( const glm::mat4 &matrix, const sphere_
 }
 
 /**
-*	@return	The box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
+*	@return	The bounds box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
 **/
 const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, const bbox3_t &bounds ) {
 	// Transform and set bounds.
@@ -216,6 +216,30 @@ const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, co
 	//} else {
 	//	return CM_Matrix_TransformBounds( matrix, bounds );
 	//}
+}
+
+/**
+*	@return	The bounds sphere transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
+**/
+void CM_EntitySphere( const uint32_t solid, const glm::mat4 &matTransform, const glm::mat4 &matInvTransform, const bbox3_t &bounds, sphere_t &sphere, sphere_t &transformedSphere, const bool isTransformed ) {
+	// Transform and set bounds.
+	bbox3_t transformedBounds = bounds; //CM_Matrix_TransformBounds( matrix, bounds );
+	// Add transform bounds and add an offset only specific to BSP brushes.
+	// TODO: solid == 31, should be client specific and check for PACKED_BSP
+	if ( solid == Solid::BSP || solid == 31 ) {
+		transformedBounds = CM_Matrix_TransformBounds( matTransform, transformedBounds );
+		transformedBounds = bbox3_expand( transformedBounds, CM_BOUNDS_EPSILON );
+	}
+
+	// Calculate the sphere from bounds.
+	sphere = sphere_from_size( bbox3_symmetrical( transformedBounds ), bbox3_center( bounds ) );
+
+	// Now transform it.
+	transformedSphere = CM_Matrix_TransformSphere( matTransform, sphere );
+
+	// Calculate offset rotation.
+	sphere_calculate_offset_rotation( matTransform, matInvTransform, sphere, isTransformed );
+	sphere_calculate_offset_rotation( matTransform, matInvTransform, transformedSphere, isTransformed );
 }
 
 /**

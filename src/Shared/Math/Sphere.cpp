@@ -29,7 +29,7 @@
 *						2      'Solid  Box' vs 'Hollow Sphere'
 *						3      'Solid  Box' vs 'Solid  Sphere'
 **/
-const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon ) {
+const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon, const bool useOriginOffset ) {
 //int Box_Sphere_Intersect( n, Bmin, Bmax, C, r, mode )
 //int    n;       /* The dimension of the space.           */
 //float  Bmin[];  /* The minimum of the box for each axis. */
@@ -45,9 +45,10 @@ const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere,
 //
 	// Squared Radius to test against.
 	const float testRadius = flt_square( sphere.radius + radiusDistEpsilon );
+	//const float testRadius = sphere.radius + radiusDistEpsilon;
 	
-	// Calculate sphere center, keep it's optional 'offset' from 'origin' in-mind.
-	const vec3_t sphereCenter = sphere.origin + sphere.offset;
+	// Calculate sphere center, use if wished for its optional 'offset' from 'origin'.
+	const vec3_t sphereCenter = ( useOriginOffset ? sphere.origin + sphere.offset : sphere.origin );
 
 	// 'Hollow Box' vs 'Hollow Sphere'
 	if ( testType == bbox3_t::IntersectType::HollowBox_HollowSphere ) {
@@ -216,7 +217,7 @@ const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere,
 /**
 *	@brief	Calculates a spherical collision shape from a 'size' vector, for use with sphere/capsule hull tracing.
 **/
-sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
+const sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
 	// Calculkate the new 'origin' centered box.
 	const bbox3_t originCenteredBounds = bbox3_from_center_size( size, origin );
 
@@ -236,7 +237,7 @@ sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
 		// Actual radius.
 		.radius = radius,
 		// Offset Radius from its origin point.
-		.offsetRadius = offsetRadius,
+		.offsetRadius = radius,
 
 		// Half Width/Height.
 		.halfHeight = halfHeight,
@@ -253,7 +254,7 @@ sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with sphere/capsule hull tracing.
 **/
-sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin ) {
+const sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin ) {
 	// Get the bounds size of the box for use with calculating an 'origin' centered bounds box.
 	const vec3_t boundsSize = bbox3_size( bounds );
 
@@ -286,14 +287,13 @@ void sphere_calculate_offset_rotation( const glm::mat4 &matTransform, const glm:
 	// Transformed path:
 	if ( isTransformed ) {
 		glm::vec4 vOffset = phvec_to_glmvec4( sphere.offset, 1 );
-		//const float t = sphere.halfHeight - sphere.radius;
-		const float t = sphere.halfHeight - sphere.offsetRadius;
+		const float t = sphere.radius - sphere.offsetRadius; //sphere.halfHeight - sphere.offsetRadius;
 		vOffset = matTransform * glm::vec4( t, t, t, 1.f ) * matInvTransform;
 		glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
 		sphere.offset = glmvec3_to_phvec( v3Offset );
 	} else {
-		const float t = sphere.halfHeight - sphere.offsetRadius;
-		sphere.offset = { 0, 0, 0 };//t };
+		const float t = sphere.radius - sphere.offsetRadius; //sphere.halfHeight - sphere.offsetRadius;
+		sphere.offset = { t, t, t };
 	}
 
 }
@@ -310,7 +310,7 @@ void sphere_calculate_offset_rotation( const glm::mat4 &matTransform, const glm:
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
 **/
-sphere_t capsule_sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
+const sphere_t capsule_sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
 	// Calculkate the new 'origin' centered box.
 	const bbox3_t originCenteredBounds = bbox3_from_center_size( size, origin );
 
@@ -347,7 +347,7 @@ sphere_t capsule_sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
 **/
-sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin ) {
+const sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin ) {
 	// Get the bounds size of the box for use with calculating an 'origin' centered bounds box.
 	const vec3_t boundsSize = bbox3_size( bounds );
 
@@ -362,12 +362,12 @@ void capsule_calculate_offset_rotation( const glm::mat4 &matTransform, const glm
 	// Transformed path:
 	if ( isTransformed ) {
 		glm::vec4 vOffset = phvec_to_glmvec4( sphere.offset, 1 );
-		const float t = sphere.halfHeight - sphere.offsetRadius;
+		const float t = sphere.radius - sphere.offsetRadius;
 		vOffset = matTransform * glm::vec4( t, t, t, 1.f ) * matInvTransform;
 		glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
 		sphere.offset = glmvec3_to_phvec( v3Offset );		
 	} else {
-		const float t = sphere.halfHeight - sphere.offsetRadius;
+		const float t = sphere.radius - sphere.offsetRadius;
 		sphere.offset = { 0, 0, t };
 	}
 	

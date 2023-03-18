@@ -137,7 +137,7 @@ typedef struct mnode_s {
 	bbox3_t bounds;
 	//int visframe;
 	//int                 numfaces;
-#if USE_REF
+//#if USE_REF
 //    union {
 //        vec_t           minmaxs[6];
         //struct bounds_t {
@@ -147,7 +147,7 @@ typedef struct mnode_s {
         //} bounds;
     //};
     int                 visframe;
-#endif
+//#endif
     struct mnode_s      *parent;
     /* <====== */
 
@@ -202,6 +202,10 @@ typedef struct {
     unsigned        key;
 #endif
 #endif
+
+	// PH: For 'Shape' leaf nodes.
+	int32_t shapeType;
+	sphere_t sphereShape;
 } mleaf_t;
 
 typedef struct {

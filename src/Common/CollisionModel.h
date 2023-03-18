@@ -103,7 +103,7 @@ mleaf_t     *CM_LeafNum(cm_t *cm, int number);
 // creates a clipping hull for an arbitrary box
 mnode_t *CM_HeadnodeForBox( const bbox3_t &bounds, const int32_t contents );
 mnode_t *CM_HeadnodeForCapsule( const bbox3_t &bounds, const int32_t contents );
-mnode_t *CM_HeadnodeForSphere( const bbox3_t &bounds, const int32_t contents );
+mnode_t *CM_HeadnodeForSphere( const bbox3_t &bounds, const sphere_t &sphere, const int32_t contents );
 mnode_t *CM_HeadnodeForOctagon( const bbox3_t &bounds, const int32_t contents );
 
 
@@ -149,8 +149,13 @@ const bbox3_t CM_Matrix_TransformBounds( const glm::mat4 &matrix, const bbox3_t 
 **/
 const sphere_t CM_Matrix_TransformSphere( const glm::mat4 &matrix, const sphere_t &sphere );
 /**
-*	@return	The box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
+*	@return	The bounds box transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
 **/
 const bbox3_t CM_EntityBounds( const uint32_t solid, const glm::mat4 &matrix, const bbox3_t &bounds );
+/**
+*	@return	The bounds sphere transformed by 'matrix', and expands the box 1.f in case of Solid::BSP
+**/
+void CM_EntitySphere( const uint32_t solid, const glm::mat4 &matTransform, const glm::mat4 &matInvTransform, const bbox3_t &bounds, sphere_t &sphere, sphere_t &transformedSphere, const bool isTransformed );
+
 #endif // CGAME_INCLUDE
 #endif // CMODEL_H

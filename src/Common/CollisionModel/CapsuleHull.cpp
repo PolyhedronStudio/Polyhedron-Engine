@@ -27,10 +27,6 @@
 //! All round 'capsule hull' data, accessed in a few other CollisionModel files as extern.
 CapsuleHull capsuleHull = {};
 
-// TODO: Obvious, clean this up
-sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin = vec3_zero() );
-sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
-sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin = vec3_zero() );
 
 /**
 *   @brief   

@@ -46,7 +46,7 @@ struct sphere_t {
 /**
 *	@brief	Calculates a spherical collision shape from a 'size' vector, for use with sphere/capsule hull tracing.
 **/
-sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin );
+const sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin );
 /**
 *	@brief	Appropriately centers a sphere's offset to rotation.
 **/
@@ -55,7 +55,7 @@ void sphere_calculate_offset_rotation( const glm::mat4 &matTransform, const glm:
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
 **/
-sphere_t capsule_sphere_from_size( const vec3_t &size, const vec3_t &origin );
+const sphere_t capsule_sphere_from_size( const vec3_t &size, const vec3_t &origin );
 /**
 *	@brief	Appropriately centers a capsule's offset to rotation.
 **/

@@ -57,9 +57,12 @@ void CM_TestCapsuleInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	bbox3_t radiusBounds = bbox3_from_center_radius( bbox3_radius( leaf->bounds ), bbox3_center( leaf->bounds ) );
+	bbox3_t symmetricLeafBounds = bbox3_from_center_size( bbox3_symmetrical( leaf->bounds ), bbox3_center( leaf->bounds ) );
+	if ( !CM_TraceIntersectBounds( traceContext, radiusBounds ) ) {
 		return;
 	}
+
 
 
 	/**
@@ -136,7 +139,7 @@ extern SphereHull leafTestSphereHull;
 //
 CollisionPlane CM_TranslatePlane( CollisionPlane *plane, const glm::mat4 &translateMatrix );
 
-void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf ) {
+void CM_Test_TraceSphere_In_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf ) {
 	// Make sure it has actual sides to clip to.
 	if (!brush->numsides) {
 		return;
@@ -149,29 +152,33 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
+	// We use the leaf test sphere for testing against the brush with.
+	sphere_t testSphere = traceContext.sphereTrace.transformedSphere;//leafTestSphereHull.sphere;
+	sphere_t intersectSphere = testSphere;
+	//if ( traceContext.isTransformedTrace ) {
+	//	intersectSphere = CM_Matrix_TransformSphere( traceContext.matTransform, intersectSphere );
+	//	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, intersectSphere, traceContext.isTransformedTrace );
+	//}
+	testSphere = intersectSphere;
+	//if ( !bbox3_intersects_sphere( traceContext.absoluteBounds, intersectSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0.f, true ) ) {
+	bbox3_t leafIntersectBounds = leafTestBoxHull.leaf.bounds;
+	if ( traceContext.isTransformedTrace ) {
+		// Get translation of matrix.
+		glm::vec4 glmTransformOrigin = traceContext.matTransform[3];
+		vec3_t transformOrigin = glmvec4_to_phvec( glmTransformOrigin );
+
+		// Now we got the translation, recenter the bbox.
+		vec3_t leafOrigin = transformOrigin + bbox3_center( leafIntersectBounds );
+
+		// Readjust bounds to origin.
+		leafIntersectBounds = bbox3_from_center_size( bbox3_size( leafIntersectBounds ), leafOrigin );
 	}
-
-
-	/**
-	*	Ensure we are hitting this 'Leaf Sphere' before testing any further.
-	**/
-	// Get the sphere to trace with.
-	sphere_t testSphere = leafTestSphereHull.sphere;
-	//sphere_t 
-
-	if ( !CM_TraceIntersectSphere( traceContext, testSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0.f ) ) {// CM_RAD_EPSILON ) ) {
-		return;
-	}
-
-
-	/**
-	*	Trace the 'Capsule Sphere' through each plane of the brush.
-	**/
-	//testSphere = traceContext.traceSphere;
-	// Sphere offset origin 
-	const vec3_t sphereOffsetOrigin = /*testSphere.origin + */testSphere.offset;
+	//if ( !bbox3_intersects_sphere( leafIntersectBounds, intersectSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0.f, false ) ) {
+	//	return;
+	//}
+	//if ( !CM_TraceIntersectSphere( traceContext, testSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0.f ) ) {
+	//	return;
+	//}
 
 
 	/**
@@ -183,43 +190,64 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
 		CollisionPlane transformedPlane = *brushSide->plane;
 		CollisionPlane translatedPlane = *brushSide->plane;
 
+		// Adjust distance to radius if not point tracing.
+		//if ( !traceContext.isPoint ) {
+		//	transformedPlane.dist += intersectSphere.offsetRadius;
+		//	translatedPlane.dist += intersectSphere.offsetRadius;
+		//}
+		// Transform if needed.
 		if ( traceContext.isTransformedTrace ) {
 			// Needed for the distance to use.
 			transformedPlane = CM_TransformPlane( &transformedPlane, traceContext.matTransform );
 			// Needed for normal testing.
 			translatedPlane = CM_TranslatePlane( &translatedPlane, traceContext.matTransform );
 		}
-
 		// Determine the plane distance.
-		float dist = 0.f;
-		if ( traceContext.isPoint ) {
-			dist = translatedPlane.dist;
-		} else {
-			// Adjust the plane distance appropriately for radius.
-			//const float dist = transformedPlane.dist + traceContext.traceSphere.radius;
-			dist = translatedPlane.dist + testSphere.radius;
-		}
+		//const float dist = transformedPlane.dist;
+		float dist = transformedPlane.dist;
+		//if ( !traceContext.isPoint ) {
+			dist += intersectSphere.radius;
+		//}
 
-		// Find the closest point on the capsule to the plane
-		const float t = vec3_dot( transformedPlane.normal, sphereOffsetOrigin );
-		//float t = vec3_dot( traceContext.traceSphere.offset, transformedPlane.normal );
+		// Calculate start and end point for traceline.
 		vec3_t startPoint = traceContext.start;
 		vec3_t endPoint = traceContext.end;
-		if ( t > 0.0f ) {
-			startPoint = traceContext.start - sphereOffsetOrigin;
-		////	//startPoint = traceContext.start - sphereOffsetOrigin;
 
+		//vec3_t startPoint = traceContext.start - intersectSphere.origin;
+		//vec3_t endPoint = traceContext.end - intersectSphere.origin;
+
+		//vec3_t startPoint = traceContext.start + intersectSphere.origin;
+		//vec3_t endPoint = traceContext.end + intersectSphere.origin;
+		//if ( !traceContext.isTransformedTrace ) {
+		//	startPoint = traceContext.start + intersectSphere.origin;
+		//	endPoint = traceContext.end + intersectSphere.origin;
+		//}
+
+
+		// Find the clostest point on the sphere to the plane.
+		const vec3_t offsetOrigin = intersectSphere.offset;
+		const float t = vec3_dot( transformedPlane.normal, offsetOrigin );
+
+		if ( t > 0 ) {
+			startPoint -= intersectSphere.offset;
+			endPoint -= intersectSphere.offset;
 		} else {
-			startPoint = traceContext.start + sphereOffsetOrigin;
-		////	//startPoint = traceContext.start + sphereOffsetOrigin;
+			startPoint += intersectSphere.offset;
+			endPoint += intersectSphere.offset;
 		}
-	
-		// Calculate trace line.
+
+
+		// Calculate trace line from translated plane.
+		//const float d1 = vec3_dot( startPoint, translatedPlane.normal ) - dist;
+		//const float d2 = vec3_dot( endPoint, translatedPlane.normal ) - dist;
+		// Calculate trace line from transformed plane.
+		//const float d1 = vec3_dot( startPoint, transformedPlane.normal ) - dist;
 		const float d1 = vec3_dot( startPoint, transformedPlane.normal ) - dist;
 
+		//const float d1 = vec3_dot( transformedPlane.normal, startPoint ) - dist;
+
 		// if completely in front of face, no intersection
-		if ( d1 > 0.0f )
-		{
+		if ( d1 > 0.0f ) {
 			return;
 		}
 	}
@@ -227,13 +255,14 @@ void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t 
     // inside this brush
     traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
     traceContext.traceResult.fraction = 0.0f;
+	traceContext.realFraction= 0.0f;
     traceContext.traceResult.contents = brush->contents;
 }
 
 /**
 *   @brief Test whether the box(mins, and maxs) when located at p1 is inside of the brush, or not.
 **/
-void CM_TestBoundingBoxInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf ) {
+void CM_Test_TraceBox_In_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf ) {
 	// Ensure we got brush sides to test for.
     if (!brush->numsides) {
         return;
@@ -253,7 +282,7 @@ void CM_TestBoundingBoxInBrush( TraceContext &traceContext, mbrush_t *brush, mle
 		if ( traceContext.isPoint ) {
 			dist = transformedPlane.dist;
 		} else {
-			dist = transformedPlane.dist - vec3_dot( traceContext.offsets[ transformedPlane.signBits ], transformedPlane.normal );
+			dist = transformedPlane.dist - vec3_dot( traceContext.aabbTrace.offsets[ transformedPlane.signBits ], transformedPlane.normal );
 		}
 		
 		const float d1 = vec3_dot( traceContext.start, transformedPlane.normal ) - dist;

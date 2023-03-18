@@ -55,7 +55,8 @@ recheck:
 //    }
 //#else
 //	// If true, we already hit something nearer.
-	if (traceContext.traceResult.fraction <= p1f) {
+	//if (traceContext.traceResult.fraction <= p1f) {
+	if (traceContext.realFraction <= p1f) {
 		return;
 	}
 //#endif
@@ -75,7 +76,7 @@ recheck:
     if ( transformedPlane.type < 3 ) {
         t1 = p1[ transformedPlane.type ] - transformedPlane.dist;
         t2 = p2[ transformedPlane.type ] - transformedPlane.dist;
-        offset = traceContext.extents[ transformedPlane.type ];
+        offset = traceContext.aabbTrace.extents[ transformedPlane.type ];
 	// Non axial planes use dot product testing.
     } else {
         t1 = vec3_dot( transformedPlane.normal, p1 ) - transformedPlane.dist;
@@ -83,9 +84,9 @@ recheck:
         if ( traceContext.isPoint ) {
 			offset = 0;
         } else {
-			offset = (fabs( traceContext.extents.x * transformedPlane.normal.x ) +
-                     fabs( traceContext.extents.y * transformedPlane.normal.y ) +
-                     fabs( traceContext.extents.z * transformedPlane.normal.z )) * 3;
+			offset = (fabs( traceContext.aabbTrace.extents.x * transformedPlane.normal.x ) +
+                     fabs( traceContext.aabbTrace.extents.y * transformedPlane.normal.y ) +
+                     fabs( traceContext.aabbTrace.extents.z * transformedPlane.normal.z )) * 3;
 		}
     }
 
@@ -97,7 +98,7 @@ recheck:
 		if ( !node->plane ) {
 			mleaf_t *leafNode = (mleaf_t *)node;
 			// TODO: First checking for any intersection might be a good thing to do here.
-			CM_TraceThroughLeaf( traceContext, leafNode );
+			CM_Trace_TraceBox_ThroughLeaf( traceContext, leafNode );
 			return;
 		}
 		// Perform another check traversing even further down the BSP tree.
@@ -110,7 +111,7 @@ recheck:
 		if ( !node->plane ) {
 			mleaf_t *leafNode = (mleaf_t *)node;
 			// TODO: First checking for any intersection might be a good thing to do here.
-			CM_TraceThroughLeaf( traceContext, leafNode );
+			CM_Trace_TraceBox_ThroughLeaf( traceContext, leafNode );
 			return;
 		}
 		// Perform another check traversing even further down the BSP tree.
@@ -147,7 +148,7 @@ recheck:
 
 		mnode_t *childNode = node->children[side];
 		if ( !childNode->plane ) {
-			CM_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
+			CM_Trace_TraceBox_ThroughLeaf( traceContext, (mleaf_t*)childNode );
 		} else {
 			CM_RecursiveBoxTraceThroughTree( traceContext, childNode, p1f, midf, p1, mid );
 		}
@@ -162,7 +163,7 @@ recheck:
 
 		mnode_t *childNode = node->children[side ^ 1];
 		if ( !childNode->plane ) {
-			CM_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
+			CM_Trace_TraceBox_ThroughLeaf( traceContext, (mleaf_t*)childNode );
 		} else {
 			CM_RecursiveBoxTraceThroughTree( traceContext, childNode, midf, p2f, mid, p2 );
 		}

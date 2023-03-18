@@ -68,7 +68,7 @@ static mnode_t *SV_HullForEntity(Entity *ent) {
 		return CM_HeadnodeForCapsule( ent->bounds, brushContents );
 	// Sphere Hull:
 	} else if ( ent->solid == Solid::Sphere ) {
-		return CM_HeadnodeForSphere( ent->bounds, brushContents );
+		return CM_HeadnodeForSphere( ent->bounds, ent->boundsSphere, brushContents );
 	// Default BoundingBox Hull:
     } else {
         return CM_HeadnodeForBox( ent->bounds, brushContents  );
@@ -362,6 +362,7 @@ void PF_LinkEntity( PODEntity *podEntity ) {
 		case Solid::Trigger:
 			// Unset the bounds.
 			podEntity->bounds = bbox3_t{ podEntity->mins, podEntity->maxs };
+
 			break;
 		case Solid::BSP:
 			// Adjust entity bounds to that of brush if need be.
@@ -580,12 +581,16 @@ void PF_LinkEntity( PODEntity *podEntity ) {
 	// Calculate the entity's absolute bounds(world space).
 	bbox3_t leafCheckBounds = podEntity->absoluteBounds = CM_EntityBounds( podEntity->solid, matEntityTransform, podEntity->bounds );
 
+	// Calculate the entity's bounds sphere(model space) and absolute bounds sphere(world space).
+	const bool isTransformed = matEntityTransform != ph_mat_identity();
+	CM_EntitySphere( podEntity->solid, matEntityTransform, matInvEntityTransform, podEntity->bounds, podEntity->boundsSphere, podEntity->boundsAbsoluteSphere, isTransformed );
+
 	// TODO: These are temporarily set, should be removed after making sure we are using absoluteBounds everywhere.	
 	podEntity->absMin = podEntity->absoluteBounds.mins;
 	podEntity->absMax = podEntity->absoluteBounds.maxs;
 
 	// Transform our bounds if needed. (BSP Brush entities can rotate.)
-	if ( matEntityTransform != ph_mat_identity() ) {// ph_mat_identity() ) {
+	if ( isTransformed ) {//if ( matEntityTransform != ph_mat_identity() ) {// ph_mat_identity() ) {
 		leafCheckBounds = CM_Matrix_TransformBounds( matInvEntityTransform, leafCheckBounds );
 	}
 
@@ -744,10 +749,18 @@ struct ServerTrace {
 	vec3_t start = vec3_zero();
 	//! End point of trace.
 	vec3_t end = vec3_zero();
-	//! The bounds of the hull being traced with.
+
+	// Box Bounds Trace:
+	//! The 'bounds' box we're tracing from 'start' to 'end'.
 	bbox3_t bounds = bbox3_zero();
-	//! The absolute bounds of the entire move.
+	//! The 'absolute bounds' box, containing the entire 'bounds' clip move from 'start' to 'end'.
 	bbox3_t absoluteBounds = bbox3_zero();
+
+	// Sphere Trace:
+	//! The bounds sphere we're tracing from 'start' to 'end'.
+	sphere_t boundsSphere;
+	//! The 'absolute bounds' containing the entire 'bounds sphere' clip move from 'start' to 'end'.
+	sphere_t absoluteBoundsSphere;
 
 	//! The 'brush' contents mask we're tracing against.
 	int32_t brushContentsMask = 0;
@@ -855,7 +868,7 @@ static TraceResult SV_TraceClipShapeToEntity( ServerTrace &serverTrace, mnode_t 
 	if ( clipEntity->translateMatrix == ph_mat_identity() ) {
 		// 'Sphere' Trace:
 		if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
-			return CM_SphereTrace( &sv.cm, serverTrace.start, serverTrace.end, serverTrace.bounds, headNode, serverTrace.brushContentsMask );
+			return CM_SphereTrace( &sv.cm, serverTrace.start, serverTrace.end, serverTrace.bounds, serverTrace.boundsSphere, headNode, serverTrace.brushContentsMask );
 		// 'Box' Trace:
 		} else {
 			return CM_BoxTrace( &sv.cm, serverTrace.start, serverTrace.end, serverTrace.bounds, headNode, serverTrace.brushContentsMask );
@@ -863,7 +876,7 @@ static TraceResult SV_TraceClipShapeToEntity( ServerTrace &serverTrace, mnode_t 
 	} else {
 		// 'Sphere' TransformedTrace:
 		if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
-			return CM_TransformedSphereTrace( &sv.cm, serverTrace.start, serverTrace.end, serverTrace.bounds, headNode, serverTrace.brushContentsMask, clipEntity->translateMatrix, clipEntity->invTranslateMatrix );
+			return CM_TransformedSphereTrace( &sv.cm, serverTrace.start, serverTrace.end, serverTrace.bounds, serverTrace.boundsSphere, headNode, serverTrace.brushContentsMask, clipEntity->translateMatrix, clipEntity->invTranslateMatrix );
 		// 'Box' TransformedTrace:
 		} else {
 			return CM_TransformedBoxTrace( &sv.cm, serverTrace.start, serverTrace.end, serverTrace.bounds, headNode, serverTrace.brushContentsMask, clipEntity->translateMatrix, clipEntity->invTranslateMatrix );
@@ -986,6 +999,8 @@ const TraceResult SV_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t
 			.ent = nullptr
 		}
 	};
+	bbox3_t boundsEpsilon = bbox3_expand( serverTrace.bounds, CM_RAD_EPSILON );
+	serverTrace.boundsSphere = sphere_from_size( bbox3_symmetrical( boundsEpsilon ), bbox3_center( boundsEpsilon ) );
 
 	// Ensure that our server 's collision model BSP data is precached. (i.e, a map is loaded.)
 	if ( !sv.cm.cache ) {
@@ -1023,10 +1038,14 @@ const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, c
 		// Set bounds.
 		.bounds = bbox3_t { mins, maxs }
 	};
+	bbox3_t boundsEpsilon = bbox3_expand( serverTrace.bounds, CM_RAD_EPSILON );
+	serverTrace.boundsSphere = sphere_from_size( bbox3_symmetrical( boundsEpsilon ), bbox3_center( boundsEpsilon ) );
+
 	// First perform a clipping trace to our world( The actual BSP tree itself).
 	// 'Sphere' shape:
 	if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
-		serverTrace.traceResult = CM_SphereTrace( &sv.cm, start, end, serverTrace.bounds, sv.cm.cache->nodes, contentMask );
+		// Create sphere from bounds.
+		serverTrace.traceResult = CM_SphereTrace( &sv.cm, start, end, serverTrace.bounds, serverTrace.boundsSphere, sv.cm.cache->nodes, contentMask );
 		// 'Box' shape by default.
 	} else {
 		serverTrace.traceResult = CM_BoxTrace( &sv.cm, start, end, serverTrace.bounds, sv.cm.cache->nodes, contentMask );
@@ -1049,7 +1068,11 @@ const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, c
 	serverTrace.end = end;
 	serverTrace.skipEntity = skipEntity;
 	serverTrace.brushContentsMask = contentMask;
-	serverTrace.absoluteBounds = CM_CalculateBoxTraceBounds( start, end, serverTrace.bounds );
+	if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
+		serverTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, serverTrace.bounds, serverTrace.boundsSphere.offset, serverTrace.boundsSphere.radius );
+	} else {
+		serverTrace.absoluteBounds = CM_AABB_CalculateTraceBounds( start, end, serverTrace.bounds );
+	}
 
     // If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
     SV_ClipTraceToEntities( serverTrace );

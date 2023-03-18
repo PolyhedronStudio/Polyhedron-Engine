@@ -91,7 +91,9 @@ struct CMHullType {
 **/
 struct TraceContext {
 	/**
+	*
 	*	User Input context values.
+	*
 	**/
 	//! The actual collision model it operates on (either server's, or client's.)
 	cm_t *collisionModel = nullptr;
@@ -113,20 +115,59 @@ struct TraceContext {
 	vec3_t start = vec3_zero();
 	vec3_t end = vec3_zero();
 
-	//! The trace box its bounds ( mins/maxs ).
-	bbox3_t bounds = bbox3_infinity();
-	//! The trace box with expanded epsilon bounds offset.
-	bbox3_t boundsEpsilonOffset = bbox3_infinity();
-	//! The transformed trace box its bounds. (If the trace is transformed, otherwise, equals bounds itself.)
-	bbox3_t transformedBounds = bbox3_infinity();
+	/**
+	*	AABB Trace
+	**/
+	struct AABBTrace {
+		//! The trace box its bounds ( mins/maxs ).
+		bbox3_t bounds = bbox3_infinity();
+		//! The trace box with expanded epsilon bounds offset.
+		bbox3_t boundsEpsilonOffset = bbox3_infinity();
+		//! The transformed trace box its bounds. (If the trace is transformed, otherwise, equals bounds itself.)
+		bbox3_t transformedBounds = bbox3_infinity();
 
-	//! Contains the trace its absolute bounds, from start to end.
+		//! Corners of AABB. Enables fast plane-side testing.
+		vec3_t offsets[8] = {vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero() };
+
+		//! Corners of Transformed AABB. Enables fast plane-side testing.
+		vec3_t transformedOffsets[8] = {vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero() };
+
+		//! The size of the AABB.
+		vec3_t size = vec3_zero();
+		//! Symmetrical AABB extents.
+		vec3_t extents = vec3_zero();
+
+		//! The AABB trace its absolute bounds, from start to end.
+		//bbox3_t absoluteBounds = bbox3_infinity();
+	} aabbTrace;
+	/**
+	*	Sphere Trace: Calculated based on the AABB.
+	**/
+	struct SphereTrace {
+		//! The original source bounds that were used to calculate this sphere trace with.
+		bbox3_t sourceBounds = bbox3_infinity();
+
+		//! Non-Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
+		sphere_t sphere;
+		//! Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
+		sphere_t transformedSphere;
+
+		//! The Sphere trace its absolute bounds, from start to end.
+		//bbox3_t absoluteBounds = bbox3_infinity();
+	} sphereTrace;
+
+	//! The actual in-use bounds, identical to the absoluteBounds of our current trace shape.
 	bbox3_t absoluteBounds = bbox3_infinity();
 
 
 	/**
+	*
 	*	Trace Processing context values.
+	*
 	**/
+	//! The 'Trace Shape' to test and trace our nodes with.
+	int32_t traceShape = TraceShape::AABB;
+
 	//! Determines what internal trace type to process with.
 	int32_t traceType = CMHullType::World;
 	//! Determines what headNode hull type we got. In case of None, it assumes World Brushes.
@@ -137,22 +178,6 @@ struct TraceContext {
 	bool isTransformedTrace = false;
 	//! Point or Box Trace.
 	bool isPoint = false; // Optimized case.
-
-
-	//! Corners of the trace its bounds. Enables fast plane-side testing.
-	vec3_t offsets[8] = {vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero(), vec3_zero() };
-
-	//! The size of the trace bounds.
-	vec3_t size = vec3_zero();
-	//! The centered to 0,0,0 and symmetrical trace bounds for use with rotations.
-	vec3_t extents = vec3_zero();
-
-	//! Non-Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
-	sphere_t traceSphere;
-	//! Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
-	sphere_t transformedTraceSphere;
-	//! BiSpheric data for Capsule trace types.
-	bisphere_t traceBiSphere;
 
 	//! Contains the actual final trace results that'll be returned to the caller.
 	TraceResult traceResult;
@@ -165,11 +190,15 @@ struct TraceContext {
 
 
 /**
-*	@return	The entire absolute trace bounds in world space.
+*	@return	The entire absolute 'AABB' trace bounds in world space.
 **/
-const bbox3_t CM_CalculateBoxTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds );
+const bbox3_t CM_AABB_CalculateTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds );
 /**
-*	@return	The entire absolute 'capsule' trace bounds in world space.
+*	@return	The entire absolute 'Sphere' trace bounds in world space.
+**/
+const bbox3_t CM_Sphere_CalculateTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius, const float sphereRadiusEpsilon = CM_RAD_EPSILON );
+/**
+*	@return	The entire absolute 'Capsule' trace bounds in world space.
 **/
 const bbox3_t CM_CalculateCapsuleTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius );
 
@@ -180,7 +209,7 @@ const bool CM_TraceIntersectBounds( TraceContext &traceContext, const bbox3_t &t
 /**
 *	@return	True if the sphere and the trace bounds intersect.
 **/
-const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon );
+const bool CM_TraceIntersectSphere( TraceContext &traceContext, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon, const bool useOriginOffset = true );
 /**
 *	@return	True if the 2D Cylinder and the trace bounds intersect.
 **/
@@ -216,12 +245,12 @@ const TraceResult _CM_Sphere_Trace( TraceContext &traceContext );
 /**
 *   @brief  General 'Sphere' shape tracing routine.
 **/
-const TraceResult CM_SphereTrace( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, mnode_t *headNode, int32_t brushMask );
+const TraceResult CM_SphereTrace( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const sphere_t &sphere, mnode_t *headNode, int32_t brushMask );
 /**
 *   @brief  Same as CM_SphereTrace but also handles offsetting and rotation of the end points 
 *           for moving and rotating entities. (Brush Models are the only rotating entities.)
 **/
-const TraceResult CM_TransformedSphereTrace( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, mnode_t *headNode, int32_t brushMask, const glm::mat4 &entityMatrix, const glm::mat4 &invEntityMatrix );
+const TraceResult CM_TransformedSphereTrace( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const sphere_t &sphere, mnode_t *headNode, int32_t brushMask, const glm::mat4 &entityMatrix, const glm::mat4 &invEntityMatrix );
 
 
 /**

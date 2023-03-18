@@ -439,13 +439,13 @@ inline const bbox3_t bbox3_scale( const bbox3_t &bounds, const float scale ) {
 *						2      'Solid  Box' vs 'Hollow Sphere'
 *						3      'Solid  Box' vs 'Solid  Sphere'
 **/
-const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon );
+const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon, const bool useOriginOffset = true );
 
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with sphere/capsule hull tracing.
 **/
-sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin );
+const sphere_t bbox3_to_sphere( const bbox3_t &bounds, const vec3_t &origin );
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with capsule hull tracing.
 **/
-sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin );
+const sphere_t bbox3_to_capsule( const bbox3_t &bounds, const vec3_t &origin );

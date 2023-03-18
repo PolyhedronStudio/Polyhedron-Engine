@@ -22,15 +22,24 @@ void CM_TraceBoxThroughCapsule( TraceContext &traceContext, mleaf_t *leaf );
 /**
 *   @brief 
 **/
-void CM_TraceBoxThroughSphere( TraceContext &traceContext, mleaf_t *leaf );
+void CM_Trace_TraceBox_Through_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *leaf );
 
 /**
 *   @brief 
 **/
-void CM_TraceSphereThroughSphere( TraceContext &traceContext, mleaf_t *leaf );
+void CM_Trace_TraceSphere_Through_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *leaf );
 
 
 /**
 *	@brief
 **/
-void CM_TraceThroughLeaf( TraceContext &traceContext, mleaf_t *leaf );
+void CM_Trace_TraceBox_ThroughLeaf( TraceContext &traceContext, mleaf_t *leaf );
+/**
+*	@brief
+**/
+void CM_Trace_TraceSphere_ThroughLeaf( TraceContext &traceContext, mleaf_t *leaf );
+
+/**
+*	@brief
+**/
+//void CM_TraceThroughLeaf( TraceContext &traceContext, mleaf_t *leaf );

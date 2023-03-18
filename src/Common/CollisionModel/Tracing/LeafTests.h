@@ -12,12 +12,17 @@
 
 
 /**
-*   @brief	Tests the traceContext headNode leaf against the passed in leaf,
-*			picking a designated 'Shape Hull' test function based on the 
-*			traceContext's traceType. (Capsule, Sphere, Box, etc).
+*   @brief	
 **/
-void CM_TestInLeaf( TraceContext &traceContext, mleaf_t *leaf );
-
+//void CM_TestInLeaf( TraceContext &traceContext, mleaf_t *leaf );
+/**
+*   @brief	
+**/
+void CM_Test_TraceBox_InLeaf( TraceContext &traceContext, mleaf_t *leaf );
+/**
+*   @brief	
+**/
+void CM_Test_TraceSphere_InLeaf( TraceContext &traceContext, mleaf_t *leaf );
 
 /**
 *
@@ -37,12 +42,12 @@ void CM_TestBoxLeafInCapsule( TraceContext &traceContext, mleaf_t *leaf );
 *   @brief	Exchanges the tracing type with 'Sphere' tracing against a temporary box hull,
 *			to then proceed performing a leaf test on it.
 **/
-void CM_TestBoxLeafInSphere( TraceContext &traceContext, mleaf_t *leaf );
+void CM_Test_TraceBox_In_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *leaf );
 
 /**
 *   @brief	Performs a 'Sphere' trace test on the 'Sphere' leaf node.
 **/
-void CM_TestSphereLeafInSphere( TraceContext &traceContext, mleaf_t *leaf );
+void CM_Test_TraceSphere_In_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *leaf );
 
 
 /**
@@ -57,8 +62,8 @@ void CM_TestCapsuleInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t
 /**
 *   @brief Test whether the box(mins, and maxs) when located at p1 is inside of the brush, or not.
 **/
-void CM_TestSphereInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );
+void CM_Test_TraceSphere_In_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );
 /**
 *   @brief Test whether the box(mins, and maxs) when located at p1 is inside of the brush, or not.
 **/
-void CM_TestBoundingBoxInBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );
+void CM_Test_TraceBox_In_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );

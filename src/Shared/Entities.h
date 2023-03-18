@@ -105,6 +105,11 @@ struct PODEntity {
 	bbox3_t bounds = bbox3_zero();
 	//! The tnity's absolute bounds in 'World Space'.
 	bbox3_t absoluteBounds = bbox3_zero();
+
+	//! For Solid::Sphere entities: The entity's bounding sphere in 'Model Space'.
+	sphere_t boundsSphere;
+	//! For Solid::Sphere entities: The entity's absolute bounding sphere in 'World Space'.
+	sphere_t boundsAbsoluteSphere;
 	// EOF MATRIX:
 
 	//! Min and max bounding box.
@@ -113,7 +118,8 @@ struct PODEntity {
     vec3_t absMin = vec3_zero(), absMax = vec3_zero();
 	//! The entity size described as a vec3.
 	vec3_t size = vec3_zero();
-    
+
+
 	/**
 	*	Game Physics POD:
 	**/
@@ -143,6 +149,7 @@ struct PODEntity {
 		//! The end angles for the linear movement path
 		vec3_t endAngles	= vec3_zero();
 	} linearMovement;
+
 
 	/**
 	*	Game Specific POD:

@@ -76,9 +76,9 @@ void CM_InitSphereHull( );
 /**
 *   @brief  
 **/
-mnode_t *CM_HeadnodeForSphere( const vec3_t &mins , const vec3_t &maxs );
+mnode_t *CM_HeadnodeForSphere( const vec3_t &mins, const sphere_t &sphere, const vec3_t &maxs );
 
 /**
 *	@return	A standalone CapsuleHull
 **/
-SphereHull CM_NewSphereHull( const bbox3_t &bounds, const int32_t contents );
+SphereHull CM_NewSphereHull( const bbox3_t &bounds, const sphere_t &sphere, const int32_t contents );

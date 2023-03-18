@@ -393,8 +393,8 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
         
 
 			// UNCOMMENT WHEN I WANT BULLET SPREAD BACK IN:
-            client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
-            client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
+            //client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
+            //client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
 
             // TODO: Tracing should start from a bone on the weapon mesh.
             // get start / end positions
@@ -424,6 +424,7 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
 
             // Fire a bullet. UNCOMMENT WHEN I WANT BULLET SPREAD BACK IN
             //SVG_FireBullet(player, bulletStart, forward, 10, 50, hSpread, vSpread, 0);
+			// Non Bullet Spread Fire:
 			SVG_FireBullet(player, bulletStart, forward, 10, 50, 0, 0, 0);
 
             // send muzzle flash

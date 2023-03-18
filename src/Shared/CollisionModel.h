@@ -103,6 +103,18 @@ struct CollisionSurface {
 };
 
 /**
+*
+*	Determines the shape to trace through the nodes.
+*
+**/
+struct TraceShape {
+	//! Axis Aligned Bounding Box
+	static const int32_t AABB = 0;
+	//! A sphere shape, based on the radius of the passed trace 'bounds'.
+	static const int32_t Sphere = 1;
+};
+
+/**
 *   Traces are discrete movements through world space, clipped to the
 *   BSP planes they intersect. This is the basis for all collision detection
 *   within Polyhedron.

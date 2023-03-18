@@ -20,9 +20,9 @@ void CM_TraceCapsuleThroughBrush( TraceContext &traceContext, mbrush_t *brush, m
 *   @brief Performs a 'Sphere Hull' based trace by clipping the hull to all leaf brushes, storing the final
 *	trace clipping results.
 **/
-void CM_TraceSphereThroughBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );
+void CM_Trace_TraceSphere_Through_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );
 /**
 *   @brief Performs a 'BoundingBox Hull' based trace by clipping the hull to all leaf brushes, storing the final
 *	trace clipping results.
 **/
-void CM_TraceBoxThroughBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );
+void CM_Trace_TraceBox_Through_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf );

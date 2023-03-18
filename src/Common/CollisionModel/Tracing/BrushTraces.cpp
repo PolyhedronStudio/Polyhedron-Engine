@@ -113,23 +113,27 @@ void CM_TraceCapsuleThroughBrush( TraceContext &traceContext, mbrush_t *brush, m
 
 		// Copy the plane and transform if need be. (We do not want to transform the source data.)
 		CollisionPlane transformedPlane = *plane;
+
+
+		// NEW METHOD:
+		// Adjust distance to radius if not point tracing.
+		if ( !traceContext.isPoint ) {
+			transformedPlane.dist += traceSphere.radius;
+		}
+		// Transform if needed.
 		if ( traceContext.isTransformedTrace ) {
 			transformedPlane = CM_TransformPlane( &transformedPlane, traceContext.matTransform );
 		}
+		// Determine the plane distance.
+		const float dist = transformedPlane.dist;
 
-		// NEW METHOD:
-		float dist = 0.f;
-		if ( traceContext.isPoint ) {
-			dist = transformedPlane.dist;
-		} else {
-			// Adjust the plane distance appropriately for radius.
-			//const float dist = transformedPlane.dist + traceContext.traceSphere.radius;
-			dist = transformedPlane.dist + traceSphere.offsetRadius;
-		}
+
 		// Find the closest point on the capsule to the plane
+		//float t = vec3_dot( traceContext.traceSphere.offset, transformedPlane.normal );
 		const float t = vec3_dot( transformedPlane.normal, sphereOffsetOrigin );
 
-		//float t = vec3_dot( traceContext.traceSphere.offset, transformedPlane.normal );
+		//vec3_t startPoint = ( traceContext.start - traceSphere.origin ) + traceSphere.offset;
+		//vec3_t endPoint = ( traceContext.end - traceSphere.origin ) + traceSphere.offset;	
 		vec3_t startPoint = traceContext.start;
 		vec3_t endPoint = traceContext.end;
 		if ( t > 0 ) {
@@ -141,8 +145,8 @@ void CM_TraceCapsuleThroughBrush( TraceContext &traceContext, mbrush_t *brush, m
 		}
 	
 		// Calculate trace line.
-		const float d1 = vec3_dot( startPoint, transformedPlane.normal) - dist;
-		const float d2 = vec3_dot( endPoint, transformedPlane.normal ) - dist;
+		const float d1 = vec3_dot( transformedPlane.normal, startPoint ) - dist;
+		const float d2 = vec3_dot( transformedPlane.normal, endPoint ) - dist;
 
 		// Exited the brush.	
 		if ( d2 > 0 ) {
@@ -246,7 +250,7 @@ if (d1 > d2) {
 //
 CollisionPlane CM_TranslatePlane( CollisionPlane *plane, const glm::mat4 &translateMatrix );
 
-void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf) {
+void CM_Trace_TraceSphere_Through_Brush(TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf) {
 	// Make sure it has actual sides to clip to.
 	if (!brush->numsides) {
 		return;
@@ -259,29 +263,43 @@ void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mle
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 
 
 	/**
 	*	Ensure we are hitting this 'Leaf Sphere' before testing any further.
 	**/
-	// Get the sphere to trace with.
-	sphere_t traceSphere = leafTraceSphereHull.sphere;
-	//sphere_t traceSphere = traceContext.traceSphere;
+	//// We use the transformed trace sphere(if non transformed, equals regular tracesphere) 
+	//// for tracing against the brush with.
+	//sphere_t traceSphere = traceContext.transformedTraceSphere; // leafTraceSphereHull.sphere;
+	//if ( !CM_TraceIntersectSphere( traceContext, traceContext.traceSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, CM_RAD_EPSILON ) ) {
+	//	return;
+	//}
 
-	if ( !CM_TraceIntersectSphere( traceContext, traceSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, CM_RAD_EPSILON ) ) {
-		return;
-	}
+	// We use the leaf trace sphere for testing against the brush with.
+	sphere_t traceSphere = traceContext.sphereTrace.transformedSphere;//leafTraceSphereHull.sphere;
+	sphere_t intersectSphere = traceSphere;
+	//if ( traceContext.isTransformedTrace ) {
+	//	intersectSphere = CM_Matrix_TransformSphere( traceContext.matTransform, intersectSphere );
+	//	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, intersectSphere, traceContext.isTransformedTrace );
+	//}
+	traceSphere = intersectSphere;
+	//if ( !bbox3_intersects_sphere( traceContext.absoluteBounds, intersectSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, CM_RAD_EPSILON, true ) ) {
 
+	//if ( !bbox3_intersects_sphere( leafIntersectBounds, intersectSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0.f, false ) ) {
+	//	return;
+	//}
+	//if ( !CM_TraceIntersectSphere( traceContext, traceSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, CM_RAD_EPSILON ) ) {
+	//	return;
+	//}
 
 	/**
-	*	Trace the 'Capsule Sphere' through each plane of the brush.
+	*	Trace the 'Sphere' through each plane of the brush.
 	**/
 	//traceSphere = traceContext.traceSphere;
 	// Sphere offset origin 
-	const vec3_t sphereOffsetOrigin = /* traceSphere.origin + */ traceSphere.offset;
 
 	// Keep score of if we started inside, and/or the trace exited the brush.
     bool getOut = false;
@@ -315,83 +333,59 @@ void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mle
 		// Copy the plane and transform if need be. (We do not want to transform the source data.)
 		CollisionPlane transformedPlane = *plane;
 		CollisionPlane translatedPlane = *plane;
-		//if ( traceContext.isTransformedTrace ) {
-		//	transformedPlane = CM_TransformPlane( &transformedPlane, traceContext.matTransform );
-		//	translatedPlane = CM_TranslatePlane( &translatedPlane, traceContext.matTransform );
-		//}
 
-		// OLD METHOD:
-		//// Determine the actual distance to, skip dot product in case of 'point tracing' and just use plane distance.
-		//float dist = 0.f;
-		//if ( traceContext.isPoint ) {
-		//	dist = transformedPlane.dist;
-		//} else {
-		//	// Adjust the plane distance appropriately for radius.
-		//	//const float dist = transformedPlane.dist + traceContext.traceSphere.radius;
-		//	dist = transformedPlane.dist + traceContext.traceSphere.offsetRadius;
-		//}
-
-		//vec3_t startPoint = traceContext.start;
-		//vec3_t endPoint = traceContext.end;
-		//// Calculate trace line.
-		//const float d1 = vec3_dot(startPoint, transformedPlane.normal) - ( transformedPlane.dist + traceContext.traceSphere.offsetRadius );
-		//const float d2 = vec3_dot( endPoint, transformedPlane.normal ) - ( transformedPlane.dist + traceContext.traceSphere.offsetRadius );
-
-		// NEW METHOD:
+		// Adjust distance to radius if not point tracing.
 		//if ( !traceContext.isPoint ) {
-		//	transformedPlane.dist += testSphere.offsetRadius;
+		//	transformedPlane.dist += intersectSphere.offsetRadius;
+		//	translatedPlane.dist += intersectSphere.offsetRadius;
 		//}
+		// Transform if needed.
 		if ( traceContext.isTransformedTrace ) {
 			// Needed for the distance to use.
 			transformedPlane = CM_TransformPlane( &transformedPlane, traceContext.matTransform );
 			// Needed for normal testing.
 			translatedPlane = CM_TranslatePlane( &translatedPlane, traceContext.matTransform );
 		}
-
 		// Determine the plane distance.
-		float dist = 0.f;
-		if ( traceContext.isPoint ) {
-			dist = transformedPlane.dist;
-		} else {
-			// Adjust the plane distance appropriately for radius.
-			//const float dist = transformedPlane.dist + traceContext.traceSphere.radius;
-			dist = transformedPlane.dist + traceSphere.radius;
-		}
+		//const float dist = transformedPlane.dist;
+		float dist = transformedPlane.dist;
+		//if ( !traceContext.isPoint ) {
+			dist += intersectSphere.radius;
+		//}
 
-		// Find the closest point on the capsule to the plane
-		const float t = vec3_dot( translatedPlane.normal, sphereOffsetOrigin );
-
-		//float t = vec3_dot( traceContext.traceSphere.offset, transformedPlane.normal );
+		// Calculate start and end point for traceline.
 		vec3_t startPoint = traceContext.start;
 		vec3_t endPoint = traceContext.end;
 
-		if ( t > 0.0f ) {
-			startPoint = traceContext.start - sphereOffsetOrigin;
-			endPoint = traceContext.end - sphereOffsetOrigin;
-		//	//startPoint = traceContext.start - sphereOffsetOrigin;
-		//	//endPoint = traceContext.end - sphereOffsetOrigin;
+		//vec3_t startPoint = traceContext.start - intersectSphere.origin;
+		//vec3_t endPoint = traceContext.end - intersectSphere.origin;
+
+		//vec3_t startPoint = traceContext.start + intersectSphere.origin;
+		//vec3_t endPoint = traceContext.end + intersectSphere.origin;
+		//if ( !traceContext.isTransformedTrace ) {
+		//	startPoint = traceContext.start + intersectSphere.origin;
+		//	endPoint = traceContext.end + intersectSphere.origin;
+		//}
+
+
+		// Find the clostest point on the sphere to the plane.
+		const vec3_t offsetOrigin = intersectSphere.offset;
+		const float t = vec3_dot( transformedPlane.normal, offsetOrigin );
+
+		if ( t > 0 ) {
+			startPoint -= intersectSphere.offset;
+			endPoint -= intersectSphere.offset;
 		} else {
-		//	//startPoint = traceContext.start + sphereOffsetOrigin;
-		//	//endPoint = traceContext.end + sphereOffsetOrigin;
-			startPoint = traceContext.start + sphereOffsetOrigin;
-			endPoint = traceContext.end + sphereOffsetOrigin;
+			startPoint += intersectSphere.offset;
+			endPoint += intersectSphere.offset;
 		}
 
-		//if ( t > 0.0f ) {
-		//	startPoint = traceContext.start - sphereOffsetOrigin;
-		//	endPoint = traceContext.end + sphereOffsetOrigin;
-		//	//startPoint = traceContext.start - sphereOffsetOrigin;
-		//	//endPoint = traceContext.end - sphereOffsetOrigin;
-		//} else {
-		//	//startPoint = traceContext.start + sphereOffsetOrigin;
-		//	//endPoint = traceContext.end + sphereOffsetOrigin;
-		//	startPoint = traceContext.start + sphereOffsetOrigin;
-		//	endPoint = traceContext.end - sphereOffsetOrigin;
-		//}
-	
-		// Calculate trace line.
-		const float d1 = vec3_dot( startPoint, translatedPlane.normal ) - dist;
-		const float d2 = vec3_dot( endPoint, translatedPlane.normal ) - dist;
+
+		// Calculate trace lines from translated plane.
+		//const float d1 = vec3_dot( startPoint, translatedPlane.normal ) - dist;
+		//const float d2 = vec3_dot( endPoint, translatedPlane.normal ) - dist;
+		const float d1 = vec3_dot( startPoint, transformedPlane.normal ) - dist;
+		const float d2 = vec3_dot( endPoint, transformedPlane.normal ) - dist;
 
 		// Exited the brush.	
 		if ( d2 > 0 ) {
@@ -403,7 +397,7 @@ void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mle
 		}
 
 		// If completely in front of face, no intersection occured.
-		if ( d1 > 0 && ( d2 >= DIST_EPSILON || d2 >= d1 ) ) {
+		if ( d1 > 0 && ( /*d2 >= DIST_EPSILON ||*/ d2 >= d1 ) ) {
 			return;
 		}
 
@@ -412,16 +406,11 @@ void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mle
 		}
 
 		// Calculate the fraction, enter distance, and the total move made.
+		//float f = d1 - d2;
+
 		float f = d1 - d2;
-
-		//if ( f > 0 ) {
-		if ( d1 > d2 ) {
+		if ( f > 0 ) {
 			f = d1 / f;
-
-			//f = ( d1 - DIST_EPSILON ) / f;
-			if ( f < 0 ) {
-				f = 0;
-			}
 
 			if ( f > enterFractionA ) {
 				enterDistance = d1;
@@ -430,16 +419,8 @@ void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mle
 				clipPlane = transformedPlane;
 				leadSide = side;
 			}
-		} else {//if ( f < 0 ) {
-		//} else {
-			//f = d1 / f;
-			//if ( f < leaveFraction ) {
-			//	leaveFraction = f;
-			//}
-			f = d1 / f; //( d1 + DIST_EPSILON ) / f;
-			if ( f > 1 ) {
-				f = 1;
-			}
+		} else if ( f < 0 ) {
+			f = d1 / f;
 			if ( f < leaveFraction ) {
 				leaveFraction = f;
 			}
@@ -492,7 +473,7 @@ void CM_TraceSphereThroughBrush(TraceContext &traceContext, mbrush_t *brush, mle
 *   @brief Performs a 'BoundingBox Hull' based trace by clipping the hull to all leaf brushes, storing the final
 *	trace clipping results.
 **/
-void CM_TraceBoxThroughBrush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf ) {
+void CM_Trace_TraceBox_Through_Brush( TraceContext &traceContext, mbrush_t *brush, mleaf_t *leaf ) {
 	// Make sure it has actual sides to clip to.
     if ( !brush->numsides ) {
         return;
@@ -533,7 +514,7 @@ void CM_TraceBoxThroughBrush( TraceContext &traceContext, mbrush_t *brush, mleaf
 		if ( traceContext.isPoint ) {
 			dist = transformedPlane.dist;
 		} else {
-			dist = transformedPlane.dist - vec3_dot( traceContext.offsets[ transformedPlane.signBits ], transformedPlane.normal );
+			dist = transformedPlane.dist - vec3_dot( traceContext.aabbTrace.offsets[ transformedPlane.signBits ], transformedPlane.normal );
 		}
 		// Calculate trace line.
 		const float d1 = vec3_dot( traceContext.start, transformedPlane.normal ) - dist;
