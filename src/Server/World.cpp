@@ -899,8 +899,6 @@ static const bool SV_ClipTraceToEntity( ServerTrace &serverTrace, PODEntity *cli
 		return false;
 	}
 
-
-
 	// Get the entity's headNode to use for clipping.
 	mnode_t *headNode = SV_HullForEntity( clipEntity );
 	if ( !headNode ) {
@@ -980,11 +978,11 @@ static void SV_ClipTraceToEntities( ServerTrace &serverTrace ) {
 /**
 *	@brief	Tests and clips the specified trace to a single specific entity.
 **/
-const TraceResult SV_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape = ServerTraceShape::Box ) {
+const TraceResult SV_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask ) {
 	// Initialize a server world trace context.
 	ServerTrace serverTrace = {
 		// Tracing shape to use.
-		.traceShape = traceShape,
+		.traceShape = ServerTraceShape::Box,
 		// Start/End of trace.		
 		.start = start,
 		.end = end,
@@ -1019,12 +1017,54 @@ const TraceResult SV_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t
 	// And blast off!
 	return serverTrace.traceResult;
 }
+/**
+*	@brief	Tests and clips the specified trace to a single specific entity.
+**/
+const TraceResult SV_ClipSphere( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask ) {
+	// Initialize a server world trace context.
+	ServerTrace serverTrace = {
+		// Tracing shape to use.
+		.traceShape = ServerTraceShape::Sphere,
+		// Start/End of trace.		
+		.start = start,
+		.end = end,
+		// Set bounds.
+		.bounds = bbox3_t { mins, maxs },
+		.boundsSphere = sphere,
+
+		// Contents mask to search trace clips with.
+		.brushContentsMask = contentMask,
+		// Default trace result.
+		.traceResult = {
+			.fraction = 1.f,
+			//.ent = ge->entities,
+			.ent = nullptr
+		}
+	};
+
+	// Ensure that our server 's collision model BSP data is precached. (i.e, a map is loaded.)
+	if ( !sv.cm.cache ) {
+		Com_Error( ErrorType::Drop, "%s: no map loaded", __func__ );
+		return serverTrace.traceResult;
+	}
+
+	// TODO: Do we need a skip entity when trying to clip against a single entity?
+	serverTrace.skipEntity = skipEntity;
+	// TODO: Do we need absoluteBounds when no move is made, thus clipping against a single entity?
+	//serverTrace.absoluteBounds = CM_CalculateTraceBounds( start, end, serverTrace.bounds );
+
+	// If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
+	SV_ClipTraceToEntity( serverTrace, clipEntity );
+
+	// And blast off!
+	return serverTrace.traceResult;
+}
 
 /**
 *	@brief	Moves the given mins/maxs volume through the world from start to end.
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
-const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, const int32_t contentMask, const int32_t traceShape = ServerTraceShape::Box ) {
+const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, const int32_t contentMask ) {
     // Ensure that our server's collision model BSP data is precached. (i.e, a map is loaded.)
 	if ( !sv.cm.cache || !sv.cm.cache->nodes ) {
         Com_Error( ErrorType::Drop, "%s: no map loaded", __func__ );
@@ -1034,7 +1074,7 @@ const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, c
 	// Initialize a server world trace context.
 	ServerTrace serverTrace = {
 		// Tracing shape to use.
-		.traceShape = traceShape,
+		.traceShape = ServerTraceShape::Box,
 		// Set bounds.
 		.bounds = bbox3_t { mins, maxs }
 	};
@@ -1043,13 +1083,13 @@ const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, c
 
 	// First perform a clipping trace to our world( The actual BSP tree itself).
 	// 'Sphere' shape:
-	if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
-		// Create sphere from bounds.
-		serverTrace.traceResult = CM_SphereTrace( &sv.cm, start, end, serverTrace.bounds, serverTrace.boundsSphere, sv.cm.cache->nodes, contentMask );
-		// 'Box' shape by default.
-	} else {
+	//if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
+	//	// Create sphere from bounds.
+	//	serverTrace.traceResult = CM_SphereTrace( &sv.cm, start, end, serverTrace.bounds, serverTrace.boundsSphere, sv.cm.cache->nodes, contentMask );
+	//	// 'Box' shape by default.
+	//} else {
 		serverTrace.traceResult = CM_BoxTrace( &sv.cm, start, end, serverTrace.bounds, sv.cm.cache->nodes, contentMask );
-	}
+	//}
 
 	// Blocked by the world if fraction < 1.0.
     if ( serverTrace.traceResult.fraction < 1.0 ) {		
@@ -1068,11 +1108,11 @@ const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, c
 	serverTrace.end = end;
 	serverTrace.skipEntity = skipEntity;
 	serverTrace.brushContentsMask = contentMask;
-	if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
-		serverTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, serverTrace.bounds, serverTrace.boundsSphere.offset, serverTrace.boundsSphere.radius );
-	} else {
+	//if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
+	//	serverTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, serverTrace.bounds, serverTrace.boundsSphere.offset, serverTrace.boundsSphere.radius );
+	//} else {
 		serverTrace.absoluteBounds = CM_AABB_CalculateTraceBounds( start, end, serverTrace.bounds );
-	}
+	//}
 
     // If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
     SV_ClipTraceToEntities( serverTrace );
@@ -1081,3 +1121,62 @@ const TraceResult q_gameabi SV_Trace( const vec3_t &start, const vec3_t &mins, c
     return serverTrace.traceResult;
 }
 
+/**
+*	@brief	Moves the given mins/maxs volume through the world from start to end.
+*			Passedict and edicts owned by passedict are explicitly skipped from being checked.
+**/
+const TraceResult q_gameabi SV_TraceSphere( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, const int32_t contentMask ) {
+    // Ensure that our server's collision model BSP data is precached. (i.e, a map is loaded.)
+	if ( !sv.cm.cache || !sv.cm.cache->nodes ) {
+        Com_Error( ErrorType::Drop, "%s: no map loaded", __func__ );
+		return TraceResult();
+	}
+
+	// Initialize a server world trace context.
+	ServerTrace serverTrace = {
+		// Tracing shape to use.
+		.traceShape = ServerTraceShape::Sphere,
+		// Set bounds.
+		.bounds = bbox3_t { mins, maxs },
+		.boundsSphere = sphere
+	};
+	
+	// First perform a clipping trace to our world( The actual BSP tree itself).
+	// 'Sphere' shape:
+	//if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
+		// Create sphere from bounds.
+		serverTrace.traceResult = CM_SphereTrace( &sv.cm, start, end, serverTrace.bounds, serverTrace.boundsSphere, sv.cm.cache->nodes, contentMask );
+		// 'Box' shape by default.
+	//} else {
+	//	serverTrace.traceResult = CM_BoxTrace( &sv.cm, start, end, serverTrace.bounds, sv.cm.cache->nodes, contentMask );
+	//}
+
+	// Blocked by the world if fraction < 1.0.
+    if ( serverTrace.traceResult.fraction < 1.0 ) {		
+		// Assign world entity to trace result.
+		serverTrace.traceResult.ent = ge->entities;
+
+		// Got blocked entirely, return early and skip entity testing.
+		if ( serverTrace.traceResult.startSolid ) {
+		//if ( serverTrace.traceResult.fraction == 0 ) {
+			return serverTrace.traceResult;
+		}
+    }
+	
+	// Prepare the server trace for iterating, and possibly clip to, all entities residing in the clip move's bounds.
+	serverTrace.start = start;
+	serverTrace.end = end;
+	serverTrace.skipEntity = skipEntity;
+	serverTrace.brushContentsMask = contentMask;
+	//if ( serverTrace.traceShape == ServerTraceShape::Sphere ) {
+		serverTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, serverTrace.bounds, serverTrace.boundsSphere.offset, serverTrace.boundsSphere.radius );
+	//} else {
+	//	serverTrace.absoluteBounds = CM_AABB_CalculateTraceBounds( start, end, serverTrace.bounds );
+	//}
+
+    // If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
+    SV_ClipTraceToEntities( serverTrace );
+
+	// And blast off!
+    return serverTrace.traceResult;
+}

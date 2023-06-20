@@ -31,6 +31,14 @@ public:
 
     void SpawnKey(const std::string& key, const std::string& value) override;
 
+	//
+	// Utility
+	//
+	/**
+	*	@brief	Checks if this entity should have a groundEntity set or not.
+	**/
+	void SphereCheckGround();
+
     //
     // Callback Functions.
     //

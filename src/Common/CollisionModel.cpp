@@ -113,7 +113,7 @@ CollisionPlane CM_TranslatePlane( CollisionPlane *plane, const glm::mat4 &transl
 /**
 *	@brief	Projects a point onto a vector.
 **/
-const vec3_t CM_ProjectPointOntoVector( const vec3_t vPoint, const vec3_t vStart, const vec3_t vDir ) {
+const vec3_t CM_ProjectPointOntoVector( const vec3_t &vPoint, const vec3_t &vStart, const vec3_t &vDir ) {
 	
 	// Project onto the directional vector for this segment.
 	const vec3_t projectVector = vPoint - vStart;						//VectorSubtract( point, vStart, pVec );
@@ -139,18 +139,12 @@ const float CM_DistanceFromLineSquared( const vec3_t &p, const vec3_t &lp1, cons
 
 	if ( j < 3 ) {
 		if ( fabsf( proj[ j ] - lp1[ j ] ) < fabsf( proj[ j ] - lp2[ j ] ) ) {
-			//t = p - lp1; //VectorSubtract( p, lp1, t );
 			return vec3_length_squared( p - lp1 );
 		} else {
-			//t = p - lp2; //VectorSubtract( p, lp2, t );
 			return vec3_length_squared( p - lp2 );
 		}
-
-		//return vec3_length_squared( t );//VectorLengthSquared( t );
 	}
 
-	//VectorSubtract( p, proj, t );
-	//return VectorLengthSquared( t );
 	return vec3_length_squared( p - proj );
 }
 

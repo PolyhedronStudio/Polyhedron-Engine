@@ -76,7 +76,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
         o[2] += 16;
 	}
 
-    trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid, 0);
+    trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid );
 
     VectorCopy(trace.endPosition, goal);
 
@@ -85,7 +85,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
     // pad for floors and ceilings
     VectorCopy(goal, o);
     o[2] += 6;
-    trace = gi.Trace(goal, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid, 0);
+    trace = gi.Trace(goal, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid );
     if (trace.fraction < 1) {
         VectorCopy(trace.endPosition, goal);
         goal[2] -= 6;
@@ -93,7 +93,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 
     VectorCopy(goal, o);
     o[2] -= 6;
-    trace = gi.Trace(goal, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid, 0);
+    trace = gi.Trace(goal, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid );
     if (trace.fraction < 1) {
         VectorCopy(trace.endPosition, goal);
         goal[2] += 6;

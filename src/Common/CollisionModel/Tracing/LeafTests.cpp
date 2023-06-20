@@ -42,10 +42,81 @@ SphereHull leafTestSphereHull;
 CapsuleHull leafTestCapsuleHull;
 
 
+///**
+//*   @brief	Test in 'World Leaf'.
+//**/
+//void CM_Test_World_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
+//	// Ensure the collision model is properly precached.
+//	if ( !traceContext.collisionModel || !traceContext.collisionModel->cache ) {
+//		return;
+//	}
+//
+//	// Ensure leaf contents are valid.
+//	if ( !(leaf->contents & traceContext.contentsMask ) ) {
+//		return;
+//	}
+//
+//	/**
+//	*	Ensure we are hitting this bounding box before testing any further.
+//	**/
+//	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+//	//	return;
+//	//}
+//
+//	/**
+//	*	Perform a TraceBox/TraceSphere in brush test depending on what trace type we're dealing with.
+//	**/
+//    mbrush_t **leafBrush = leaf->firstleafbrush;
+//
+//    for ( int32_t k = 0; k < leaf->numleafbrushes; k++, leafBrush++ ) {
+//        mbrush_t *brush = *leafBrush;
+//		
+//		// Skip the brush('continue') if we've already checked this brush in another leaf
+//        if ( brush->checkcount == traceContext.collisionModel->checkCount ) {
+//            continue;   
+//        }
+//        
+//		// Assign current check count.
+//        brush->checkcount = traceContext.collisionModel->checkCount;
+//
+//		// Skip the brush('continue') if the contents mask does not match to that of our trace.
+//        if ( !( brush->contents & traceContext.contentsMask ) ) {
+//            continue;
+//        }
+//        
+//		/**
+//		*	Determine what Leaf Test to use.
+//		**/
+//		// Trace: 'TraceSphere' -> 'Box Brush'
+//		// Trace: 'TraceSphere' -> 'World Brush'
+//		if ( traceContext.traceShape == CMHullType::Sphere ) {
+//			CM_TraceSphere_TestInBrush( traceContext, brush, leaf  );
+//		// Trace: 'TraceBox' -> 'Box Brush' 
+//		// Trace: 'TraceBox' -> 'World Brush' 
+//		} else {
+//			CM_TraceBox_TestInBrush( traceContext, brush, leaf );
+//		}
+//        
+//		// Exit in case of achieving an 'allSolid' trace state.
+//		if ( traceContext.traceResult.allSolid ) { //if ( !traceContext.traceResult.fraction ) {
+//			return;
+//		}
+//    }
+//}
+
+
+
 /**
-*   @brief	Test in 'World Leaf'.
+*
+*
+*	'TraceSphere' Leaf Tests:
+*
+*
 **/
-void CM_Test_World_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
+/**
+*   @brief	Test 'TraceSphere' in Leaf.
+**/
+void CM_TraceSphere_TestInLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	// Ensure the collision model is properly precached.
 	if ( !traceContext.collisionModel || !traceContext.collisionModel->cache ) {
 		return;
@@ -59,18 +130,52 @@ void CM_Test_World_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+		return;
+	}
+	//sphere_t transformedTraceSphere = traceContext.sphereTrace.transformedSphere;
+	//if ( !bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTraceSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, CM_RAD_EPSILON, true ) ) {
 	//	return;
 	//}
 
 	/**
-	*	Perform a TraceBox/TraceSphere in brush test depending on what trace type we're dealing with.
+	*
 	**/
+	// Trace: 'TraceSphere' -> 'Sphere 'Leaf Brush' 
+	if ( leaf->shapeType == CMHullType::Sphere ) {
+		// Trace line against all brushes in the leaf
+		mbrush_t **leafBrush = leaf->firstleafbrush;
+
+		if ( leafBrush ) {
+		   mbrush_t *brush = *leafBrush;
+
+			// Skip the brush('continue') if we've already checked this brush in another leaf
+			if ( brush->checkcount == traceContext.collisionModel->checkCount ) {
+				return;   
+			}
+        
+			// Assign current check count.
+			brush->checkcount = traceContext.collisionModel->checkCount;
+
+			// Skip the brush('continue') if the contents mask does not match to that of our trace.
+			if ( !( brush->contents & traceContext.contentsMask ) ) {
+				return;
+			}
+		}
+
+		CM_TraceSphere_TestInSphereLeaf( traceContext, leaf );
+		return;
+	}
+
+	/**
+	*	Perform a TraceSphere in brush test for all leaf brushes.
+	**/
+    // Trace line against all brushes in the leaf
     mbrush_t **leafBrush = leaf->firstleafbrush;
 
     for ( int32_t k = 0; k < leaf->numleafbrushes; k++, leafBrush++ ) {
         mbrush_t *brush = *leafBrush;
-		
+        
 		// Skip the brush('continue') if we've already checked this brush in another leaf
         if ( brush->checkcount == traceContext.collisionModel->checkCount ) {
             continue;   
@@ -84,19 +189,10 @@ void CM_Test_World_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
             continue;
         }
         
-		/**
-		*	Determine what Leaf Test to use.
-		**/
-		// Trace: 'TraceSphere' -> 'Box Brush'
-		// Trace: 'TraceSphere' -> 'World Brush'
-		if ( traceContext.traceShape == CMHullType::Sphere ) {
-			CM_Test_TraceSphere_In_Brush( traceContext, brush, leaf  );
-		// Trace: 'TraceBox' -> 'Box Brush' 
-		// Trace: 'TraceBox' -> 'World Brush' 
-		} else {
-			CM_Test_TraceBox_In_Brush( traceContext, brush, leaf );
-		}
-        
+		// Trace: 'TraceSphere' -> 'Box Brush' 
+		// Trace: 'TraceSphere' -> 'World Brush' 
+		CM_TraceSphere_TestInBrush( traceContext, brush, leaf );
+
 		// Exit in case of achieving an 'allSolid' trace state.
 		if ( traceContext.traceResult.allSolid ) { //if ( !traceContext.traceResult.fraction ) {
 			return;
@@ -105,9 +201,100 @@ void CM_Test_World_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 }
 
 /**
-*   @brief	Test 'TraceBox' in Leaf.
+*   @brief	Performs a 'Sphere' hull test on the 'Sphere' leaf.
 **/
-void CM_Test_TraceBox_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
+void CM_TraceSphere_TestInSphereLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
+	/**
+	*	Ensure our absolute trace bounds intersect with the sphere leaf's bounds.
+	**/
+	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+		return;
+	}
+
+
+	/**
+	*	Calculate the Leaf's sphere to 'Test' against.
+	**/
+	sphere_t leafSphere = leaf->sphereShape;
+	sphere_t transformedLeafSphere = leaf->sphereShape;
+
+	// Transform the sphere.
+	if ( traceContext.isTransformedTrace ) {
+		transformedLeafSphere = CM_Matrix_TransformSphere( traceContext.matTransform, leafSphere );
+	}
+	// Calculate offset rotation.
+	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, transformedLeafSphere, traceContext.isTransformedTrace );
+
+	// First perform a general AABB vs Sphere test.
+	if ( !sphere_intersects_bbox3( traceContext.absoluteBounds, transformedLeafSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, 0.f, true ) ) {
+		return;
+	}
+	leafSphere = transformedLeafSphere;
+
+	// Spheres are always transformed when tested and traced against, so
+	// transform the sphere if needed.
+	//if ( !traceContext.isTransformedTrace ) {
+	//	leafSphere = CM_Matrix_TransformSphere( traceContext.matInvTransform, leafSphere );
+	//}
+
+
+	/**
+	*	Calculate exact start/end trace points for the sphere's offsetOrigins.
+	**/
+	// Trace Sphere.
+	sphere_t traceSphere = traceContext.sphereTrace.transformedSphere;
+
+	const vec3_t traceSphereOffsetOrigin = traceSphere.origin + traceSphere.offset;
+	const vec3_t traceSphereStart		 = traceContext.start + traceSphereOffsetOrigin;
+	const vec3_t traceSphereEnd			 = traceContext.end + traceSphereOffsetOrigin;
+
+	// Leaf Sphere.
+	const vec3_t leafSphereOffsetOrigin = leafSphere.origin + leafSphere.offset;
+	const vec3_t leafSphereStart		= traceContext.start + leafSphereOffsetOrigin;
+	const vec3_t leafSphereEnd			= traceContext.end + leafSphereOffsetOrigin;
+
+
+	/**
+	*	Test whether the two spheres intersect/overlap.
+	**/
+	// Total test radius. (Seems to work)
+	const float testRadius = ( traceContext.sphereTrace.transformedSphere.radius + CM_RAD_EPSILON ) + ( transformedLeafSphere.radius + CM_RAD_EPSILON );
+
+	// Top point.
+	//const vec3_t pointTop = traceSphereOffsetOrigin - leafSphereStart;
+	const vec3_t pointTop = leafSphereOffsetOrigin - traceSphereStart;
+
+	if ( vec3_length_squared( pointTop ) < testRadius ) {
+		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
+		traceContext.realFraction = 0.f;
+		traceContext.traceResult.fraction = 0.f;
+		traceContext.traceResult.contents = leaf->contents;
+	}
+
+	// Bottom point.
+	//const vec3_t pointBottom = traceSphereOffsetOrigin - leafSphereEnd; //traceSphereOffsetOrigin - traceSphereBottom;
+	const vec3_t pointBottom = leafSphereOffsetOrigin - traceSphereEnd; //traceSphereOffsetOrigin - traceSphereBottom;
+	if ( vec3_length_squared( pointBottom ) < testRadius ) {
+		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
+		traceContext.realFraction = 0.f;
+		traceContext.traceResult.fraction = 0.f;
+		traceContext.traceResult.contents = leaf->contents;
+	}
+}
+
+
+
+/**
+*
+*
+*	'TraceBox' Leaf Tests:
+*
+*
+**/
+/**
+*   @brief	Test 'AABB ' in Leaf.
+**/
+void CM_TraceBox_TestInLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	// Ensure the collision model is properly precached.
 	if ( !traceContext.collisionModel || !traceContext.collisionModel->cache ) {
 		return;
@@ -130,8 +317,8 @@ void CM_Test_TraceBox_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	*
 	**/
 	// Trace: 'TraceBox' -> 'Sphere Leaf Brush' 
-	if ( traceContext.headNodeType == CMHullType::Sphere ) {
-		CM_Test_TraceBox_In_Sphere_LeafShape( traceContext, leaf );
+	if ( leaf->shapeType == CMHullType::Sphere ) {
+		CM_TraceBox_TestInSphereLeaf( traceContext, leaf );
 		return;
 	}
 
@@ -160,7 +347,7 @@ void CM_Test_TraceBox_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
         
 		// Trace: 'TraceBox' -> 'Box Brush' 
 		// Trace: 'TraceBox' -> 'World Brush' 
-		CM_Test_TraceBox_In_Brush( traceContext, brush, leaf );
+		CM_TraceBox_TestInBrush( traceContext, brush, leaf );
         
 		// Exit in case of achieving an 'allSolid' trace state.
 		if ( traceContext.traceResult.allSolid ) { //if ( !traceContext.traceResult.fraction ) {
@@ -169,111 +356,11 @@ void CM_Test_TraceBox_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
     }
 }
 
-/**
-*   @brief	Test 'TraceSphere' in Leaf.
-**/
-void CM_Test_TraceSphere_InLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
-	// Ensure the collision model is properly precached.
-	if ( !traceContext.collisionModel || !traceContext.collisionModel->cache ) {
-		return;
-	}
-
-	// Ensure leaf contents are valid.
-	if ( !(leaf->contents & traceContext.contentsMask ) ) {
-		return;
-	}
-
-	/**
-	*	Ensure we are hitting this bounding box before testing any further.
-	**/
-	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-	//	return;
-	//}
-
-	/**
-	*
-	**/
-	// Trace: 'TraceSphere' -> 'Sphere 'Leaf Brush' 
-	if ( traceContext.headNodeType == CMHullType::Sphere ) {
-		CM_Test_TraceSphere_In_Sphere_LeafShape( traceContext, leaf );
-		return;
-	}
-
-	/**
-	*	Perform a TraceSphere in brush test for all leaf brushes.
-	**/
-    // Trace line against all brushes in the leaf
-    mbrush_t **leafBrush = leaf->firstleafbrush;
-
-    for ( int32_t k = 0; k < leaf->numleafbrushes; k++, leafBrush++ ) {
-        mbrush_t *brush = *leafBrush;
-        
-		// Skip the brush('continue') if we've already checked this brush in another leaf
-        if ( brush->checkcount == traceContext.collisionModel->checkCount ) {
-            continue;   
-        }
-        
-		// Assign current check count.
-        brush->checkcount = traceContext.collisionModel->checkCount;
-
-		// Skip the brush('continue') if the contents mask does not match to that of our trace.
-        if ( !( brush->contents & traceContext.contentsMask ) ) {
-            continue;
-        }
-        
-		// Trace: 'TraceSphere' -> 'Box Brush' 
-		// Trace: 'TraceSphere' -> 'World Brush' 
-		CM_Test_TraceSphere_In_Brush( traceContext, brush, leaf );
-
-		// Exit in case of achieving an 'allSolid' trace state.
-		if ( traceContext.traceResult.allSolid ) { //if ( !traceContext.traceResult.fraction ) {
-			return;
-		}
-    }
-}
-
-
-
-/**
-*
-*
-*	SPHERE Testing
-*
-*
-**/
-static void _sphere_calculate_offset_rotation( const vec3_t origin, sphere_t &sphere, const bool isTransformed  ) {
-	glm::vec3 vTranslate = phvec_to_glmvec3( origin );
-	const glm::mat4 &matTransform = glm::translate( ph_mat_identity(), vTranslate );
-	const glm::mat4 &matInvTransform = glm::inverse( matTransform );
-
-		glm::vec4 vOffset = phvec_to_glmvec4( sphere.offset, 1 );
-		//const float t = sphere.halfHeight - sphere.radius;
-		const float t = sphere.halfHeight - sphere.offsetRadius;
-		vOffset = matTransform * glm::vec4( t, t, t, 1.f ) * matInvTransform;
-		glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
-		sphere.offset = glmvec3_to_phvec( v3Offset );
-}
-
-/**
-*	@brief	Calculates the AABBTrace bounds needed to trace, by expanding our bounds by CM_BOUNDS_EPSILON offset and transform 
-*			the bounds by our inverse matrix when dealing with a transformedTrace, after which it finishes by calculating its 
-*			symmetrical extents.
-**/
-const TraceContext::AABBTrace CM_AABB_CalculateTraceShape( TraceContext &traceContext, const bbox3_t &bounds, const bool boundsPointCase = false, 
-													   const bool isTransformedTrace = false, const glm::mat4 &matTransform = ph_mat_identity(), const glm::mat4 &matInvTransform = ph_mat_identity() );
-/**
-*	@brief	Calculates a new sphere shape to trace with for the trace context.
-*	@param	isTransformed			When true, the transformedSphere is transformed by the trace context's transform matrix. If false
-*									however, it will be identical to the non transformed sphere itself.
-*	@param	expandRadiusEpsilon		Expand by radius epsilon, for use if sphereBounds isn't epsilonOffset yet.
-**/
-const TraceContext::SphereTrace CM_Sphere_CalculateTraceShape( TraceContext &traceContext, const bbox3_t &sphereBounds, const bool boundsPointCase = false, const bool expandRadiusEpsilon = false, 
-														 const bool isTransformedTrace = false, const glm::mat4 &matTransform = ph_mat_identity(), const glm::mat4 &matInvTransform = ph_mat_identity() );
 /**
 *   @brief	Exchanges the tracing type with 'Sphere' tracing against a temporary box hull,
 *			to then proceed performing a leaf test on it.
 **/
-void CM_Test_TraceBox_In_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *leaf ) {
+void CM_TraceBox_TestInSphereLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	// TODO: ENABLE POINT TRACE AND USE THE ALREADY DETERMINED CONSTANT
 	const bool boundsPointCase = vec3_equal( traceContext.aabbTrace.bounds.mins, vec3_zero() ) && vec3_equal( traceContext.aabbTrace.bounds.maxs, vec3_zero() );
 	//traceContext.isPoint = boundsPointCase;
@@ -362,180 +449,23 @@ void CM_Test_TraceBox_In_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *
 	}
 
 	/**
-	*	Test the 'Start'/'Top' point.
+	*	Test whether the final closest distance resides within the leaf's Sphere Radius, and if so,
+	*	zero out the fractions, and set startSolid AND allSolid to 'true'.
 	**/
-	// Test the 'Start'/'Top' point.
-	//if ( vec3_length_squared( pointTop ) < testRadius ) {
 	if ( closestDistance < testRadius ) {
-	//if ( vec3_length_squared( pointTop ) < testRadius ) {
 		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
 		traceContext.realFraction = 0.f;
 		traceContext.traceResult.fraction = 0.f;
 		traceContext.traceResult.contents = leaf->contents;
 		return;
-	}
-
-	//// Go over each point of our transformed AABB and see if it resides within the transformed leaf sphere.
-	//static constexpr int32_t BBOX3_MAX_POINTS = 8;
-
-	//// Find closest point to the sphere center.
-	//for ( int32_t i = 0; i < BBOX3_MAX_POINTS; i++ ) {
-	//	// Get the offset point to test against.
-	//	//const vec3_t offsetPoint = traceContext.aabbTrace.transformedOffsets[ i ];
-
-	//	// Calculate the start and end points for our transformed bounds to test against the sphere with.
-	//	const vec3_t boxOffsetStartPoint = traceContext.start + offsetPoint;
-	//	const vec3_t boxOffsetEndPoint	 = traceContext.end + offsetPoint;
-
-	//	/**
-	//	*	Test the 'Start'/'Top' point.
-	//	**/
-	//	// Stores the top test normal result.
-	//	vec3_t topDirectionNormal;
-	//	// Test the 'Start'/'Top' point.
-	//	//if ( vec3_length_squared( pointTop ) < testRadius ) {
-	//	if ( vec3_distance_direction( leafSphereOffsetOrigin, boxOffsetStartPoint, topDirectionNormal ) < testRadius ) {
-	//	//if ( vec3_length_squared( pointTop ) < testRadius ) {
-	//		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
-	//		traceContext.realFraction = 0.f;
-	//		traceContext.traceResult.fraction = 0.f;
-	//		traceContext.traceResult.contents = leaf->contents;
-	//		return;
-	//	}
-
-	//	/**
-	//	*	Test the 'End'/'Bottom' point.
-	//	**/
-	//	// Stores the bottom test normal result.
-	//	vec3_t bottomDirectionNormal;
-	//	// Test the 'End'/'Bottom' point.
-	//	if ( vec3_distance_direction( leafSphereOffsetOrigin, boxOffsetEndPoint, bottomDirectionNormal ) < testRadius ) {
-	//	//if ( vec3_length_squared( pointBottom ) < testRadius ) {
-	//		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
-	//		traceContext.realFraction = 0.f;
-	//		traceContext.traceResult.fraction = 0.f;
-	//		traceContext.traceResult.contents = leaf->contents;
-	//		return;
-	//	}
-	//}
-}
-
-/**
-*   @brief	Performs a 'Sphere' hull test on the 'Sphere' leaf.
-**/
-void CM_Test_TraceSphere_In_Sphere_LeafShape( TraceContext &traceContext, mleaf_t *leaf ) {
-	/**
-	*	Ensure we are hitting this bounding box before testing any further.
-	**/
-	//bbox3_t symmetricLeafBounds = bbox3_from_center_size( bbox3_symmetrical( leaf->bounds ), bbox3_center( leaf->bounds ) );
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
-
-
-	/**
-	*	Calculate the Leaf's sphere to 'Test' against.
-	**/
-	bbox3_t leafBounds = leaf->bounds;
-	if ( traceContext.isTransformedTrace ) {
-		//leafBounds = CM_Matrix_TransformBounds( traceContext.matInvTransform, leafBounds );
-	}
-
-	// Create the test sphere.
-	sphere_t leafSphere = sphere_from_size( bbox3_symmetrical( leafBounds ), bbox3_center( leafBounds ) );
-	leafSphere.offset = { 0.f, 0.f, 0.f };
-
-	// Calculate offset rotation.
-	sphere_calculate_offset_rotation( traceContext.matTransform, traceContext.matInvTransform, leafSphere, traceContext.isTransformedTrace );
-
-
-	/**
-	*	Ensure we are hitting this 'Leaf Sphere' before Testing any further.
-	**/
-	// TODO: We should transform it here, just once, because right now CM_TraceIntersectSphere
-	// does so too on its own.
-	if ( !CM_TraceIntersectSphere( traceContext, leafSphere, bbox3_t::IntersectType::SolidBox_SolidSphere, 0 ) ) {
-		return;
-	}
-
-	// Spheres are always transformed when tested and traced against, so
-	// transform the sphere if needed.
-	//if ( !traceContext.isTransformedTrace ) {
-	//	leafSphere = CM_Matrix_TransformSphere( traceContext.matInvTransform, leafSphere );
-	//}
-
-
-	/**
-	*	Test whether the two spheres intersect/overlap.
-	**/
-	//// Trace Sphere.
-	//sphere_t traceSphere = traceContext.transformedTraceSphere;
-
-	//const vec3_t traceSphereOffsetOrigin = traceSphere.origin + traceSphere.offset;
-	//const vec3_t traceSphereStart		 = ( traceContext.start - traceSphere.origin ) + traceSphere.offset; //traceSphereOffsetOrigin;// - traceSphereOffsetOrigin;// + traceContext.traceSphere.offset; //+ traceSphereOffsetOrigin;
-	//const vec3_t traceSphereEnd			 = ( traceContext.end - traceSphere.origin ) + traceSphere.offset; //traceSphereOffsetOrigin;// - traceSphereOffsetOrigin; //traceContext.traceSphere.offset;// - traceSphereOffsetOrigin;
-
-	//// Leaf Sphere.
-	//const vec3_t leafSphereOffsetOrigin = leafSphere.origin + leafSphere.offset;
-	//const vec3_t leafSphereStart		= ( traceContext.start - leafSphere.origin ) + leafSphere.offset; //leafSphereOffsetOrigin; //leafSphere.offset;// + traceSphereOffsetOrigin;
-	//const vec3_t leafSphereEnd			= ( traceContext.end - leafSphere.origin ) + leafSphere.offset; //leafSphereOffsetOrigin; //leafSphere.offset;// - traceSphereOffsetOrigin;
-	
-	// Trace Sphere.
-	sphere_t traceSphere = traceContext.sphereTrace.transformedSphere;
-
-	const vec3_t traceSphereOffsetOrigin = traceSphere.origin + traceSphere.offset;
-	const vec3_t traceSphereStart		 = traceContext.start + traceSphereOffsetOrigin;// - traceSphereOffsetOrigin;// + traceContext.traceSphere.offset; //+ traceSphereOffsetOrigin;
-	const vec3_t traceSphereEnd			 = traceContext.end + traceSphereOffsetOrigin;// - traceSphereOffsetOrigin; //traceContext.traceSphere.offset;// - traceSphereOffsetOrigin;
-
-	// Leaf Sphere.
-	const vec3_t leafSphereOffsetOrigin = leafSphere.origin + leafSphere.offset;
-	const vec3_t leafSphereStart		= traceContext.start + leafSphereOffsetOrigin; //leafSphere.offset;// + traceSphereOffsetOrigin;
-	const vec3_t leafSphereEnd			= traceContext.end + leafSphereOffsetOrigin; //leafSphere.offset;// - traceSphereOffsetOrigin;
-
-
-	/**
-	*	Test
-	**/
-	// Total test radius. (Seems to work)
-	//const float testRadius = /*flt_square*/( traceSphere.radius + leafSphere.radius );
-	const float testRadius = flt_square( traceSphere.radius + CM_RAD_EPSILON + leafSphere.radius + CM_RAD_EPSILON);
-
-	// Top point.
-	//const vec3_t pointTop = traceSphereOffsetOrigin - leafSphereStart;
-	const vec3_t pointTop = leafSphereOffsetOrigin - traceSphereStart;
-
-	if ( vec3_length_squared( pointTop ) < testRadius ) {
-		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
-		traceContext.realFraction = 0.f;
-		traceContext.traceResult.fraction = 0.f;
-		traceContext.traceResult.contents = leaf->contents;
-	}
-
-	// Bottom point.
-	//const vec3_t pointBottom = traceSphereOffsetOrigin - leafSphereEnd; //traceSphereOffsetOrigin - traceSphereBottom;
-	const vec3_t pointBottom = leafSphereOffsetOrigin - traceSphereEnd; //traceSphereOffsetOrigin - traceSphereBottom;
-	if ( vec3_length_squared( pointBottom ) < testRadius ) {
-		traceContext.traceResult.startSolid = traceContext.traceResult.allSolid = true;
-		traceContext.realFraction = 0.f;
-		traceContext.traceResult.fraction = 0.f;
-		traceContext.traceResult.contents = leaf->contents;
 	}
 }
 
-
-
-/**
-*
-*
-*	CAPSULE Testing
-*
-*
-**/
 /**
 *   @brief	Exchanges the tracing type with 'Capsule' tracing against a temporary box hull,
 *			to then proceed performing a leaf test on it.
 **/
-void CM_TestBoxLeafInCapsule( TraceContext &traceContext, mleaf_t *leaf ) {
+void CM_TraceBox_TestInCapsuleLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	return;
 //	/**
 //	*	Ensure we are hitting this bounding box before testing any further.
@@ -632,10 +562,19 @@ void CM_TestBoxLeafInCapsule( TraceContext &traceContext, mleaf_t *leaf ) {
 //	CM_TestInLeaf( traceContext, &leafTestBoxHull.leaf );
 }
 
+
+
+/**
+*
+*
+*	'TraceCapsule' Leaf Tests:
+*
+*
+**/
 /**
 *   @brief	Tests whether the traceContext traceType capsule against a temporary leaf capsule.
 **/
-void CM_TestCapsuleLeafInCapsule( TraceContext &traceContext, mleaf_t *leaf ) {
+void CM_TraceCapsule_TestInCapsuleLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	return;
 
 //	// Well here we go I guess.

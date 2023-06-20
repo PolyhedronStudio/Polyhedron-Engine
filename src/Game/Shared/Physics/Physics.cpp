@@ -218,14 +218,14 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	// and return. It does not need GroundEntity behavior.
 	if( geCheck->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) {
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount( 0 );
 		return;
 	}
 
 	// Check For: Client Entity.
 	if( geCheck->GetClient() && geCheck->GetVelocity().z > 180 ) { // > 100
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount( 0 );
 		return;
 	}
 
@@ -242,14 +242,14 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount( 0 );
 		return;
 	}
 
 	// Unset Ground Entity For Non Clients: When the trace result was not in a solid, and the velocity is > 1.
 	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
 		geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
-		geCheck->SetGroundEntityLinkCount(0);
+		geCheck->SetGroundEntityLinkCount( 0 );
 		return;
 	}
 
@@ -315,7 +315,14 @@ void SG_Monster_CheckGround( GameEntity *geCheck ) {
 		geOrigin.z - groundOffset 
 	};
 
-	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck) );
+	const int32_t traceShape = ( geCheck->GetSolid() == Solid::Sphere ? 1 : 0 );
+	SGTraceResult traceResult;
+	if ( traceShape == 1 ) {
+		traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck));
+	} else {
+		sphere_t traceSphere = geCheck->GetPODEntity()->boundsSphere;
+		traceResult = SG_SphereTrace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, traceSphere, geCheck, SG_SolidMaskForGameEntity(geCheck) );
+	}
 
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
@@ -330,7 +337,7 @@ void SG_Monster_CheckGround( GameEntity *geCheck ) {
 		geCheck->SetOrigin( traceResult.endPosition );
 		
 		// We must've hit some entity, so set it.
-		geCheck->SetGroundEntity(traceResult.gameEntity);
+		geCheck->SetGroundEntity( traceResult.gameEntity );
 		if ( traceResult.gameEntity ) {
 			geCheck->SetGroundEntityLinkCount( traceResult.gameEntity->GetLinkCount() ); //ent->groundentity_linkcount = ent->groundentity->linkcount;
 		}
@@ -376,12 +383,12 @@ void SG_BoundVelocity( GameEntity *geCheck ) {
 	//if( ( scale > g_maxvelocity->value ) && ( scale ) ) {
 
 	// If it exceeds max velocity...
-	if ( (scale > sv_maxvelocity->value) && (scale) ) {
+	if ( ( scale > sv_maxvelocity->value ) && ( scale ) ) {
 		// Calculate scale to adjust velocity by.
 		scale = sv_maxvelocity->value / scale;
 
 		// Scale and set new velocity.
-		geCheck->SetVelocity(vec3_scale(entityVelocity, scale));
+		geCheck->SetVelocity( vec3_scale( entityVelocity, scale ) );
 	}
 }
 

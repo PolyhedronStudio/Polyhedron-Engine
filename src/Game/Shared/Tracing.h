@@ -66,7 +66,11 @@ struct SGTraceResult {
 /**
 *	@brief	SharedGame Trace Functionality: Supports GameEntities :-)
 **/
-SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask, const int32_t traceShape = 0 );
+SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask );
+/**
+*	@brief	
+**/
+SGTraceResult SG_SphereTrace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const sphere_t &sphere, GameEntity* skipGameEntity, const int32_t contentMask );
 
 /**
 *	@brief	SharedGame PointContents Functionality: Supports GameEntities :-)

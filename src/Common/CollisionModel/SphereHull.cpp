@@ -100,10 +100,10 @@ mnode_t *CM_HeadnodeForSphere( const bbox3_t &bounds, const sphere_t &sphere, co
 	//sphereHull.headNode->bounds = sphereHull.leaf.bounds = epsilonBounds;
 
 	// Bounds
-	const bbox3_t symmetricBounds = bbox3_from_center_size( 
+	const bbox3_t symmetricBounds = bounds;/*bbox3_from_center_size( 
 		bbox3_symmetrical( bounds ), 
 		bbox3_center( bounds ) 
-	);
+	);*/
 	sphereHull.headNode->bounds = sphereHull.leaf.bounds = bounds;
 
 	// Sphere Shape.

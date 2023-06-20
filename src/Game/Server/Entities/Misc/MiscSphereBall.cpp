@@ -216,7 +216,80 @@ void MiscSphereBall::SpawnKey(const std::string& key, const std::string& value) 
 // ==============
 void MiscSphereBall::SphereBallUse( IServerGameEntity* caller, IServerGameEntity* activator )
 {
-    SphereBallDie( caller, activator, 999, GetOrigin() );
+//    SphereBallDie( caller, activator, 999, GetOrigin() );
+}
+
+/**
+*	@brief	Checks if this entity should have a groundEntity set or not.
+**/
+void MiscSphereBall::SphereCheckGround() {
+	// Actual offset to determine for when a Hull is on-ground.
+	static constexpr float groundOffset = 0.25;
+		
+	// Get velocity.
+	const vec3_t geCheckVelocity = GetVelocity();
+
+	//// Check For: (EntityFlags::Swim | EntityFlags::Fly)
+	//// If an entity suddenly has the Swim, or Fly flag set, unset its ground entity
+	//// and return. It does not need GroundEntity behavior.
+	//if( geCheck->GetFlags() & ( EntityFlags::Swim | EntityFlags::Fly ) ) {
+	//	geCheck->SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+	//	geCheck->SetGroundEntityLinkCount(0);
+	//	return;
+	//}
+
+	// If the hull point one-quarter unit down is solid the entity is on ground.
+	const vec3_t geOrigin = GetOrigin();
+	vec3_t traceEndPoint = {
+		geOrigin.x,
+		geOrigin.y,
+		geOrigin.z - groundOffset 
+	};
+
+	// Perform ground trace.
+	const vec3_t testMins = GetMins(); //vec3_scale( GetMins(), 0.25 );
+	const vec3_t testMaxs = GetMaxs(); //vec3_scale( GetMaxs(), 0.25 );
+	const sphere_t testSphere = GetPODEntity()->boundsSphere;
+	SGTraceResult traceResult = SG_SphereTrace( geOrigin, testMins, testMaxs, traceEndPoint, testSphere, this, SG_SolidMaskForGameEntity( this ) );
+
+	// Check steepness.
+	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
+		SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		SetGroundEntityLinkCount(0);
+		return;
+	}
+
+	// Unset Ground Entity For Non Clients: When the trace result was not in a solid, and the velocity is > 1.
+	if( GetVelocity().z > 1 && !traceResult.startSolid) {
+		SetGroundEntity( SGEntityHandle( nullptr, -1 ) );
+		SetGroundEntityLinkCount(0);
+		return;
+	}
+
+	// If it did not start in a solid, and it's not stopping inside of a solid...
+	if( !traceResult.startSolid && !traceResult.allSolid ) {
+		// TODO: We don't always WANT to do this, so instead have a specific CheckGround that can be utilized
+		// for monster use.
+		SetOrigin( traceResult.endPosition );
+		// Link entity.
+		LinkEntity();
+		
+		// We must've hit some entity, so set it.
+		SetGroundEntity(traceResult.gameEntity);
+		if ( traceResult.gameEntity ) {
+			SetGroundEntityLinkCount( traceResult.gameEntity->GetLinkCount() ); //ent->groundentity_linkcount = ent->groundentity->linkcount;
+		} else {
+			//geCheck->SetGroundEntityLinkCount( 0 );
+		}
+
+		// Since we hit ground, zero out the Z velocity in case it is lower than 0.
+		if ( GetVelocity().z < 0 ) {
+			SetVelocity( vec3_t { geCheckVelocity.x, geCheckVelocity.y, 0.f } );
+		}
+
+		// Impact.
+		SG_Impact( this, traceResult );
+	}
 }
 
 void MiscSphereBall::SphereBallThink(void) {
@@ -239,7 +312,7 @@ void MiscSphereBall::SphereBallThink(void) {
 	if ( !wasOnGround ) {
 		SG_AddGravity( this );
 	}
-	SG_CheckGround( this );
+	SphereCheckGround( );
 
     // Get angular velocity for applying rotational friction.
     vec3_t angularVelocity = GetAngularVelocity();
@@ -362,7 +435,7 @@ void MiscSphereBall::SphereBallDropToFloor(void) {
     };
     
     // Exceute the trace.
-    SVGTraceResult trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
+    SVGTraceResult trace = SVG_TraceSphere(traceStart, GetMins(), GetMaxs(), traceEnd, GetPODEntity()->boundsSphere, this, BrushContentsMask::MonsterSolid );
     
     // Return in case we hit anything.
     if (trace.fraction != 1.f || trace.allSolid) {
@@ -372,7 +445,7 @@ void MiscSphereBall::SphereBallDropToFloor(void) {
     // Set new entity origin.
     SetOrigin(trace.endPosition);
 
-    SG_CheckGround(this);
+    SphereCheckGround();
 
     // Link entity back in.
     LinkEntity();

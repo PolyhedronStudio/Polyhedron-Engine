@@ -157,10 +157,20 @@ SVGTraceResult::SVGTraceResult(const TraceResult& traceResult) :
 /**
 *	@brief	ClientGame Trace function. Supports Game Entities.
 **/
-SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask, const int32_t traceShape ) {
+SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask ) {
     // Fetch POD Entity to use for pass entity testing.
     PODEntity* serverPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
 
 	// Execute and return the actual trace.
-    return gi.Trace(start, mins, maxs, end, (struct PODEntity*)serverPODEntity, contentMask, traceShape );
+    return gi.Trace(start, mins, maxs, end, (struct PODEntity*)serverPODEntity, contentMask );
+}
+/**
+*	@brief	ClientGame Trace function. Supports Game Entities.
+**/
+SVGTraceResult SVG_TraceSphere(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const sphere_t &sphere, GameEntity* skipGameEntity, const int32_t contentMask ) {
+    // Fetch POD Entity to use for pass entity testing.
+    PODEntity* serverPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
+
+	// Execute and return the actual trace.
+    return gi.TraceSphere(start, mins, maxs, end, sphere, (struct PODEntity*)serverPODEntity, contentMask );
 }

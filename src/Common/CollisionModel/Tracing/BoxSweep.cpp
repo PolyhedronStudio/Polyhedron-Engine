@@ -98,7 +98,7 @@ recheck:
 		if ( !node->plane ) {
 			mleaf_t *leafNode = (mleaf_t *)node;
 			// TODO: First checking for any intersection might be a good thing to do here.
-			CM_Trace_TraceBox_ThroughLeaf( traceContext, leafNode );
+			CM_TraceBox_TraceThroughLeaf( traceContext, leafNode );
 			return;
 		}
 		// Perform another check traversing even further down the BSP tree.
@@ -111,7 +111,7 @@ recheck:
 		if ( !node->plane ) {
 			mleaf_t *leafNode = (mleaf_t *)node;
 			// TODO: First checking for any intersection might be a good thing to do here.
-			CM_Trace_TraceBox_ThroughLeaf( traceContext, leafNode );
+			CM_TraceBox_TraceThroughLeaf( traceContext, leafNode );
 			return;
 		}
 		// Perform another check traversing even further down the BSP tree.
@@ -148,7 +148,7 @@ recheck:
 
 		mnode_t *childNode = node->children[side];
 		if ( !childNode->plane ) {
-			CM_Trace_TraceBox_ThroughLeaf( traceContext, (mleaf_t*)childNode );
+			CM_TraceBox_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
 		} else {
 			CM_RecursiveBoxTraceThroughTree( traceContext, childNode, p1f, midf, p1, mid );
 		}
@@ -163,7 +163,7 @@ recheck:
 
 		mnode_t *childNode = node->children[side ^ 1];
 		if ( !childNode->plane ) {
-			CM_Trace_TraceBox_ThroughLeaf( traceContext, (mleaf_t*)childNode );
+			CM_TraceBox_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
 		} else {
 			CM_RecursiveBoxTraceThroughTree( traceContext, childNode, midf, p2f, mid, p2 );
 		}

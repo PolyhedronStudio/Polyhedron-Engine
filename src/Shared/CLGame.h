@@ -264,11 +264,15 @@ extern "C" {
 		// Point Contents for Client.
 		int32_t (*World_PointContents) (const vec3_t &point);
 		// Performs client side clipping against packet and local entities.
-		const TraceResult (*Clip) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape );
+		const TraceResult (*Clip) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
+		// Performs client side clipping against packet and local entities.
+		const TraceResult (*ClipSphere) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
         // Performs client side tracing against packet and local entities.
-        const TraceResult (*Trace) ( const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, const int32_t traceShape );
+        const TraceResult (*Trace) ( const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask );
+        // Performs client side tracing against packet and local entities.
+        const TraceResult (*SphereTrace) ( const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const sphere_t &sphere, PODEntity* skipEntity, const int32_t contentMask );
 		// Executes a full world client side trace, on all entities.
-		const TraceResult (*World_Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, const int32_t traceShape );
+		const TraceResult (*World_Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask );
 
         //---------------------------------------------------------------------
         // Command Buffer.

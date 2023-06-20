@@ -65,4 +65,8 @@ struct CLGTraceResult {
 /**
 *	@brief	ClientGame Trace function. Supports Game Entities.
 **/
-CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask, const int32_t traceShape = 0 );
+CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask );
+/**
+*	@brief	
+**/
+CLGTraceResult CLG_SphereTrace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const sphere_t &sphere, IClientGameEntity* skipGameEntity, const int32_t& contentMask );

@@ -107,6 +107,9 @@ const int32_t SG_Physics_TossSlideBox( GameEntity *geSlider, const int32_t conte
 			.mins		= geSlider->GetMins(),
 			.maxs		= geSlider->GetMaxs(),
 
+			// The sphere to use.
+			.sphere		= geSlider->GetPODEntity()->boundsSphere,
+
 			// The remaining time: Set to FRAMETIME_S(The time a frame takes.). Meaning, we move over time through frame.
 			.remainingTime = FRAMETIME_S.count(),
 

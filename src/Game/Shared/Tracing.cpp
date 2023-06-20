@@ -127,16 +127,32 @@ SGTraceResult::SGTraceResult(const TraceResult& traceResult) :
 /**
 *	@brief	SharedGame Trace Functionality: Supports GameEntities :-)
 **/
-SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask, const int32_t traceShape ) {
+SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t contentMask ) {
     // Fetch POD Entity to use for pass entity testing.
     PODEntity* podEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
 
 	// Execute and return the actual trace.
 #ifdef SHAREDGAME_SERVERGAME
-    return gi.Trace(start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask, traceShape );
+    return gi.Trace( start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask );
 #endif
 #ifdef SHAREDGAME_CLIENTGAME
-    return clgi.Trace(start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask, traceShape );
+    return clgi.Trace( start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask );
+#endif
+}
+
+/**
+*	@brief	
+**/
+SGTraceResult SG_SphereTrace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const sphere_t &sphere, GameEntity* skipGameEntity, const int32_t contentMask ) {
+    // Fetch POD Entity to use for pass entity testing.
+    PODEntity* podEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
+
+	// Execute and return the actual trace.
+#ifdef SHAREDGAME_SERVERGAME
+    return gi.TraceSphere( start, mins, maxs, end, sphere, (struct PODEntity*)podEntity, contentMask );
+#endif
+#ifdef SHAREDGAME_CLIENTGAME
+    return clgi.SphereTrace( start, mins, maxs, end, sphere, (struct PODEntity*)podEntity, contentMask );
 #endif
 }
 
@@ -169,21 +185,21 @@ void SG_TouchTriggers(GameEntity* geToucher) {
 	}
 
     // Fetch the boxed entities.
-    GameEntityVector touched = SG_BoxEntities(geToucher->GetAbsoluteMin(), geToucher->GetAbsoluteMax(), MAX_WIRED_POD_ENTITIES, AreaEntities::Triggers);
+    GameEntityVector touched = SG_BoxEntities( geToucher->GetAbsoluteMin(), geToucher->GetAbsoluteMax(), MAX_WIRED_POD_ENTITIES, AreaEntities::Triggers );
 
     // Do some extra sanity checks on the touched entity list. It is possible to have 
     // an entity be removed before we get to it (kill triggered).
-    for (auto& touchedEntity : touched) {
-        if (!touchedEntity) {
+    for ( auto& touchedEntity : touched ) {
+        if ( !touchedEntity ) {
 	        continue;
         }
-	    if (!touchedEntity->GetPODEntity()) {
+	    if ( !touchedEntity->GetPODEntity() ) {
 	        continue;
 	    }
-	    if (!touchedEntity->IsInUse()) {
+	    if ( !touchedEntity->IsInUse() ) {
 		    continue;
 	    }
 
-        touchedEntity->DispatchTouchCallback(touchedEntity, geToucher, NULL, NULL);
+        touchedEntity->DispatchTouchCallback( touchedEntity, geToucher, NULL, NULL );
     }
 }

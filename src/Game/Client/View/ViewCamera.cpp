@@ -122,7 +122,17 @@ void ViewCamera::SetupThirdpersonViewProjection() {
 
     // Perform gun tip sphere trace.
 	//clgi.Trace(cl->playerEntityOrigin, mins, maxs, viewOrigin, geClient, BrushContentsMask::PlayerSolid); 
-	TraceResult trace = clgi.Trace(cl->playerEntityOrigin, mins, maxs, viewOrigin, nullptr, BrushContentsMask::PlayerSolid, traceShape );
+	TraceResult trace;
+	if ( traceShape == 1 ) {
+		bbox3_t sphereBox = bbox3_from_center_size( bbox3_size( { mins, maxs } ), vec3_zero() );
+		sphere_t traceSphere = sphere_from_size( 
+			bbox3_symmetrical( sphereBox ), 
+			bbox3_center( sphereBox ) 
+		);
+		trace = clgi.SphereTrace(cl->playerEntityOrigin, mins, maxs, viewOrigin, traceSphere, nullptr, BrushContentsMask::PlayerSolid );
+	} else {
+		trace = clgi.Trace( cl->playerEntityOrigin, mins, maxs, viewOrigin, nullptr, BrushContentsMask::PlayerSolid );
+	}
 
     if (trace.fraction != 1.0f) {
         // We've collided with the world, let's adjust our view origin.
@@ -436,8 +446,8 @@ void ViewCamera::TraceViewWeaponOffset() {
     constexpr float gunUpOffset = -5.f;
 
 	// Gun tip bounding box.
-    const vec3_t gunMins = { -12, -12, -12 };
-	const vec3_t gunMaxs = { 12, 12, 12 };
+    const vec3_t gunMins = { -14, -14, -14 };
+	const vec3_t gunMaxs = { 14, 14, 14 };
 
 	// Get client entity, in order to skip it for tracing.
 	GameEntity *geClient = gameWorld->GetClientGameEntity();
@@ -450,8 +460,15 @@ void ViewCamera::TraceViewWeaponOffset() {
     const vec3_t gunTipOrigin = vec3_fmaf( gunOrigin, gunLengthOffset, viewForward );
 
     // Perform gun tip sphere trace.
-    CLGTraceResult trace = CLG_Trace( gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid, 1 );
+    //CLGTraceResult trace = CLG_Trace( gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient, BrushContentsMask::PlayerSolid, 1 );
 	//TraceResult trace = clgi.Trace(gunOrigin, gunMins, gunMaxs, gunTipOrigin, geClient->GetPODEntity(), BrushContentsMask::PlayerSolid, 1);
+	bbox3_t sphereBox = { gunMins, gunMaxs };
+	sphere_t traceSphere = sphere_from_size( 
+		bbox3_symmetrical( sphereBox ), 
+		bbox3_center( sphereBox ) 
+	);
+	CLGTraceResult trace = CLG_SphereTrace(cl->playerEntityOrigin, gunMins, gunMaxs, gunTipOrigin, traceSphere, geClient, BrushContentsMask::PlayerSolid );
+
 
 	// In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
     if ( trace.fraction < 1.f || trace.podEntity != nullptr ) {

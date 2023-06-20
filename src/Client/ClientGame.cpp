@@ -547,7 +547,9 @@ void CL_InitGameProgs(void)
 	importAPI.PointContents = CL_World_PointContents;
 	importAPI.World_PointContents = CL_World_PointContents;
     importAPI.Trace = CL_World_Trace;
+	importAPI.SphereTrace = CL_World_SphereTrace;
 	importAPI.Clip = CL_World_Clip;
+	importAPI.ClipSphere = CL_World_ClipSphere;
 	importAPI.World_Trace = CL_World_Trace;
 
     // Command Buffer.

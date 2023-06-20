@@ -720,8 +720,10 @@ int SV_PointContents(const vec3_t &p);
 // returns the CONTENTS_* value from the world at the given point.
 // Quake 2 extends this to also check entities, to allow moving liquids
 
-const TraceResult SV_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape );
-const TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passedict, const int32_t contentMask, const int32_t traceShape );
+const TraceResult SV_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
+const TraceResult SV_ClipSphere( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
+const TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passedict, const int32_t contentMask );
+const TraceResult q_gameabi SV_TraceSphere(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *passedict, const int32_t contentMask );
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allSolid will be set,

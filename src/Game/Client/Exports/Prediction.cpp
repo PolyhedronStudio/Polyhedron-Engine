@@ -462,13 +462,13 @@ TraceResult ClientGamePrediction::PM_Trace( const vec3_t& start, const vec3_t& m
 	PODEntity *podClient = (geClient ? geClient->GetPODEntity() : nullptr);
 
 	if ( podClient && cl->frame.playerState.stats[PlayerStats::Health] > 0 ) {
-	    cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::PlayerSolid, 0 );
+	    cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::PlayerSolid );
 	} else if ( podClient ) {
-		cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::DeadSolid, 0 );
+		cmTrace = clgi.Trace( start, mins, maxs, end, podClient, BrushContentsMask::DeadSolid );
 	} else {
 		// TODO: Com_Error, or just perform a trace without skip entity...? Hmmm..
 		//Com_Error( ErrorType::Drop, "ClientGamePrediction::PM_Trace called without a valid skipEntity\n" );
-		cmTrace = clgi.Trace( start, mins, maxs, end, 0, BrushContentsMask::DeadSolid, 0 );
+		cmTrace = clgi.Trace( start, mins, maxs, end, 0, BrushContentsMask::DeadSolid );
 	}
 
     return cmTrace;

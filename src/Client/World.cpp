@@ -1093,11 +1093,11 @@ static void CL_World_ClipTraceToEntities( ClientTrace &clientTrace ) {
 /**
 *	@brief	Tests and clips the specified trace to a single specific entity.
 **/
-const TraceResult CL_World_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape = ClientTraceShape::Box ) {
+const TraceResult CL_World_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask ) {
 	// Initialize a server world trace context.
 	ClientTrace clientTrace = {
 		// Tracing shape to use.
-		.traceShape = traceShape,
+		.traceShape = ClientTraceShape::Box,
 		// Start/End of trace.		
 		.start = start,
 		.end = end,
@@ -1135,10 +1135,53 @@ const TraceResult CL_World_Clip( const vec3_t &start, const vec3_t &mins, const 
 	return clientTrace.traceResult;
 }
 /**
+*	@brief	Tests and clips the specified trace to a single specific entity.
+**/
+const TraceResult CL_World_ClipSphere( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask ) {
+	// Initialize a server world trace context.
+	ClientTrace clientTrace = {
+		// Tracing shape to use.
+		.traceShape = ClientTraceShape::Sphere,
+		// Start/End of trace.		
+		.start = start,
+		.end = end,
+		// Set bounds.
+		.bounds = bbox3_t { mins, maxs },
+		// Contents mask to search trace clips with.
+		.brushContentsMask = contentMask,
+		// Default trace result.
+		.traceResult = {
+			.fraction = 1.f,
+			//.ent = ge->entities,
+			.ent = nullptr
+		}
+	};
+	clientTrace.boundsSphere = sphere;
+
+	// Ensure that our client's collision model BSP data is precached. (i.e, a map is loaded.)
+	if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
+		// For the client, return an empty trace since game logic might already be firing up
+		// and awaiting a load still.
+        //Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
+		return clientTrace.traceResult;
+    }
+
+	// TODO: Do we need a skip entity when trying to clip against a single entity?
+	clientTrace.skipEntity = skipEntity;
+	// TODO: Do we need absoluteBounds when no move is made, thus clipping against a single entity?
+	//clientTrace.absoluteBounds = CM_CalculateTraceBounds( start, end, clientTrace.bounds );
+
+	// If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
+	CL_World_ClipTraceToEntity( clientTrace, clipEntity );
+
+	// And blast off!
+	return clientTrace.traceResult;
+}
+/**
 *	@brief	Moves the given mins/maxs volume through the world from start to end.
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
-const TraceResult CL_World_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, const int32_t traceShape = ClientTraceShape::Box ) {
+const TraceResult CL_World_Trace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask ) {
 	// Ensure that our client's collision model BSP data is precached. (i.e, a map is loaded.)
 	if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
 		// For the client, return an empty trace since game logic might already be firing up
@@ -1150,7 +1193,7 @@ const TraceResult CL_World_Trace( const vec3_t &start, const vec3_t &mins, const
 	// Initialize a server world trace context.
 	ClientTrace clientTrace = {
 		// Tracing shape to use.
-		.traceShape = traceShape,
+		.traceShape = ClientTraceShape::Box,
 		// Set bounds.
 		.bounds = bbox3_t { mins, maxs }
 	};
@@ -1159,12 +1202,12 @@ const TraceResult CL_World_Trace( const vec3_t &start, const vec3_t &mins, const
 
 	// First perform a clipping trace to our world( The actual BSP tree itself).
 	// 'Sphere' shape:
-	if ( clientTrace.traceShape == ClientTraceShape::Sphere ) {
-		clientTrace.traceResult = CM_SphereTrace( &cl.cm, start, end, clientTrace.bounds, clientTrace.boundsSphere, cl.cm.cache->nodes, contentMask );
-		// 'Box' shape by default.
-	} else {
+	//if ( clientTrace.traceShape == ClientTraceShape::Sphere ) {
+	//	clientTrace.traceResult = CM_SphereTrace( &cl.cm, start, end, clientTrace.bounds, clientTrace.boundsSphere, cl.cm.cache->nodes, contentMask );
+	//	// 'Box' shape by default.
+	//} else {
 		clientTrace.traceResult = CM_BoxTrace( &cl.cm, start, end, clientTrace.bounds, cl.cm.cache->nodes, contentMask );
-	}
+	//}
 	
 	// Blocked by the world if fraction < 1.0.
     if ( clientTrace.traceResult.fraction < 1.0 ) {		
@@ -1183,11 +1226,74 @@ const TraceResult CL_World_Trace( const vec3_t &start, const vec3_t &mins, const
 	clientTrace.end = end;
 	clientTrace.skipEntity = skipEntity;
 	clientTrace.brushContentsMask = contentMask;
-	if ( clientTrace.traceShape == ClientTraceShape::Sphere ) {
-		clientTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, clientTrace.bounds, clientTrace.boundsSphere.offset, clientTrace.boundsSphere.radius );
-	} else {
+	//if ( clientTrace.traceShape == ClientTraceShape::Sphere ) {
+	//	clientTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, clientTrace.bounds, clientTrace.boundsSphere.offset, clientTrace.boundsSphere.radius );
+	//} else {
 		clientTrace.absoluteBounds = CM_AABB_CalculateTraceBounds( start, end, clientTrace.bounds );
-	}
+	//}
+
+    // If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
+    CL_World_ClipTraceToEntities( clientTrace );
+
+	// And blast off!
+    return clientTrace.traceResult;
+}
+
+/**
+*	@brief	Moves the given mins/maxs volume through the world from start to end.
+*			Passedict and edicts owned by passedict are explicitly skipped from being checked.
+**/
+const TraceResult CL_World_SphereTrace( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, PODEntity *skipEntity, const int32_t contentMask ) {
+	// Ensure that our client's collision model BSP data is precached. (i.e, a map is loaded.)
+	if ( !cl.cm.cache || !cl.cm.cache->nodes ) {
+		// For the client, return an empty trace since game logic might already be firing up
+		// and awaiting a load still.
+        //Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
+		return TraceResult();
+    }
+
+	// Initialize a server world trace context.
+	ClientTrace clientTrace = {
+		// Tracing shape to use.
+		.traceShape = ClientTraceShape::Sphere,
+		// Set bounds.
+		.bounds = bbox3_t { mins, maxs },
+		.boundsSphere = sphere
+	};
+	//bbox3_t boundsEpsilon = bbox3_expand( clientTrace.bounds, CM_RAD_EPSILON );
+	//clientTrace.boundsSphere = sphere_from_size( bbox3_symmetrical( boundsEpsilon ), bbox3_center( boundsEpsilon ) );
+
+	// First perform a clipping trace to our world( The actual BSP tree itself).
+	// 'Sphere' shape:
+	//if ( clientTrace.traceShape == ClientTraceShape::Sphere ) {
+		clientTrace.traceResult = CM_SphereTrace( &cl.cm, start, end, clientTrace.bounds, clientTrace.boundsSphere, cl.cm.cache->nodes, contentMask );
+		// 'Box' shape by default.
+	//} else {
+	//	clientTrace.traceResult = CM_BoxTrace( &cl.cm, start, end, clientTrace.bounds, cl.cm.cache->nodes, contentMask );
+	//}
+	
+	// Blocked by the world if fraction < 1.0.
+    if ( clientTrace.traceResult.fraction < 1.0 ) {		
+		// Assign world entity to trace result.
+		clientTrace.traceResult.ent = cs.entities;
+
+		// Got blocked entirely, return early and skip entity testing.
+		if ( clientTrace.traceResult.startSolid ) {
+		//if ( clientTrace.traceResult.fraction == 0 ) {
+			return clientTrace.traceResult;
+		}
+    }
+	
+	// Prepare the server trace for iterating, and possibly clip to, all entities residing in the clip move's bounds.
+	clientTrace.start = start;
+	clientTrace.end = end;
+	clientTrace.skipEntity = skipEntity;
+	clientTrace.brushContentsMask = contentMask;
+	//if ( clientTrace.traceShape == ClientTraceShape::Sphere ) {
+		clientTrace.absoluteBounds = CM_Sphere_CalculateTraceBounds( start, end, clientTrace.bounds, clientTrace.boundsSphere.offset, clientTrace.boundsSphere.radius );
+	//} else {
+	//	clientTrace.absoluteBounds = CM_AABB_CalculateTraceBounds( start, end, clientTrace.bounds );
+	//}
 
     // If we didn't hit the world, iterate over all entities using our trace bounds and clip our move against their transforms.
     CL_World_ClipTraceToEntities( clientTrace );

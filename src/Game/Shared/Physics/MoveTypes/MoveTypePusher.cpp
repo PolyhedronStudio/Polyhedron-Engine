@@ -429,15 +429,67 @@ void SG_PopPushedEntityState( const bool linkEntity = true, gclient_s *geCheckCl
 /**
 *	@brief	TODO: Move into elsewhere.
 **/
-SGTraceResult SG_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, GameEntity *geSkipEntity, GameEntity *geClipEntity, const int32_t contentMask, const int32_t traceShape = 0 ) {
+const SGTraceResult SG_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, GameEntity *geSkipEntity, GameEntity *geClipEntity, const int32_t contentMask ) {
 	PODEntity *podSkipEntity = ( geSkipEntity ? geSkipEntity->GetPODEntity() : nullptr );
 	PODEntity *podClipEntity = ( geClipEntity ? geClipEntity->GetPODEntity() : nullptr );
 
 	#ifdef SHAREDGAME_CLIENTGAME
-		return clgi.Clip( start, mins, maxs, end, podSkipEntity, podClipEntity, contentMask, traceShape );
+		return clgi.Clip( start, mins, maxs, end, podSkipEntity, podClipEntity, contentMask );
 	#else
-		return gi.Clip( start, mins, maxs, end, podSkipEntity, podClipEntity, contentMask, traceShape );
+		return gi.Clip( start, mins, maxs, end, podSkipEntity, podClipEntity, contentMask );
 	#endif
+}
+/**
+*	@brief	TODO: Move into elsewhere.
+**/
+const SGTraceResult SG_ClipSphere( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, GameEntity *geSkipEntity, GameEntity *geClipEntity, const int32_t contentMask ) {
+	PODEntity *podSkipEntity = ( geSkipEntity ? geSkipEntity->GetPODEntity() : nullptr );
+	PODEntity *podClipEntity = ( geClipEntity ? geClipEntity->GetPODEntity() : nullptr );
+
+	#ifdef SHAREDGAME_CLIENTGAME
+		return clgi.ClipSphere( start, mins, maxs, end, sphere, podSkipEntity, podClipEntity, contentMask );
+	#else
+		return gi.ClipSphere( start, mins, maxs, end, sphere, podSkipEntity, podClipEntity, contentMask );
+	#endif
+}
+/**
+*	@brief	TODO: Move into elsewhere.
+**/
+const SGTraceResult SG_Pusher_ClipEntity( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, GameEntity *geSkipEntity, GameEntity *geClipEntity, const int32_t contentMask, const int32_t entitySolid ) {
+	//PODEntity *podSkipEntity = ( geSkipEntity ? geSkipEntity->GetPODEntity() : nullptr );
+	//PODEntity *podClipEntity = ( geClipEntity ? geClipEntity->GetPODEntity() : nullptr );
+
+	//#ifdef SHAREDGAME_CLIENTGAME
+	//	return clgi.ClipSphere( start, mins, maxs, end, sphere, podSkipEntity, podClipEntity, contentMask );
+	//#else
+	//	return gi.ClipSphere( start, mins, maxs, end, sphere, podSkipEntity, podClipEntity, contentMask );
+	//#endif
+	// Sphere tracing:
+	if ( entitySolid == Solid::Sphere) {
+		return SG_ClipSphere( start, mins, maxs, end, sphere, geSkipEntity, geClipEntity, contentMask );
+	} else {
+		return SG_Clip( start, mins, maxs, end, geSkipEntity, geClipEntity, contentMask );
+	}
+}
+/**
+*	@brief	SharedGame Trace Functionality: Supports GameEntities :-)
+**/
+const SGTraceResult SG_Pusher_TraceEntity(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, const sphere_t &sphere, GameEntity* skipGameEntity, const int32_t contentMask, const int32_t entitySolid ) {
+//    // Fetch POD Entity to use for pass entity testing.
+//    PODEntity* podEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
+//
+//	// Execute and return the actual trace.
+//#ifdef SHAREDGAME_SERVERGAME
+//    return gi.Trace( start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask );
+//#endif
+//#ifdef SHAREDGAME_CLIENTGAME
+//    return clgi.Trace( start, mins, maxs, end, (struct PODEntity*)podEntity, contentMask );
+//#endif
+	if ( entitySolid == Solid::Sphere ) {
+		return SG_SphereTrace( start, mins, maxs, end, sphere, skipGameEntity, contentMask );
+	} else {
+		return SG_Trace( start, mins, maxs, end, skipGameEntity, contentMask );
+	}
 }
 
 /**
@@ -530,17 +582,20 @@ const bool SG_Push_IsValidOrigin( GameEntity *geCheck, gclient_s *geCheckClient 
 	SGTraceResult testTrace;
 
 	const vec3_t testOrigin = SG_Push_GetEntityOrigin( geCheck );
-	testTrace = SG_Trace( testOrigin, geCheck->GetMins(), geCheck->GetMaxs(), testOrigin, geCheck, clipMask );
+	testTrace = SG_Pusher_TraceEntity( testOrigin, geCheck->GetMins(), geCheck->GetMaxs(), testOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, clipMask, geCheck->GetSolid() );
 
 	// Return a boolean test for the resulting outcome.
-	if ( testTrace.startSolid == false && testTrace.allSolid == false /*&& testTrace.fraction == 0.f */) {
-		int x = 10;
-	}
-
 	if ( debugTrace ) {
 		*debugTrace = testTrace;
 	}
-	return ( testTrace.startSolid == false && testTrace.allSolid == false && ( testTrace.fraction == 1.f || !testTrace.podEntity ) );
+	if ( geCheck->GetSolid() == Solid::Sphere ) {
+		return ( testTrace.startSolid == false && testTrace.allSolid == false );
+	} else {
+		if ( testTrace.startSolid == false && testTrace.allSolid == false /*&& testTrace.fraction == 0.f */) {
+			int x = 10;
+		}
+		return ( testTrace.startSolid == false && testTrace.allSolid == false && ( testTrace.fraction == 1.f || !testTrace.podEntity ) );
+	}
 }
 
 /**
@@ -575,7 +630,12 @@ const bool SG_Push_CorrectOrigin( GameEntity *geCheck, gclient_s *geCheckClient 
 	}
 
 	if ( *angularMove ) {
-		SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, 1.f + (firstTrace.fraction), vec3_normalize( vec3_negate( *angularMove ) ) ) );
+		if ( geCheck->GetSolid() == Solid::Sphere ) {
+			const float scale = 1.0f / geCheck->GetPODEntity()->boundsSphere.radius * firstTrace.fraction;
+			SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, scale, vec3_normalize( vec3_negate( *angularMove ) ) ) );
+		} else {
+			SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, 1.f + (firstTrace.fraction), vec3_normalize( vec3_negate( *angularMove ) ) ) );
+		}
 		geCheck->LinkEntity();
 		if ( SG_Push_IsValidOrigin( geCheck, nullptr, &firstTrace ) ) {
 			return true;
@@ -764,7 +824,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 		if ( !SG_Push_EntityValidSolid( geCheck ) ) {
 			continue;
 		}
-		// Linked or not.
+		// Linked or not:
 		if ( !SG_Push_EntityIsLinked( geCheck ) ) {
 			continue;
 		}
@@ -823,7 +883,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 				const vec3_t geTraceEnd		= geTraceStart + deltaMove;
 
 				// Perform trace.
-				const SGTraceResult geMoveTrace = SG_Trace( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, SG_SolidMaskForGameEntity( geCheck ) );
+				const SGTraceResult geMoveTrace = SG_Pusher_TraceEntity( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 				/*
 				*	Client:
 				*/
@@ -836,7 +896,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 					clTraceEnd		= clTraceStart + deltaMove;
 
 					// Perform trace.
-					clMoveTrace = SG_Trace( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck, SG_SolidMaskForGameEntity( geCheck ) );
+					clMoveTrace = SG_Pusher_TraceEntity( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 				}
 
 				// Link the pusher back in.
@@ -916,7 +976,12 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 				const vec3_t geTraceEnd		= geTraceStart - deltaMove;
 
 				// Perform trace.
-				const SGTraceResult geClipTrace = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				SGTraceResult geClipTrace;// = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				if ( geCheck->GetSolid() == Solid::Sphere ) {
+					geClipTrace = SG_ClipSphere( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				} else {
+					geClipTrace = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				}
 				/*
 				*	Client:
 				*/
@@ -929,7 +994,11 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 					clTraceEnd		= clTraceStart - deltaMove;
 
 					// Perform trace.
-					clClipTrace = SG_Clip( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					if ( geCheck->GetSolid() == Solid::Sphere ) {
+						clClipTrace = SG_ClipSphere( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					} else {
+						clClipTrace = SG_Clip( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					}
 				}
 								
 				// Move pusher back to destination.
@@ -971,7 +1040,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 						const vec3_t geNewOrigin	= vec3_fmaf( geOrigin, geRemainingDistance, deltaMove * vec3_fabsf( geClipTrace.plane.normal ) );
 
 						// Perform trace.
-						const SGTraceResult geTranslateTrace = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geNewOrigin, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+						const SGTraceResult geTranslateTrace = SG_Pusher_TraceEntity( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geNewOrigin, geCheck->GetPODEntity()->boundsSphere, gePusher, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 						SG_Push_SetEntityOrigin( geCheck, geTranslateTrace.endPosition );
 					
 						// Make sure to test for it however unlikely it may be for it to be incorrect.
@@ -1005,7 +1074,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 						// Need to unlink geCheck first.
 						geCheck->UnlinkEntity();
 						// Perform trace.
-						const SGTraceResult clTranslateTrace = SG_Trace( clOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clNewOrigin, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+						const SGTraceResult clTranslateTrace = SG_Pusher_TraceEntity( clOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clNewOrigin, geCheck->GetPODEntity()->boundsSphere,gePusher, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid()  );
 						SG_Push_SetEntityOrigin( geCheck, clTranslateTrace.endPosition, geCheckClient );
 
 						// Make sure to test for it however unlikely it may be for it to be incorrect.
@@ -1110,7 +1179,11 @@ const SGTraceResult SG_Push_RotateAndTrace( const vec3_t &angles, GameEntity *ge
 	const vec3_t geMaxs = geCheck->GetMaxs();
 
 	// Perform and return clipping trace results.
-	return SG_Clip( geOrigin, geMins, geMaxs, geOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+	if ( geCheck->GetSolid() == Solid::Sphere ) {
+		return SG_ClipSphere( geOrigin, geMins, geMaxs, geOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+	} else {
+		return SG_Clip( geOrigin, geMins, geMaxs, geOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+	}
 }
 
 static const vec3_t SG_Push_SlerpAnglesByQuaternion( const vec3_t &anglesA, const vec3_t &anglesB, const float fraction ) {
@@ -1361,7 +1434,12 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 				const vec3_t geTraceEnd		= geTraceStart;//SG_Push_RotatePointAroundOrigin(geTraceStart, gePusher->GetOrigin(), angularDeltaMove);;//geTraceStart;
 
 				// Perform clip entity trace to see how much of the move can be performed.
-				SGTraceResult geClipTrace = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				SGTraceResult geClipTrace;
+				if ( geCheck->GetSolid() == Solid::Sphere ) {
+					geClipTrace = SG_ClipSphere( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				} else {
+					geClipTrace = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+				}
 				//SGTraceResult geClipTrace = SG_Trace( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, SG_SolidMaskForGameEntity( geCheck ) );
 
 				// See if we intersected with it, and if so, determine by how much for our remaining move to perform.
@@ -1413,7 +1491,12 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 					SG_Push_SetEntityOrigin( geCheck, geRotateOrigin );
 
 					// Perform test clipping trace.
-					SGTraceResult trClipper = SG_Clip( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					SGTraceResult trClipper;// = SG_Clip( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					if ( geCheck->GetSolid() == Solid::Sphere ) {
+						trClipper = SG_ClipSphere( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					} else {
+						trClipper = SG_Clip( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					}
 					if ( !trClipper.podEntity || trClipper.fraction >= 1.0f ) {//trClipper.fraction == 1.0f ) {
 						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): rotated(totalMoves: {}) by Pusher(#{}) to GOOD origin fraction({}), allSolid({}), startSolid({}).\n", geCheck->GetNumber(), i, gePusher->GetNumber(), trClipper.fraction, ( trClipper.allSolid ? "true" : "false" ), ( trClipper.startSolid ? "true" : "false" )));
@@ -1434,7 +1517,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 				// Clip the rest of the movement.
 				// Perform world trace from original, to the TOI calculated move.
 				const vec3_t geOrigin = SG_Push_GetEntityOrigin( geCheck );
-				const SGTraceResult geFinalTrace = SG_Trace( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geOrigin, geCheck, SG_SolidMaskForGameEntity( geCheck ) );
+				const SGTraceResult geFinalTrace = SG_Pusher_TraceEntity( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 				// Set final new origin.
 				SG_Push_SetEntityOrigin( geCheck, geFinalTrace.endPosition );
 					// DEBUG: For the love of god stop fucking thinking we're blocked when hit by a corner segment.

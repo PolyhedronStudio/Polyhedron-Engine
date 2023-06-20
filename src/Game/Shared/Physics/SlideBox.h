@@ -79,6 +79,9 @@ struct SlideBoxMove {
 	vec3_t mins = vec3_zero();
 	vec3_t maxs = vec3_zero();
 
+	//! The trace sphere, in case of sphere tracing
+	sphere_t sphere;
+
 	//! Remaining time for a slidebox move.
 	float remainingTime = 0.f;
 

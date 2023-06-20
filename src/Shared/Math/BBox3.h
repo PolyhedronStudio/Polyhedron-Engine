@@ -440,6 +440,22 @@ inline const bbox3_t bbox3_scale( const bbox3_t &bounds, const float scale ) {
 *						3      'Solid  Box' vs 'Solid  Sphere'
 **/
 const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon, const bool useOriginOffset = true );
+/**
+*	@brief	"A Simple Method for Box-Sphere Intersection Testing",
+*			by Jim Arvo, in "Graphics Gems", Academic Press, 1990.
+*
+*			This routine tests for intersection between an axis-aligned box (bbox3_t)
+*			and a dimensional sphere(sphere_t). The 'testType' argument indicates whether the shapes
+*			are to be regarded as plain surfaces, or plain solids.
+*						
+*	@param	testType	Mode:  Meaning:
+*			
+*						0      'Hollow Box' vs 'Hollow Sphere'
+*						1      'Hollow Box' vs 'Solid  Sphere'
+*						2      'Solid  Box' vs 'Hollow Sphere'
+*						3      'Solid  Box' vs 'Solid  Sphere'
+**/
+const bool sphere_intersects_bbox3( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon, const bool useOriginOffset = true );
 
 /**
 *	@brief	Calculates a spherical collision shape from the 'bounds' box, for use with sphere/capsule hull tracing.

@@ -36,7 +36,7 @@ static constexpr int32_t SLIDEBOXFLAG_MOVED = 1;
 
 //#define SG_SLIDEBOX_DEBUG_TRAPPED
 
-static constexpr float STOP_EPSILON = FLT_EPSILON; //0.1;
+static constexpr float STOP_EPSILON = 0.03125;//FLT_EPSILON; //0.1;
 
 //static inline const bool IsGroundPlane( const CollisionPlane &plane, const vec3_t &gravityDir) {
 //	return ( vec3_dot( plane.normal, gravityDir ) < -0.45f);
@@ -76,7 +76,13 @@ static SGTraceResult SBM_Trace( SlideBoxMove* move, const vec3_t *origin, const 
 	GameEntity *geSkip = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( traceSkipEntityNumber ) );
 
 	// Perform and return trace results.
-	return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask, move->traceType );
+	if ( move->traceType == 1 ) {
+		sphere_t traceSphere = move->sphere;
+		traceSphere.origin = vec3_zero();
+		return SG_SphereTrace( traceOrigin, traceMins, traceMaxs, traceEnd, traceSphere, geSkip, traceContentMask );
+	} else {
+		return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask );
+	}
 }
 
 /**

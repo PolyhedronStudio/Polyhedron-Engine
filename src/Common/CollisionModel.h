@@ -135,7 +135,7 @@ CollisionPlane CM_TransformPlane( CollisionPlane *plane, const glm::mat4 &transf
 /**
 *	@brief	Projects a point onto a vector.
 **/
-const vec3_t CM_ProjectPointOntoVector( const vec3_t vPoint, const vec3_t vStart, const vec3_t vDir );
+const vec3_t CM_ProjectPointOntoVector( const vec3_t &vPoint, const vec3_t &vStart, const vec3_t &vDir );
 /**
 *	@brief	Point distance from line.
 **/

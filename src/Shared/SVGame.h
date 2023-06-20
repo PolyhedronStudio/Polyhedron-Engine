@@ -171,9 +171,11 @@ typedef struct {
 
 
     // collision detection
-	const TraceResult (*Clip) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape  );
-    const TraceResult (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, const int32_t contentMask, const int32_t traceShape );
-    int (*PointContents)(const vec3_t &point);
+	const TraceResult (*Clip) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
+	const TraceResult (*ClipSphere) ( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
+    const TraceResult (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, const int32_t contentMask );
+	const TraceResult (* q_gameabi TraceSphere)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *passent, const int32_t contentMask );
+	int (*PointContents)(const vec3_t &point);
     qboolean (*InPVS)(const vec3_t &p1, const vec3_t &p2);
     qboolean (*InPHS)(const vec3_t &p1, const vec3_t &p2);
     void (*SetAreaPortalState)(int portalnum, qboolean open);

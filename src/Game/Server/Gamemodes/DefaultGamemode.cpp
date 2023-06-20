@@ -922,9 +922,9 @@ TraceResult DefaultGameMode::PM_Trace( const vec3_t &start, const vec3_t &mins, 
 	}
 
 	if ( pmSkipEntity->GetHealth() > 0 ) {
-        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::PlayerSolid, 0);
+        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::PlayerSolid );
     } else {
-        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::DeadSolid, 0);
+        return gi.Trace(start, mins, maxs, end, pmSkipEntity->GetPODEntity(), BrushContentsMask::DeadSolid );
     }
 }
 

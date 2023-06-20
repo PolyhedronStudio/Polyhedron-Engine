@@ -86,6 +86,7 @@ struct CMHullType {
 #include "Common/CollisionModel/SphereHull.h"
 #include "Common/CollisionModel/CapsuleHull.h"
 
+
 /**
 *	@brief	Stores the actual data of a trace.
 **/
@@ -189,6 +190,25 @@ struct TraceContext {
 };
 
 
+
+/**
+*	@brief	Calculates the AABBTrace bounds needed to trace, by expanding our bounds by CM_BOUNDS_EPSILON offset and transform 
+*			the bounds by our inverse matrix when dealing with a transformedTrace, after which it finishes by calculating its 
+*			symmetrical extents.
+**/
+const TraceContext::AABBTrace CM_AABB_CalculateTraceShape( TraceContext &traceContext, const bbox3_t &bounds, const bool boundsPointCase = false, 
+													   const bool isTransformedTrace = false, const glm::mat4 &matTransform = ph_mat_identity(), const glm::mat4 &matInvTransform = ph_mat_identity() );
+/**
+*	@brief	Calculates a new sphere shape to trace with for the trace context.
+*	@param	isTransformed			When true, the transformedSphere is transformed by the trace context's transform matrix. If false
+*									however, it will be identical to the non transformed sphere itself.
+*	@param	expandRadiusEpsilon		Expand by radius epsilon, for use if sphereBounds isn't epsilonOffset yet.
+**/
+const TraceContext::SphereTrace CM_Sphere_CalculateTraceShape( TraceContext &traceContext, const bbox3_t &sphereBounds, const bool boundsPointCase = false, const bool expandRadiusEpsilon = false, 
+														 const bool isTransformedTrace = false, const glm::mat4 &matTransform = ph_mat_identity(), const glm::mat4 &matInvTransform = ph_mat_identity() );
+
+
+
 /**
 *	@return	The entire absolute 'AABB' trace bounds in world space.
 **/
@@ -201,6 +221,8 @@ const bbox3_t CM_Sphere_CalculateTraceBounds( const vec3_t &start, const vec3_t 
 *	@return	The entire absolute 'Capsule' trace bounds in world space.
 **/
 const bbox3_t CM_CalculateCapsuleTraceBounds( const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const vec3_t &sphereOffset, const float sphereRadius );
+
+
 
 /**
 *	@return	True if the bounds intersected.
@@ -221,11 +243,7 @@ const bool CM_TraceIntersect2DCylinder( TraceContext &traceContext, const sphere
 void CM_ClipEntity( TraceResult *dst, const TraceResult *src, struct PODEntity *ent );
 
 
-/**
-*   @brief	Operates as the main 'Box' shape trace function, used by other trace functions after changing model frame of references
-*			or other necessaties.
-**/
-const TraceResult _CM_Trace( TraceContext &traceContext );
+
 /**
 *   @brief  General box tracing routine.
 **/
@@ -237,11 +255,7 @@ const TraceResult CM_BoxTrace( cm_t *cm, const vec3_t &start, const vec3_t &end,
 const TraceResult CM_TransformedBoxTrace( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, mnode_t *headNode, int32_t brushMask, const glm::mat4 &entityMatrix, const glm::mat4 &invEntityMatrix );
 
 
-/**
-*   @brief	Operates as the main 'Sphere' shape trace function, used by other trace functions after changing model frame of references
-*			or other necessaties.
-**/
-const TraceResult _CM_Sphere_Trace( TraceContext &traceContext );
+
 /**
 *   @brief  General 'Sphere' shape tracing routine.
 **/
@@ -251,6 +265,7 @@ const TraceResult CM_SphereTrace( cm_t *cm, const vec3_t &start, const vec3_t &e
 *           for moving and rotating entities. (Brush Models are the only rotating entities.)
 **/
 const TraceResult CM_TransformedSphereTrace( cm_t *cm, const vec3_t &start, const vec3_t &end, const bbox3_t &bounds, const sphere_t &sphere, mnode_t *headNode, int32_t brushMask, const glm::mat4 &entityMatrix, const glm::mat4 &invEntityMatrix );
+
 
 
 /**

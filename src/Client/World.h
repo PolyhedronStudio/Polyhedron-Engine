@@ -56,9 +56,18 @@ int32_t CL_World_PointContents(const vec3_t &point);
 /**
 *	@brief	Tests and clips the specified trace to a single specific entity.
 **/
-const TraceResult CL_World_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask, const int32_t traceShape );
+const TraceResult CL_World_Clip( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
+/**
+*	@brief	Tests and clips the specified trace to a single specific entity.
+**/
+const TraceResult CL_World_ClipSphere( const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, Entity *skipEntity, Entity *clipEntity, const int32_t contentMask );
 /**
 *	@brief	Moves the given mins/maxs volume through the world from start to end. This is used for local entities.
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
-const TraceResult CL_World_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask, const int32_t traceShape );
+const TraceResult CL_World_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask );
+/**
+*	@brief	Moves the given mins/maxs volume through the world from start to end. This is used for local entities.
+*			Passedict and edicts owned by passedict are explicitly skipped from being checked.
+**/
+const TraceResult CL_World_SphereTrace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, const sphere_t &sphere, PODEntity *passedict, int32_t contentMask );

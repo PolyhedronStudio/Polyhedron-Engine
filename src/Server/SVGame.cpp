@@ -953,7 +953,9 @@ void SV_InitGameProgs(void)
     importAPI.UnlinkEntity = PF_UnlinkEntity;
     importAPI.BoxEntities = SV_AreaEntities;
 	importAPI.Clip = SV_Clip;
+	importAPI.ClipSphere = SV_ClipSphere;
     importAPI.Trace = SV_Trace;
+	importAPI.TraceSphere = SV_TraceSphere;
     importAPI.PointContents = SV_PointContents;
 
     importAPI.InPVS = PF_InPVS;

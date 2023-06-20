@@ -215,6 +215,206 @@ const bool bbox3_intersects_sphere( const bbox3_t &boxA, const sphere_t &sphere,
 }
 
 /**
+*	@brief	"A Simple Method for Box-Sphere Intersection Testing",
+*			by Jim Arvo, in "Graphics Gems", Academic Press, 1990.
+*
+*			This routine tests for intersection between an axis-aligned box (bbox3_t)
+*			and a dimensional sphere(sphere_t). The 'testType' argument indicates whether the shapes
+*			are to be regarded as plain surfaces, or plain solids.
+*						
+*	@param	testType	Mode:  Meaning:
+*			
+*						0      'Hollow Box' vs 'Hollow Sphere'
+*						1      'Hollow Box' vs 'Solid  Sphere'
+*						2      'Solid  Box' vs 'Hollow Sphere'
+*						3      'Solid  Box' vs 'Solid  Sphere'
+**/
+const bool sphere_intersects_bbox3( const bbox3_t &boxA, const sphere_t &sphere, const int32_t testType, const float radiusDistEpsilon, const bool useOriginOffset ) {
+//int Box_Sphere_Intersect( n, Bmin, Bmax, C, r, mode )
+//int    n;       /* The dimension of the space.           */
+//float  Bmin[];  /* The minimum of the box for each axis. */
+//float  Bmax[];  /* The maximum of the box for each axis. */
+//float  C[];     /* The sphere center in n-space.         */
+//float  r;       /* The radius of the sphere.             */
+//int    mode;    /* Selects hollow or solid.              */
+//{
+//float  a, b;
+//float  dmin, dmax;
+//float  r2 = SQR( r );
+//int    i, face;
+//
+	// Squared Radius to test against.
+	const float testRadius = fabs( sphere.radius + radiusDistEpsilon );
+	//const float testRadius = sphere.radius + radiusDistEpsilon;
+	
+	// Calculate sphere center, use if wished for its optional 'offset' from 'origin'.
+	const vec3_t sphereCenter = ( useOriginOffset ? sphere.origin + sphere.offset : sphere.origin );
+
+	// 'Hollow Box' vs 'Hollow Sphere'
+	if ( testType == bbox3_t::IntersectType::HollowBox_HollowSphere ) {
+//    case 0: /* Hollow Box and Hollow Sphere */
+//        dmin = 0;
+//        dmax = 0;
+//        face = FALSE;
+//        for( i = 0; i < n; i++ ) {
+//            a = SQR( C[i] - Bmin[i] );
+//            b = SQR( C[i] - Bmax[i] );
+//            dmax += MAX( a, b );
+//            if( C[i] < Bmin[i] ) {
+//                face = TRUE;
+//                dmin += a;
+//                }
+//            else if( C[i] > Bmax[i] ) {
+//                face = TRUE;
+//                dmin += b;
+//                }
+//            else if( MIN( a, b ) <= r2 ) face = TRUE;
+//            }
+//        if( face && ( dmin <= r2 ) && ( r2 <= dmax ) ) return TRUE;
+		// Delta values to keep score of the actual surface differences.
+		float deltaMin = 0;
+		float deltaMax = 0;
+
+		// Whether we're on face.
+		bool face = false;
+
+		// Iterate over all three axial components.
+		for( int32_t i = 0; i < 3; i++ ) {
+			// Calculate total coverage for mins.
+			const float a = fabs( sphereCenter[i] - ( boxA.mins[i] ) );
+			// Calculate total coverage for mins.
+			const float b = fabs( sphereCenter[i] - ( boxA.maxs[i] ) );     
+
+			// Sum the max of either two.
+			deltaMax += Maxf( a, b );
+
+			// Sum the max of either two.
+			if( sphereCenter[i] < boxA.mins[i] ) {
+				face = true;
+				deltaMin += a;
+			} else if( sphereCenter[i] > boxA.maxs[i] ) {
+				face = true;
+				deltaMin += b;
+			} else if ( Minf( a, b ) <= testRadius ) {
+				face = true;
+			}
+		}
+
+		// Intersected.
+		if( face == true && ( deltaMin <= testRadius ) && ( testRadius <= deltaMax ) ) {
+			return true;
+		}
+		return false;
+	// 'Hollow Box' vs 'Solid  Sphere'
+	} else if ( testType == bbox3_t::IntersectType::HollowBox_SolidSphere ) {
+//        dmin = 0;
+//        face = FALSE;
+//        for( i = 0; i < n; i++ ) {
+//            if( C[i] < Bmin[i] ) {
+//                face = TRUE;
+//                dmin += SQR( C[i] - Bmin[i] );
+//                }
+//            else if( C[i] > Bmax[i] ) {
+//                face = TRUE;
+//                dmin += SQR( C[i] - Bmax[i] );     
+//                }
+//            else if( C[i] - Bmin[i] <= r ) face = TRUE;
+//            else if( Bmax[i] - C[i] <= r ) face = TRUE;
+//            }
+//        if( face && ( dmin <= r2 ) ) return TRUE;
+		// Delta values to keep score of the actual surface differences.
+		float deltaMin = 0;
+
+		// Whether we're on face.
+		bool face = false;
+		// Iterate over all three axial components.
+		for( int32_t i = 0; i < 3; i++ ) {
+			// Sum the max of either two.
+			if( sphereCenter[i] < boxA.mins[i] ) {
+				face = true;
+				deltaMin += fabs( sphereCenter[i] - ( boxA.mins[i] ) );
+			} else if( sphereCenter[i] > boxA.maxs[i] ) {
+				face = true;
+				deltaMin += fabs( sphereCenter[i] - ( boxA.maxs[i] ) );
+			} else if (sphereCenter[i] - boxA.mins[i] <= testRadius) {
+				face = true;
+			} else if (boxA.maxs[i] - sphereCenter[i] <= testRadius) {
+				face = true;
+			}
+		}
+
+		// Intersected.
+		if( face == true && ( deltaMin <= testRadius ) ) {
+			return true;
+		}
+	// 'Solid  Box' vs 'Hollow Sphere'
+	} else if ( testType == bbox3_t::IntersectType::SolidBox_HollowSphere ) {
+//dmax = 0;
+//dmin = 0;
+//for( i = 0; i < n; i++ ) {
+//    a = SQR( C[i] - Bmin[i] );
+//    b = SQR( C[i] - Bmax[i] );
+//    dmax += MAX( a, b );
+//    if( C[i] < Bmin[i] ) dmin += a; else
+//    if( C[i] > Bmax[i] ) dmin += b;
+//    }
+//if( dmin <= r2 && r2 <= dmax ) return TRUE;
+		// Delta values to keep score of the actual surface differences.
+		float deltaMin = 0;
+		float deltaMax = 0;
+
+		// Iterate over all three axial components.
+		for( int32_t i = 0; i < 3; i++ ) {
+			// Calculate total coverage for mins.
+			const float a = fabs( sphereCenter[i] - ( boxA.mins[i] ) );
+			// Calculate total coverage for mins.
+			const float b = fabs( sphereCenter[i] - ( boxA.maxs[i] ) );     
+
+			// Sum the max of either two.
+			deltaMax += Maxf( a, b );
+			if( sphereCenter[i] < boxA.mins[i] ) {
+				deltaMin += a;
+			} else if( sphereCenter[i] > boxA.maxs[i] ) {
+				deltaMin += b;
+			}
+		}
+
+		// Intersected.
+		if( ( deltaMin <= testRadius ) && ( testRadius <= deltaMax ) ) {
+			return true;
+		}
+	// 'Solid  Box' vs 'Solid  Sphere'
+	} else if ( testType == bbox3_t::IntersectType::SolidBox_SolidSphere ) {
+//    case 3: /* Solid Box and Solid Sphere */
+//        dmin = 0;
+//        for( i = 0; i < n; i++ ) {
+//            if( C[i] < Bmin[i] ) dmin += SQR( C[i] - Bmin[i] ); else
+//            if( C[i] > Bmax[i] ) dmin += SQR( C[i] - Bmax[i] );     
+//            }
+//        if( dmin <= r2 ) return TRUE;
+//        break;
+		// Delta values.
+		float deltaMin = 0;
+
+		// Iterate over all three axial components.
+		for( int32_t i = 0; i < 3; i++ ) {
+			// Sum the max of either two.
+			if( sphereCenter[i] < boxA.mins[i] ) {
+				deltaMin += fabs( sphereCenter[i] - ( boxA.mins[i] ) );
+			} else if( sphereCenter[i] > boxA.maxs[i] ) {
+				deltaMin += fabs( sphereCenter[i] - ( boxA.maxs[i] ) );
+			}
+		}
+
+		// Intersected.
+		if( deltaMin <= testRadius ) {
+			return true;
+		}
+	} 
+	return false;
+}
+
+/**
 *	@brief	Calculates a spherical collision shape from a 'size' vector, for use with sphere/capsule hull tracing.
 **/
 const sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
@@ -237,7 +437,7 @@ const sphere_t sphere_from_size( const vec3_t &size, const vec3_t &origin ) {
 		// Actual radius.
 		.radius = radius,
 		// Offset Radius from its origin point.
-		.offsetRadius = radius,
+		.offsetRadius = offsetRadius,
 
 		// Half Width/Height.
 		.halfHeight = halfHeight,
@@ -287,12 +487,12 @@ void sphere_calculate_offset_rotation( const glm::mat4 &matTransform, const glm:
 	// Transformed path:
 	if ( isTransformed ) {
 		glm::vec4 vOffset = phvec_to_glmvec4( sphere.offset, 1 );
-		const float t = sphere.radius - sphere.offsetRadius; //sphere.halfHeight - sphere.offsetRadius;
+		const float t = sphere.offsetRadius - sphere.radius;
 		vOffset = matTransform * glm::vec4( t, t, t, 1.f ) * matInvTransform;
 		glm::vec3 v3Offset = { vOffset.x / vOffset.w, vOffset.y / vOffset.w, vOffset.z / vOffset.w };
 		sphere.offset = glmvec3_to_phvec( v3Offset );
 	} else {
-		const float t = sphere.radius - sphere.offsetRadius; //sphere.halfHeight - sphere.offsetRadius;
+		const float t = sphere.offsetRadius - sphere.radius;
 		sphere.offset = { t, t, t };
 	}
 
