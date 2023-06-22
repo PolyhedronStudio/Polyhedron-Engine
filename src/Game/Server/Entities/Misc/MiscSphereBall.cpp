@@ -435,7 +435,7 @@ void MiscSphereBall::SphereBallDropToFloor(void) {
     };
     
     // Exceute the trace.
-    SVGTraceResult trace = SVG_TraceSphere(traceStart, GetMins(), GetMaxs(), traceEnd, GetPODEntity()->boundsSphere, this, BrushContentsMask::MonsterSolid );
+    SVGTraceResult trace = SVG_TraceSphere(traceStart, GetMins(), GetMaxs(), traceEnd, GetPODEntity()->boundsAbsoluteSphere, this, BrushContentsMask::MonsterSolid );
     
     // Return in case we hit anything.
     if (trace.fraction != 1.f || trace.allSolid) {

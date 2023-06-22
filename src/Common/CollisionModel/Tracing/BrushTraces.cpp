@@ -128,17 +128,18 @@ void CM_TraceBox_TraceThroughBrush( TraceContext &traceContext, mbrush_t *brush,
 			startOut = true;
 		}
 
-		// If completely in front of face, no intersection occured.
+		// If completely in front of face, no intersection with the brush occured.
 		//if ( d1 > 0 && ( d2 >= DIST_EPSILON || d2 >= d1 ) ) {
 		if ( d1 > 0 && d2 >= d1 ) {
 			return;
 		}
 
+		// If completely behind the face, the trace does not intersect the current tested side.
 		if ( d1 <= 0 && d2 <= 0 ) {
 			continue;
 		}
 
-		// Calculate the fraction, enter distance, and the total move made.
+		// Calculate the fraction to the intersected side,
 		float f = d1 - d2;
 		if ( f > 0 ) {
 			f = d1 / f;
@@ -345,8 +346,8 @@ void CM_TraceSphere_TraceThroughBrush(TraceContext &traceContext, mbrush_t *brus
 		/**
 		*	Trace the sphere through the brush, from 'start' to 'end' point.
 		**/
-		float d1 = plane_distance( transformedPlane, traceStart, traceSphereRadius );
-		float d2 = plane_distance( transformedPlane, traceEnd, traceSphereRadius );
+		float d1 = plane_distance( transformedPlane, traceStart, traceSphereRadiusEpsilon );
+		float d2 = plane_distance( transformedPlane, traceEnd, traceSphereRadiusEpsilon );
 
 		// Exact hit points.
 		vec3_t traceStartHitPoint = vec3_zero(), traceEndHitPoint = vec3_zero();
@@ -365,178 +366,74 @@ void CM_TraceSphere_TraceThroughBrush(TraceContext &traceContext, mbrush_t *brus
 		**/
 		// Plane origin for distance calculation.
 		const vec3_t planeOrigin = vec3_scale( transformedPlane.normal, transformedPlane.dist );
-		//const vec3_t planeOrigin = vec3_scale( transformedPlane.normal, transformedPlane.dist + traceSphereRadiusEpsilon );
+		
 		// Calculate sphere to plane distance (Start Trace).
 		const float startTraceDistance = vec3_dot( transformedPlane.normal, traceStart - planeOrigin );
 		// Dot between plane normal and sphere 'angle'.
 		const float startAngle = vec3_dot( transformedPlane.normal, traceStart );
 		// Calculate extra offset for the 'Start Trace' based on the spheroid's actual angle.
 		const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - traceStartHitRadius ) / startAngle );
-
+		//const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - traceStartHitRadius ) / startAngle );
 		
 		// Calculate sphere to plane distance (End Trace).
 		const float endTraceDistance = vec3_dot( transformedPlane.normal, traceEnd - planeOrigin );
 		// Dot between plane normal and sphere 'angle'.
 		const float endAngle = vec3_dot( transformedPlane.normal, traceEnd );
 		// Calculate extra offset for the 'End Trace' based on the spheroid's actual angle.
-		const float /*t1*/extraOffsetT2 = ( ( -( traceSphereRadius - traceEndHitRadius ) ) / endAngle );
+		const float /*t1*/extraOffsetT2 = ( ( ( traceSphereRadius - traceEndHitRadius ) ) / endAngle );
 
+		// Add OR subtract the offsets depending on the sphere's 'origin + offset' closest to the plane.
+		//d1 += extraOffsetT1;
+		//d2 += extraOffsetT2;
+		const float t = vec3_dot( transformedPlane.normal, traceSphereOrigin );
+		if ( t > 0 ) {
+			d1 -= extraOffsetT1;
+			d2 -= extraOffsetT2;
+		} else {
+			d1 += extraOffsetT1;
+			d2 += extraOffsetT2;
+		}
 
-		//// - Inside:	If the distance is negative(-) and greater(>) than the Radius. 
-		//// - Outside:	If the distance is positive(+) and greater(>) than the Radius. 
-		//// - Intersection: If the absolute distance(fabs( dist )) is less than or 
-		////					equal(<=) to the Radius.
-		d1 += extraOffsetT1;
-		d2 -= extraOffsetT2;
-		//// Set hit distances.
-		////const float traceStartCorrectRad = ( traceSphereRadius - traceStartHitRadius ) + CM_RAD_EPSILON;
-		////const float traceEndCorrectRad = ( traceSphereRadius + traceEndHitRadius ) + CM_RAD_EPSILON;
-		////d1 = traceStartHitDistance;// - traceStartCorrectRad;
-		////d2 = traceEndHitDistance;// - traceEndCorrectRad;
-
+		/**
+		*	Determine whether the trace started and/or ended, inside of 'Solid' or 'Non Solid' brushwork.
+		*	- Inside:		If the distance is negative(-) and greater(>) than the Radius. 
+		*	- Outside:		If the distance is positive(+) and greater(>) than the Radius. 
+		*	- Intersection: If the absolute distance(fabs( dist )) is less than or 
+		*					equal(<=) to the Radius.
+		**/
 		// Absolute distances.
 		float absD1 = fabs( d1 );
 		float absD2 = fabs( d2 );
 
-		// Radius to test against.
-		const float testRadius = traceSphereRadius;// traceSphereRadius;
+		// Radius' to test against.
+		const float testRadius = traceSphereRadius;
+		//const float testRadiusStart = testRadius - traceStartHitRadius;
+		//const float testRadiusEnd = testRadius - traceEndHitRadius;
 
-		// Exited the brush.
-		//if ( !( absD1 <= testRadius ) && d1 > 0 ) {
-		//if ( d1 > testRadius && !(-d1 > 0 ) ) {
-		if ( absD1 > testRadius ) {
+		// Determine whether the 'End Point' resides in a 'Solid' brush type.
+		if ( absD2 > testRadius ) {
+			// The 'End Point' does NOT reside in a 'Solid' brush type. Meaning the trace exited through the brush.
+			getOut = true;
+		}
+
+		// Determine whether the 'Start Point' resides in a 'Non Solid', empty space type.
+		if ( !(absD1 <= testRadius ) ) {
+			// The 'Start Point' does NOT reside in a 'Solid' brush type. Meaning the trace started in 'Non Solid', outside of a brush.
 			startOut = true;
 		}
-		// Started outside.
-		//if ( d2 > testRadius && !(-d2 > 0 ) ) {
-		if ( absD2 > testRadius ) {
-			getOut = true; // End Point is not in solid.
 
-		}
-
-		// If completely in front of the brush' face/plane, the trace does NOT intersect with this brush side.
-		//if ( d1 > testRadius && ( ( d2 >= testRadius + DIST_EPSILON ) && d2 >= d1 ) ) { 
-		//if ( !( absD1 <= testRadius ) && d1 > 0 && ( !( absD2 <= testRadius ) && d2 >= d1 ) ) { 
-		if ( !( absD1 <= testRadius ) && d1 > testRadius && ( !( absD2 <= testRadius + DIST_EPSILON ) && d2 >= d1 ) ) { 
-		//if ( !( -d1 > 0 ) && d1 > testRadius && ( !( -d2 > 0 ) && ( d2 > testRadius ) ) ) { 
-		//if ( d1 > testRadius && ( d2 >= d1 ) ) { 
+		// If the trace started entirely in front of the face, we got no interaction related to this entire brush.
+		if ( /*( absD1 > testRadius ) &&*/ ( d1 > 0 && d1 > testRadius ) && ( ( d2 > testRadius + DIST_EPSILON ) && d2 >= d1 ) ) { 
 			return;
 		}
-		// r’/cos(theta) — Ydown < (Y — projected_sphere_center) < r’/cos(theta) + Yup
 
-
-		// If completely behind the brush' face/plane, the trace does NOT intersect with this brush side.
-		if ( ( -d1 > testRadius ) && ( -d2 > testRadius ) && !( d1 > testRadius ) && !( d2 > testRadius ) //( -d2 <= -d1 ) 
-			) {
+		// If the trace is behind the current brush' plane, it doesn't intersect to this brush' side.
+		if ( (absD1 > testRadius /*+ DIST_EPSILON*/) && ( d1 <= -0 )
+			&& ( ((absD2 > testRadius /*+ DIST_EPSILON*/) && ( d2 <= -0 )) && (d2 <= d1)))  {
 			continue;
 		}
 
-	//	if (d1 > 0.f) {
-	//		start_outside = true;
-	//	}
-	//	if (d2 > 0.f) {
-	//		end_outside = true;
-	//	}
-
-	//	// if completely in front of plane, the trace does not intersect with the brush
-	//	if (d1 > 0.f && d2 >= d1) {
-	//		return;
-	//	}
-
-	//	// if completely behind plane, the trace does not intersect with this side
-	//	if (d1 <= 0.f && d2 <= d1) {
-	//		continue;
-	//	}
-
-	//	// the trace intersects this side
-	//	const float d2d1_dist = (d1 - d2);
-
-	//	if (d1 > d2) { // enter
-	//		const float f = d1 / d2d1_dist;
-	//		if (f > enter_fraction) {
-	//			enter_fraction = f;
-	//			plane = p;
-	//			side = s;
-	//			nudged_enter_fraction = (d1 - TRACE_EPSILON) / d2d1_dist;
-	//		}
-	//	} else { // leave
-	//		const float f = d1 / d2d1_dist;
-	//		if (f < leave_fraction) {
-	//			leave_fraction = f;
-	//		}
-	//	}
-	//}
-
-	//// some sort of collision has occurred
-
-	//if (!start_outside) { // original point was inside brush
-	//	data->trace.start_solid = true;
-	//	if (!end_outside) {
-	//		data->trace.all_solid = true;
-	//		data->trace.brush = brush;
-	//		data->trace.contents = brush->contents;
-	//		data->trace.fraction = 0.f;
-	//		data->unnudged_fraction = 0.f;
-	//	}
-	//} else if (enter_fraction < leave_fraction) { // pierced brush
-	//	if (enter_fraction > -1.f && enter_fraction < data->unnudged_fraction && nudged_enter_fraction < data->trace.fraction) {
-	//		data->unnudged_fraction = enter_fraction;
-	//		data->trace.fraction = nudged_enter_fraction;
-	//		data->trace.brush = brush;
-	//		data->trace.brush_side = side;
-	//		data->trace.plane = plane;
-	//		data->trace.contents = side->contents;
-	//		data->trace.surface = side->surface;
-	//		data->trace.material = side->material;
-	//	}
-	//}
-
-		//if ( ( -d1 < testRadius ) && ( -d2 < testRadius ) 
-		//	&& (absD1 < testRadius && absD2 < testRadius ) ) {
-		//	continue;
-		//}
-		//// Exited the brush.
-		//if ( d2 > 0 ) {
-		//	getOut = true; // End Point is not in solid.
-		//}
-		//// Started outside.
-		//if ( d1 > 0 ) {
-		//	startOut = true;
-		//}
-
-		//// If completely in front of face, no intersection occured.
-		////if ( d1 > 0 && ( d2 >= DIST_EPSILON || d2 >= d1 ) ) {
-		//if ( d1 > 0 && d2 >= d1 ) {
-		//	return;
-		//}
-
-		//if ( d1 <= 0 && d2 <= 0 ) {
-		//	continue;
-		//}
-
-		//float f = d1 - d2;
-		//if ( f > 0 ) {
-		//	f = ( d1 ) / f;
-		//	if ( f < 0 ) {
-		//	//	f = 0;
-		//	}
-
-		//	if ( f > enterFractionA ) {
-		//		enterDistance = ( d1 );
-		//		move = d1 - d2;
-		//		enterFractionA = f;
-		//		clipPlane = transformedPlane;
-		//		leadSide = brushSide;
-		//	}
-		//} else if ( f < 0 ) {
-		//	f = ( d1 ) / f;
-		//	if ( f > 1 ) {
-		//	//	f = 1;
-		//	}
-		//	if ( f < leaveFraction ) {
-		//		leaveFraction = f;
-		//	}
-		//}
+		// Calculate the fraction to the intersected side,
 		float distD1D2 = d1 - d2;
 		float f = distD1D2;
 		if ( d1 >= d2 ) {
@@ -546,14 +443,15 @@ void CM_TraceSphere_TraceThroughBrush(TraceContext &traceContext, mbrush_t *brus
 			}
 
 			if ( f > enterFractionA ) {
-				enterDistance = ( d1 - DIST_EPSILON ) ;
+				enterDistance = ( d1 - DIST_EPSILON );
 				move = d1 - d2;
 				enterFractionA = f;
 				clipPlane = transformedPlane;
 				leadSide = brushSide;
 			}
-		} else if ( f < 0 ) {
-			float f = ( d1  ) / (d1 - d2);
+		} else {
+		//} else /*if ( f < 0 )*/ {
+			float f = ( d1 /*+ DIST_EPSILON*/ ) / ( d1 - d2 );
 			//f = fabs(f);
 			if ( f < 0 ) {
 			//	f = 0;
@@ -565,29 +463,6 @@ void CM_TraceSphere_TraceThroughBrush(TraceContext &traceContext, mbrush_t *brus
 				leaveFraction = f;
 			}
 		}
-
-		//
-		// WORKS: But, sinks to the huge ground.
-		//
-		// Calculate the fraction, enter distance, and the total move made.
-		//float f = d1 - d2;
-		//float absF = fabs( f );
-		//if ( f > 0 ) {
-		//	f = ( traceStartHitDistance ) / f;
-
-		//	if ( f > enterFractionA ) {
-		//		enterDistance = ( d1 );
-		//		move = d1 - d2;
-		//		enterFractionA = f;
-		//		clipPlane = transformedPlane;
-		//		leadSide = brushSide;
-		//	}
-		//} else if ( f < 0 ) {
-		//	f = ( traceStartHitDistance ) / f;
-		//	if ( f < leaveFraction ) {
-		//		leaveFraction = f;
-		//	}
-		//}
 	}
 
 	// We started inside of the brush:
@@ -610,19 +485,17 @@ void CM_TraceSphere_TraceThroughBrush(TraceContext &traceContext, mbrush_t *brus
     }
 
 	// Check if this reduces collision time range.
- //   if ( enterFractionA <= -1 ) { 
+	//if ( enterFractionA <= -1 ) { 
 	//	return;
 	//}
- //   if ( enterFractionA - FRAC_EPSILON > leaveFraction ) { 
-	//	return; 
+	//if ( enterFractionA - FRAC_EPSILON > leaveFraction ) { 
+	//		return; 
 	//}
-
-//else if (enter_fraction < leave_fraction) { // pierced brush
-	//	if (enter_fraction > -1.f && enter_fraction < data->unnudged_fraction 
-		//&& nudged_enter_fraction < data->trace.fraction) {
-
+	//else if (enter_fraction < leave_fraction) { // pierced brush
+	//if (enter_fraction > -1.f && enter_fraction < data->unnudged_fraction 
+	//&& nudged_enter_fraction < data->trace.fraction) {
 	//if ( enterFractionA - FRAC_EPSILON <= leaveFraction ) {
-		//if ( enterFractionA > -1 && enterFractionA < traceContext.realFraction ) {
+	//if ( enterFractionA > -1 && enterFractionA < traceContext.realFraction ) {
 	
 	// Calculate nudged fraction.
 	const float nudgedFraction = ( enterDistance ) / move;

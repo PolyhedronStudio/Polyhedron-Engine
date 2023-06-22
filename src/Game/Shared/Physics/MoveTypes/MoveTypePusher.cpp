@@ -20,7 +20,7 @@
 #include "Game/Client/Entities/GibEntity.h"
 #endif
 
-#define PRINT_DEBUG_ROTATOR_CLIPPING3
+#define PRINT_DEBUG_ROTATOR_CLIPPING
 
 /***
 *
@@ -582,14 +582,16 @@ const bool SG_Push_IsValidOrigin( GameEntity *geCheck, gclient_s *geCheckClient 
 	SGTraceResult testTrace;
 
 	const vec3_t testOrigin = SG_Push_GetEntityOrigin( geCheck );
-	testTrace = SG_Pusher_TraceEntity( testOrigin, geCheck->GetMins(), geCheck->GetMaxs(), testOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, clipMask, geCheck->GetSolid() );
+	testTrace = SG_Pusher_TraceEntity( testOrigin, geCheck->GetMins(), geCheck->GetMaxs(), testOrigin, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, clipMask, geCheck->GetSolid() );
 
 	// Return a boolean test for the resulting outcome.
 	if ( debugTrace ) {
 		*debugTrace = testTrace;
 	}
 	if ( geCheck->GetSolid() == Solid::Sphere ) {
-		return ( testTrace.startSolid == false && testTrace.allSolid == false );
+		return ( testTrace.startSolid == false && testTrace.allSolid == false && ( testTrace.fraction == 1.f || !testTrace.podEntity ) );
+		//return ( testTrace.allSolid == false || !testTrace.podEntity );
+		//return ( testTrace.startSolid == false && testTrace.allSolid == false );
 	} else {
 		if ( testTrace.startSolid == false && testTrace.allSolid == false /*&& testTrace.fraction == 0.f */) {
 			int x = 10;
@@ -631,7 +633,8 @@ const bool SG_Push_CorrectOrigin( GameEntity *geCheck, gclient_s *geCheckClient 
 
 	if ( *angularMove ) {
 		if ( geCheck->GetSolid() == Solid::Sphere ) {
-			const float scale = 1.0f / geCheck->GetPODEntity()->boundsSphere.radius * firstTrace.fraction;
+			const float sphereRadius = geCheck->GetPODEntity()->boundsAbsoluteSphere.radius;
+			const float scale = ( sphereRadius ) + ( sphereRadius * ( 1.0f / firstTrace.fraction ) );
 			SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, scale, vec3_normalize( vec3_negate( *angularMove ) ) ) );
 		} else {
 			SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, 1.f + (firstTrace.fraction), vec3_normalize( vec3_negate( *angularMove ) ) ) );
@@ -800,6 +803,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 
 	// Union the previous bounds with the destination absolute bounds to get us the full move bounds.
 	totalBounds = bbox3_union( totalBounds, gePusher->GetPODEntity()->absoluteBounds );
+	totalBounds = bbox3_expand( totalBounds, 1.f );
 
 	/**
 	*	Get all entities residing in the move's bounds box.
@@ -883,7 +887,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 				const vec3_t geTraceEnd		= geTraceStart + deltaMove;
 
 				// Perform trace.
-				const SGTraceResult geMoveTrace = SG_Pusher_TraceEntity( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
+				const SGTraceResult geMoveTrace = SG_Pusher_TraceEntity( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 				/*
 				*	Client:
 				*/
@@ -896,7 +900,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 					clTraceEnd		= clTraceStart + deltaMove;
 
 					// Perform trace.
-					clMoveTrace = SG_Pusher_TraceEntity( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
+					clMoveTrace = SG_Pusher_TraceEntity( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 				}
 
 				// Link the pusher back in.
@@ -978,7 +982,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 				// Perform trace.
 				SGTraceResult geClipTrace;// = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 				if ( geCheck->GetSolid() == Solid::Sphere ) {
-					geClipTrace = SG_ClipSphere( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					geClipTrace = SG_ClipSphere( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 				} else {
 					geClipTrace = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 				}
@@ -995,7 +999,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 
 					// Perform trace.
 					if ( geCheck->GetSolid() == Solid::Sphere ) {
-						clClipTrace = SG_ClipSphere( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+						clClipTrace = SG_ClipSphere( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 					} else {
 						clClipTrace = SG_Clip( clTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), clTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 					}
@@ -1040,7 +1044,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 						const vec3_t geNewOrigin	= vec3_fmaf( geOrigin, geRemainingDistance, deltaMove * vec3_fabsf( geClipTrace.plane.normal ) );
 
 						// Perform trace.
-						const SGTraceResult geTranslateTrace = SG_Pusher_TraceEntity( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geNewOrigin, geCheck->GetPODEntity()->boundsSphere, gePusher, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
+						const SGTraceResult geTranslateTrace = SG_Pusher_TraceEntity( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geNewOrigin, geCheck->GetPODEntity()->boundsAbsoluteSphere, gePusher, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 						SG_Push_SetEntityOrigin( geCheck, geTranslateTrace.endPosition );
 					
 						// Make sure to test for it however unlikely it may be for it to be incorrect.
@@ -1074,7 +1078,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 						// Need to unlink geCheck first.
 						geCheck->UnlinkEntity();
 						// Perform trace.
-						const SGTraceResult clTranslateTrace = SG_Pusher_TraceEntity( clOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clNewOrigin, geCheck->GetPODEntity()->boundsSphere,gePusher, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid()  );
+						const SGTraceResult clTranslateTrace = SG_Pusher_TraceEntity( clOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clNewOrigin, geCheck->GetPODEntity()->boundsAbsoluteSphere,gePusher, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid()  );
 						SG_Push_SetEntityOrigin( geCheck, clTranslateTrace.endPosition, geCheckClient );
 
 						// Make sure to test for it however unlikely it may be for it to be incorrect.
@@ -1180,7 +1184,7 @@ const SGTraceResult SG_Push_RotateAndTrace( const vec3_t &angles, GameEntity *ge
 
 	// Perform and return clipping trace results.
 	if ( geCheck->GetSolid() == Solid::Sphere ) {
-		return SG_ClipSphere( geOrigin, geMins, geMaxs, geOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+		return SG_ClipSphere( geOrigin, geMins, geMaxs, geOrigin, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 	} else {
 		return SG_Clip( geOrigin, geMins, geMaxs, geOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 	}
@@ -1347,6 +1351,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 	// Union the previous bounds with the destination absolute bounds to get us the full move bounds.
 	totalBounds = bbox3_union( totalBounds, gePusher->GetPODEntity()->absoluteBounds );
 	totalBounds = bbox3_expand( totalBounds, 1.f );
+
 	/**
 	*	Get all entities residing in the move's bounds box.
 	**/
@@ -1436,7 +1441,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 				// Perform clip entity trace to see how much of the move can be performed.
 				SGTraceResult geClipTrace;
 				if ( geCheck->GetSolid() == Solid::Sphere ) {
-					geClipTrace = SG_ClipSphere( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+					geClipTrace = SG_ClipSphere( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 				} else {
 					geClipTrace = SG_Clip( geTraceStart, geCheck->GetMins(), geCheck->GetMaxs(), geTraceEnd, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 				}
@@ -1493,7 +1498,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 					// Perform test clipping trace.
 					SGTraceResult trClipper;// = SG_Clip( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 					if ( geCheck->GetSolid() == Solid::Sphere ) {
-						trClipper = SG_ClipSphere( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
+						trClipper = SG_ClipSphere( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 					} else {
 						trClipper = SG_Clip( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 					}
@@ -1517,7 +1522,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 				// Clip the rest of the movement.
 				// Perform world trace from original, to the TOI calculated move.
 				const vec3_t geOrigin = SG_Push_GetEntityOrigin( geCheck );
-				const SGTraceResult geFinalTrace = SG_Pusher_TraceEntity( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geOrigin, geCheck->GetPODEntity()->boundsSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
+				const SGTraceResult geFinalTrace = SG_Pusher_TraceEntity( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geOrigin, geCheck->GetPODEntity()->boundsAbsoluteSphere, geCheck, SG_SolidMaskForGameEntity( geCheck ), geCheck->GetSolid() );
 				// Set final new origin.
 				SG_Push_SetEntityOrigin( geCheck, geFinalTrace.endPosition );
 					// DEBUG: For the love of god stop fucking thinking we're blocked when hit by a corner segment.
@@ -1759,479 +1764,6 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 
 	return nullptr;
 }
-///**
-//*	@brief	Rotates the entity's yaw angles by default, pitch and roll are optional.
-//**/
-//void SG_Pusher_RotateEntity( GameEntity *geRotate, GameEntity *gePusher, const vec3_t &deltaAngles, bool rotatePlayerState = false, const bool rotateYaw = true, const bool rotatePitch = false, const bool rotateRoll = false ) {
-//	if ( !geRotate || !gePusher ) {
-//		return;
-//	}
-//	
-//	// Validate the 'check' entity its ground entity, make sure it has its 'IsInUse' returning true.
-//	GameEntity *geRotateGroundEntity = SGGameWorld::ValidateEntity( geRotate->GetGroundEntityHandle(), false, true );
-//
-//	if ( SG_Push_IsSameEntity( geRotateGroundEntity, gePusher ) ) {
-//		if ( rotatePlayerState && geRotate->GetClient() ) {
-//			if ( rotateYaw == true ) {
-//				geRotate->GetClient()->playerState.pmove.deltaAngles[ vec3_t::Yaw ] += deltaAngles[ vec3_t::Yaw ];
-//			}
-//			if ( rotatePitch == true ) {
-//				geRotate->GetClient()->playerState.pmove.deltaAngles[ vec3_t::Pitch ] += deltaAngles[ vec3_t::Pitch ];
-//			}
-//			if ( rotateRoll == true ) {
-//				geRotate->GetClient()->playerState.pmove.deltaAngles[ vec3_t::Roll ] += deltaAngles[ vec3_t::Roll ];
-//			}
-//		} else {
-//			vec3_t angles = geRotate->GetAngles();
-//			if ( rotateYaw ) {
-//				angles[ vec3_t::Yaw ] += deltaAngles[ vec3_t::Yaw ];
-//			}
-//			if ( rotatePitch == true ) {
-//				angles[ vec3_t::Pitch ] += deltaAngles[ vec3_t::Pitch ];
-//			}
-//			if ( rotateRoll == true ) {
-//				angles[ vec3_t::Roll ] += deltaAngles[ vec3_t::Roll ];
-//			}
-//			geRotate->SetAngles(angles);
-//		}
-//	}
-//}
-//
-//
-///**
-//*	@brief	PushRotates the entity, clipping it to its pusher.
-//**/
-//SGTraceResult _PushRotateAndTraceEntity(GameEntity *geCheck, GameEntity *gePusher, const vec3_t &origin, const vec3_t &angles ) {
-//	gePusher->SetAngles( angles );
-//	
-//	gePusher->LinkEntity();
-//
-//	return SG_Clip( origin, geCheck->GetMins(), geCheck->GetMaxs(), origin, nullptr, gePusher, SG_SolidMaskForGameEntity(geCheck));
-//}
-//
-///**
-//*	@brief	..
-//**/
-//// 0.015625
-//// 0.0078125 
-//// 0.00390625
-//// 0.001953125 
-//static constexpr float TOI_MIN_FRACTION = 1.f;//0.06f;// 1.0f / 1024.f;//0.03125f;
-//float _PushCalculateRotationalTOI(GameEntity *geCheck, GameEntity *gePusher, const vec3_t &origin, const vec3_t &originalAngles, const vec3_t &finalAngles, const float left, const float right) {
-//	SGTraceResult leftTrace = _PushRotateAndTraceEntity( geCheck, gePusher, origin, vec3_mix( originalAngles, finalAngles, left ));
-//	const float half = Mixf( left, right, 0.5f );
-//	SGTraceResult halfTrace = _PushRotateAndTraceEntity( geCheck, gePusher, origin, vec3_mix( originalAngles, finalAngles, half ) );
-//
-//	SGGameWorld *world = GetGameWorld();
-//
-//	if ( leftTrace.fraction >= 1.f && halfTrace.fraction < 1.f ) {
-//		if ( half - left <= TOI_MIN_FRACTION ) {
-//			return left;
-//		}
-//
-//		return _PushCalculateRotationalTOI( geCheck, gePusher, origin, originalAngles, finalAngles, left, half );
-//	}
-//
-//	SGTraceResult rightTrace = _PushRotateAndTraceEntity( geCheck, gePusher, origin, vec3_mix( originalAngles, finalAngles, right ));
-//
-//	if ( halfTrace.fraction >= 1.f && rightTrace.fraction < 1.f ) {
-//		if ( half - left <= TOI_MIN_FRACTION ) {
-//			return half;
-//		}
-//
-//		return _PushCalculateRotationalTOI( geCheck, gePusher, origin, originalAngles, finalAngles, half, right );
-//	}
-//
-//	return 0.f;
-//}
-//
-///**
-//*	@brief	Will push the mover into its deltaMove + deltaAngularMove combined offset direction.
-//*	@return	false if the move failed (i.e could've been blocked.), true if it succeeds.
-//**/
-//GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOrigin, const vec3_t &deltaMove, const vec3_t &angularDeltaMove ) {
-//	/**
-//	*	Validate Pusher Entity.
-//	**/
-//	// Assign handle to base entity.
-//    GameEntity* gePusher = SGGameWorld::ValidateEntity(entityHandle);
-//
-//    // Ensure it is a valid entity.
-//    if (!gePusher) {
-//	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
-//	    return nullptr;
-//    }
-//
-//	/**
-//	* Store pusher entity information state.
-//	**/
-//	const vec3_t pusherOrigin = gePusher->GetOrigin();
-//	SG_PushEntityState( gePusher );
-//
-//	// Reset push obstacle.
-//	pushObstacle = nullptr;
-//
-//	/**
-//	*	Rotate the pusher and calculate its total move bounds.
-//	*
-//	*	mins/maxs are the bounds at destination.
-//	*	totalMins / totalMaxs are the bounds for the entire move
-//	**/
-//	//vec3_t totalMins = gePusher->GetAbsoluteMin();
-//	//vec3_t totalMaxs = gePusher->GetAbsoluteMax();
-//	bbox3_t totalBounds = gePusher->GetPODEntity()->absoluteBounds;
-//
-//	// Unlink pusher.
-//	gePusher->UnlinkEntity();
-//
-//	// Get original angles for restoring if need.
-//	const vec3_t originalAngles = gePusher->GetAngles();
-//	// Calculate new destined angles.
-//	const vec3_t finalAngles = gePusher->GetAngles() + angularDeltaMove;
-//
-//	// Set and link.
-//	gePusher->SetAngles( finalAngles );
-//	gePusher->LinkEntity();
-//
-//	// Calculate total bounds.
-//	//_UnionBounds( totalMins, totalMaxs, gePusher->GetAbsoluteMin(), gePusher->GetAbsoluteMax(), totalMins, totalMaxs );
-//	totalBounds = bbox3_union( totalBounds, gePusher->GetPODEntity()->absoluteBounds );
-//
-//	/**
-//	*	Get all entities residing in the move's bounds box.
-//	**/
-//	// Get a range of all pushable entities in our world. (A valid GameEntity and Inuse.)
-//	SGGameWorld *gameWorld = GetGameWorld();
-//	auto gePushables = SG_BoxEntities( totalBounds.mins, totalBounds.maxs, MAX_POD_ENTITIES, AreaEntities::Solid );
-//
-//	/**
-//	*	Iterate all resulting entities of BoxEntities and determine whether they are riding the pusher,
-//	*	or being pushed by it. If they are we try and move them into their new spot, when any of them
-//	*	gets blocked we revert all entity moves and return the blocking game entity.
-//	**/
-//	for ( auto geCheck : gePushables ) {
-//		/**
-//		*	Perform several tests on whether we truly must include this entity in our move.
-//		**/
-//		// MoveType:
-//		if ( !SG_Push_EntityValidMoveType( geCheck ) ) {
-//			continue;
-//		}
-//		// Solid:
-//		if ( !SG_Push_EntityValidSolid( geCheck ) ) {
-//			continue;
-//		}
-//		// Linked or not.
-//		if ( !SG_Push_EntityIsLinked( geCheck ) ) {
-//			continue;
-//		}
-//
-//		// Validate the 'check' entity its ground entity, make sure it has its 'IsInUse' returning true.
-//		GameEntity *geCheckGroundEntity = SGGameWorld::ValidateEntity( geCheck->GetGroundEntityHandle() );
-//
-//		
-//		/**
-//		*
-//		**/
-//		// These store the origin of the entity and (when available) the client playerstate.
-//		vec3_t geOrigin = geCheck->GetOrigin();
-//		gclient_s *clCheck = geCheck->GetClient();
-//		vec3_t clOrigin = (clCheck ? clCheck->playerState.pmove.origin : vec3_zero() );
-//		//
-//		// Store original copies.
-//		vec3_t geOriginalOrigin = geOrigin;
-//		vec3_t clOriginalOrigin = clOrigin;
-//		//
-//
-//		// When the position test does not hit any solids, and the check entity does not have its ground entity set to
-//		// the pusher then we can safely skip it. It isn't riding us nor meant to be pushed.
-//		const bool isRidingPusher = SG_Push_IsSameEntity( geCheckGroundEntity, gePusher );
-//		if ( SG_Push_IsValidOrigin( geCheck, clCheck ) && !isRidingPusher ) {
-//			if ( !clCheck ) {
-//				continue;
-//			}
-//		}
-//		if ( clCheck ) {
-//			if ( SG_Push_IsValidOrigin( geCheck, nullptr ) && !isRidingPusher ) {
-//				continue;
-//			}
-//		}
-//
-//		// We're either pushing this entity or its riding the pusher.
-//		if ( ( gePusher->GetMoveType() == MoveType::Push ) || isRidingPusher ) {
-//			/**
-//			*	Push entity onto stack.
-//			**/
-//			SG_PushEntityState( geCheck );
-//
-//			/**
-//			*	Test whether we are going to collide with the mover.
-//			**/
-//			gePusher->SetAngles( finalAngles );
-//			gePusher->LinkEntity();
-//
-//			// Trace clip the origins to our pusher.
-//			SGTraceResult geCollideTrace = SG_Clip( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geOrigin, nullptr, gePusher, SG_SolidMaskForGameEntity( geCheck ) );	
-//			SGTraceResult clCollideTrace;
-//			if (clCheck) {
-//				clCollideTrace = SG_Clip( clOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clOrigin, nullptr, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
-//			}
-//
-//			/**
-//			*	ROTATE MOVE: Game Entity
-//			**/
-//			/**
-//			*	Game Entity: If we got hit by it or anything else, move ourselves out of it an offset.
-//			*				 If we got a fraction less however, Try and find the actual move to make.
-//			**/
-//			float geRemainingMove = 1.0f;
-//			if ( geCollideTrace.fraction < 1.f ) {
-//				// Calculate intersection point and move us back out.
-//				geRemainingMove = 1.0f - _PushCalculateRotationalTOI( geCheck, gePusher, geOriginalOrigin, originalAngles, finalAngles, 0, 1);
-//				//geRemainingMove = 1.0f - geCollideTrace.fraction;
-//				
-//				// Back to final angles.
-//				gePusher->SetAngles( finalAngles );
-//				gePusher->LinkEntity();
-//
-//				#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
-//				SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): STUCK GameEntity: remainingMove({}), endPosition( {}, {}, {} )\n", gePusher->GetNumber(), geRemainingMove, geCollideTrace.fraction, geCollideTrace.endPosition.x, geCollideTrace.endPosition.y, geCollideTrace.endPosition.z));
-//				#endif
-//			}
-//			/**
-//			*	Game Entity: Rotate it into position.
-//			**/
-//			vec3_t geRotatedOrigin = geOriginalOrigin;
-//			const int32_t geTotalMovements = 55;
-//			int32_t geI = 0;
-//
-//			for ( geI = 0; geI < geTotalMovements; geI++) {
-//				int32_t offset = (int32_t)( ceilf(geI * 0.5f ) );
-//				if ( geI & 1 ) {
-//					offset = -offset;
-//				}
-//
-//				// PREVIOUS METHOD:
-//				// Calculate angular move origin offset.
-//				const vec3_t geAngularMoveOffset = G_CalculateAngularMove( gePusher->GetOrigin(), geRotatedOrigin, vec3_scale( angularDeltaMove, geRemainingMove + ( geRemainingMove * offset * 0.5f ) ) );
-//				geRotatedOrigin = geAngularMoveOffset; //geOriginalOrigin + geAngularMoveOffset;
-//				geCheck->SetOrigin( geRotatedOrigin );
-//				//geCheck->LinkEntity();
-//
-//				SGTraceResult rotateClipTrace = SG_Clip( geRotatedOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotatedOrigin, nullptr, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
-//				if ( rotateClipTrace.fraction == 1.0 ) {
-//					#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
-//					SG_Print(PrintType::Developer, fmt::format( "Pusher(#{}) rotated GameEntity(#{}) @ {}, good position\n",
-//							 gePusher->GetNumber(),
-//							 geCheck->GetNumber(),
-//							 geI) 
-//					);
-//					#endif
-//					//if (!clCheck) {
-//						break;
-//					//}
-//				}
-//			}
-//			if ( geI == geTotalMovements ) {
-//				#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
-//				SG_Print(PrintType::Developer, fmt::format( "Pusher(#{}) couldn't make GameEntity(#{}) fit, {} move was remaining.\n",
-//							gePusher->GetNumber(),
-//							geCheck->GetNumber(),
-//							geRemainingMove ) 
-//				);
-//				#endif
-//			}
-//			/**
-//			*	Clip rest of the movement.
-//			**/
-//			// Game Entity.
-//			SGTraceResult geFinalClipTrace = SG_Trace( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotatedOrigin, geCheck, SG_SolidMaskForGameEntity( geCheck ) );
-//			geCheck->SetOrigin( geFinalClipTrace.endPosition );
-//			geCheck->LinkEntity();
-//			bool geMoveAccepted = SG_Push_CorrectOrigin( geCheck, nullptr );
-//			if ( geMoveAccepted ) {
-//				//SG_Pusher_RotateEntity( geCheck, gePusher, angularDeltaMove );
-//				if (!clCheck) {
-//					SG_Pusher_RotateEntity( geCheck, gePusher, angularDeltaMove );
-//					//geCheck->LinkEntity();
-//					break;
-//				}
-//			}
-//
-//
-//
-//			/**
-//			*	ROTATE MOVE: Client PlayerState
-//			**/
-//			/**
-//			*	Client PlayerState: Similar as to Game Entity.
-//			**/
-//			float clRemainingMove = 1.0f;
-//			if ( clCheck && clCollideTrace.fraction < 1.f ) {
-//				// Calculate intersection point and move us back out.
-//				clRemainingMove = 1.0f - _PushCalculateRotationalTOI( geCheck, gePusher, clOriginalOrigin, originalAngles, finalAngles, 0, 1 );
-//				//clRemainingMove = 1.0f - clCollideTrace.fraction;
-//
-//				// Back to final angles.
-//				gePusher->SetAngles( finalAngles );
-//				gePusher->LinkEntity();
-//				#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
-//				SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): STUCK Client: remainingMove({}), endPosition( {}, {}, {} )\n", gePusher->GetNumber(), clRemainingMove, clCollideTrace.fraction, clCollideTrace.endPosition.x, clCollideTrace.endPosition.y, geCollideTrace.endPosition.z));
-//				#endif
-//			}
-//			/**
-//			*	Client PlayerState: Rotate it into position.
-//			**/
-//			vec3_t clRotatedOrigin = clOriginalOrigin;
-//			if ( clCheck ) {
-//				const int32_t clTotalMovements = 55;
-//				int32_t clI = 0;
-//
-//				for ( clI = 0; clI < clTotalMovements; clI++) {
-//					int32_t offset = (int32_t)( ceilf(clI * 0.5f ) );
-//					if ( clI & 1 ) {
-//						offset = -offset;
-//					}
-//					
-//					// PREVIOUS METHOD:
-//					const vec3_t clAngularMoveOffset = G_CalculateAngularMove( gePusher->GetOrigin(), clRotatedOrigin, vec3_scale( angularDeltaMove, clRemainingMove + ( clRemainingMove * offset * 0.5f ) ) );
-//					clRotatedOrigin = clAngularMoveOffset; //clOriginalOrigin + clAngularMoveOffset;//clNewOrigin;
-//					clCheck->playerState.pmove.origin = clRotatedOrigin;
-//
-//					SGTraceResult rotateClipTrace = SG_Clip( clRotatedOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clRotatedOrigin, nullptr, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
-//					if ( rotateClipTrace.fraction == 1.0 ) {
-//						//#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
-//						SG_Print(PrintType::Developer, fmt::format( "Pusher(#{}) rotated Client(#{}) @ {}, good position\n",
-//								 gePusher->GetNumber(),
-//								 geCheck->GetNumber(),
-//								 clI) 
-//						);
-//						//#endif
-//						break;
-//					}
-//				}
-//				if ( clI == clTotalMovements ) {
-//					#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
-//					SG_Print(PrintType::Developer, fmt::format( "Pusher(#{}) couldn't make Client(#{}) fit, move {} was remaining.\n",
-//								gePusher->GetNumber(),
-//								geCheck->GetNumber(),
-//								clRemainingMove ) 
-//					);
-//					#endif
-//				}
-//			}
-//			/**
-//			*	Clip rest of the movement.
-//			**/
-//			// Client.
-//			bool clMoveAccepted = false;
-//			if ( clCheck ) {
-//				SGTraceResult clFinalClipTrace = SG_Trace( clOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), clRotatedOrigin, geCheck, SG_SolidMaskForGameEntity( geCheck ) );
-//				clCheck->playerState.pmove.origin = clOrigin = clFinalClipTrace.endPosition;
-//				clMoveAccepted = SG_Push_CorrectOrigin( geCheck, clCheck );
-//				if ( clMoveAccepted && geMoveAccepted ) {
-//					SG_Pusher_RotateEntity( geCheck, gePusher, angularDeltaMove );
-//					SG_Pusher_RotateEntity( geCheck, gePusher, angularDeltaMove, true );
-//					//geCheck->LinkEntity();
-//					//break;
-//				}
-//			}
-//
-//			//// Link it back in.
-//			if ( !clCheck && geMoveAccepted ) {
-//				//geCheck->LinkEntity();
-//				break;;
-//				//continue;
-//			} 
-//			if ( clCheck && clMoveAccepted && geMoveAccepted) {
-//				//geCheck->LinkEntity();
-//				break;;
-//				//continue;
-//			}
-//
-//			// Make sure entity is not pushed off
-//			GameEntity *geCheckGroundEntity = SGGameWorld::ValidateEntity( geCheck->GetGroundEntityHandle(), false, true );
-//			if ( SG_Push_IsSameEntity( geCheckGroundEntity, gePusher ) ) {
-//				SG_PopPushedEntityState( );
-//				
-//				// Get position
-//				bool geRevertMoveAccepted = SG_Push_CorrectOrigin( geCheck, nullptr );
-//
-//				if ( geRevertMoveAccepted ) {
-//					if ( !clCheck ) {
-//						continue;
-//					}
-//				}
-//
-//				// Client.
-//			if ( clCheck ) {
-//					bool cleRevertMoveAccepted = SG_Push_CorrectOrigin( geCheck, clCheck );
-//					if ( cleRevertMoveAccepted ) {
-//						continue;
-//					}
-//				}
-//			}
-//		}
-//
-//        // Save off the obstacle so we can call the block function later on.
-//        pushObstacle = geCheck;
-//
-//		// Dispatch blocked callback
-//		SGEntityHandle ehCheck = geCheck;
-//		gePusher->DispatchBlockedCallback( geCheck );
-//		// Continue to nexti teration if, and only IF, the entity has been 'destroyed'/'killed'.
-//		GameEntity *validatedGeCheck = SGGameWorld::ValidateEntity( geCheck );
-//		if ( !validatedGeCheck || !validatedGeCheck->IsInUse() || validatedGeCheck->GetDeadFlag() == DeadFlags::Dead) {
-//			continue;
-//		}
-//
-//		/**
-//		*	#5:	Move back any entities we already moved. We'll go backwards, so if the same entity was pushed
-//		*		twice, it goes back to the original position.
-//		**/
-//		while ( lastPushedEntityState > pushedEntities) {
-//			SG_PopPushedEntityState( );
-//		}
-//
-//        return geCheck;
-//    }
-//	
-//	// Translate pusher to desired origin.
-//	//gePusher->SetOrigin( partOrigin );
-//	
-//	// Call TouchTriggers on all our moved entities.
-//    for ( PushedEntityState *p = lastPushedEntityState - 1; p >= pushedEntities; p--) {
-//        // Fetch pusher's base entity.
-//        GameEntity* gePushedState= SG_GetGameEntityFromPushedState(p);
-//
-//        // Ensure we are dealing with a valid pusher entity.
-//	    if ( !gePushedState ) {
-//			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
-//            continue;
-//	    }
-//
-//		// Enjoy,
-//		if ( gePushedState->IsInUse() ) {
-//			// Link entity.
-//			gePushedState->LinkEntity(); 
-//			// Check for ground
-//			if ( !SG_Push_IsSameEntity( gePushedState, gePusher ) ) {
-//				if ( gePushedState->GetClient() ) {
-//				//	SG_CheckGround( gePushedState );
-//				} else {
-//					//SG_CheckGround( gePushedState );
-//					SG_Monster_CheckGround( gePushedState );
-//				}
-//			}
-//			// SG_CheckSolids
-//
-//			// Touch triggers.
-//		    SG_TouchTriggers( gePushedState );
-//		}
-//    }
-//
-//    return nullptr;
-//}
 
 /**
 *	@brief	Calculates delta move, deltaAngularMove for both linear and non linear movers. In the

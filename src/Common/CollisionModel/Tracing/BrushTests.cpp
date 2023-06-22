@@ -230,8 +230,8 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		/**
 		*	Trace the sphere through the brush, from 'start' to 'end' point.
 		**/
-		float d1 = plane_distance( transformedPlane, traceStart, traceSphereRadius );
-		float d2 = plane_distance( transformedPlane, traceEnd, traceSphereRadius );
+		float d1 = plane_distance( transformedPlane, traceStart, traceSphereRadiusEpsilon );
+		float d2 = plane_distance( transformedPlane, traceEnd, traceSphereRadiusEpsilon );
 
 		// Exact hit points.
 		vec3_t traceStartHitPoint = vec3_zero(), traceEndHitPoint = vec3_zero();
@@ -250,44 +250,54 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		**/
 		// Plane origin for distance calculation.
 		const vec3_t planeOrigin = vec3_scale( transformedPlane.normal, transformedPlane.dist );
-		//const vec3_t planeOrigin = vec3_scale( transformedPlane.normal, transformedPlane.dist + traceSphereRadiusEpsilon );
+		
 		// Calculate sphere to plane distance (Start Trace).
 		const float startTraceDistance = vec3_dot( transformedPlane.normal, traceStart - planeOrigin );
 		// Dot between plane normal and sphere 'angle'.
 		const float startAngle = vec3_dot( transformedPlane.normal, traceStart );
 		// Calculate extra offset for the 'Start Trace' based on the spheroid's actual angle.
 		const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - traceStartHitRadius ) / startAngle );
-
+		//const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - traceStartHitRadius ) / startAngle );
 		
 		// Calculate sphere to plane distance (End Trace).
 		const float endTraceDistance = vec3_dot( transformedPlane.normal, traceEnd - planeOrigin );
 		// Dot between plane normal and sphere 'angle'.
 		const float endAngle = vec3_dot( transformedPlane.normal, traceEnd );
 		// Calculate extra offset for the 'End Trace' based on the spheroid's actual angle.
-		const float /*t1*/extraOffsetT2 = ( ( -( traceSphereRadius - traceEndHitRadius ) ) / endAngle );
+		const float /*t1*/extraOffsetT2 = ( ( ( traceSphereRadius - traceEndHitRadius ) ) / endAngle );
 
+		// Add OR subtract the offsets depending on the sphere's 'origin + offset' closest to the plane.
+		//d1 += extraOffsetT1;
+		//d2 += extraOffsetT2;
+		const float t = vec3_dot( transformedPlane.normal, traceSphereOrigin );
+		if ( t > 0 ) {
+			d1 -= extraOffsetT1;
+			d2 -= extraOffsetT2;
+		} else {
+			d1 += extraOffsetT1;
+			d2 += extraOffsetT2;
+		}
 
-		//// - Inside:	If the distance is negative(-) and greater(>) than the Radius. 
-		//// - Outside:	If the distance is positive(+) and greater(>) than the Radius. 
-		//// - Intersection: If the absolute distance(fabs( dist )) is less than or 
-		////					equal(<=) to the Radius.
-		d1 += extraOffsetT1;
-		d2 -= extraOffsetT2;
-		//// Set hit distances.
-		////const float traceStartCorrectRad = ( traceSphereRadius - traceStartHitRadius ) + CM_RAD_EPSILON;
-		////const float traceEndCorrectRad = ( traceSphereRadius + traceEndHitRadius ) + CM_RAD_EPSILON;
-		////d1 = traceStartHitDistance;// - traceStartCorrectRad;
-		////d2 = traceEndHitDistance;// - traceEndCorrectRad;
-
+		/**
+		*	Determine whether the trace started and/or ended, inside of 'Solid' or 'Non Solid' brushwork.
+		*	- Inside:		If the distance is negative(-) and greater(>) than the Radius. 
+		*	- Outside:		If the distance is positive(+) and greater(>) than the Radius. 
+		*	- Intersection: If the absolute distance(fabs( dist )) is less than or 
+		*					equal(<=) to the Radius.
+		**/
 		// Absolute distances.
 		float absD1 = fabs( d1 );
 		float absD2 = fabs( d2 );
-		
-		// Radius to test against.
-		const float testRadius = traceSphereRadius;// traceSphereRadius;;
-		// Exited the brush.
-		//if ( !( absD1 <= testRadius ) && d1 > 0 ) {
-		if ( !( absD1 <= testRadius ) && d1 > testRadius ) {
+
+		// Radius' to test against.
+		const float testRadius = traceSphereRadius;
+		//const float testRadiusStart = testRadius - traceStartHitRadius;
+		//const float testRadiusEnd = testRadius - traceEndHitRadius;
+
+		// Started outside of the brush. (No point test result for this brush).
+		//if ( /*( absD1 > testRadius ) &&*/ ( d1 > 0 && d1 > testRadius )  ) { 
+		if ( !(absD1 <= testRadius ) ) {
+
 			return;
 		}
 	}
