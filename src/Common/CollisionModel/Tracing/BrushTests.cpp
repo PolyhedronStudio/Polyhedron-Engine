@@ -29,26 +29,13 @@
 
 
 /**
-*	In-Place Hulls: Used during Leaf/Brush Tests and Leaf/Brush Traces when requiring to 
-*	convert a said passed-in Leaf Node into a different Shape type Hull Leaf Node.
-**/
-//! For 'Box' leaf testing.
-extern BoxHull leafTestBoxHull;
-//! For 'Sphere' leaf testing.
-extern SphereHull leafTestSphereHull;
-//! For 'Ca[si;e' leaf testing.
-extern CapsuleHull leafTestCapsuleHull;
-
-
-
-/**
 *
 *
 *	Plane VS Sphere Methods: TODO: Move elsewhere.
 *
 *
 **/
-const float plane_distance( const CollisionPlane &p, const vec3_t &point, const float extraDistance = 0.f );
+const float plane_distance( const CollisionPlane &p, const vec3_t &point, const float extraDistance );
 const bool sphere_inside_plane( const CollisionPlane &plane, const vec3_t &sphereOrigin, const float sphereRadius );
 const bool sphere_outside_plane( const CollisionPlane &plane, const vec3_t &sphereOrigin, const float sphereRadius );
 const bool sphere_intersects_plane( const CollisionPlane &plane, const vec3_t &sphereOrigin, const float sphereRadius );
@@ -215,7 +202,7 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		// End point of this trace.
 		vec3_t traceEnd = traceContext.end;
 
-		// Find the clostest point on the sphere to the plane.
+		//// Find the clostest point on the sphere to the plane.
 		//const vec3_t sphereOffset = transformedTraceSphere.offset;
 		//const float t = vec3_dot( transformedPlane.normal, sphereOffset );
 		//if ( t > 0 ) {
@@ -227,23 +214,25 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		//}
 
 
+
 		/**
-		*	Trace the sphere through the brush, from 'start' to 'end' point.
+		*	Project the sphere trace's start and end points properly.
 		**/
 		float d1 = plane_distance( transformedPlane, traceStart, traceSphereRadiusEpsilon );
 		float d2 = plane_distance( transformedPlane, traceEnd, traceSphereRadiusEpsilon );
 
+		/**
+		*	Determine if, where and how much distance the sphere had IF intersecting with a plane.
+		**/
 		// Exact hit points.
 		vec3_t traceStartHitPoint = vec3_zero(), traceEndHitPoint = vec3_zero();
 		// Exact penetrated radius.
-		float traceStartHitRadius = 0.f;
-		float traceEndHitRadius = 0.f;
+		float startHitPenetrationRadius = 0.f, endHitPenetrationRadius = 0.f;
 		// Exact distance traveled between start to end, until hitting the plane.
-		float traceStartHitDistance = 0.f;
-		float traceEndHitDistance = 0.f;
+		float startHitPenetrationDistance = 0.f, endHitPenetrationDistance = 0.f;
 		// Calculate whether sphere vs plane intersectioned, and if so, at what specific point did it intersect at?
-		const bool startTraceIntersected = sphere_intersects_plane_point( traceStart, traceSphereRadius, transformedPlane, traceStartHitPoint, traceStartHitRadius, traceStartHitDistance );
-		const bool endTraceIntersected = sphere_intersects_plane_point( traceEnd, traceSphereRadius, transformedPlane, traceEndHitPoint, traceEndHitRadius, traceEndHitDistance );
+		const bool D1TraceIntersected = sphere_intersects_plane_point( traceStart, traceSphereRadius, transformedPlane, traceStartHitPoint, startHitPenetrationRadius, startHitPenetrationDistance );
+		const bool D2TraceIntersected = sphere_intersects_plane_point( traceEnd, traceSphereRadius, transformedPlane, traceEndHitPoint, endHitPenetrationRadius, endHitPenetrationDistance );
 
 		/**
 		*	Calculate sphere to plane distances for end and start trace.
@@ -254,29 +243,29 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		// Calculate sphere to plane distance (Start Trace).
 		const float startTraceDistance = vec3_dot( transformedPlane.normal, traceStart - planeOrigin );
 		// Dot between plane normal and sphere 'angle'.
-		const float startAngle = vec3_dot( transformedPlane.normal, traceStart );
+		const float startAngle = vec3_dot( transformedPlane.normal, traceStart - traceStartHitPoint );
 		// Calculate extra offset for the 'Start Trace' based on the spheroid's actual angle.
-		const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - traceStartHitRadius ) / startAngle );
+		const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - startHitPenetrationRadius ) / startAngle );
 		//const float /*t0*/extraOffsetT1 = ( ( traceSphereRadius - traceStartHitRadius ) / startAngle );
 		
 		// Calculate sphere to plane distance (End Trace).
 		const float endTraceDistance = vec3_dot( transformedPlane.normal, traceEnd - planeOrigin );
 		// Dot between plane normal and sphere 'angle'.
-		const float endAngle = vec3_dot( transformedPlane.normal, traceEnd );
+		const float endAngle = vec3_dot( transformedPlane.normal, traceEnd - traceEndHitPoint );
 		// Calculate extra offset for the 'End Trace' based on the spheroid's actual angle.
-		const float /*t1*/extraOffsetT2 = ( ( ( traceSphereRadius - traceEndHitRadius ) ) / endAngle );
+		const float /*t1*/extraOffsetT2 = ( ( ( traceSphereRadius - endHitPenetrationRadius ) ) / endAngle );
 
 		// Add OR subtract the offsets depending on the sphere's 'origin + offset' closest to the plane.
-		//d1 += extraOffsetT1;
-		//d2 += extraOffsetT2;
-		const float t = vec3_dot( transformedPlane.normal, traceSphereOrigin );
-		if ( t > 0 ) {
-			d1 -= extraOffsetT1;
-			d2 -= extraOffsetT2;
-		} else {
-			d1 += extraOffsetT1;
-			d2 += extraOffsetT2;
-		}
+		d1 += extraOffsetT1;
+		d2 += extraOffsetT2;
+		//const float t = vec3_dot( transformedPlane.normal, traceSphereOrigin );
+		//if ( t > 0 ) {
+		//	d1 += extraOffsetT1;
+		//	d2 += extraOffsetT2;
+		//} else {
+		//	d1 -= extraOffsetT1;
+		//	d2 -= extraOffsetT2;
+		//}
 
 		/**
 		*	Determine whether the trace started and/or ended, inside of 'Solid' or 'Non Solid' brushwork.
@@ -290,14 +279,15 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		float absD2 = fabs( d2 );
 
 		// Radius' to test against.
-		const float testRadius = traceSphereRadius;
-		//const float testRadiusStart = testRadius - traceStartHitRadius;
-		//const float testRadiusEnd = testRadius - traceEndHitRadius;
+		const float testRadius = traceSphereRadiusEpsilon;
 
-		// Started outside of the brush. (No point test result for this brush).
-		//if ( /*( absD1 > testRadius ) &&*/ ( d1 > 0 && d1 > testRadius )  ) { 
-		if ( !(absD1 <= testRadius ) ) {
-
+		// Determine whether the 'Start Point' resides in a 'Non Solid', empty space type.
+		//if ( !(-d1 > testRadius) && !(absD1 <= testRadius) )   {
+		//	return;
+		//}
+		//if ( ( d1 > 0 && absD1 <= testRadius ) /*&& ( absD2 < testRadius + DIST_EPSILON || d2 <= d1 )*/ ) {
+		//if ( (d1 < 0 && d1 < -testRadius) && !(absD1 <= testRadius)) {
+		if ( !(d1 <= 0 && d1 < -testRadius) && !(d1 > 0 && d1 > testRadius) ) {//!(absD1 <= testRadius)) {
 			return;
 		}
 	}
@@ -346,7 +336,7 @@ void CM_TraceCapsule_TestInBrush( TraceContext &traceContext, mbrush_t *brush, m
 	*	Ensure we are hitting this 'Leaf Sphere' before testing any further.
 	**/
 	// Get the sphere to trace with.
-	sphere_t testSphere = leafTestCapsuleHull.sphere;
+	sphere_t testSphere =traceContext.capsuleTrace.sphere;
 
 	if ( !CM_TraceIntersectSphere( traceContext, testSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, CM_RAD_EPSILON ) ) {
 		return;

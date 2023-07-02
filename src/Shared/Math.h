@@ -14,6 +14,9 @@
 **/
 #include "Math/Utilities.h"
 
+
+
+
 /**
 *	Vectors
 **/
@@ -27,7 +30,18 @@
 **/
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
-
+/**
+*	Ultimately needs relocating.
+**/
+// plane_t structure
+//-----------------
+typedef struct cplane_s {
+    vec3_t  normal = vec3_zero();
+    float   dist = 0;
+    byte    type = 0;           //! For fast side tests.
+    byte    signBits = 0;       //! signx + (signy<<1) + (signz<<1)
+    byte    pad[2] = {};
+} CollisionPlane;
 /**
 *	Sphere
 **/

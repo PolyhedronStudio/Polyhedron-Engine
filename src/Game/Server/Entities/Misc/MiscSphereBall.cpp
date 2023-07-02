@@ -249,7 +249,7 @@ void MiscSphereBall::SphereCheckGround() {
 	// Perform ground trace.
 	const vec3_t testMins = GetMins(); //vec3_scale( GetMins(), 0.25 );
 	const vec3_t testMaxs = GetMaxs(); //vec3_scale( GetMaxs(), 0.25 );
-	const sphere_t testSphere = GetPODEntity()->boundsSphere;
+	const sphere_t testSphere = GetPODEntity()->boundsAbsoluteSphere;
 	SGTraceResult traceResult = SG_SphereTrace( geOrigin, testMins, testMaxs, traceEndPoint, testSphere, this, SG_SolidMaskForGameEntity( this ) );
 
 	// Check steepness.

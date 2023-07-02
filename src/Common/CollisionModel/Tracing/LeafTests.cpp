@@ -30,18 +30,6 @@
 
 
 
-/**
-*	In-Place Hulls: Used during Leaf/Brush Tests and Leaf/Brush Traces when requiring to 
-*	convert a said passed-in Leaf Node into a different Shape type Hull Leaf Node.
-**/
-//! For 'Box' leaf testing.
-BoxHull leafTestBoxHull;
-//! For 'Sphere' leaf testing.
-SphereHull leafTestSphereHull;
-//! For 'Ca[si;e' leaf testing.
-CapsuleHull leafTestCapsuleHull;
-
-
 ///**
 //*   @brief	Test in 'World Leaf'.
 //**/

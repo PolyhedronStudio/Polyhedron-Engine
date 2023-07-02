@@ -14,13 +14,13 @@
 //-----------------
 // plane_t structure
 //-----------------
-typedef struct cplane_s {
-    vec3_t  normal = vec3_zero();
-    float   dist = 0;
-    byte    type = 0;           //! For fast side tests.
-    byte    signBits = 0;       //! signx + (signy<<1) + (signz<<1)
-    byte    pad[2] = {};
-} CollisionPlane;
+//typedef struct cplane_s {
+//    vec3_t  normal = vec3_zero();
+//    float   dist = 0;
+//    byte    type = 0;           //! For fast side tests.
+//    byte    signBits = 0;       //! signx + (signy<<1) + (signz<<1)
+//    byte    pad[2] = {};
+//} CollisionPlane;
 
 //-----------------
 // Planes.

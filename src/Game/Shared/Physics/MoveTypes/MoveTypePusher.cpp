@@ -20,7 +20,8 @@
 #include "Game/Client/Entities/GibEntity.h"
 #endif
 
-#define PRINT_DEBUG_ROTATOR_CLIPPING
+// Uncomment to enable rotator clip debugging.
+//#define ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 
 /***
 *
@@ -518,7 +519,7 @@ const bool SG_Push_IsSameEntity( GameEntity *geFirst, GameEntity *geSecond ) {
 **/
 const vec3_t SG_Push_GetEntityOrigin(GameEntity *geCheck, gclient_s *geCheckClient = nullptr ) {
 	if ( !geCheck ) {
-		#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+		#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "Tried to get the origin from a (nullptr) GameEntity.\n" ) );
 		#endif
 		return vec3_zero();
@@ -544,7 +545,7 @@ const vec3_t SG_Push_GetEntityOrigin(GameEntity *geCheck, gclient_s *geCheckClie
 **/
 const void SG_Push_SetEntityOrigin( GameEntity *geCheck, const vec3_t &geNewOrigin, gclient_s *geCheckClient = nullptr ) {
 	if ( !geCheck ) {
-		#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+		#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "Tried to push move a (nullptr) GameEntity.\n" ) );
 		#endif
 		return;
@@ -634,7 +635,7 @@ const bool SG_Push_CorrectOrigin( GameEntity *geCheck, gclient_s *geCheckClient 
 	if ( *angularMove ) {
 		if ( geCheck->GetSolid() == Solid::Sphere ) {
 			const float sphereRadius = geCheck->GetPODEntity()->boundsAbsoluteSphere.radius;
-			const float scale = ( sphereRadius ) + ( sphereRadius * ( 1.0f / firstTrace.fraction ) );
+			const float scale = ( sphereRadius ) + ( sphereRadius * firstTrace.fraction );
 			SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, scale, vec3_normalize( vec3_negate( *angularMove ) ) ) );
 		} else {
 			SG_Push_SetEntityOrigin( geCheck, vec3_fmaf( currentOrigin, 1.f + (firstTrace.fraction), vec3_normalize( vec3_negate( *angularMove ) ) ) );
@@ -671,7 +672,7 @@ const bool SG_Push_CorrectOrigin( GameEntity *geCheck, gclient_s *geCheckClient 
 	// Still inside of some solid, revert.
 	SG_Push_SetEntityOrigin( geCheck, currentOrigin );
 	geCheck->LinkEntity();
-	#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+	#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): Still inside of a solid, reverting origin.\n", geCheck->GetNumber() ) );
 		#ifdef SHAREDGAME_SERVERGAME
 		int x = 10;
@@ -1015,7 +1016,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 				*	GameEntity: 
 				*/
 				if ( geClipTrace.fraction >= 1.0 && !geCheckClient ) {
-					#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+					#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 					SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): FALSE positive clip to Pusher(#{}).\n", geCheck->GetNumber(), gePusher->GetNumber() ) );
 					#endif
 					continue;
@@ -1024,7 +1025,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 				*	Client:
 				*/
 				if ( geCheckClient && clClipTrace.fraction >= 1.0 ) {
-					#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+					#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 					SG_Print( PrintType::DeveloperWarning, fmt::format( "Client(#{}): FALSE positive clip to Pusher(#{}).\n", geCheck->GetNumber(), gePusher->GetNumber()));
 					#endif
 					continue;
@@ -1049,16 +1050,16 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 					
 						// Make sure to test for it however unlikely it may be for it to be incorrect.
 						if ( SG_Push_CorrectOrigin( geCheck ) && !geCheckClient ) {
-							#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+							#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 							SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Pushed GameEntity(#{}) into CORRECT position.\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 							#endif
 							continue;
 						}
-						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+						#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Pushed GameEntity(#{}) into BAD position.\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 						#endif
 					} else {
-						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+						#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Did NOT CLIP GameEntity(#{}).\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 						#endif
 					}
@@ -1083,7 +1084,7 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 
 						// Make sure to test for it however unlikely it may be for it to be incorrect.
 						if ( SG_Push_CorrectOrigin( geCheck, geCheckClient ) ) {
-							#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+							#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 							SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Pushed Client(#{}) into CORRECT position.\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 							#endif
 							// Relink.
@@ -1093,11 +1094,11 @@ GameEntity *SG_Pusher_Translate( SGEntityHandle &entityHandle, const vec3_t &pus
 						// Relink.
 						//geCheck->LinkEntity();
 
-						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+						#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Pushed Client(#{}) into BAD position.\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 						#endif
 					} else {
-						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+						#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Did NOT CLIP Client(#{}).\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 						#endif
 					}
@@ -1458,7 +1459,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 					gePusher->SetAngles( destinationAngles );
 					gePusher->LinkEntity();
 
-					//#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+					//#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 					//SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): FALSE positive clip to Pusher(#{}).\n", geCheck->GetNumber(), gePusher->GetNumber() ) );
 					//#endif
 					//continue;
@@ -1503,18 +1504,18 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 						trClipper = SG_Clip( geOriginalOrigin, geCheck->GetMins(), geCheck->GetMaxs(), geRotateOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 					}
 					if ( !trClipper.podEntity || trClipper.fraction >= 1.0f ) {//trClipper.fraction == 1.0f ) {
-						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+						#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): rotated(totalMoves: {}) by Pusher(#{}) to GOOD origin fraction({}), allSolid({}), startSolid({}).\n", geCheck->GetNumber(), i, gePusher->GetNumber(), trClipper.fraction, ( trClipper.allSolid ? "true" : "false" ), ( trClipper.startSolid ? "true" : "false" )));
 						#endif
 						break;
 					} else {
-						#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+						#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 						SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): tried to rotate(totalMoves: {}) by Pusher(#{}) to BAD origin fraction({}), allSolid({}), startSolid({}).\n", geCheck->GetNumber(), i, gePusher->GetNumber(), trClipper.fraction, ( trClipper.allSolid ? "true" : "false" ), ( trClipper.startSolid ? "true" : "false" )));
 						#endif
 					}
 				}
 				if (i == geTotalMovements) {
-					#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+					#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 					SG_Print( PrintType::DeveloperWarning, fmt::format( "GameEntity(#{}): rotated(totalMoves: {}) by Pusher(#{}) but COULD NOT FIT({}).\n", geCheck->GetNumber(), i, gePusher->GetNumber(), geRemainingMove ) );
 					#endif
 				}
@@ -1647,14 +1648,14 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 			//		// Perform test clipping trace.
 			//		SGTraceResult trClipper = SG_Clip( testOrigin, geCheck->GetMins(), geCheck->GetMaxs(), testOrigin, geCheck, gePusher, SG_SolidMaskForGameEntity( geCheck ) );
 			//		if ( trClipper.startSolid == false && trClipper.allSolid == false && trClipper.fraction == 1.0f ) {
-			//			#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+			//			#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 			//			SG_Print( PrintType::DeveloperWarning, fmt::format( "Client(#{}): rotated(totalMoves: {}) by Pusher(#{}) to GOOD origin.\n", geCheck->GetNumber(), i, gePusher->GetNumber() ) );
 			//			#endif
 			//			break;				
 			//		}		
 			//	}
 			//	if ( i == clTotalMovements ) {
-			//		#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+			//		#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 			//		SG_Print( PrintType::DeveloperWarning, fmt::format( "Client(#{}): rotated(totalMoves: {}) by Pusher(#{}) but COULD NOT FIT({}).\n", geCheck->GetNumber(), i, gePusher->GetNumber(), clRemainingMove ) );
 			//		#endif
 			//	}
@@ -1715,7 +1716,7 @@ GameEntity *SG_Pusher_Rotate( SGEntityHandle &entityHandle, const vec3_t &partOr
 			continue;
 		}
 		
-		#ifdef PRINT_DEBUG_ROTATOR_CLIPPING
+		#ifdef ENABLE_PRINT_DEBUG_ROTATOR_CLIPPING
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "Pusher(#{}): Blocked by GameEntity(#{}).\n", gePusher->GetNumber(), geCheck->GetNumber() ) );
 		#endif
 

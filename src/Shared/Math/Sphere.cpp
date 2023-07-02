@@ -14,6 +14,143 @@
 // Shared header.
 #include "../Shared.h"
 
+/***
+*
+*
+*	Sphere Functions:
+*
+*
+***/
+/**
+*
+*
+*	Sphere VS Plane Utilities: TODO: Move elsewhere.
+*
+*
+**/
+
+/**
+*	@brief
+**/
+const bool sphere_sweep_inside_plane( sphere_t &sphere, const vec3_t &sphereOrigin, const vec3_t &sphereAngle, const CollisionPlane &plane,  const float extraDistance = 0.f ) {
+	// Dot between plane normal and sphere 'angle'.
+	const float angle = vec3_dot( plane.normal, sphereAngle );
+	// Plane origin for distance calculation.
+	const vec3_t planeOrigin = vec3_scale( plane.normal, plane.dist + extraDistance );
+	// Calculate sphere to plane distance.
+	const float distance = vec3_dot( plane.normal, sphereOrigin - planeOrigin );
+
+	// False if outside of the plane.
+	if ( -distance <= sphere.radius ) {
+		return false;
+	}
+
+	// Calculate start and end points of sphere to plane.
+	const float t0 = ( sphere.radius - distance ) / angle;
+	const float t1 = ( -sphere.radius - distance ) / angle;
+
+	// Test whether it is inside or not.
+	return ( !( t0 >= 0 && t0 <= 1 ) 
+			&& !( t1 >= 0 && t1 <= 1 ) );
+}
+//**
+//*	@brief
+//**/
+//bool sphere_swept_inside_plane(sphere s, vec3 v, plane p) {
+//	float angle = vec3_dot(p.direction, v);
+//	float dist  = vec3_dot(p.direction, vec3_sub(s.center, p.position)); 
+//  
+//	if (-dist <= s.radius) { return false; }
+//  
+//	float t0 = ( s.radius - dist) / angle;
+//	float t1 = (-s.radius - dist) / angle;
+//  
+//	return (!between_or(t0, 0, 1) && !between_or(t1, 0, 1)); 
+//}
+
+/**
+*	@brief
+**/
+const bool sphere_sweep_outside_plane( sphere_t &sphere, const vec3_t &sphereOrigin, const vec3_t &sphereAngle, const CollisionPlane &plane,  const float extraDistance = 0.f ) {
+	// Dot between plane normal and sphere 'angle'.
+	const float angle = vec3_dot( plane.normal, sphereAngle );
+	// Plane origin for distance calculation.
+	const vec3_t planeOrigin = vec3_scale( plane.normal, plane.dist + extraDistance );
+	// Calculate sphere to plane distance.
+	const float distance = vec3_dot( plane.normal, sphereOrigin - planeOrigin );
+
+	// False if outside of the plane.
+	if ( distance <= sphere.radius ) {
+		return false;
+	}
+
+	// Calculate start and end points of sphere to plane.
+	const float t0 = ( sphere.radius - distance ) / angle;
+	const float t1 = ( -sphere.radius - distance ) / angle;
+
+	// Test whether it is inside or not.
+	return ( !( t0 >= 0 && t0 <= 1 ) 
+			&& !( t1 >= 0 && t1 <= 1 ) );
+}
+//**
+//*	@brief
+//**/
+//bool sphere_swept_outside_plane(sphere s, vec3 v, plane p) {
+//	float angle = vec3_dot(p.direction, v);
+//	float dist  = vec3_dot(p.direction, vec3_sub(s.center, p.position)); 
+//  
+//	if ( dist <= s.radius ) { return false; }
+//  
+//	float t0 = ( s.radius - dist) / angle;
+//	float t1 = (-s.radius - dist) / angle;
+//  
+//	return (!between_or(t0, 0, 1) && !between_or(t1, 0, 1));
+//}
+
+/**
+*	@brief
+**/
+const bool sphere_sweep_intersect_plane( sphere_t &sphere, const vec3_t &sphereOrigin, const vec3_t &sphereAngle, const CollisionPlane &plane,  const float extraDistance = 0.f ) {
+	// Dot between plane normal and sphere 'angle'.
+	const float angle = vec3_dot( plane.normal, sphereAngle );
+	// Plane origin for distance calculation.
+	const vec3_t planeOrigin = vec3_scale( plane.normal, plane.dist + extraDistance );
+	// Calculate sphere to plane distance.
+	const float distance = vec3_dot( plane.normal, sphereOrigin - planeOrigin );
+
+	// False if outside of the plane.
+	if ( fabs( distance ) <= sphere.radius ) {
+		return true;
+	}
+
+	// Calculate start and end points of sphere to plane.
+	const float t0 = ( sphere.radius - distance ) / angle;
+	const float t1 = ( -sphere.radius - distance ) / angle;
+
+	// Test whether it is inside or not.
+	return ( ( t0 >= 0 && t0 <= 1 )
+			&& ( t1 >= 0 && t1 <= 1 ) );
+}
+///**
+//*	@brief
+//**/
+//bool sphere_swept_intersects_plane(sphere s, vec3 v, plane p) {
+//	float angle = vec3_dot(p.direction, v);
+//	float dist  = vec3_dot(p.direction, vec3_sub(s.center, p.position)); 
+//  
+//	if ( fabs(dist) <= s.radius ) { return true; }
+//  
+//	float t0 = ( s.radius - dist) / angle;
+//	float t1 = (-s.radius - dist) / angle;
+//  
+//	return (between_or(t0, 0, 1) || between_or(t1, 0, 1));
+//}
+//bool between_or(float x, float bottom, float top) {
+//  return (x >= bottom) && (x <= top);
+//}
+
+
+
 /**
 *	@brief	"A Simple Method for Box-Sphere Intersection Testing",
 *			by Jim Arvo, in "Graphics Gems", Academic Press, 1990.

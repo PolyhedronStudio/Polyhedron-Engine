@@ -156,6 +156,21 @@ struct TraceContext {
 		//! The Sphere trace its absolute bounds, from start to end.
 		//bbox3_t absoluteBounds = bbox3_infinity();
 	} sphereTrace;
+	/**
+	*	Capsule Trace: Calculated based on the AABB.
+	**/
+	struct CapsuleTrace {
+		//! The original source bounds that were used to calculate this sphere trace with.
+		bbox3_t sourceBounds = bbox3_infinity();
+
+		//! Non-Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
+		sphere_t sphere;
+		//! Transformed trace bound sphere. The sphere is generated based on the user input 'bounds'.
+		sphere_t transformedSphere;
+
+		//! The Sphere trace its absolute bounds, from start to end.
+		//bbox3_t absoluteBounds = bbox3_infinity();
+	} capsuleTrace;
 
 	//! The actual in-use bounds, identical to the absoluteBounds of our current trace shape.
 	bbox3_t absoluteBounds = bbox3_infinity();
