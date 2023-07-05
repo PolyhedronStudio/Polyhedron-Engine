@@ -236,9 +236,13 @@ recheck:
 		// See if we hit a leaf node, and trace through it if we did before exiting our traversal.
 		if ( !node->plane ) {
 			mleaf_t *leafNode = (mleaf_t *)node;
-			// TODO: First checking for any intersection might be a good thing to do here.
-			traceContext.traceShape = TraceShape::Sphere;
-			CM_TraceSphere_TraceThroughLeaf( traceContext, leafNode );
+			// Ensure we are hitting this bounding box before testing any further.
+			if ( CM_TraceIntersectBounds( traceContext, leafNode->bounds ) ) {
+				// TODO: First checking for any intersection might be a good thing to do here.
+				traceContext.traceShape = TraceShape::Sphere;
+				CM_TraceSphere_TraceThroughLeaf( traceContext, leafNode );
+			}
+
 			return;
 		}
 		// Perform another check traversing even further down the BSP tree.
@@ -251,9 +255,13 @@ recheck:
 		// See if we hit a leaf node, and trace through it if we did before exiting our traversal.
 		if ( !node->plane ) {
 			mleaf_t *leafNode = (mleaf_t *)node;
-			// TODO: First checking for any intersection might be a good thing to do here.
-			traceContext.traceShape = TraceShape::Sphere;
-			CM_TraceSphere_TraceThroughLeaf( traceContext, leafNode );
+			// Ensure we are hitting this bounding box before testing any further.
+			if ( CM_TraceIntersectBounds( traceContext, leafNode->bounds ) ) {
+				// TODO: First checking for any intersection might be a good thing to do here.
+				traceContext.traceShape = TraceShape::Sphere;
+				CM_TraceSphere_TraceThroughLeaf( traceContext, leafNode );
+			}
+
 			return;
 		}
 		// Perform another check traversing even further down the BSP tree.
@@ -317,8 +325,11 @@ recheck:
 
 		mnode_t *childNode = node->children[side];
 		if ( !childNode->plane ) {
-			traceContext.traceShape = TraceShape::Sphere;
-			CM_TraceSphere_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
+			// Ensure we are hitting this bounding box before testing any further.
+			if ( CM_TraceIntersectBounds( traceContext, ((mleaf_t*)childNode)->bounds ) ) {
+				traceContext.traceShape = TraceShape::Sphere;
+				CM_TraceSphere_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
+			}
 		} else {
 			CM_RecursiveSphereTraceThroughTree( traceContext, childNode, p1f, midf, p1, mid );
 		}
@@ -333,8 +344,11 @@ recheck:
 
 		mnode_t *childNode = node->children[side ^ 1];
 		if ( !childNode->plane ) {
-			traceContext.traceShape = TraceShape::Sphere;
-			CM_TraceSphere_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
+			// Ensure we are hitting this bounding box before testing any further.
+			if ( CM_TraceIntersectBounds( traceContext, ((mleaf_t*)childNode)->bounds ) ) {
+				traceContext.traceShape = TraceShape::Sphere;
+				CM_TraceSphere_TraceThroughLeaf( traceContext, (mleaf_t*)childNode );
+			}
 		} else {
 			CM_RecursiveSphereTraceThroughTree( traceContext, childNode, midf, p2f, mid, p2 );
 		}

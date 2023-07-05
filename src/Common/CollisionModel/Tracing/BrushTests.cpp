@@ -187,9 +187,11 @@ void CM_TraceSphere_TestInBrush( TraceContext &traceContext, mbrush_t *brush, ml
 		// Add our sphere radius to the plane distance.
 		//transformedPlane.dist += traceSphereRadius;
 		// Transform if need be.
+		//transformedPlane.dist += transformedTraceSphere.radius;
 		if ( traceContext.isTransformedTrace ) {
 			transformedPlane = CM_TransformPlane( &transformedPlane, traceContext.matTransform );
 		}
+
 		// Distance to work with.
 		//const float dist = transformedPlane.dist + transformedTraceSphere.radius;
 		//transformedPlane.dist += transformedTraceSphere.radius;
@@ -316,7 +318,8 @@ void CM_TraceCapsule_TestInBrush( TraceContext &traceContext, mbrush_t *brush, m
 	if (!brush->numsides) {
 		return;
 	}
-
+	///////////////////
+	return;
 	//if (traceContext.traceType != CMHullType::Sphere) {
 	//	return;
 	//}
@@ -325,10 +328,10 @@ void CM_TraceCapsule_TestInBrush( TraceContext &traceContext, mbrush_t *brush, m
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
 	bbox3_t radiusBounds = bbox3_from_center_radius( bbox3_radius( leaf->bounds ), bbox3_center( leaf->bounds ) );
-	bbox3_t symmetricLeafBounds = bbox3_from_center_size( bbox3_symmetrical( leaf->bounds ), bbox3_center( leaf->bounds ) );
-	if ( !CM_TraceIntersectBounds( traceContext, radiusBounds ) ) {
-		return;
-	}
+	//bbox3_t symmetricLeafBounds = bbox3_from_center_size( bbox3_symmetrical( leaf->bounds ), bbox3_center( leaf->bounds ) );
+	//if ( !CM_TraceIntersectBounds( traceContext, radiusBounds ) ) {
+	//	return;
+	//}
 
 
 
@@ -338,9 +341,9 @@ void CM_TraceCapsule_TestInBrush( TraceContext &traceContext, mbrush_t *brush, m
 	// Get the sphere to trace with.
 	sphere_t testSphere =traceContext.capsuleTrace.sphere;
 
-	if ( !CM_TraceIntersectSphere( traceContext, testSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, CM_RAD_EPSILON ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectSphere( traceContext, testSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, CM_RAD_EPSILON ) ) {
+	//	return;
+	//}
 
 
 	/**

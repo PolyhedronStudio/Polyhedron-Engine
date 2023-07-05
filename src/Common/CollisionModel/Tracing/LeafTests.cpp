@@ -118,9 +118,9 @@ void CM_TraceSphere_TestInLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 	//sphere_t transformedTraceSphere = traceContext.sphereTrace.transformedSphere;
 	//if ( !bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTraceSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, CM_RAD_EPSILON, true ) ) {
 	//	return;
@@ -195,9 +195,9 @@ void CM_TraceSphere_TestInSphereLeaf( TraceContext &traceContext, mleaf_t *leaf 
 	/**
 	*	Ensure our absolute trace bounds intersect with the sphere leaf's bounds.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 
 
 	/**
@@ -357,9 +357,9 @@ void CM_TraceBox_TestInSphereLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
 	//bbox3_t symmetricLeafBounds = bbox3_from_center_size( bbox3_symmetrical( leaf->bounds ), bbox3_center( leaf->bounds ) );
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 
 
 	/**

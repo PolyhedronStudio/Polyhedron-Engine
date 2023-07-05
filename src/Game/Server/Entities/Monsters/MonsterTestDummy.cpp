@@ -133,7 +133,7 @@ void MonsterTestDummy::Spawn() {
     SetModel( "models/monsters/testdummy/testdummy.iqm" );
 	SetModelIndex3( SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm") );
 
-	#define CAPSULEMONSTER
+	#define CAPSULEMONSTERX
 	#ifdef CAPSULEMONSTER
     // Set the bounding box.
 	SetSolid( Solid::Capsule );

@@ -146,9 +146,9 @@ void CM_TraceBox_TraceThroughLeaf( TraceContext &traceContext, mleaf_t *leaf ) {
         return;
     }
 
-	/**
-	*	Ensure we are hitting this bounding box before testing any further.
-	**/
+	///**
+	//*	Ensure we are hitting this bounding box before testing any further.
+	//**/
 	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
 	//	return;
 	//}
@@ -281,12 +281,12 @@ void CM_TraceSphere_TraceThroughLeaf( TraceContext &traceContext, mleaf_t *leaf 
         return;
     }
 
-	/**
-	*	Ensure we are hitting this bounding box before testing any further.
-	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
+	///**
+	//*	Ensure we are hitting this bounding box before testing any further.
+	//**/
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 	//sphere_t transformedTraceSphere = traceContext.sphereTrace.transformedSphere;
 	//if ( !bbox3_intersects_sphere( traceContext.absoluteBounds, transformedTraceSphere, bbox3_t::IntersectType::SolidBox_HollowSphere, CM_RAD_EPSILON, true ) ) {
 	//	return;

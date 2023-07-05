@@ -250,9 +250,9 @@ void CM_TraceSphere_TraceThroughBrush(TraceContext &traceContext, mbrush_t *brus
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectBounds( traceContext, leaf->bounds ) ) {
+	//	return;
+	//}
 
 
 	///**
@@ -588,9 +588,9 @@ void CM_TraceCapsule_TraceThroughBrush( TraceContext &traceContext, mbrush_t *br
 	/**
 	*	Ensure we are hitting this bounding box before testing any further.
 	**/
-	if ( !CM_TraceIntersectBounds( traceContext, leafTraceBoxHull.leaf.bounds ) ) {
-		return;
-	}
+	//if ( !CM_TraceIntersectBounds( traceContext, leafTraceBoxHull.leaf.bounds ) ) {
+	//	return;
+	//}
 
 
 	/**
