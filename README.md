@@ -1,6 +1,9 @@
 ## Polyhedron - A Q2RTX Engine Fork and a Game in one.
 [![Build Status](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml/badge.svg)](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml)
 
+### IMPORTANT!!!!:
+This project has been abandoned due to yes, how typical... SSD crash and various other factors. However, that led to a project which now superseded Polyhedron, and that is *Q2RTXPerimental* which you can find right [HERE](https://github.com/PolyhedronStudio/Q2RTXPerimental/)
+
 ### What is Polyhedron Engine:
 Polyhedron Engine is a heavily modified fork of the famous Q2RTX project by NVIDIA™. Accompanied by a game project named Polyhedron. Its history comes from the Nail & Crescent project (If you are a Quake 1 fan, do check it out. Great team, great project). After the split up, all that was left was a bunch of code that didn't represent anything anymore. That's when Polyhedron was truly born. The game serves as an indirect roadmap towards deciding what to prioritize out of the features to add to the current technology. Its soul purpose is to evolve into a fully stand-alone SDK for RTX client/server -model games. After all, what good is a fully path traced renderer without introducing more modern features next to it?
 
